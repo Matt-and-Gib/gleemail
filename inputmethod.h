@@ -4,26 +4,31 @@
 enum PIN_MODE : unsigned int {WRITE = 0, READ = 1};
 
 struct Pin {
-	Pin(const unsigned short i, const PIN_MODE m) {index = i; mode = m;}
+	Pin(const unsigned short i, const PIN_MODE m, const unsigned short v) {pinLocation = i; mode = m; value = v;}
+	~Pin() {}
 
-	unsigned short index;
+	short pinLocation;
 	PIN_MODE mode;
+	unsigned short value;
 
-	bool operator== (const Pin &o) {
-		return this->index == o.index;
+	bool operator== (const Pin &rhs) {
+		return this->pinLocation == rhs.pinLocation;
 	}
 
-	bool operator!= (const Pin &o) {
-		return this->index != o.index;
+	bool operator!= (const Pin &rhs) {
+		return this->pinLocation != rhs.pinLocation;
 	}
 };
 
-static const Pin NULL_PIN = Pin(-1, PIN_MODE::READ);
+static Pin *NULL_PIN = new Pin(-1, PIN_MODE::READ, 0);
 
 
 class InputMethod {
 public:
-	virtual const Pin *getPins() const = 0;
+	virtual Pin **getPins() = 0;
+	virtual Pin **getReadPins() = 0;
+	virtual Pin **getWritePins() = 0;
+	virtual void processInput(const unsigned long) = 0;
 private:
 };
 

@@ -4,26 +4,26 @@
 #include "inputmethod.h"
 
 
-enum class MORSE_CODE_INPUT : bool {DOWN = false, UP = true};
+enum MORSE_CODE_INPUT : bool {CLOSED = 1, OPEN = 0};
 
 
 class MorseCodeInput : public InputMethod {
 public:
-	MorseCodeInput();
+	MorseCodeInput(const unsigned short, const unsigned short);
 	~MorseCodeInput();
 
-	const Pin *getPins() const {return pins;}
-
-	//const Pin *getInputPins() {return inputPins;}
-	//const Pin *getOutputPins() {return outputPins;}
-
-	void pushCharacter(const bool down = false);
+	Pin **getPins() {return pins;}
+	Pin **getReadPins() {return readPins;}
+	Pin **getWritePins() {return writePins;}
+	void processInput(const unsigned long time);
 private:
 	static constexpr unsigned short MAX_MORSE_CODE_INPUT_LENGTH = 6;
 
-	const Pin SWITCH_DIGITAL_PIN = Pin(4, PIN_MODE::READ);
-	const Pin LED_DIGITAL_PIN = Pin(5, PIN_MODE::WRITE);
-	const Pin pins[3] = {SWITCH_DIGITAL_PIN, LED_DIGITAL_PIN, NULL_PIN};
+	Pin *switchDigitalPin = NULL_PIN;
+	Pin *ledDigitalPin = NULL_PIN;
+	Pin *pins[3] = {switchDigitalPin, ledDigitalPin, NULL_PIN};
+	Pin *readPins[2] = {switchDigitalPin, NULL_PIN};
+	Pin *writePins[2] = {ledDigitalPin, NULL_PIN};
 
 	static constexpr unsigned short DOT_THRESHOLD = 10;
 	static constexpr unsigned short MIN_DASH_THRESHOLD = 3 * DOT_THRESHOLD; //length of time required to enter dash
@@ -34,7 +34,7 @@ private:
 	char inputCharacterCode[MAX_MORSE_CODE_INPUT_LENGTH] = {'\0', '\0', '\0', '\0', '\0', '\0'};
 	char *message = new char;
 
-	MORSE_CODE_INPUT inputState = MORSE_CODE_INPUT::UP;
+	MORSE_CODE_INPUT inputState = MORSE_CODE_INPUT::OPEN;
 	short typingDelayState = -1;
 	unsigned long long lastCharTime;
 };

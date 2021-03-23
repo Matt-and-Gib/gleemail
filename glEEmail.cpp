@@ -6,33 +6,60 @@
 #include "morsecode.h"
 
 
-constexpr unsigned short BAUD_RATE = 9600;
+static constexpr unsigned short BAUD_RATE = 9600;
 
-static InputMethod *input = new MorseCodeInput();
+/*
+	SWITCH_PIN_INDEX assign digital pin index for swtich used with your Arduino board
+	LED_PIN_INDEX assign digital pin index for LED used with your Arduino board
+*/
+static constexpr unsigned short SWITCH_PIN_INDEX = 4;
+static constexpr unsigned short LED_PIN_INDEX = 5; //LED_BUILTIN;
 
+
+static InputMethod *input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_PIN_INDEX);
+
+static unsigned short pinIndex = 0;
 
 void loop () {
-	/*switch(digitalRead(input.getSwitchPin())) {
-	case HIGH:
-		digitalWrite(input->getLEDPin(), HIGH);
-		input->pushCharacter(true);
-		break;
+	pinIndex = 0;
 
-	case LOW:
-		digitalWrite(input->getLEDPin(), LOW);
-		input->pushCharacter();
-		break;
-	}*/
+	Pin **readPins = input->getReadPins();
+	Pin *currentPin = readPins[pinIndex];
+
+	//Serial.print("readPin 0 pin location: ");
+	//Serial.println(currentPin.pinLocation);
+
+	while (currentPin != NULL_PIN) {
+		currentPin->value = digitalRead(currentPin->pinLocation);
+		currentPin = readPins[++pinIndex];
+	}
+
+	input->processInput(millis());
+
+	pinIndex = 0;
+
+	Pin **writePins = input->getWritePins();
+	currentPin = writePins[pinIndex];
+	while(currentPin != NULL_PIN) {
+		digitalWrite(currentPin->pinLocation, currentPin->value);
+		currentPin = writePins[++pinIndex];
+	}
+	
 }
 
 
 void setupPins() {
-	const Pin *pins = input->getPins();
+	Pin **pins = input->getPins();
 	unsigned short i = 0;
-	Pin currentPin = pins[i];
-	while (currentPin != NULL_PIN) {
-		pinMode(currentPin.index, currentPin.mode);
-		currentPin = pins[++i];
+	Pin &currentPin = *pins[i];
+	while (currentPin != *NULL_PIN) {
+		Serial.print("pin ");
+		Serial.print(i);
+		Serial.print(" location: ");
+		Serial.println(currentPin.pinLocation);
+
+		pinMode(currentPin.pinLocation, currentPin.mode);
+		currentPin = *pins[++i];
 	}
 }
 

@@ -3,11 +3,12 @@
 
 #include "inputmethod.h"
 
-class TiltType : public InputMethod {
+/*class TiltType : public InputMethod {
 public:
-	const Pin *getPins() const {return pins;}
+	Pin *getPins() {return &pins;}
+	void processInput(const unsigned long) {}
 private:
-	const Pin pins[1] = {NULL_PIN};
-};
+	Pin *pins[1] = {NULL_PIN};
+};*/
 
 #endif
