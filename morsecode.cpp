@@ -13,6 +13,6 @@ MorseCodeInput::~MorseCodeInput() {
 
 void MorseCodeInput::pushCharacter (const bool down) {
 	if(down) {
-		lastCharTime = millis();
+		//lastCharTime = millis();
 	}
 }
