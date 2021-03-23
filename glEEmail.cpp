@@ -12,11 +12,11 @@ static constexpr unsigned short BAUD_RATE = 9600;
 	SWITCH_PIN_INDEX assign digital pin index for swtich used with your Arduino board
 	LED_PIN_INDEX assign digital pin index for LED used with your Arduino board
 */
-static constexpr unsigned short SWITCH_PIN_INDEX = 4;
-static constexpr unsigned short LED_PIN_INDEX = 5; //LED_BUILTIN;
+static constexpr unsigned short SWITCH_PIN_INDEX = 2;//4;
+//static constexpr unsigned short LED_PIN_INDEX = 5;
 
 
-static InputMethod *input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_PIN_INDEX);
+static InputMethod *input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN); //LED_PIN_INDEX);
 
 static unsigned short pinIndex = 0;
 
