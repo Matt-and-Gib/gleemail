@@ -8,26 +8,26 @@
 
 constexpr unsigned short BAUD_RATE = 9600;
 
-static InputDevice *morseCode = new MorseCodeInput();
+static InputMethod *input = new MorseCodeInput();
 
 
 void loop () {
-	/*switch(digitalRead(morseCode.getSwitchPin())) {
+	/*switch(digitalRead(input.getSwitchPin())) {
 	case HIGH:
-		digitalWrite(morseCode->getLEDPin(), HIGH);
-		morseCode->pushCharacter(true);
+		digitalWrite(input->getLEDPin(), HIGH);
+		input->pushCharacter(true);
 		break;
 
 	case LOW:
-		digitalWrite(morseCode->getLEDPin(), LOW);
-		morseCode->pushCharacter();
+		digitalWrite(input->getLEDPin(), LOW);
+		input->pushCharacter();
 		break;
 	}*/
 }
 
 
 void setupPins() {
-	const Pin *pins = morseCode->getPins();
+	const Pin *pins = input->getPins();
 	unsigned short i = 0;
 	Pin currentPin = pins[i];
 	while (currentPin != NULL_PIN) {

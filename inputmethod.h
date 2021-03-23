@@ -1,5 +1,5 @@
-#ifndef INPUTDEVICE_H
-#define INPUTDEVICE_H
+#ifndef INPUTMETHOD_H
+#define INPUTMETHOD_H
 
 enum PIN_MODE : unsigned int {WRITE = 0, READ = 1};
 
@@ -21,7 +21,7 @@ struct Pin {
 static const Pin NULL_PIN = Pin(-1, PIN_MODE::READ);
 
 
-class InputDevice {
+class InputMethod {
 public:
 	virtual const Pin *getPins() const = 0;
 private:

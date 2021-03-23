@@ -1,9 +1,9 @@
 #ifndef TILTTYPE_H
 #define TILTTYPE_H
 
-#include "inputdevice.h"
+#include "inputmethod.h"
 
-class TiltType : public InputDevice {
+class TiltType : public InputMethod {
 public:
 	const Pin *getPins() const {return pins;}
 private:

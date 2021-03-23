@@ -1,13 +1,13 @@
 #ifndef MORSECODE_H
 #define MORSECODE_H
 
-#include "inputdevice.h"
+#include "inputmethod.h"
 
 
 enum class MORSE_CODE_INPUT : bool {DOWN = false, UP = true};
 
 
-class MorseCodeInput : public InputDevice {
+class MorseCodeInput : public InputMethod {
 public:
 	MorseCodeInput();
 	~MorseCodeInput();
