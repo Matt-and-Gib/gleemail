@@ -12,7 +12,7 @@ static InputDevice *morseCode = new MorseCodeInput();
 
 
 void loop () {
-	switch(digitalRead(morseCode.getSwitchPin())) {
+	/*switch(digitalRead(morseCode.getSwitchPin())) {
 	case HIGH:
 		digitalWrite(morseCode->getLEDPin(), HIGH);
 		morseCode->pushCharacter(true);
@@ -22,7 +22,7 @@ void loop () {
 		digitalWrite(morseCode->getLEDPin(), LOW);
 		morseCode->pushCharacter();
 		break;
-	}
+	}*/
 }
 
 

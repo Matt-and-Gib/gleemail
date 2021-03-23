@@ -1,7 +1,7 @@
 #ifndef INPUTDEVICE_H
 #define INPUTDEVICE_H
 
-enum class PIN_MODE {WRITE = 0x0, READ = 0x1};
+enum PIN_MODE : unsigned int {WRITE = 0, READ = 1};
 
 struct Pin {
 	Pin(const unsigned short i, const PIN_MODE m) {index = i; mode = m;}
@@ -12,6 +12,10 @@ struct Pin {
 	bool operator== (const Pin &o) {
 		return this->index == o.index;
 	}
+
+	bool operator!= (const Pin &o) {
+		return this->index != o.index;
+	}
 };
 
 static const Pin NULL_PIN = Pin(-1, PIN_MODE::READ);
@@ -19,7 +23,7 @@ static const Pin NULL_PIN = Pin(-1, PIN_MODE::READ);
 
 class InputDevice {
 public:
-	virtual Pin *getPins() const;
+	virtual const Pin *getPins() = 0;
 private:
 };
 

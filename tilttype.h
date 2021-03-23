@@ -3,9 +3,11 @@
 
 #include "inputdevice.h"
 
-public class TiltType : public InputDevice {
+class TiltType : public InputDevice {
 public:
+	const Pin *getPins() {return pins;}
 private:
-}
+	const Pin pins[1] = {NULL_PIN};
+};
 
 #endif
