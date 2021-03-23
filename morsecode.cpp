@@ -4,6 +4,12 @@
 MorseCodeInput::MorseCodeInput(const unsigned short switchPinIndex, const unsigned short ledPinIndex) {
 	switchDigitalPin = new Pin(switchPinIndex, PIN_MODE::READ, MORSE_CODE_INPUT::OPEN);
 	ledDigitalPin = new Pin(ledPinIndex, PIN_MODE::WRITE, MORSE_CODE_INPUT::OPEN);
+
+	pins[0] = switchDigitalPin;
+	pins[1] = ledDigitalPin;
+
+	readPins[0] = switchDigitalPin;
+	writePins[0] = ledDigitalPin;
 }
 
 

@@ -26,10 +26,10 @@ void loop () {
 	Pin **readPins = input->getReadPins();
 	Pin *currentPin = readPins[pinIndex];
 
-	//Serial.print("readPin 0 pin location: ");
-	//Serial.println(currentPin.pinLocation);
+	Serial.print("readPin 0 pin location: ");
+	Serial.println(currentPin->pinLocation);
 
-	while (currentPin != NULL_PIN) {
+	while (*currentPin != *NULL_PIN) {
 		currentPin->value = digitalRead(currentPin->pinLocation);
 		currentPin = readPins[++pinIndex];
 	}
@@ -40,7 +40,7 @@ void loop () {
 
 	Pin **writePins = input->getWritePins();
 	currentPin = writePins[pinIndex];
-	while(currentPin != NULL_PIN) {
+	while(*currentPin != *NULL_PIN) {
 		digitalWrite(currentPin->pinLocation, currentPin->value);
 		currentPin = writePins[++pinIndex];
 	}
@@ -51,26 +51,32 @@ void loop () {
 void setupPins() {
 	Pin **pins = input->getPins();
 	unsigned short i = 0;
-	Pin &currentPin = *pins[i];
-	while (currentPin != *NULL_PIN) {
+	Pin *currentPin = pins[i];
+
+	while (*currentPin != *NULL_PIN) {
 		Serial.print("pin ");
 		Serial.print(i);
 		Serial.print(" location: ");
-		Serial.println(currentPin.pinLocation);
+		Serial.println(currentPin->pinLocation);
 
-		pinMode(currentPin.pinLocation, currentPin.mode);
-		currentPin = *pins[++i];
+		pinMode(currentPin->pinLocation, currentPin->mode);
+		currentPin = pins[++i];
 	}
 }
 
 
 void setup() {
-	setupPins();
-
 	Serial.begin(BAUD_RATE);
 	while(!Serial) {
 		delay(250);
 	}
+
+	setupPins();
+
+	/*Pin **pins = input->getPins();
+	Pin &testPin = *pins[0];
+	Serial.print("getPins 0 location: ");
+	Serial.println(testPin.pinLocation);*/
 
 	Serial.println("Running");
 }
