@@ -23,7 +23,7 @@ static const Pin NULL_PIN = Pin(-1, PIN_MODE::READ);
 
 class InputDevice {
 public:
-	virtual const Pin *getPins() = 0;
+	virtual const Pin *getPins() const = 0;
 private:
 };
 

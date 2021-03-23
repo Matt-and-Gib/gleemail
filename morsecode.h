@@ -12,7 +12,7 @@ public:
 	MorseCodeInput();
 	~MorseCodeInput();
 
-	const Pin *getPins() {return pins;}
+	const Pin *getPins() const {return pins;}
 
 	//const Pin *getInputPins() {return inputPins;}
 	//const Pin *getOutputPins() {return outputPins;}

@@ -5,7 +5,7 @@
 
 class TiltType : public InputDevice {
 public:
-	const Pin *getPins() {return pins;}
+	const Pin *getPins() const {return pins;}
 private:
 	const Pin pins[1] = {NULL_PIN};
 };

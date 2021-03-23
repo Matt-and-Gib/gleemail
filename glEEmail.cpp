@@ -27,7 +27,7 @@ void loop () {
 
 
 void setupPins() {
-	Pin *pins = morseCode->getPins();
+	const Pin *pins = morseCode->getPins();
 	unsigned short i = 0;
 	Pin currentPin = pins[i];
 	while (currentPin != NULL_PIN) {
