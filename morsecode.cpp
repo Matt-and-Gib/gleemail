@@ -15,8 +15,6 @@ MorseCodeInput::~MorseCodeInput() {
 
 
 void MorseCodeInput::processInput(const unsigned long time) {
-	if(time == 0) {}
-
 	switch(pins[switchPinIndex]->value) {
 	case MORSE_CODE_INPUT::CLOSED:
 		pins[ledPinIndex]->value = 100;

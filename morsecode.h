@@ -17,9 +17,9 @@ public:
 private:
 	static constexpr unsigned short MAX_MORSE_CODE_INPUT_LENGTH = 6;
 
-	unsigned short switchPinIndex = 0;
-	unsigned short ledPinIndex = 1;
-	Pin *pins[3] = {NULL_PIN, NULL_PIN, NULL_PIN};
+	const unsigned short switchPinIndex = 0;
+	const unsigned short ledPinIndex = 1;
+	Pin *pins[3] = {&NULL_PIN, &NULL_PIN, &NULL_PIN};
 
 	static constexpr unsigned short DOT_THRESHOLD = 10;
 	static constexpr unsigned short MIN_DASH_THRESHOLD = 3 * DOT_THRESHOLD; //length of time required to enter dash

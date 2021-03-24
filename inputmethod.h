@@ -20,7 +20,7 @@ struct Pin {
 	}
 };
 
-static Pin *NULL_PIN = new Pin(-1, PIN_MODE::READ, 0);
+static Pin NULL_PIN = Pin(-1, PIN_MODE::READ, 0);
 
 
 class InputMethod {
