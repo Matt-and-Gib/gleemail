@@ -3,18 +3,16 @@
 //#include <SPI.h>
 //#include <WiFiNINA.h>
 
+#include "global.h"
 #include "morsecode.h"
 
 
-static constexpr unsigned short BAUD_RATE = 9600;
-static constexpr unsigned short SWITCH_PIN_INDEX = 9;
-
-static InputMethod *input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
-
 static unsigned short pinIndex = 0;
+static InputMethod *input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+static char messageOut[MAX_MESSAGE_LENGTH] = {'\0'};
 
 
-void loop () {
+void processInputMethod() {
 	pinIndex = 0;
 
 	Pin **allPins = input->getPins();
@@ -38,6 +36,17 @@ void loop () {
 
 		currentPin = allPins[++pinIndex];
 	}
+}
+
+
+void loop() {
+	processInputMethod();
+	if(input->isMessageReady()) {
+		input->getMessageToSend(messageOut);
+		//sendMessage(inputMethod->getMessageToSend());
+	}
+	//messageIn = receiveMessage();
+	//printMessage(); //write to LCD buffer, I guess
 }
 
 

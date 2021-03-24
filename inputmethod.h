@@ -1,33 +1,23 @@
 #ifndef INPUTMETHOD_H
 #define INPUTMETHOD_H
 
-enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};
-
-struct Pin {
-	Pin(const unsigned short i, const PIN_MODE m, const unsigned short v) {pinLocation = i; mode = m; value = v;}
-	~Pin() {}
-
-	short pinLocation;
-	PIN_MODE mode;
-	unsigned short value;
-
-	bool operator== (const Pin &rhs) {
-		return this->pinLocation == rhs.pinLocation;
-	}
-
-	bool operator!= (const Pin &rhs) {
-		return this->pinLocation != rhs.pinLocation;
-	}
-};
-
-static Pin NULL_PIN = Pin(-1, PIN_MODE::READ, 0);
+#include "global.h"
 
 
 class InputMethod {
 public:
 	virtual Pin **getPins() = 0;
 	virtual void processInput(const unsigned long) = 0;
+
+	void getMessageToSend(char *);
+	void commitMessage() {messageComplete = true;}
+	bool isMessageReady() const {return messageComplete;}
+
+	void pushCharacterToMessage(const char c);
 private:
+	bool messageComplete = false;
+	bool messageRetrieved = false;
+	char messageToSend[MAX_MESSAGE_LENGTH];
 };
 
 #endif
