@@ -7,8 +7,7 @@
 
 
 static constexpr unsigned short BAUD_RATE = 9600;
-
-static constexpr unsigned short SWITCH_PIN_INDEX = 4;
+static constexpr unsigned short SWITCH_PIN_INDEX = 9;
 
 static InputMethod *input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
 
@@ -48,12 +47,13 @@ void setupPins() {
 	Pin *currentPin = pins[i];
 
 	while (*currentPin != NULL_PIN) {
+		/*Important debug messages. Check here first if something seems broken!
 		Serial.print("Index: ");
 		Serial.println(i);
 
 		Serial.print(currentPin->pinLocation);
 		Serial.print(" : ");
-		Serial.println(currentPin->mode);
+		Serial.println(currentPin->mode);*/
 
 		pinMode(currentPin->pinLocation, currentPin->mode);
 		currentPin = pins[++i];
@@ -66,8 +66,6 @@ void setup() {
 	while(!Serial) {
 		delay(250);
 	}
-
-	Serial.println("Serial setup");
 
 	setupPins();
 
