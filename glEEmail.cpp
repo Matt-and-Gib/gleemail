@@ -41,8 +41,11 @@ void processInputMethod() {
 
 void loop() {
 	processInputMethod();
+	//peek messageToSend
+	//Push peek to inputMessage - write inputMessage to LCD
 	if(input->isMessageReady()) {
 		input->getMessageToSend(messageOut);
+		Serial.println(messageOut);
 		//sendMessage(inputMethod->getMessageToSend());
 	}
 	//messageIn = receiveMessage();

@@ -7,6 +7,7 @@ void InputMethod::getMessageToSend(char *messageOut) {
 		messageToSend[i] = '\0';
 	}
 
+	messageToSendFirstEmptyIndex = 0;
 	messageComplete = false;
 }
 
@@ -14,5 +15,19 @@ void InputMethod::getMessageToSend(char *messageOut) {
 void InputMethod::pushCharacterToMessage(const char c) {
 	messageComplete = false;
 
-	//other logic for appending char to array
+	if(messageToSendFirstEmptyIndex < MAX_MESSAGE_LENGTH) {
+		messageToSend[messageToSendFirstEmptyIndex] = c;
+		messageToSendFirstEmptyIndex += 1;
+	}
+}
+
+
+void InputMethod::commitMessage() {
+	messageComplete = true;
+	//trim whitespace from message
+}
+
+
+bool InputMethod::isLastCharSpace() const {
+	return messageToSendFirstEmptyIndex == 0 ? false : (messageToSend[messageToSendFirstEmptyIndex - 1] == ' ');
 }

@@ -10,14 +10,17 @@ public:
 	virtual void processInput(const unsigned long) = 0;
 
 	void getMessageToSend(char *);
-	void commitMessage() {messageComplete = true;}
+	void commitMessage();
 	bool isMessageReady() const {return messageComplete;}
+	bool messageNotEmpty() const {return messageToSend[0] != '\0';}
+	bool isLastCharSpace() const;
 
 	void pushCharacterToMessage(const char c);
 private:
 	bool messageComplete = false;
 	bool messageRetrieved = false;
 	char messageToSend[MAX_MESSAGE_LENGTH];
+	unsigned short int messageToSendFirstEmptyIndex = 0;
 };
 
 #endif

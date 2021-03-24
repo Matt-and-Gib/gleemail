@@ -49,22 +49,24 @@ void MorseCodeInput::pushMorseCharacter(const MORSE_CHAR character) {
 
 //					***BUTTON RELEASED***
 void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
-	pins[ledPinIndex]->value = 0;
+	pins[ledPinIndex]->value = LED_STATUS::OFF;
 
-	/*elapsedTime = currentCycleTime - lastChangeTime; //Duration of switch being closed
+	elapsedTime = currentCycleTime - lastChangeTime; //Duration of switch being closed
 	if(elapsedTime < MIN_DASH_THRESHOLD) {
-		pushCharacter(MORSE_CHAR::DOT);
+		pushMorseCharacter(MORSE_CHAR::DOT);
+	} else {
+		pushMorseCharacter(MORSE_CHAR::DASH);
 	}
 
 	lastChangeTime = currentCycleTime;
-	inputState = MORSE_CODE_STATE::OPEN;*/
+	inputState = MORSE_CODE_STATE::OPEN;
 }
 
 
 //					***BUTTON PRESSED***
 void MorseCodeInput::processOpenToClosed(const unsigned long currentCycleTime) {
-	pins[ledPinIndex]->value = 1;
-	morseCharStarted = true;
+	pins[ledPinIndex]->value = LED_STATUS::ON;
+	morsePhraseStarted = true;
 
 	lastChangeTime = currentCycleTime;
 
@@ -73,30 +75,60 @@ void MorseCodeInput::processOpenToClosed(const unsigned long currentCycleTime) {
 }
 
 
-void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
-	if(lastChangeTime > currentCycleTime) { //Overflow ~every 70 days
-		lastChangeTime = 0;
-	} //This may not be the best place to process this
+void MorseCodeInput::resetMorsePhrase() {
+	morsePhraseStarted = false;
+	for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+		morsePhrase[i] = MORSE_CHAR::NOTHING;
+	}
+}
 
-	if(morseCharStarted) {
-		elapsedTime = currentCycleTime - lastChangeTime;
+
+/*
+	elapsedTime < PhraseFinished : same phrase
+	elapsedTime > PhrasedFinished && elapsedTime < MESSAGE_FINISHED : new phrase and insert space
+	elpasedTime > MESSAGE_FINISHED : send message and reset all
+
+
+	every cycle, check elapsed time because 
+*/
+
+void MorseCodeInput::checkPhraseElapsedThreshold(const unsigned long elapsedTime) {
+	if(morsePhraseStarted) {
 		if(elapsedTime >= PHRASE_FINISHED_THRESHOLD) {
 			pushCharacterToMessage(convertPhraseToCharacter());
+			resetMorsePhrase();
+		}
+	}
+}
 
-			if(elapsedTime >= WORD_FINISHED_THRESHOLD) {
-				pushCharacterToMessage(' ');
-
-				if(elapsedTime >= MESSAGE_FINISHED_THRESHOLD) {
-					commitMessage();
+void MorseCodeInput::checkMessageElapsedThresholds(const unsigned long elspasedTime) {
+	if(messageNotEmpty()) {
+		if(elapsedTime >= MESSAGE_FINISHED_THRESHOLD) {
+			commitMessage();
+		} else {
+			if(!isLastCharSpace()) {
+				if(elapsedTime >= WORD_FINISHED_THRESHOLD) {
+					pushCharacterToMessage(' ');
 				}
 			}
 		}
 	}
+}
 
-	//Check morseCharStarted == true
-		//Check WORD_FINISHED_THRESHOLD met/exceeded
-			//Append space
-			//Set flag false
+
+void MorseCodeInput::checkElapsedTime(const unsigned long currentCycleTime) {
+	/*if(lastChangeTime > currentCycleTime) {
+		lastChangeTime = 0;
+	}*/
+	elapsedTime = currentCycleTime - lastChangeTime;
+
+	checkPhraseElapsedThreshold(elapsedTime);
+	checkMessageElapsedThresholds(elapsedTime);
+}
+
+
+void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
+	checkElapsedTime(currentCycleTime);
 
 	if(pins[switchPinIndex]->value == MORSE_CODE_STATE::OPEN) {
 		if(inputState == MORSE_CODE_STATE::CLOSED) {

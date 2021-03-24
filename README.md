@@ -5,6 +5,7 @@
 2. [Components](#parts)
 3. [Wiring Diagram](#diagram)
 4. [Getting Started in the Code](#gettingstarted)
+5. [Future Plans](#plans)
 
 ___
 
@@ -40,3 +41,16 @@ ___
 
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
 To-do
+
+___
+
+### <a name="plans"></a>**Future Plans**
+We'd like to implement additional input methods, including (but not limited to):
+1. Phone app that connects directly to the Arduino, which also stores past messages.
+2. Speech-to-text
+3. Light-level
+4. Web app
+5. Dance-dance-revolution input
+6. Game controller
+7. Touch screen keyboard
+8. Single-button random messages (magic 8 ball style)

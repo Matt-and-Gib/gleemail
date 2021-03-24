@@ -30,7 +30,6 @@ void setup() {
 	Serial.println(arrayOne[0]);
 }
 
-
 void loop() {
 
 }

@@ -16,7 +16,7 @@
 	morsePhrase : array of MORSE_CHAR
 
 	message : string formed of chars
-	morseCharStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
+	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
 */
 
 static constexpr unsigned short DOT_THRESHOLD = 10;
@@ -68,7 +68,7 @@ private:
 	unsigned short morsePhraseIndex = 0;
 	MORSE_CHAR inputCharacter = MORSE_CHAR::NOTHING;
 
-	bool morseCharStarted = false;
+	bool morsePhraseStarted = false;
 
 	MORSE_CODE_STATE inputState = MORSE_CODE_STATE::OPEN;
 	short typingDelayState = -1;
@@ -79,6 +79,11 @@ private:
 	void processOpenToClosed(const unsigned long);
 	void pushMorseCharacter(const MORSE_CHAR);
 	char convertPhraseToCharacter() const;
+
+	void checkElapsedTime(const unsigned long);
+	void checkPhraseElapsedThreshold(const unsigned long);
+	void checkMessageElapsedThresholds(const unsigned long);
+	void resetMorsePhrase();
 };
 
 #endif
