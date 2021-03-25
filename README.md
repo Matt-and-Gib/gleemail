@@ -5,7 +5,8 @@
 2. [Components](#parts)
 3. [Wiring Diagram](#diagram)
 4. [Getting Started in the Code](#gettingstarted)
-5. [Future Plans](#plans)
+5. [Usage Instructions](#instructions)
+6. [Future Plans](#plans)
 
 ___
 
@@ -41,6 +42,14 @@ ___
 
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
 To-do
+
+___
+
+### <a href="instructions"></a>**Usage Instructions**
+• How to connect with your friend
+	• To Do
+• Features
+	• You can hold down the switch to pause input
 
 ___
 

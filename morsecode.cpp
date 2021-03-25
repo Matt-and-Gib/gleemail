@@ -121,6 +121,10 @@ void MorseCodeInput::checkElapsedTime(const unsigned long currentCycleTime) {
 	}*/
 	elapsedCycleTime = currentCycleTime - lastChangeTime;
 
+	if(elapsedCycleTime > MESSAGE_FINISHED_THRESHOLD) {
+		return;
+	}
+
 	checkPhraseElapsedThreshold();
 	checkMessageElapsedThresholds();
 }
@@ -133,7 +137,7 @@ void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
 
 	if(pins[switchPinIndex]->value == MORSE_CODE_STATE::OPEN) {
 		checkElapsedTime(currentCycleTime);
-		
+
 		if(inputState == MORSE_CODE_STATE::CLOSED) {
 			processClosedToOpen(currentCycleTime);
 		}
