@@ -2,8 +2,17 @@
 #include "HardwareSerial.h"
 
 
+#define OPEN false
+#define CLOSED true
+
+
 static constexpr unsigned short SWITCH_PIN_INDEX = 9;
-static bool activeInputFlag = false;
+unsigned long lastDebounceTime = 0;
+static constexpr unsigned short DEBOUNCE_DELAY = 50;
+
+static bool switchState = OPEN;
+static bool lastSwitchState = OPEN;
+static bool pinValue = 0;
 
 void setup() {
 	Serial.begin(9600);
@@ -13,23 +22,32 @@ void setup() {
 
 	pinMode(SWITCH_PIN_INDEX, INPUT);
 
+	Serial.println("Ready");
 }
 
 
 void loop() {
-	while(true) {
-		if(digitalRead(SWITCH_PIN_INDEX) == HIGH) {
-			if(!activeInputFlag) {
+	pinValue = digitalRead(SWITCH_PIN_INDEX) == HIGH ? CLOSED : OPEN;
+
+	if(pinValue != lastSwitchState) {
+		lastDebounceTime = millis();
+	}
+
+	if(millis() - lastDebounceTime > DEBOUNCE_DELAY) {
+		if(pinValue == HIGH) {
+			if(switchState != CLOSED) {
 				Serial.print("Down: ");
 				Serial.println(millis());
-				activeInputFlag = true;
+				switchState = CLOSED;
 			}
 		} else {
-			if(activeInputFlag) {
+			if(switchState != OPEN) {
 				Serial.print("Up: ");
 				Serial.println(millis());
-				activeInputFlag = false;
+				switchState = OPEN;
 			}
 		}
 	}
+
+	lastSwitchState = pinValue;
 }
