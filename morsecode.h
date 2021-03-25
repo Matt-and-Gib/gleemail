@@ -19,7 +19,7 @@
 	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
 */
 
-static constexpr unsigned short TIMING_SCALAR = 1000;
+static constexpr unsigned short TIMING_SCALAR = 200;
 
 static constexpr unsigned short DOT_DASH_THRESHOLD = 10 * TIMING_SCALAR;
 static constexpr unsigned short MAX_DASH_THRESHOLD = 30 * TIMING_SCALAR;
