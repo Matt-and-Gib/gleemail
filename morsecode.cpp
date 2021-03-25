@@ -52,12 +52,6 @@ void MorseCodeInput::pushMorseCharacter(const MORSE_CHAR character) {
 void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 	pins[ledPinIndex]->value = LED_STATUS::OFF;
 
-	/*if(elapsedCycleTime < MIN_DASH_THRESHOLD) {
-		pushMorseCharacter(MORSE_CHAR::DOT);
-	} else {
-		pushMorseCharacter(MORSE_CHAR::DASH);
-	}*/
-
 	if(elapsedCycleTime < DOT_DASH_THRESHOLD) {
 		pushMorseCharacter(MORSE_CHAR::DOT);
 	} else if (elapsedCycleTime < MAX_DASH_THRESHOLD) {

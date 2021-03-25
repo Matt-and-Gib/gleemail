@@ -19,13 +19,13 @@
 	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
 */
 
-static constexpr unsigned short TIMING_SCALAR = 100;
+static constexpr unsigned short TIMING_SCALAR = 1000;
 
-static constexpr unsigned short DOT_DASH_THRESHOLD = 10;
-static constexpr unsigned short MAX_DASH_THRESHOLD = 30;
-static constexpr unsigned short PHRASE_FINISHED_THRESHOLD = 10; //max amount of time to wait to consider phrase finished
-static constexpr unsigned short WORD_FINISHED_THRESHOLD = 30; //max amount of time to wait to consider word finished
-static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = 300; //max amount of time to enter new words before message committed
+static constexpr unsigned short DOT_DASH_THRESHOLD = 10 * TIMING_SCALAR;
+static constexpr unsigned short MAX_DASH_THRESHOLD = 30 * TIMING_SCALAR;
+static constexpr unsigned short PHRASE_FINISHED_THRESHOLD = 10 * TIMING_SCALAR; //max amount of time to wait to consider phrase finished
+static constexpr unsigned short WORD_FINISHED_THRESHOLD = 30 * TIMING_SCALAR; //max amount of time to wait to consider word finished
+static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = 300 * TIMING_SCALAR; //max amount of time to enter new words before message committed
 
 /*
 static constexpr unsigned short DOT_THRESHOLD = 10;
