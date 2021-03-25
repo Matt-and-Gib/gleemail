@@ -127,9 +127,13 @@ void MorseCodeInput::checkElapsedTime(const unsigned long currentCycleTime) {
 
 
 void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
-	checkElapsedTime(currentCycleTime);
+	/*
+		* ** DEBOUNCE ** *
+	*/
 
 	if(pins[switchPinIndex]->value == MORSE_CODE_STATE::OPEN) {
+		checkElapsedTime(currentCycleTime);
+		
 		if(inputState == MORSE_CODE_STATE::CLOSED) {
 			processClosedToOpen(currentCycleTime);
 		}

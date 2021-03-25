@@ -12,6 +12,8 @@ public:
 	virtual Pin **getPins() = 0;
 	virtual void processInput(const unsigned long) = 0;
 
+	virtual unsigned short getDebounceDelay() = 0;
+
 	void getMessageToSend(char *);
 	void commitMessage();
 	bool isMessageReady() const {return messageComplete;}

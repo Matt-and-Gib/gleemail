@@ -8,7 +8,7 @@
 
 static constexpr unsigned short SWITCH_PIN_INDEX = 9;
 unsigned long lastDebounceTime = 0;
-static constexpr unsigned short DEBOUNCE_DELAY = 50;
+static constexpr unsigned short DEBOUNCE_DELAY = 25;
 
 static bool switchState = OPEN;
 static bool lastSwitchState = OPEN;
@@ -36,13 +36,11 @@ void loop() {
 	if(millis() - lastDebounceTime > DEBOUNCE_DELAY) {
 		if(pinValue == HIGH) {
 			if(switchState != CLOSED) {
-				Serial.print("Down: ");
 				Serial.println(millis());
 				switchState = CLOSED;
 			}
 		} else {
 			if(switchState != OPEN) {
-				Serial.print("Up: ");
 				Serial.println(millis());
 				switchState = OPEN;
 			}
