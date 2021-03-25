@@ -8,6 +8,8 @@ static constexpr unsigned short MAX_MESSAGE_LENGTH = 32; //Maximum number of cha
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};
 enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};
 
+enum ERROR_CODE: short {NONE = 0, MORSE_PHRASE_IMMINENT_OVERFLOW = 1, INPUT_MORSE_CHAR_NOTHING = 2};
+
 struct Pin {
 	Pin(const unsigned short i, const PIN_MODE m, const unsigned short v) {pinLocation = i; mode = m; value = v;}
 	~Pin() {}

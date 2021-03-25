@@ -8,8 +8,9 @@
 
 
 static unsigned short pinIndex = 0;
+static unsigned short errorIndex = 0;
 static InputMethod *input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
-static char messageOut[MAX_MESSAGE_LENGTH] = {'\0'};
+static char *messageOut;
 
 
 void processInputMethod() {
@@ -39,6 +40,19 @@ void processInputMethod() {
 }
 
 
+void printErrorCodes() {
+	ERROR_CODE **errors = input->getErrorCodes();
+
+	errorIndex = 0;
+	ERROR_CODE *code = errors[errorIndex];
+	while(*code != ERROR_CODE::NONE) {
+		Serial.println(*code);
+		*code = ERROR_CODE::NONE;
+		code = errors[++errorIndex];
+	}
+}
+
+
 void loop() {
 	processInputMethod();
 	//peek messageToSend
@@ -50,6 +64,8 @@ void loop() {
 	}
 	//messageIn = receiveMessage();
 	//printMessage(); //write to LCD buffer, I guess
+
+	printErrorCodes();
 }
 
 
@@ -80,6 +96,11 @@ void setup() {
 	}
 
 	setupPins();
+
+	messageOut = new char[MAX_MESSAGE_LENGTH];
+	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
+		messageOut[i] = '\0';
+	}
 
 	Serial.println("Running");
 }

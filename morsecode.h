@@ -19,11 +19,21 @@
 	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
 */
 
+static constexpr unsigned short TIMING_SCALAR = 100;
+
+static constexpr unsigned short DOT_DASH_THRESHOLD = 10;
+static constexpr unsigned short MAX_DASH_THRESHOLD = 30;
+static constexpr unsigned short PHRASE_FINISHED_THRESHOLD = 10; //max amount of time to wait to consider phrase finished
+static constexpr unsigned short WORD_FINISHED_THRESHOLD = 30; //max amount of time to wait to consider word finished
+static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = 300; //max amount of time to enter new words before message committed
+
+/*
 static constexpr unsigned short DOT_THRESHOLD = 10;
-static constexpr unsigned short MIN_DASH_THRESHOLD = 3 * DOT_THRESHOLD;
+static constexpr unsigned short MAX_DASH_THRESHOLD = 3 * DOT_THRESHOLD;
 static constexpr unsigned short PHRASE_FINISHED_THRESHOLD = DOT_THRESHOLD; //max amount of time to wait to consider phrase finished
 static constexpr unsigned short WORD_FINISHED_THRESHOLD = 3 * PHRASE_FINISHED_THRESHOLD; //max amount of time to wait to consider word finished
 static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = 10 * WORD_FINISHED_THRESHOLD; //max amount of time to enter new words before message committed
+*/
 
 /*
 	#Logic
@@ -64,7 +74,7 @@ private:
 	Pin *pins[3] = {&NULL_PIN, &NULL_PIN, &NULL_PIN};
 
 	static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6;
-	MORSE_CHAR morsePhrase[MAX_MORSE_PHRASE_LENGTH] = {MORSE_CHAR::NOTHING};
+	MORSE_CHAR *morsePhrase;
 	unsigned short morsePhraseIndex = 0;
 	MORSE_CHAR inputCharacter = MORSE_CHAR::NOTHING;
 
@@ -73,7 +83,7 @@ private:
 	MORSE_CODE_STATE inputState = MORSE_CODE_STATE::OPEN;
 	short typingDelayState = -1;
 	unsigned long lastChangeTime = 0;
-	long long elapsedTime = 0;
+	long long elapsedCycleTime = 0;
 
 	void processClosedToOpen(const unsigned long);
 	void processOpenToClosed(const unsigned long);
@@ -81,8 +91,8 @@ private:
 	char convertPhraseToCharacter() const;
 
 	void checkElapsedTime(const unsigned long);
-	void checkPhraseElapsedThreshold(const unsigned long);
-	void checkMessageElapsedThresholds(const unsigned long);
+	void checkPhraseElapsedThreshold();
+	void checkMessageElapsedThresholds();
 	void resetMorsePhrase();
 };
 

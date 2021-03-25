@@ -6,6 +6,9 @@
 
 class InputMethod {
 public:
+	InputMethod();
+	~InputMethod();
+
 	virtual Pin **getPins() = 0;
 	virtual void processInput(const unsigned long) = 0;
 
@@ -16,10 +19,17 @@ public:
 	bool isLastCharSpace() const;
 
 	void pushCharacterToMessage(const char c);
+
+	void pushErrorCode(const ERROR_CODE);
+	ERROR_CODE **getErrorCodes() {return errorCodes;}
 private:
+	static constexpr short MAX_ERROR_CODES = 128;
+	ERROR_CODE *errorCodes[MAX_ERROR_CODES];
+	ERROR_CODE *tempCode;
+
 	bool messageComplete = false;
 	bool messageRetrieved = false;
-	char messageToSend[MAX_MESSAGE_LENGTH];
+	char *messageToSend;
 	unsigned short int messageToSendFirstEmptyIndex = 0;
 };
 
