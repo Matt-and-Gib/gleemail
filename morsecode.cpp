@@ -175,22 +175,23 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long currentCycleTime) 
 
 
 void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
-	/*
-		* ** DEBOUNCE ** *
-	*/
+	if(pins[switchPinIndex]->value != lastInputState) {
+		setLastDebounceTime(currentCycleTime);
+	}
 
+	if(currentCycleTime - getLastDebounceTime() > getDebounceThreshold()) {
+		if(pins[switchPinIndex]->value == MORSE_CODE_STATE::OPEN) {
+			if(inputState == MORSE_CODE_STATE::CLOSED) {
+				processClosedToOpen(currentCycleTime);
+			}
 
-
-	if(pins[switchPinIndex]->value == MORSE_CODE_STATE::OPEN) {
-		if(inputState == MORSE_CODE_STATE::CLOSED) {
-			processClosedToOpen(currentCycleTime);
-		}
-
-	checkOpenElapsedTime(currentCycleTime);
-
-	} else {
-		if(inputState == MORSE_CODE_STATE::OPEN) {
-			processOpenToClosed(currentCycleTime);
+			checkOpenElapsedTime(currentCycleTime);
+		} else {
+			if(inputState == MORSE_CODE_STATE::OPEN) {
+				processOpenToClosed(currentCycleTime);
+			}
 		}
 	}
+
+	lastInputState = pins[switchPinIndex]->value == 1 ? MORSE_CODE_STATE::CLOSED : MORSE_CODE_STATE::OPEN;
 }

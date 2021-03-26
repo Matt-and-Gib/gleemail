@@ -189,7 +189,7 @@ public:
 	MorseCodeInput(const unsigned short, const unsigned short);
 	~MorseCodeInput();
 
-	unsigned short getDebounceDelay() {return 25;}
+	unsigned short getDebounceThreshold() {return 25;}
 
 	Pin **getPins() {return pins;}
 	void processInput(const unsigned long);
@@ -200,6 +200,7 @@ private:
 
 	MorsePhrase morsePhrase;
 
+	MORSE_CODE_STATE lastInputState = MORSE_CODE_STATE::OPEN;
 	MORSE_CODE_STATE inputState = MORSE_CODE_STATE::OPEN;
 	short typingDelayState = -1;
 	unsigned long lastChangeTime = 0;
