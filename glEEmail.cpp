@@ -58,6 +58,7 @@ void loop() {
 	//peek messageToSend
 	//Push peek to inputMessage - write inputMessage to LCD
 	if(input->isMessageReady()) {
+		Serial.print("message ready! : ");
 		input->getMessageToSend(messageOut);
 		Serial.println(messageOut);
 		//sendMessage(inputMethod->getMessageToSend());

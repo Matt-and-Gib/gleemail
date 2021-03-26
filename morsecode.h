@@ -48,7 +48,7 @@ public:
 	unsigned short getSize() const {return MAX_MORSE_PHRASE_LENGTH;}
 	unsigned short getLength() const {return firstOpenIndex;}
 
-	bool push(const MorseChar&);
+	bool push(const MorseChar*);
 	void resetPhrase();
 
 	bool phraseStarted() const {return firstOpenIndex > 0;}
@@ -59,7 +59,7 @@ public:
 private:
 	static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6;
 	unsigned short firstOpenIndex;
-	MorseChar **phraseArray;
+	MorseChar *phraseArray;
 };
 
 
@@ -208,7 +208,7 @@ private:
 
 	void processClosedToOpen(const unsigned long);
 	void processOpenToClosed(const unsigned long);
-	void pushMorseCharacter(const MorseChar&);
+	void pushMorseCharacter(const MorseChar*);
 	char convertPhraseToCharacter() const;
 
 	void checkOpenElapsedTime(const unsigned long);

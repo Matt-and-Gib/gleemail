@@ -5,7 +5,8 @@
 	TODO:
 [v]		implement basic morse char functions
 [v]		implement morse char comparison
-		replace enum class usage with new type Morse Char
+[v]		replace enum class usage with new type Morse Char
+		DEBOUNCE
 		finish BSTree data strcutre
 		hardcode morse phrase to char pairs
 			push <MorsePhrase, char> pairs to tree
@@ -15,7 +16,7 @@
 
 
 MorsePhrase::MorsePhrase() {
-	*phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
+	phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
 	firstOpenIndex = 0;
 }
 
@@ -26,17 +27,17 @@ MorsePhrase::~MorsePhrase() {
 
 
 MorseChar* MorsePhrase::operator[](short unsigned int index) {
-	return phraseArray[index];
+	return &phraseArray[index];
 }
 
 
 bool MorsePhrase::operator==(MorsePhrase& o) {
 	for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-		if(phraseArray[i] != o[i]) {
+		if(phraseArray[i] != *o[i]) {
 			return false;
 		}
 
-		if(phraseArray[i] == NOTHING) {
+		if(phraseArray[i] == *NOTHING) {
 			return true;
 		}
 	}
@@ -45,9 +46,9 @@ bool MorsePhrase::operator==(MorsePhrase& o) {
 }
 
 
-bool MorsePhrase::push(const MorseChar& morseCharacterToAdd) {
+bool MorsePhrase::push(const MorseChar* morseCharacterToAdd) {
 	if(!phraseFull()) {
-		phraseArray[firstOpenIndex++] = &morseCharacterToAdd;
+		phraseArray[firstOpenIndex++] = *morseCharacterToAdd;
 		return true;
 	}
 
@@ -57,7 +58,7 @@ bool MorsePhrase::push(const MorseChar& morseCharacterToAdd) {
 
 void MorsePhrase::resetPhrase() {
 	for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-		phraseArray[i] = NOTHING;
+		phraseArray[i] = *NOTHING;
 	}
 
 	firstOpenIndex = 0;
@@ -71,7 +72,7 @@ MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const uns
 	pins[switchPinIndex] = switchDigitalPin;
 	pins[ledPinIndex] = ledDigitalPin;
 
-	//Maybe initialize new MorsePhrase()
+	morsePhrase = MorsePhrase();
 }
 
 
@@ -81,12 +82,11 @@ MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 
 
 char MorseCodeInput::convertPhraseToCharacter() const {
-	char convertedChar = '\0';
-	return static_cast<const char>(convertedChar);
+	return 'a';
 }
 
 
-void MorseCodeInput::pushMorseCharacter(const MorseChar& morseCharacter) {
+void MorseCodeInput::pushMorseCharacter(const MorseChar* morseCharacter) {
 	if(morsePhrase.phraseFull()) {
 		pushErrorCode(ERROR_CODE::MORSE_PHRASE_IMMINENT_OVERFLOW);
 		//pushCharacterToMessage(convertPhraseToCharacter());
@@ -178,6 +178,8 @@ void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
 	/*
 		* ** DEBOUNCE ** *
 	*/
+
+
 
 	if(pins[switchPinIndex]->value == MORSE_CODE_STATE::OPEN) {
 		if(inputState == MORSE_CODE_STATE::CLOSED) {
