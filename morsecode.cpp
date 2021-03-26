@@ -6,8 +6,8 @@
 [v]		implement basic morse char functions
 [v]		implement morse char comparison
 [v]		replace enum class usage with new type Morse Char
-		DEBOUNCE
-		finish BSTree data strcutre
+[v]		DEBOUNCE
+		finish BSTree data strcture
 		hardcode morse phrase to char pairs
 			push <MorsePhrase, char> pairs to tree
 		lookup on MorsePhrase (key) in BSTree
