@@ -18,11 +18,11 @@ struct Pin {
 	PIN_MODE mode;
 	unsigned short value;
 
-	bool operator== (const Pin &rhs) {
+	bool operator==(const Pin &rhs) {
 		return this->pinLocation == rhs.pinLocation;
 	}
 
-	bool operator!= (const Pin &rhs) {
+	bool operator!=(const Pin &rhs) {
 		return this->pinLocation != rhs.pinLocation;
 	}
 };

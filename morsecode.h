@@ -9,7 +9,64 @@
 
 //https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf
 
+
+enum MORSE_CODE_STATE : bool {CLOSED = 1, OPEN = 0};
+enum class MORSE_CHAR_STATE : char {NOTHING = '0', DOT = '1', DASH = '2'};
+
+
+class MorseChar {
+public:
+	MorseChar() {value = MORSE_CHAR_STATE::NOTHING;}
+	MorseChar(const MORSE_CHAR_STATE v) {value = v;}
+
+	bool operator==(const MorseChar& o) {return value == o.value;}
+	bool operator!=(const MorseChar& o) {return value != o.value;}
+	bool operator>(const MorseChar& o) {
+		if(value == o.value) return false;
+		if(o.value == MORSE_CHAR_STATE::NOTHING) return true;
+		return (value == MORSE_CHAR_STATE::DASH);
+	};
+	bool operator<(const MorseChar& o) {
+		if(value == o.value) return false;
+		if(value == MORSE_CHAR_STATE::NOTHING) return true;
+		return (value == MORSE_CHAR_STATE::DOT);
+	};
+protected:
+	MORSE_CHAR_STATE value;
+private:
+};
+static const MorseChar *DOT = new MorseChar(MORSE_CHAR_STATE::DOT);
+static const MorseChar *DASH = new MorseChar(MORSE_CHAR_STATE::DASH);
+static const MorseChar *NOTHING = new MorseChar(MORSE_CHAR_STATE::NOTHING);
+
+
+class MorsePhrase {
+public:
+	MorsePhrase();
+	~MorsePhrase();
+
+	unsigned short getSize() const {return MAX_MORSE_PHRASE_LENGTH;}
+	unsigned short getLength() const {return firstOpenIndex;}
+
+	bool push(const MorseChar&);
+	void resetPhrase();
+
+	bool phraseStarted() const {return firstOpenIndex > 0;}
+	bool phraseFull() const {return firstOpenIndex == MAX_MORSE_PHRASE_LENGTH;}
+
+	MorseChar* operator[](short unsigned int);
+	bool operator==(MorsePhrase&);
+private:
+	static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6;
+	unsigned short firstOpenIndex;
+	MorseChar **phraseArray;
+};
+
+
 /*
+
+priority of each node is : number of MORESE_CHARs + val of each
+
 
 	A	• ━
 	B	━ • • •
@@ -124,9 +181,6 @@ static constexpr unsigned short MESSAGE_FINISIHED_THRESHOLD_BUFFER = 500;
 static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_FINISHED_THRESHOLD + MESSAGE_FINISIHED_THRESHOLD_BUFFER;
 
 
-enum MORSE_CODE_STATE : bool {CLOSED = 1, OPEN = 0};
-enum class MORSE_CHAR : char {NOTHING = '0', DOT = '1', DASH = '2'};
-
 static constexpr unsigned short SWITCH_PIN_INDEX = 9;
 
 
@@ -144,24 +198,20 @@ private:
 	const unsigned short ledPinIndex = 1;
 	Pin *pins[3] = {&NULL_PIN, &NULL_PIN, &NULL_PIN};
 
-	static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6;
-	MORSE_CHAR *morsePhrase;
-	unsigned short morsePhraseIndex = 0;
-	MORSE_CHAR inputCharacter = MORSE_CHAR::NOTHING;
-
-	bool morsePhraseStarted = false;
+	MorsePhrase morsePhrase;
 
 	MORSE_CODE_STATE inputState = MORSE_CODE_STATE::OPEN;
 	short typingDelayState = -1;
 	unsigned long lastChangeTime = 0;
 	long long elapsedCycleTime = 0;
+	void updateElapsedTime(const unsigned long);
 
 	void processClosedToOpen(const unsigned long);
 	void processOpenToClosed(const unsigned long);
-	void pushMorseCharacter(const MORSE_CHAR);
+	void pushMorseCharacter(const MorseChar&);
 	char convertPhraseToCharacter() const;
 
-	void checkElapsedTime(const unsigned long);
+	void checkOpenElapsedTime(const unsigned long);
 	void checkPhraseElapsedThreshold();
 	void checkMessageElapsedThresholds();
 	void resetMorsePhrase();
