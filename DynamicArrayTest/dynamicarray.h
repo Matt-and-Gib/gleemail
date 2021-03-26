@@ -6,13 +6,14 @@ template <class T>
 class DynamicArray {
 public:
 	DynamicArray<T>();
+	~DynamicArray<T>();
 
 	//T& operator[](const unsigned short);
 
-	void insert(T*);
 	void push(T*);
 	T* pop();
 	T* removeAtIndex(const unsigned short);
+	T* insertAtIndex(T*, const unsigned short);
 
 	T* getAtIndex(const unsigned short);
 	T* getFirst() {return getAtIndex(0);};
@@ -38,6 +39,16 @@ DynamicArray<T>::DynamicArray() {
 	arraySize = ARRAY_BLOCK_SIZE;
 	internalArray = new T*[arraySize]();
 	firstOpenIndex = 0;
+}
+
+
+template <class T>
+DynamicArray<T>::~DynamicArray() {
+	for(int i = 0; i < firstOpenIndex; i += 1) {
+		delete[] internalArray[i];
+	}
+
+	delete[] internalArray;
 }
 
 
@@ -124,5 +135,25 @@ T* DynamicArray<T>::getAtIndex(const unsigned short index) {
 
 	return nullptr;
 }
+
+
+template <class T>
+T* DynamicArray<T>::insertAtIndex(T* object, const unsigned short index) {
+	if (index < firstOpenIndex) {
+		if(firstOpenIndex >= arraySize - 1) {//minus one to ensure there is room to expand by one
+			expand();
+		}
+
+		for(int i = firstOpenIndex; i > index + 1; i -= 1) {
+			internalArray[i] = internalArray[i - 1];
+		}
+
+		internalArray[index] = object;
+		return object;
+	}
+
+	return nullptr;
+}
+
 
 #endif

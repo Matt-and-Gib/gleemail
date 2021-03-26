@@ -9,7 +9,7 @@ struct MyPair {
 
 	MyPair() {
 		key = 0;
-		val = '0';
+		val = '\0';
 	}
 
 	MyPair(int k, char v) {
@@ -19,12 +19,7 @@ struct MyPair {
 };
 
 
-void setup() {
-	Serial.begin(9600);
-	while(!Serial) {
-		delay(250);
-	}
-
+void basicTests() {
 	DynamicArray<MyPair> arr;
 
 	Serial.print("array is of size ");
@@ -62,6 +57,37 @@ void setup() {
 
 	Serial.print("the last value is ");
 	Serial.println(arr.getFirst()->val);
+
+	arr.pop();
+	arr.pop();
+	arr.pop();
+
+	Serial.print("array is of size ");
+	Serial.print(arr.getSize());
+	Serial.print(" and contains ");
+	Serial.print(arr.getLength());
+	Serial.println(" items.");
+
+	//delete &arr;
+}
+
+
+void advancedTests() {
+
+}
+
+
+void setup() {
+	Serial.begin(9600);
+	while(!Serial) {
+		delay(250);
+	}
+
+	Serial.println("Begin basic tests");
+	basicTests();
+	Serial.println("Basic tests complete");
+
+	advancedTests();
 }
 
 
