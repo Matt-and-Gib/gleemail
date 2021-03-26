@@ -6,6 +6,7 @@
 //https://morsecode.world/international/morse2.html
 //https://morsecode.world/international/timing.html
 
+
 /*
 	#Definitions
 	____________
@@ -18,6 +19,27 @@
 	message : string formed of chars
 	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
 */
+
+
+/*
+	#Logic
+	______
+
+	• Input MORSE_CHAR::NOTHING : convert morsePhrase to char, reset morsePhrase
+	• If period of time between opeing and closing swtich > PHRASE_FINISHED_THRESHOLD : convert moresePhrase to char, reset moresePhrase, input MORSE_CHAR at index 0
+	• If period of time between opening and closing switch > WORD_FINISHED_THRESHOLD : add space to message
+
+	• Message sent if timeout reached or 32 char limit reached
+*/
+
+
+/*
+	#Reminders
+	__________
+
+	• If switch depressed at launch, dot will be (immediately) pushed before switch is released
+*/
+
 
 /*
 	WARNING: STATISTICS BELOW:
@@ -45,33 +67,6 @@ static constexpr unsigned short WORD_FINISHED_THRESHOLD = CALCULATED_WORD_FINISH
 static constexpr unsigned short CALCULATED_MESSAGE_FINISHED_THRESHOLD = 3 * CALCULATED_WORD_FINISHED_THRESHOLD;
 static constexpr unsigned short MESSAGE_FINISIHED_THRESHOLD_BUFFER = 500;
 static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_FINISHED_THRESHOLD + MESSAGE_FINISIHED_THRESHOLD_BUFFER;
-
-/*
-static constexpr unsigned short DOT_THRESHOLD = 10;
-static constexpr unsigned short MAX_DASH_THRESHOLD = 3 * DOT_THRESHOLD;
-static constexpr unsigned short PHRASE_FINISHED_THRESHOLD = DOT_THRESHOLD; //max amount of time to wait to consider phrase finished
-static constexpr unsigned short WORD_FINISHED_THRESHOLD = 3 * PHRASE_FINISHED_THRESHOLD; //max amount of time to wait to consider word finished
-static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = 10 * WORD_FINISHED_THRESHOLD; //max amount of time to enter new words before message committed
-*/
-
-/*
-	#Logic
-	______
-
-	• Input MORSE_CHAR::NOTHING : convert morsePhrase to char, reset morsePhrase
-	• If period of time between opeing and closing swtich > PHRASE_FINISHED_THRESHOLD : convert moresePhrase to char, reset moresePhrase, input MORSE_CHAR at index 0
-	• If period of time between opening and closing switch > WORD_FINISHED_THRESHOLD : add space to message
-
-	• Message sent if timeout reached or 32 char limit reached
-*/
-
-
-/*
-	#Reminders
-	__________
-
-	• If switch depressed at launch, dot will be (immediately) pushed before switch is released
-*/
 
 
 enum MORSE_CODE_STATE : bool {CLOSED = 1, OPEN = 0};

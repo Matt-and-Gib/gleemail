@@ -38,6 +38,8 @@ void MorseCodeInput::pushMorseCharacter(const MORSE_CHAR character) {
 		return;
 	}
 
+	morsePhraseStarted = true;
+
 	morsePhrase[morsePhraseIndex] = character;
 	morsePhraseIndex += 1;
 
@@ -82,15 +84,6 @@ void MorseCodeInput::resetMorsePhrase() {
 }
 
 
-/*
-	elapsedTime < PhraseFinished : same phrase
-	elapsedTime > PhrasedFinished && elapsedTime < MESSAGE_FINISHED : new phrase and insert space
-	elpasedTime > MESSAGE_FINISHED : send message and reset all
-
-
-	every cycle, check elapsed time because 
-*/
-
 void MorseCodeInput::checkPhraseElapsedThreshold() {
 	if(morsePhraseStarted) {
 		if(elapsedCycleTime >= PHRASE_FINISHED_THRESHOLD) {
@@ -99,6 +92,7 @@ void MorseCodeInput::checkPhraseElapsedThreshold() {
 		}
 	}
 }
+
 
 void MorseCodeInput::checkMessageElapsedThresholds() {
 	if(messageNotEmpty()) {
