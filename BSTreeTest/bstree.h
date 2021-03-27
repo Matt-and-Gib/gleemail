@@ -1,5 +1,43 @@
-#include "bstree.h"
+#ifndef BSTREE_H
+#define BSTREE_H
 
+
+template <class T>
+class BinarySearchTreeNode {
+public:
+	BinarySearchTreeNode<T>();
+	BinarySearchTreeNode<T>(T* key);
+
+	static BinarySearchTreeNode<T>* balance(BinarySearchTreeNode<T>*);
+	static BinarySearchTreeNode<T>* insert(BinarySearchTreeNode<T>*, T*);
+
+	T* getKey() {return key;}
+
+	void setParentNode(BinarySearchTreeNode<T>* node) {parentNode = node;}
+	BinarySearchTreeNode<T>* getSmallerNode() {return smallerNode;}
+	BinarySearchTreeNode<T>* getLargerNode() {return largerNode;}
+private:
+	T* key;
+	BinarySearchTreeNode<T>* parentNode;
+	BinarySearchTreeNode<T>* smallerNode;
+	BinarySearchTreeNode<T>* largerNode;
+};
+
+
+template <class T>
+class BinarySearchTree {
+public:
+	BinarySearchTree<T>();
+	BinarySearchTree<T>(BinarySearchTreeNode<T>*);
+	~BinarySearchTree<T>();
+
+	BinarySearchTreeNode<T>* insert(BinarySearchTreeNode<T>*);
+private:
+	BinarySearchTreeNode<T>* rootNode;
+};
+
+
+#endif
 
 template <class T>
 BinarySearchTreeNode<T>::BinarySearchTreeNode() {
@@ -30,6 +68,10 @@ BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::insert(BinarySearchTreeNode<T>
 	if(localRoot == nullptr) {
 		localRoot = new BinarySearchTreeNode<T>(key);
 		return localRoot;
+	}
+
+	if(key == localRoot->getKey()) {
+		return nullptr;
 	}
 
 	if(key < localRoot->getKey()) {

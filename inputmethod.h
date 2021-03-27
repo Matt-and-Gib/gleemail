@@ -13,7 +13,7 @@ public:
 	virtual void processInput(const unsigned long) = 0;
 
 	virtual unsigned short getDebounceThreshold() = 0;
-	const unsigned long getLastDebounceTime() const {return lastDebounceTime;}
+	unsigned long getLastDebounceTime() const {return lastDebounceTime;}
 	void setLastDebounceTime(const unsigned long t) {lastDebounceTime = t;}
 
 	void getMessageToSend(char *);
