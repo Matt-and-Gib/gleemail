@@ -13,7 +13,6 @@ public:
 
 	void insert(T* d);
 	BinarySearchTreeNode<T>* remove();
-	BinarySearchTreeNode<T>* remove(BinarySearchTreeNode<T>*);
 private:
 	BinarySearchTreeNode<T>* parentNode;
 	BinarySearchTreeNode<T>* lesserNode;
@@ -55,20 +54,52 @@ void BinarySearchTreeNode<T>::insert(T* d) {
 	//balance tree
 }
 
-/* //Maybe process delete from BST class?
+
 template <class T>
-BinarySearchTreeNode<T>* BinarySearchTreeNode::remove() {
-	if(lesserNode == nullptr && greaterNode == nullptr) {
-		parentNode->remove(this);
+BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::remove() {
+	if(parentNode == nullptr) {
+		return nullptr; //shouldn't delete root node this way (maybe possible if we scrap the parent class BinarySearchTree, which keeps track of root node)
+	}
+
+	if(!lesserNode && !greaterNode) { //no children
+		if(parentNode->lesserNode == this) {
+			parentNode->lesserNode = nullptr;
+		} else {
+			parentNode->greaterNode = nullptr;
+		}
+		return this;
+	}
+
+	if(lesserNode && !greaterNode) { //only one child (lesser)
+		if(parentNode->lesserNode == this) {
+			parentNode->lesserNode = lesserNode;
+		} else {
+			parentNode->greaterNode = lesserNode;
+		}
+		return this;
+	}
+
+	if(!lesserNode && greaterNode) { //only one child (greater)
+		if(parentNode->lesserNode == this) {
+			parentNode->lesserNode = greaterNode;
+		} else {
+			parentNode->greaterNode = greaterNode;
+		}
+		return this;
+	}
+
+	if(lesserNode && greaterNode) { //two children
+		//find smallest node from all nodes on greaterNode side
+		//replace this node with found node
+			//create copy of found node
+			//assign lesser and greater nodes from this node to new copy of smallest
+			//assign nullptr to this node's children
+			//find whether this node is greater or lesser in parent
+			//assign new copy of smallest as parent's child, replacing this node
+		//remove original smallest node
+		//return this now-removed node
 	}
 }
-
-
-template <class T>
-BinarySearchTreeNode<T>* BinarySearchTreeNode::remove(BinarySearchTreeNode<T>* child) {
-
-}
-*/
 
 
 template <class T>
