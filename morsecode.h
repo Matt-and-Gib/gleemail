@@ -78,6 +78,49 @@ private:
 
 
 /*
+list of characters in order from least (top) to greatest (bottom)
+
+	5	• • • • •
+	H	• • • •
+	4	• • • • ━
+	S	• • •
+	V	• • • ━
+	3	• • • ━ ━
+	I	• •
+	F	• • ━ •
+	U	• • ━
+	2	• • ━ ━ ━
+	E	•
+	L	• ━ • •
+	R	• ━ •
+	A	• ━
+	P	• ━ ━ •
+	W	• ━ ━
+	J	• ━ ━ ━
+	1	• ━ ━ ━ ━
+	6	━ • • • •
+	B	━ • • •
+	D	━ • •
+	X	━ • • ━
+	N	━ •
+	C	━ • ━ •
+	K	━ • ━
+	Y	━ • ━ ━
+	T	━
+	7	━ ━ • • •
+	Z	━ ━ • •
+	G	━ ━ •
+	Q	━ ━ • ━
+	M	━ ━
+	8	━ ━ ━ • •
+	O	━ ━ ━
+	9	━ ━ ━ ━ •
+	0	━ ━ ━ ━ ━
+
+*/
+
+
+/*
 
 priority of each node is : number of MORESE_CHARs + val of each
 
