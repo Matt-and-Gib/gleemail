@@ -26,13 +26,6 @@ struct ArrObj {
 struct CustObj {
 	CustObj() {val = new ArrObj[VAL_ARR_LEN];}
 
-	/*void push(ArrObj &o) {
-		if(firstOpenIndex == VAL_ARR_LEN) {
-			return;
-		}
-
-		val[firstOpenIndex++] = o;
-	}*/
 	void push(char o) {
 		if(firstOpenIndex == VAL_ARR_LEN) {
 			return;
@@ -105,7 +98,12 @@ void basicTests() {
 	CustPair m(&ll, 'm');
 	m.printString();
 
-	//BinarySearchTree<CustPair> lookupTree;
+	BinarySearchTree<CustPair> lookupTree;
+	lookupTree.insert(&a);
+	lookupTree.insert(&e);
+	lookupTree.insert(&i);
+	lookupTree.insert(&n);
+	lookupTree.balance();
 }
 
 

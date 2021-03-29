@@ -65,6 +65,12 @@ void MorsePhrase::resetPhrase() {
 }
 
 
+void MorseCodeBSTNode::sortSubtree() {
+	//sort tree
+	//remember that sorting an balancing are at odds
+}
+
+
 MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const unsigned short ledPinLocation) {
 	Pin *switchDigitalPin = new Pin(switchPinLocation, PIN_MODE::READ, MORSE_CODE_STATE::OPEN);
 	Pin *ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::OPEN);

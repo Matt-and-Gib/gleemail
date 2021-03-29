@@ -2,6 +2,7 @@
 #define MORSECODE_H
 
 #include "inputmethod.h"
+#include "binarysearchtree.h"
 
 
 //https://morsecode.world/international/morse2.html
@@ -60,6 +61,19 @@ private:
 	static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6;
 	unsigned short firstOpenIndex;
 	MorseChar *phraseArray;
+};
+
+
+struct MorseCodeCharPair {
+	char character;
+	MorsePhrase morsePhrase;
+};
+
+
+class MorseCodeBSTNode : public BinarySearchTreeNode<MorseCodeCharPair> {
+public:
+	void sortSubtree();
+private:
 };
 
 
