@@ -7,6 +7,7 @@
 template <class T>
 class BinarySearchTreeNode {
 public:
+	BinarySearchTreeNode();
 	BinarySearchTreeNode(T* d, BinarySearchTreeNode<T>* p);
 	~BinarySearchTreeNode(); //WARNING: destructor will attempt to delete all linked children nodes!
 
@@ -16,26 +17,24 @@ public:
 
 	BinarySearchTreeNode<T>* insert(T* d);
 	BinarySearchTreeNode<T>* remove(); //NOTE: Never remove from Morse Code tree
-
-	short getBalance() const {return greaterNode->getDepth() - lesserNode->getDepth();}
-	void balanceSubtree();
-
-	void print();
-private:
+protected:
 	BinarySearchTreeNode<T>* parentNode;
 	BinarySearchTreeNode<T>* lesserNode;
 	BinarySearchTreeNode<T>* greaterNode;
 
-	static constexpr unsigned short CORRECTABLE_BALANCE_VALUE = 2;
-
 	BinarySearchTreeNode<T>* getSmallest();
-
-	short getDepth() const;
-
-	void printSubtree(const short, const BinarySearchTreeNode<T>*, bool);
 
 	T* data;
 };
+
+
+template <class T>
+BinarySearchTreeNode<T>::BinarySearchTreeNode() {
+	data = nullptr;
+	parentNode = nullptr;
+	lesserNode = nullptr;
+	greaterNode = nullptr;
+}
 
 
 template <class T>
@@ -139,35 +138,6 @@ BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::getSmallest() {
 	}
 
 	return lesserNode->getSmallest();
-}
-
-
-template <class T>
-void BinarySearchTreeNode<T>::print() {
-	printSubtree(0, this, false);
-}
-
-
-template <class T>
-void BinarySearchTreeNode<T>::printSubtree(const short spacingIndex, const BinarySearchTreeNode<T>* node, bool lesser) {
-	if(node) {
-		if(node->data) {
-			if(lesser) {
-				Serial.print("│   ");
-			} else {
-				Serial.print("    ");
-			}
-
-			for(int i = 0; i < spacingIndex; i += 1) {
-				Serial.print(' ');
-			}
-			Serial.print(lesser ? "├── " : "└── ");
-			Serial.println(node->data->value);
-		}
-
-		printSubtree(spacingIndex + 4, node->lesserNode, true);
-		printSubtree(spacingIndex + 4, node->greaterNode, false);
-	}
 }
 
 
