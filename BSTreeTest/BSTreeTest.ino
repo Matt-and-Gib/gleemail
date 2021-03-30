@@ -7,12 +7,12 @@ void basicTests() {
 	CustPair root(&r, '\0');
 	MorseCodeTreeNode morseCodeTreeRootNode(&root, nullptr);
 
-	CustObj s;
+	CustObj temp_s;
 	temp_s.push('.');
 	CustPair e(&temp_s, 'e');
 	morseCodeTreeRootNode.insert(&e);
 
-	CustObj l;
+	CustObj temp_l;
 	temp_l.push('-');
 	CustPair t(&temp_l, 't');
 	morseCodeTreeRootNode.insert(&t);
@@ -154,7 +154,7 @@ void basicTests() {
 
 
 
-
+/*
 	CustObj lllls;
 	lllls.push('-');
 	lllls.push('-');
@@ -162,7 +162,7 @@ void basicTests() {
 	lllls.push('-');
 	lllls.push('.');
 	CustPair nine(&lllls, '0');
-	morseCodeTreeRootNode.nine(&zero);
+	morseCodeTreeRootNode.insert(&nine);
 
 	CustObj lllll;
 	lllll.push('-');
@@ -172,7 +172,7 @@ void basicTests() {
 	lllll.push('-');
 	CustPair zero(&lllll, '0');
 	morseCodeTreeRootNode.insert(&zero);
-
+*/
 	morseCodeTreeRootNode.print();
 }
 
