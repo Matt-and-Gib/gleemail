@@ -3,19 +3,16 @@
 
 
 struct ArrObj {
-	ArrObj() {value = '\0';}
-	ArrObj(const char v) {value = v;}
+	ArrObj(const char v = '\0') {value = v;}
 
 	bool operator==(const ArrObj& o) {return value == o.value;}
 	bool operator!=(const ArrObj& o) {return value != o.value;}
 	bool operator>(const ArrObj& o) {
 		if(value == o.value) return false;
-		if(o.value == '\0') return true;
 		return (value == '-');
 	};
 	bool operator<(const ArrObj& o) {
 		if(value == o.value) return false;
-		if(value == '\0') return true;
 		return (value == '.');
 	};
 
@@ -25,6 +22,8 @@ struct ArrObj {
 
 struct CustObj {
 	CustObj() {val = new ArrObj[VAL_ARR_LEN];}
+
+	ArrObj& lastVal() {return val[firstOpenIndex - 1];}
 
 	void push(char o) {
 		if(firstOpenIndex == VAL_ARR_LEN) {
@@ -55,6 +54,26 @@ struct CustPair {
 	CustObj* key;
 	char value;
 
+	//if a < b
+	bool operator<(CustPair& o) {
+		//return this->key->lastVal() < o.key->lastVal();
+		for(int i = 0; i < key->VAL_ARR_LEN; i += 1) {
+			Serial.println(i);
+			Serial.println(o.value);
+			/*Serial.flush();
+			delay(250);
+			if((*key).val[i] > o.key->val[i]) {
+				return false;
+			}*/
+		}
+
+		return true;
+	}
+
+	bool operator==(CustPair& o) {
+		return value == o.value;
+	}
+
 	void printString() {
 		key->printString();
 		Serial.print(" : ");
@@ -68,42 +87,46 @@ void basicTests() {
 	sl.push('.');
 	sl.push('-');
 	CustPair a(&sl, 'a');
-	a.printString();
+	//a.printString();
 
 	CustObj s;
 	s.push('.');
 	CustPair e(&s, 'e');
-	e.printString();
+	//e.printString();
 
 	CustObj ss;
 	ss.push('.');
 	ss.push('.');
 	CustPair i(&ss, 'i');
-	i.printString();
+	//i.printString();
 
 	CustObj ls;
 	ls.push('-');
 	ls.push('.');
 	CustPair n(&ls, 'n');
-	n.printString();
+	//n.printString();
 
 	CustObj l;
 	l.push('-');
 	CustPair t(&l, 't');
-	t.printString();
+	//t.printString();
 
 	CustObj ll;
 	ll.push('-');
 	ll.push('-');
 	CustPair m(&ll, 'm');
-	m.printString();
+	//m.printString();
 
-	BinarySearchTree<CustPair> lookupTree;
-	lookupTree.insert(&a);
+	CustObj r;
+	CustPair root(&r, '\0');
+
+	BinarySearchTreeNode<CustPair> lookupTree(&root, nullptr);
 	lookupTree.insert(&e);
+	lookupTree.insert(&a);
 	lookupTree.insert(&i);
 	lookupTree.insert(&n);
-	lookupTree.balance();
+
+	lookupTree.print();
 }
 
 
@@ -113,7 +136,9 @@ void setup() {
 		delay(250);
 	}
 
+	Serial.println("Begin basic tests");
 	basicTests();
+	Serial.println("Done with basic tests");
 }
 
 

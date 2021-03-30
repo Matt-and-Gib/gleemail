@@ -98,6 +98,7 @@ list of characters in order from least (top) to greatest (bottom)
 	W	• ━ ━
 	J	• ━ ━ ━
 	1	• ━ ━ ━ ━
+	ROOT (char value of NULL, morse phrase of NULL)
 	6	━ • • • •
 	B	━ • • •
 	D	━ • •

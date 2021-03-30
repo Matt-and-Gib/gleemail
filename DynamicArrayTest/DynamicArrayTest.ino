@@ -67,8 +67,6 @@ void basicTests() {
 	Serial.print(" and contains ");
 	Serial.print(arr.getLength());
 	Serial.println(" items.");
-
-	//delete &arr;
 }
 
 

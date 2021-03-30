@@ -8,9 +8,8 @@ public:
 	DynamicArray<T>();
 	~DynamicArray<T>();
 
-	//T& operator[](const unsigned short);
-
 	void push(T*);
+	void push(T);
 	T* pop();
 	T* removeAtIndex(const unsigned short);
 	T* insertAtIndex(T*, const unsigned short);
@@ -52,16 +51,6 @@ DynamicArray<T>::~DynamicArray() {
 }
 
 
-/*template <class T>
-T& DynamicArray<T>::operator[](const unsigned short index) {
-	if(index < firstOpenIndex) {
-		return internalArray[index];
-	}
-
-	return nullptr;
-}*/
-
-
 template <class T>
 T** DynamicArray<T>::createResizedArray(const unsigned short desiredSize) {
 	T **resizedArray = new T*[desiredSize]();
@@ -100,6 +89,16 @@ void DynamicArray<T>::push(T* object) {
 	}
 
 	internalArray[firstOpenIndex++] = object;
+}
+
+
+template <class T>
+void DynamicArray<T>::push(T object) {
+	if(firstOpenIndex == arraySize) {
+		expand();
+	}
+
+	internalArray[firstOpenIndex++] = &object;
 }
 
 
