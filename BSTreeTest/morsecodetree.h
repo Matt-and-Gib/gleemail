@@ -156,11 +156,11 @@ void MorseCodeTreeNode::printSubtree(const short spacingIndex, const MorseCodeTr
 			}
 
 			Serial.print(lesser ? "├── " : "└── ");
-			if(node->data->value != '\0') {
+			//if(node->data->value != ' ') {
 				Serial.println(node->data->value);
-			} else {
-				Serial.println("[]");
-			}
+			//} else {
+				//Serial.println("[]");
+			//}
 
 			//if(node->parentNode) Serial.println(node->parentNode->data->value);
 		//}
