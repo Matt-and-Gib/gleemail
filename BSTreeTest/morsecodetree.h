@@ -45,6 +45,16 @@ struct ArrObj {
 struct CustObj {
 	CustObj() {val = new ArrObj[VAL_ARR_LEN];}
 
+	bool operator==(CustObj& o) {
+		for(int i = 0; i < VAL_ARR_LEN; i += 1) {
+			if(val[i] != o.val[i]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	ArrObj& lastVal() {return val[firstOpenIndex - 1];}
 
 	void push(char o) {
@@ -81,7 +91,8 @@ struct CustPair {
 	}
 
 	bool operator==(CustPair& o) {
-		return value == o.value;
+		//return value == o.value; //NOTE: This is much more efficient, but technically not correct. If this is used instead of comparing keys, having two levels of placeholder nodes will be impossible
+		return key == o.key;
 	}
 
 	void printString() {
@@ -150,20 +161,12 @@ void MorseCodeTreeNode::print() {
 
 void MorseCodeTreeNode::printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
 	if(node) {
-		//if(node->data) {
-			for(int i = 0; i < spacingIndex; i += 1) {
-				Serial.print(' ');
-			}
+		for(int i = 0; i < spacingIndex; i += 1) {
+			Serial.print(' ');
+		}
 
-			Serial.print(lesser ? "├── " : "└── ");
-			//if(node->data->value != ' ') {
-				Serial.println(node->data->value);
-			//} else {
-				//Serial.println("[]");
-			//}
-
-			//if(node->parentNode) Serial.println(node->parentNode->data->value);
-		//}
+		Serial.print(lesser ? "├── " : "└── ");
+		Serial.println(node->data->value);
 
 		printSubtree(spacingIndex + 4, node->lesserNode, true);
 		printSubtree(spacingIndex + 4, node->greaterNode, false);

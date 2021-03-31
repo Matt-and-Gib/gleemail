@@ -2,9 +2,23 @@
 #include "morsecodetree.h"
 
 
+/*
+	Timing Notes
+		Complex Compare:
+			Creating and Inserting all nodes took ~2201 microseconds (~2 milliseconds)
+			Printing tree took ~61294 microseconds (~61 milliseconds)
+		Simple Compare:
+			Creating and Inserting all nodes took ~2216 microseconds (~2 milliseconds)
+			Printing tree took ~59235 microseconds (~59 milliseconds)
+*/
+
+
 void basicTests() {
+	Serial.print ("begin creating and inserting nodes at ");
+	Serial.println(micros());
+
 	CustObj rootObj;
-	CustPair root(&rootObj, '\0'); //Root node symbol must be different that placeholder nodes, otherwise all placeholder nodes will be invisible
+	CustPair root(&rootObj, '\0');
 	MorseCodeTreeNode morseCodeTreeRootNode(&root, nullptr);
 
 	CustObj temp_s;
@@ -513,7 +527,16 @@ void basicTests() {
 	CustPair zero(&lllll, '0');
 	morseCodeTreeRootNode.insert(&zero);
 
+	Serial.print ("done creating and inserting nodes at ");
+	Serial.println(micros());
+
+	Serial.print ("begin printing tree at ");
+	Serial.println(micros());
+
 	morseCodeTreeRootNode.print();
+
+	Serial.print ("done printing tree at ");
+	Serial.println(micros());
 }
 
 
