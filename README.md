@@ -19,13 +19,13 @@ Okay, for real, glEEmail is a side project while we're waiting for 200 SMD LEDs 
 ___
 
 ### <a name="parts"></a>**Components**
-We're testing glEEmail on an Arduino Leonardo and an Arduino Nano 33 IoT. For the full parts list that we used (for one user), please see the table below:
+We're testing glEEmail on an Arduino Nano 33 IoT. For the full parts list that we used (for one user), please see the table below:
 
 |Quantity|Component|
 |-------------|---:|
-|1x|Arduino Leonardo or Nano 33 IoT|
+|1x|Nano 33 IoT|
 |1x|Breadboard|
-|1x|54-410 RoHS Switch|
+|1x|54-410 Switch|
 |1x|10k Ohm Resistor|
 |6x|Jumper Wires|
 |2x|Crimp Connectors|
