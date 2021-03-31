@@ -150,16 +150,20 @@ void MorseCodeTreeNode::print() {
 
 void MorseCodeTreeNode::printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
 	if(node) {
-		if(node->data) {
+		//if(node->data) {
 			for(int i = 0; i < spacingIndex; i += 1) {
 				Serial.print(' ');
 			}
 
 			Serial.print(lesser ? "├── " : "└── ");
-			Serial.println(node->data->value);
+			if(node->data->value != '\0') {
+				Serial.println(node->data->value);
+			} else {
+				Serial.println("[]");
+			}
 
 			//if(node->parentNode) Serial.println(node->parentNode->data->value);
-		}
+		//}
 
 		printSubtree(spacingIndex + 4, node->lesserNode, true);
 		printSubtree(spacingIndex + 4, node->greaterNode, false);
