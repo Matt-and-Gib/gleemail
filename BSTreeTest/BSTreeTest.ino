@@ -3,8 +3,8 @@
 
 
 void basicTests() {
-	CustObj r;
-	CustPair root(&r, '\0');
+	CustObj rootObj;
+	CustPair root(&rootObj, '\0');
 	MorseCodeTreeNode morseCodeTreeRootNode(&root, nullptr);
 
 	CustObj temp_s;
@@ -54,105 +54,176 @@ void basicTests() {
 	ssl.push('-');
 	CustPair u(&ssl, 'u');
 	morseCodeTreeRootNode.insert(&u);
-	
-/*	complete above this line	*/
 
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	CustObj sls;
+	sls.push('.');
+	sls.push('-');
+	sls.push('.');
+	CustPair r(&sls, 'r');
+	morseCodeTreeRootNode.insert(&r);
+
+	CustObj sll;
+	sll.push('.');
+	sll.push('-');
+	sll.push('-');
+	CustPair w(&sll, 'w');
+	morseCodeTreeRootNode.insert(&w);
+
+	CustObj lss;
+	lss.push('-');
+	lss.push('.');
+	lss.push('.');
+	CustPair d(&lss, 'd');
+	morseCodeTreeRootNode.insert(&d);
+
+	CustObj lsl;
+	lsl.push('-');
+	lsl.push('.');
+	lsl.push('-');
+	CustPair k(&lsl, 'k');
+	morseCodeTreeRootNode.insert(&k);
+
+	CustObj lls;
+	lls.push('l');
+	lls.push('-');
+	lls.push('.');
+	CustPair g(&lls, 'g');
+	morseCodeTreeRootNode.insert(&g);
+
+	CustObj lll;
+	lll.push('-');
+	lll.push('-');
+	lll.push('-');
+	CustPair o(&lll, 'o');
+	morseCodeTreeRootNode.insert(&o);
+
+	CustObj ssss;
+	ssss.push('.');
+	ssss.push('.');
+	ssss.push('.');
+	ssss.push('.');
+	CustPair h(&ssss, 'h');
+	morseCodeTreeRootNode.insert(&h);
+
+	CustObj sssl;
+	sssl.push('.');
+	sssl.push('.');
+	sssl.push('.');
+	sssl.push('-');
+	CustPair v(&sssl, 'v');
+	morseCodeTreeRootNode.insert(&v);
+
+	CustObj ssls;
+	ssls.push('.');
+	ssls.push('.');
+	ssls.push('-');
+	ssls.push('.');
+	CustPair f(&ssls, 'f');
+	morseCodeTreeRootNode.insert(&f);
+
+	CustObj ssll;
+	ssll.push('.');
+	ssll.push('.');
+	ssll.push('-');
+	ssll.push('-');
+	CustPair placeholder_ssll(&ssll, '\0');
+	morseCodeTreeRootNode.insert(&placeholder_ssll);
+
+	CustObj slss;
+	slss.push('.');
+	slss.push('-');
+	slss.push('.');
+	slss.push('.');
+	CustPair l(&slss, 'l');
+	morseCodeTreeRootNode.insert(&l);
+
+	CustObj slsl;
+	slsl.push('.');
+	slsl.push('-');
+	slsl.push('.');
+	slsl.push('-');
+	CustPair placeholder_slsl(&sls, '\0');
+	morseCodeTreeRootNode.insert(&placeholder_slsl);
+
+	CustObj slls;
+	slls.push('.');
+	slls.push('-');
+	slls.push('-');
+	slls.push('.');
+	CustPair p(&slls, 'p');
+	morseCodeTreeRootNode.insert(&p);
+
+	CustObj slll;
+	slll.push('.');
+	slll.push('-');
+	slll.push('-');
+	slll.push('-');
+	CustPair j(&slll, 'j');
+	morseCodeTreeRootNode.insert(&j);
+
+	CustObj lsss;
+	lsss.push('-');
+	lsss.push('.');
+	lsss.push('.');
+	lsss.push('.');
+	CustPair b(&lsss, 'b');
+	morseCodeTreeRootNode.insert(&b);
+
+	CustObj lssl;
+	lssl.push('-');
+	lssl.push('.');
+	lssl.push('.');
+	lssl.push('-');
+	CustPair x(&lssl, 'x');
+	morseCodeTreeRootNode.insert(&x);
+
+	CustObj lsls;
+	lsls.push('-');
+	lsls.push('.');
+	lsls.push('-');
+	lsls.push('.');
+	CustPair c(&lsls, 'c');
+	morseCodeTreeRootNode.insert(&c);
+
+	CustObj lsll;
+	lsll.push('-');
+	lsll.push('.');
+	lsll.push('-');
+	lsll.push('-');
+	CustPair y(&lsll, 'y');
+	morseCodeTreeRootNode.insert(&y);
+
+	CustObj llss;
+	llss.push('-');
+	llss.push('-');
+	llss.push('.');
+	llss.push('.');
+	CustPair z(&llss, 'z');
+	morseCodeTreeRootNode.insert(&z);
+
+	CustObj llsl;
+	llsl.push('-');
+	llsl.push('-');
+	llsl.push('.');
+	llsl.push('-');
+	CustPair q(&llsl, 'q');
+	morseCodeTreeRootNode.insert(&q);
+
+	CustObj llls;
+	llls.push('-');
+	llls.push('-');
+	llls.push('-');
+	llls.push('.');
+	CustPair placeholder_llls(&llls, '\0');
+	morseCodeTreeRootNode.insert(&placeholder_llls);
+
+	CustObj llll;
+	llll.push('-');
+	llll.push('-');
+	llll.push('-');
+	llll.push('-');
+	CustPair placeholder_llll(&llll, '\0');
+	morseCodeTreeRootNode.insert(&placeholder_llll);
 
 /*
 	CustObj lllls;
