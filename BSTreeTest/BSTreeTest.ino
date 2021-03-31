@@ -513,7 +513,11 @@ void basicTests() {
 	CustPair zero(&lllll, '0');
 	morseCodeTreeRootNode.insert(&zero);
 
+	Serial.print("current time: ");
+	Serial.println(millis());
 	morseCodeTreeRootNode.print();
+	Serial.print("current time: ");
+	Serial.println(millis());
 }
 
 
