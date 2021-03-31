@@ -22,7 +22,7 @@ ___
 We're testing glEEmail on an Arduino Nano 33 IoT. For the full parts list that we used (for one user), please see the table below:
 
 |Quantity|Component|
-|-------------|---:|
+|-------------|:---|
 |1x|Nano 33 IoT|
 |1x|Breadboard|
 |1x|54-410 Switch|
