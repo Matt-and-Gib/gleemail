@@ -15,62 +15,6 @@
 */
 
 
-MorsePhrase::MorsePhrase() {
-	phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
-	firstOpenIndex = 0;
-}
-
-
-MorsePhrase::~MorsePhrase() {
-	delete[] phraseArray;
-}
-
-
-MorseChar* MorsePhrase::operator[](short unsigned int index) {
-	return &phraseArray[index];
-}
-
-
-bool MorsePhrase::operator==(MorsePhrase& o) {
-	for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-		if(phraseArray[i] != *o[i]) {
-			return false;
-		}
-
-		if(phraseArray[i] == *NOTHING) {
-			return true;
-		}
-	}
-
-	return true;
-}
-
-
-bool MorsePhrase::push(const MorseChar* morseCharacterToAdd) {
-	if(!phraseFull()) {
-		phraseArray[firstOpenIndex++] = *morseCharacterToAdd;
-		return true;
-	}
-
-	return false;
-}
-
-
-void MorsePhrase::resetPhrase() {
-	for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-		phraseArray[i] = *NOTHING;
-	}
-
-	firstOpenIndex = 0;
-}
-
-
-/*void MorseCodeBSTNode::sortSubtree() {
-	//sort tree
-	//remember that sorting an balancing are at odds
-}*/
-
-
 MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const unsigned short ledPinLocation) {
 	Pin *switchDigitalPin = new Pin(switchPinLocation, PIN_MODE::READ, MORSE_CODE_STATE::OPEN);
 	Pin *ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::OPEN);

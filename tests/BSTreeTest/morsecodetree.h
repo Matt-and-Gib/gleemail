@@ -3,26 +3,6 @@
 
 #include "binarysearchtree.h"
 
-/*
-
-    └── 
-│       ├── e				(less than root)
-│           ├── i			(less than e)
-
-        └── a				(greater than root)
-            └── n			(greater than a)
-
-
-*/
-
-/*
-   └── 
-│       ├── e
-│           ├── i
-       └── t
-           └── a			(wrong)
-*/
-
 
 struct ArrObj { //Morse Character
 	ArrObj(const char v = '\0') {value = v;}
