@@ -97,21 +97,69 @@ static const MorseChar* NOTHING = new MorseChar(MORSE_CHAR_STATE::NOTHING);
 
 class MorsePhrase {
 public:
-	MorsePhrase();
-	~MorsePhrase();
+	MorsePhrase() {
+		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
+		firstOpenIndex = 0;
+	}
+	~MorsePhrase() {delete[] phraseArray;}
+
+	MorseChar* operator[](const unsigned short index) {return &phraseArray[index];}
+
+	bool operator==(MorsePhrase& o) {
+		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+			if(phraseArray[i] != *o[i]) {
+				return false;
+			}
+
+			if(phraseArray[i] == *NOTHING) {
+				return true;
+			}
+		}
+
+		return true;
+	}
+
+	bool operator<(MorsePhrase&o) {
+		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+			if(o[i] == NOTHING) {
+				if(phraseArray[i] == *DOT) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+			if(phraseArray[i] != *o[i]) {
+				if(phraseArray[i] == *DOT) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 
 	unsigned short getSize() const {return MAX_MORSE_PHRASE_LENGTH;}
 	unsigned short getLength() const {return firstOpenIndex;}
 
-	bool push(const MorseChar*);
-	void resetPhrase();
+	bool push(const MorseChar* morseCharacterToAdd) {
+		if(!phraseFull()) {
+			phraseArray[firstOpenIndex++] = *morseCharacterToAdd;
+			return true;
+		}
+
+		return false;
+	}
+	void resetPhrase() {
+		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+			phraseArray[i] = *NOTHING;
+		}
+
+		firstOpenIndex = 0;
+	}
 
 	bool phraseStarted() const {return firstOpenIndex > 0;}
 	bool phraseFull() const {return firstOpenIndex == MAX_MORSE_PHRASE_LENGTH;}
-
-	MorseChar* operator[](short unsigned int);
-	bool operator==(MorsePhrase&);
-	bool operator<(MorsePhrase&);
 private:
 	static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6;
 	unsigned short firstOpenIndex;
@@ -119,87 +167,11 @@ private:
 };
 
 
-MorsePhrase::MorsePhrase() {
-	phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
-	firstOpenIndex = 0;
-}
-
-
-MorsePhrase::~MorsePhrase() {
-	delete[] phraseArray;
-}
-
-
-MorseChar* MorsePhrase::operator[](short unsigned int index) {
-	return &phraseArray[index];
-}
-
-
-bool MorsePhrase::operator==(MorsePhrase& o) {
-	for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-		if(phraseArray[i] != *o[i]) {
-			return false;
-		}
-
-		if(phraseArray[i] == *NOTHING) {
-			return true;
-		}
-	}
-
-	return true;
-}
-
-
-bool MorsePhrase::operator<(MorsePhrase& o) {
-	for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-		if(o[i] == NOTHING) {
-			if(phraseArray[i] == *DOT) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		if(phraseArray[i] != *o[i]) {
-			if(phraseArray[i] == *DOT) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-
-bool MorsePhrase::push(const MorseChar* morseCharacterToAdd) {
-	if(!phraseFull()) {
-		phraseArray[firstOpenIndex++] = *morseCharacterToAdd;
-		return true;
-	}
-
-	return false;
-}
-
-
-void MorsePhrase::resetPhrase() {
-	for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-		phraseArray[i] = *NOTHING;
-	}
-
-	firstOpenIndex = 0;
-}
-
-
 struct MorsePhraseCharPair {
 	MorsePhraseCharPair(const char c, MorsePhrase& p) {character = c; morsePhrase = p;}
 
-	bool operator==(MorsePhraseCharPair& o) {
-		return morsePhrase == o.morsePhrase;
-	}
-
-	bool isLessThan(unsigned short depth) {
-		return morsePhrase[depth] == DOT ? true : false;
-	}
+	bool operator==(MorsePhraseCharPair& o) {return morsePhrase == o.morsePhrase;}
+	bool isLessThan(unsigned short depth) {return morsePhrase[depth] == DOT ? true : false;}
 
 	char character;
 	MorsePhrase morsePhrase;
@@ -208,11 +180,50 @@ struct MorsePhraseCharPair {
 
 class MorseCodeTreeNode : public BinarySearchTreeNode<MorsePhraseCharPair> {
 public:
-	MorseCodeTreeNode(MorsePhraseCharPair&, MorseCodeTreeNode*);
+	MorseCodeTreeNode(MorsePhraseCharPair& newData, MorseCodeTreeNode* newParent) {
+		data = &newData;
+		parentNode = newParent;
+		lesserNode = nullptr;
+		greaterNode = nullptr;
+	}
 
-	MorseCodeTreeNode* insert(MorsePhraseCharPair&, unsigned short = 0);
+	MorseCodeTreeNode* insert(MorsePhraseCharPair& dataToInsert, unsigned short depth = 0) {
+		if (dataToInsert == *data) {
+			return nullptr; //No duplicates allowed!
+		}
 
-	MorsePhraseCharPair* lookup(MorsePhrase&);
+		if(dataToInsert.isLessThan(depth)) {
+			if(lesserNode == nullptr) {
+				lesserNode = new MorseCodeTreeNode(dataToInsert, this);
+				return lesserNode;
+			} else {
+				return lesserNode->insert(dataToInsert, depth + 1);
+			}
+		} else {
+			if(greaterNode == nullptr) {
+				greaterNode = new MorseCodeTreeNode(dataToInsert, this);
+				return greaterNode;
+			} else {
+				return greaterNode->insert(dataToInsert, depth + 1);
+			}
+		}
+	}
+
+	MorsePhraseCharPair* lookup(MorsePhrase& phraseToConvert) {
+		if(phraseToConvert[0] == NOTHING) {
+			return nullptr;
+		}
+
+		if(phraseToConvert == data->morsePhrase) {
+			return data;
+		}
+
+		if(phraseToConvert < data->morsePhrase) {
+			return lesserNode->lookup(phraseToConvert);
+		} else {
+			return greaterNode->lookup(phraseToConvert);
+		}
+	}
 
 	void print();
 protected:
@@ -222,53 +233,5 @@ protected:
 private:
 	void printSubtree(const short, const MorseCodeTreeNode*, bool);
 };
-
-
-MorseCodeTreeNode::MorseCodeTreeNode(MorsePhraseCharPair& newData, MorseCodeTreeNode* newParent) {
-	data = &newData;
-	parentNode = newParent;
-	lesserNode = nullptr;
-	greaterNode = nullptr;
-}
-
-
-MorseCodeTreeNode* MorseCodeTreeNode::insert(MorsePhraseCharPair& dataToInsert, unsigned short depth) {
-	if (dataToInsert == *data) {
-		return nullptr; //No duplicates allowed!
-	}
-
-	if(dataToInsert.isLessThan(depth)) {
-		if(lesserNode == nullptr) {
-			lesserNode = new MorseCodeTreeNode(dataToInsert, this);
-			return lesserNode;
-		} else {
-			return lesserNode->insert(dataToInsert, depth + 1);
-		}
-	} else {
-		if(greaterNode == nullptr) {
-			greaterNode = new MorseCodeTreeNode(dataToInsert, this);
-			return greaterNode;
-		} else {
-			return greaterNode->insert(dataToInsert, depth + 1);
-		}
-	}
-}
-
-
-MorsePhraseCharPair* MorseCodeTreeNode::lookup(MorsePhrase& phraseToConvert) {
-	if(phraseToConvert[0] == NOTHING) {
-		return nullptr;
-	}
-
-	if(phraseToConvert == data->morsePhrase) {
-		return data;
-	}
-
-	if(phraseToConvert < data->morsePhrase) {
-		return lesserNode->lookup(phraseToConvert);
-	} else {
-		return greaterNode->lookup(phraseToConvert);
-	}
-}
 
 #endif
