@@ -1,4 +1,4 @@
-#include "inputmethod.h"
+#include "include/inputmethod.h"
 
 
 InputMethod::InputMethod() {

@@ -1,4 +1,4 @@
-#include "morsecode.h"
+#include "include/morsecode.h"
 
 
 /*
@@ -7,10 +7,10 @@
 [v]		implement morse char comparison
 [v]		replace enum class usage with new type Morse Char
 [v]		DEBOUNCE
-		finish BSTree data strcture
-		hardcode morse phrase to char pairs
-			push <MorsePhrase, char> pairs to tree
-		lookup on MorsePhrase (key) in BSTree
+[v]		finish BSTree data strcture
+[v]		hardcode morse phrase to char pairs
+[v]			push <MorsePhrase, char> pairs to tree
+[v]		lookup on MorsePhrase (key) in BSTree
 		...
 */
 
@@ -65,10 +65,10 @@ void MorsePhrase::resetPhrase() {
 }
 
 
-void MorseCodeBSTNode::sortSubtree() {
+/*void MorseCodeBSTNode::sortSubtree() {
 	//sort tree
 	//remember that sorting an balancing are at odds
-}
+}*/
 
 
 MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const unsigned short ledPinLocation) {
@@ -95,6 +95,8 @@ char MorseCodeInput::convertPhraseToCharacter() const {
 	}
 
 	return convertedPhrase.value;*/
+
+	return 'a';
 }
 
 

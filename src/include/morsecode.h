@@ -2,7 +2,7 @@
 #define MORSECODE_H
 
 #include "inputmethod.h"
-#include "binarysearchtree.h"
+//#include "binarysearchtree.h"
 
 
 //https://morsecode.world/international/morse2.html
@@ -64,17 +64,17 @@ private:
 };
 
 
-struct MorsePhraseCharPair {
+/*struct MorsePhraseCharPair {
 	char character;
 	MorsePhrase morsePhrase;
-};
+};*/
 
 
-class MorseCodeBSTNode : public BinarySearchTreeNode<MorseCodeCharPair> {
+/*class MorseCodeBSTNode : public BinarySearchTreeNode<MorseCodeCharPair> {
 public:
 	void sortSubtree();
 private:
-};
+};*/
 
 
 /*
