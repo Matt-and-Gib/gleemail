@@ -97,7 +97,7 @@ void basicTests() {
 	morseCodeTreeRootNode.insert(&k);
 
 	CustObj lls;
-	lls.push('l');
+	lls.push('-');
 	lls.push('-');
 	lls.push('.');
 	CustPair g(&lls, 'g');
