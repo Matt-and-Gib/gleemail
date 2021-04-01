@@ -24,7 +24,7 @@
 */
 
 
-struct ArrObj {
+struct ArrObj { //Morse Character
 	ArrObj(const char v = '\0') {value = v;}
 
 	bool operator==(const ArrObj& o) {return value == o.value;}
@@ -42,7 +42,7 @@ struct ArrObj {
 };
 
 
-struct CustObj {
+struct CustObj { //Morse Phrase
 	CustObj() {val = new ArrObj[VAL_ARR_LEN];}
 
 	bool operator==(CustObj& o) {
@@ -53,6 +53,25 @@ struct CustObj {
 		}
 
 		return true;
+	}
+
+	bool operator<(CustObj& o) {
+		for(int i = 0; i < VAL_ARR_LEN; i += 1) {
+			if(o.val[i] == '\0') {
+				if(val[i] == '.') {
+					return true;
+				} else {
+					return false;
+				}
+			}
+			if(val[i] != o.val[i]) {
+				if(val[i] == '.') {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	ArrObj& lastVal() {return val[firstOpenIndex - 1];}
@@ -81,7 +100,7 @@ struct CustObj {
 };
 
 
-struct CustPair {
+struct CustPair { //Morse Phrase Char Pair
 	CustPair(CustObj* k, char v) {key = k; value = v;}
 	CustObj* key;
 	char value;
@@ -108,6 +127,8 @@ public:
 	MorseCodeTreeNode(CustPair*, MorseCodeTreeNode*);
 
 	MorseCodeTreeNode* insert(CustPair*, unsigned short = 0);
+
+	CustPair* lookup(CustObj&);
 
 	void print();
 protected: // Might be making copies...
@@ -136,7 +157,7 @@ MorseCodeTreeNode* MorseCodeTreeNode::insert(CustPair* dataToInsert, unsigned sh
 		return nullptr; //No duplicates allowed!
 	}
 
-	if(dataToInsert->isLessThan(depth)) { //*dataToInsert < *data) {
+	if(dataToInsert->isLessThan(depth)) {
 		if(lesserNode == nullptr) {
 			lesserNode = new MorseCodeTreeNode(dataToInsert, this);
 			return lesserNode;
@@ -150,6 +171,22 @@ MorseCodeTreeNode* MorseCodeTreeNode::insert(CustPair* dataToInsert, unsigned sh
 		} else {
 			return greaterNode->insert(dataToInsert, depth + 1);
 		}
+	}
+}
+
+
+CustPair* MorseCodeTreeNode::lookup(CustObj& phraseToConvert) {
+	if(phraseToConvert.val[0].value == '\0') {
+		return nullptr;
+	}
+
+	if(phraseToConvert == *data->key) {
+		return data;
+	} else {
+		if(phraseToConvert < *data->key) {
+			return lesserNode->lookup(phraseToConvert);
+		}
+		return greaterNode->lookup(phraseToConvert);
 	}
 }
 

@@ -64,7 +64,7 @@ private:
 };
 
 
-struct MorseCodeCharPair {
+struct MorsePhraseCharPair {
 	char character;
 	MorsePhrase morsePhrase;
 };

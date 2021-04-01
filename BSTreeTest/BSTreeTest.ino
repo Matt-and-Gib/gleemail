@@ -1,7 +1,6 @@
 #include "Arduino.h"
 #include "morsecodetree.h"
 
-
 /*
 	Timing Notes
 		Complex Compare:
@@ -537,6 +536,18 @@ void basicTests() {
 
 	Serial.print ("done printing tree at ");
 	Serial.println(micros());
+
+	CustObj findMe;
+	findMe.push('-');
+	findMe.push('.');
+	findMe.push('.');
+
+	CustPair* foundYou = morseCodeTreeRootNode.lookup(findMe);
+	if(foundYou) {
+		Serial.println(foundYou->value);
+	} else {
+		Serial.println("No key found");
+	}
 }
 
 

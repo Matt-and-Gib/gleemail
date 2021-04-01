@@ -88,7 +88,13 @@ MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 
 
 char MorseCodeInput::convertPhraseToCharacter() const {
-	return 'a';
+	/*TreeNode* convertedPhrase = rootNode.lookup(MorsePhrase);
+	if(!convertedPhrase) {
+		pushErrorCode(ERROR_CODE::INVALID_CHAR_CONVERSION);
+		return '\0';
+	}
+
+	return convertedPhrase.value;*/
 }
 
 
