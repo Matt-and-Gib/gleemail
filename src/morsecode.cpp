@@ -16,8 +16,8 @@
 
 
 MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const unsigned short ledPinLocation) {
-	Pin *switchDigitalPin = new Pin(switchPinLocation, PIN_MODE::READ, MORSE_CODE_STATE::OPEN);
-	Pin *ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::OPEN);
+	Pin *switchDigitalPin = new Pin(switchPinLocation, PIN_MODE::READ, MORSE_CODE_STATE::SWITCH_OPEN);
+	Pin *ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
 
 	pins[switchPinIndex] = switchDigitalPin;
 	pins[ledPinIndex] = ledDigitalPin;
@@ -28,7 +28,7 @@ MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const uns
 
 MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 	//delete morsePhrase;
-}
+}	
 
 
 char MorseCodeInput::convertPhraseToCharacter() const {
@@ -78,7 +78,7 @@ void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 	}
 
 	lastChangeTime = currentCycleTime;
-	inputState = MORSE_CODE_STATE::OPEN;
+	inputState = MORSE_CODE_STATE::SWITCH_OPEN;
 }
 
 
@@ -87,7 +87,7 @@ void MorseCodeInput::processOpenToClosed(const unsigned long currentCycleTime) {
 	pins[ledPinIndex]->value = LED_STATUS::ON;
 
 	lastChangeTime = currentCycleTime;
-	inputState = MORSE_CODE_STATE::CLOSED;
+	inputState = MORSE_CODE_STATE::SWITCH_CLOSED;
 }
 
 
@@ -132,24 +132,31 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long currentCycleTime) 
 }
 
 
+void MorseCodeInput::setNetworkData(const char* payload) {
+	if(!payload) {
+		return;
+	}
+}
+
+
 void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
 	if(pins[switchPinIndex]->value != lastInputState) {
 		setLastDebounceTime(currentCycleTime);
 	}
 
 	if(currentCycleTime - getLastDebounceTime() > getDebounceThreshold()) {
-		if(pins[switchPinIndex]->value == MORSE_CODE_STATE::OPEN) {
-			if(inputState == MORSE_CODE_STATE::CLOSED) {
+		if(pins[switchPinIndex]->value == MORSE_CODE_STATE::SWITCH_OPEN) {
+			if(inputState == MORSE_CODE_STATE::SWITCH_CLOSED) {
 				processClosedToOpen(currentCycleTime);
 			}
 
 			checkOpenElapsedTime(currentCycleTime);
 		} else {
-			if(inputState == MORSE_CODE_STATE::OPEN) {
+			if(inputState == MORSE_CODE_STATE::SWITCH_OPEN) {
 				processOpenToClosed(currentCycleTime);
 			}
 		}
 	}
 
-	lastInputState = pins[switchPinIndex]->value == 1 ? MORSE_CODE_STATE::CLOSED : MORSE_CODE_STATE::OPEN;
+	lastInputState = pins[switchPinIndex]->value == 1 ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
 }

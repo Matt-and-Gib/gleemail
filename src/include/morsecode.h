@@ -62,15 +62,22 @@ static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_
 static constexpr unsigned short SWITCH_PIN_INDEX = 9;
 
 
+static constexpr short REQUEST_HEADERS_LENGTH = 6;
+static constexpr char SERVER[] = "raw.githubusercontent.com";
+static constexpr char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/MorseCodeCharPairs.json HTTP/1.1";
+static constexpr char HOST[] = "Host: raw.githubusercontent.com";
+
+static constexpr const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
+	SERVER_REQUEST,
+	NETWORK_HEADER_USER_AGENT,
+	HOST,
+	NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
+	NETWORK_HEADER_CONNECTION_LIFETIME,
+	HEADER_TERMINATION
+};
+
+
 class MorseCodeInput : public InputMethod {
-public:
-	MorseCodeInput(const unsigned short, const unsigned short);
-	~MorseCodeInput();
-
-	unsigned short getDebounceThreshold() {return 25;}
-
-	Pin **getPins() {return pins;}
-	void processInput(const unsigned long);
 private:
 	const unsigned short switchPinIndex = 0;
 	const unsigned short ledPinIndex = 1;
@@ -78,8 +85,10 @@ private:
 
 	MorsePhrase morsePhrase;
 
-	MORSE_CODE_STATE lastInputState = MORSE_CODE_STATE::OPEN;
-	MORSE_CODE_STATE inputState = MORSE_CODE_STATE::OPEN;
+	static constexpr unsigned short DEBOUNCE_THRESHOLD = 25;
+
+	MORSE_CODE_STATE lastInputState = MORSE_CODE_STATE::SWITCH_OPEN;
+	MORSE_CODE_STATE inputState = MORSE_CODE_STATE::SWITCH_OPEN;
 	short typingDelayState = -1;
 	unsigned long lastChangeTime = 0;
 	long long elapsedCycleTime = 0;
@@ -94,6 +103,18 @@ private:
 	void checkPhraseElapsedThreshold();
 	void checkMessageElapsedThresholds();
 	void resetMorsePhrase();
+public:
+	MorseCodeInput(const unsigned short, const unsigned short);
+	~MorseCodeInput();
+
+	void setNetworkData(const char*);
+	const char* getServerAddress() const {return SERVER;}
+	const char* const* getRequestHeaders() const {return REQUEST_HEADERS;}
+
+	Pin **getPins() {return pins;}
+	void processInput(const unsigned long);
+
+	unsigned short getDebounceThreshold() {return DEBOUNCE_THRESHOLD;}
 };
 
 #endif

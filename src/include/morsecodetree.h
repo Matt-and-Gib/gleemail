@@ -17,55 +17,8 @@
 	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
 */
 
-/*
-	A	• ━
-	B	━ • • •
-	C	━ • ━ •
-	D	━ • •
-	E	•
-	F	• • ━ •
-	G	━ ━ •
-	H	• • • •
-	I	• •
-	J	• ━ ━ ━
-	K	━ • ━
-	L	• ━ • •
-	M	━ ━
-	N	━ •
-	O	━ ━ ━
-	P	• ━ ━ •
-	Q	━ ━ • ━
-	R	• ━ •
-	S	• • •
-	T	━
-	U	• • ━
-	V	• • • ━
-	W	• ━ ━
-	X	━ • • ━
-	Y	━ • ━ ━
-	Z	━ ━ • •
 
-	0	━ ━ ━ ━ ━
-	1	• ━ ━ ━ ━
-	2	• • ━ ━ ━
-	3	• • • ━ ━
-	4	• • • • ━
-	5	• • • • •
-	6	━ • • • •
-	7	━ ━ • • •
-	8	━ ━ ━ • •
-	9	━ ━ ━ ━ •
-
-	&	• ━ • • •
-	+	• ━ • ━ •
-	=	━ • • • ━
-	/	━ • • ━ •
-	(	━ • ━ ━ •
-	
-*/
-
-
-enum MORSE_CODE_STATE : bool {CLOSED = 1, OPEN = 0};
+enum MORSE_CODE_STATE : bool {SWITCH_CLOSED = 1, SWITCH_OPEN = 0};
 enum class MORSE_CHAR_STATE : char {NOTHING = '0', DOT = '1', DASH = '2'};
 
 

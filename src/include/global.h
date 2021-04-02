@@ -3,6 +3,12 @@
 
 static constexpr unsigned short BAUD_RATE = 9600;
 
+static constexpr char NETWORK_HEADER_USER_AGENT[] = "User-Agent: ArduinoWifiClient";
+static constexpr char NETWORK_HEADER_ACCEPTED_RETURN_TYPE[] = "Accept: */*";
+static constexpr char NETWORK_HEADER_CONNECTION_LIFETIME[] = "Connection: close";
+static constexpr char HEADER_TERMINATION[] = "\r\n\r\n";
+static constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEADER_TERMINATION)/sizeof(HEADER_TERMINATION[0]) - 1;
+
 static constexpr unsigned short MAX_MESSAGE_LENGTH = 32; //Maximum number of characters LCD display can print
 
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};

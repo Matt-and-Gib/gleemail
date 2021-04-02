@@ -46,6 +46,24 @@ To-do
 ___
 
 ### <a href="instructions"></a>**Usage Instructions**
+Important!
+
+Make sure to type your WiFi SSID and Password into the Networking Code (TODO: Remove this text if process changes!)
+
+In order to use the Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com`. To do this, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the Wifi Module).
+
+![Install Certificate Picture One.png](resources/InstallCertificatePictureOne.png)
+
+![Install Certificate Picture Two.png](resources/InstallCertificatePictureTwo.png)
+
+Next, skip to Step 3 of the Firmware Updater, click on Add domain, and paste the following: `raw.githubusercontent.com`.
+
+![Install Certificate Picture Three.png](resources/InstallCertificatePictureThree.png)
+
+Click OK, and you should see "raw.githubusercontent.com:443" in the table below "arduino.cc:443". Then click on "Upload Certificates to WiFi Module." If you receive an error that the Programmer is not responding, make sure that the uploader sketch is uploaded on the Arduino first by clicking OK, then clicking "Open uploader sketch" back in Step 1 of the Firmware Updater, and uploading that to your Arduino before uploading any certificates.
+
+![Install Certificate Picture Four.png](resources/InstallCertificatePictureFour.png)
+
 • How to connect with your friend
 	• To Do
 • Features
