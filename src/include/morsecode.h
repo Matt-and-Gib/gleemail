@@ -77,6 +77,9 @@ static constexpr const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
 };
 
 
+//Maybe the above static constexprs have to live outside the class in order to exist at compile-time?
+
+
 class MorseCodeInput : public InputMethod {
 private:
 	const unsigned short switchPinIndex = 0;
