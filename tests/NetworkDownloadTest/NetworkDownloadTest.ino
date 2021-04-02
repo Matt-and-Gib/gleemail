@@ -1,9 +1,3 @@
-/*
-  created 13 July 2010
-  by dlf (Metodo2 srl)
-  modified 09 June 2016
-  by Petar Georgiev
-*/
 #include "Arduino.h"
 #include <SPI.h>
 #include <WiFiNINA.h>
