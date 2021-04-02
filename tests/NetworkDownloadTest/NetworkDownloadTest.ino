@@ -8,8 +8,8 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 
-static constexpr char SSID[] = "LEDE2GH";
-static constexpr char PASSWORD[] = "happyMaestro4300";
+static constexpr char SSID[] = "CHANGE_ME";
+static constexpr char PASSWORD[] = "CHANGE_ME";
 static char* jsonData;
 
 
