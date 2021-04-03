@@ -4,6 +4,8 @@
 #include <SPI.h>
 #include <WiFiNINA.h>
 
+#include "global.h"
+
 
 class Networking {
 private:
@@ -23,7 +25,6 @@ private:
 
 	static constexpr char HEADER_END_STRING[] = "\r\n\r\n";
 	static constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
-
 public:
 	Networking();
 	~Networking();
@@ -46,6 +47,7 @@ Networking::Networking() {
 
 bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
 	if(networkName == nullptr || networkPassword == nullptr) {
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_PASSED_INVALID_PARAMETER);
 		return false;
 	}
 
@@ -56,6 +58,7 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
 	unsigned short attemptIndex = 0;
 	while(!activeConnection) {
 		if(attemptIndex == 4) {
+			DebugLog::getLog().logError(ERROR_CODE::NETWORK_WIFI_CONNECTION_FAILED_RETRY_OCCURED);
 			return false;
 		}
 
@@ -76,7 +79,13 @@ void Networking::disconnectFromNetwork() {
 
 
 char* Networking::downloadFromServer(const char* server, const char* const* headers) {
-	return "";
+	char* temp = new char('a');
+
+	if(!client.connected()) {
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
+	}
+
+	return temp;
 }
 
 

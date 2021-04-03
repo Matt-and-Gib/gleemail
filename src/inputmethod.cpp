@@ -6,31 +6,11 @@ InputMethod::InputMethod() {
 	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		messageToSend[i] = '\0';
 	}
-
-	for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
-		errorCodes[i] = new ERROR_CODE(ERROR_CODE::NONE);
-	}
 }
 
 
 InputMethod::~InputMethod() {
 	delete[] messageToSend;
-	for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
-		delete errorCodes[i];
-	}
-}
-
-
-void InputMethod::pushErrorCode(const ERROR_CODE code) {
-	unsigned short index = 0;
-	tempCode = errorCodes[index];
-	while(*tempCode != ERROR_CODE::NONE) {
-		tempCode = errorCodes[++index];
-	}
-
-	if(index < MAX_ERROR_CODES) {
-		*errorCodes[index] = code;
-	}
 }
 
 

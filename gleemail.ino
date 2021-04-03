@@ -7,7 +7,6 @@
 static Networking *network = new Networking();
 
 static unsigned short pinIndex = 0;
-static unsigned short errorIndex = 0;
 static InputMethod *input;// = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
 static char *messageOut;
 
@@ -40,14 +39,11 @@ void processInputMethod() {
 
 
 void printErrorCodes() {
-	ERROR_CODE **errors = input->getErrorCodes();
-
-	errorIndex = 0;
-	ERROR_CODE *code = errors[errorIndex];
-	while(*code != ERROR_CODE::NONE) {
-		Serial.println(*code);
-		*code = ERROR_CODE::NONE;
-		code = errors[++errorIndex];
+	ERROR_CODE e = DebugLog::getLog().getError();
+	while(e != ERROR_CODE::NONE) {
+		Serial.print("\nError Code: ");
+		Serial.println(e);
+		e = DebugLog::getLog().getError();
 	}
 }
 
@@ -141,7 +137,7 @@ void setup() {
 	}
 
 	if(!setupNetwork()) {
-		abort();
+		//abort();
 	}
 
 	if(!setupInputMethod()) {

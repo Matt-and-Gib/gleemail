@@ -46,14 +46,15 @@ char MorseCodeInput::convertPhraseToCharacter() const {
 
 void MorseCodeInput::pushMorseCharacter(const MorseChar* morseCharacter) {
 	if(morsePhrase.phraseFull()) {
-		pushErrorCode(ERROR_CODE::MORSE_PHRASE_IMMINENT_OVERFLOW);
+		DebugLog::getLog().logError(ERROR_CODE::MORSE_PHRASE_IMMINENT_OVERFLOW);
 		//pushCharacterToMessage(convertPhraseToCharacter());
 		pushCharacterToMessage('~');
 		morsePhrase.resetPhrase();
 	}
 
 	if(morseCharacter == nullptr) {
-		pushErrorCode(ERROR_CODE::INPUT_MORSE_CHAR_NOTHING);
+		DebugLog::getLog().logError(ERROR_CODE::INPUT_MORSE_CHAR_NOTHING);
+		//pushErrorCode(ERROR_CODE::INPUT_MORSE_CHAR_NOTHING);
 		return;
 	}
 
