@@ -129,7 +129,7 @@ bool setupNetwork() {
 
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
-	//input.setNetworkData(network.downloadFromServer(input.getServerAddress(), input.getRequestHeaders()));
+	input->setNetworkData(network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders()));
 	return true;
 }
 

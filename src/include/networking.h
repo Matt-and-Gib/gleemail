@@ -31,6 +31,8 @@ public:
 	bool connectToNetwork(char*, char*);
 	void disconnectFromNetwork();
 
+	char* downloadFromServer(const char*, const char* const*);
+
 	bool checkConnection() const {return activeConnection;}
 	unsigned short getMaxSSIDLength() const {return MAX_SSID_LENGTH;}
 	unsigned short getMaxPasswordLength() const {return MAX_PASSWORD_LENGTH;}
@@ -70,6 +72,11 @@ void Networking::disconnectFromNetwork() {
 	if(client.connected()) {
 		client.stop();
 	}
+}
+
+
+char* Networking::downloadFromServer(const char* server, const char* const* headers) {
+	return "";
 }
 
 
