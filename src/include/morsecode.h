@@ -62,7 +62,7 @@ static constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_
 static constexpr unsigned short SWITCH_PIN_INDEX = 9;
 
 
-static constexpr short REQUEST_HEADERS_LENGTH = 6;
+static constexpr short REQUEST_HEADERS_LENGTH = 7;
 static constexpr char SERVER[] = "raw.githubusercontent.com";
 static constexpr char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/MorseCodeCharPairs.json HTTP/1.1";
 static constexpr char HOST[] = "Host: raw.githubusercontent.com";
@@ -73,7 +73,8 @@ static constexpr const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
 	HOST,
 	NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
 	NETWORK_HEADER_CONNECTION_LIFETIME,
-	HEADER_TERMINATION
+	HEADER_TERMINATION,
+	nullptr
 };
 
 

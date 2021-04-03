@@ -86,28 +86,36 @@ void setupPins() {
 
 
 bool setupNetwork() {
+	unsigned short inputLength = 0;
+
 	Serial.println("Enter WiFi SSID:");
-	char userSSID[network->getMaxSSIDLength()];
+	char userSSID[network->getMaxSSIDLength() + 1];
 	while(true) {
 		if(Serial.available() > 0) {
-			Serial.readBytesUntil('\n', userSSID, network->getMaxSSIDLength());
+			inputLength = Serial.readBytesUntil('\n', userSSID, network->getMaxSSIDLength());
 			break;
 		}
 
 		delay(250);
 	}
+	for(int i = inputLength; i < network->getMaxSSIDLength(); i += 1) {
+		userSSID[i] = '\0';
+	}
 
-	char userPassword[network->getMaxPasswordLength()];
+	char userPassword[network->getMaxPasswordLength() + 1];
 	Serial.print("Enter password for ");
 	Serial.print(userSSID);
 	Serial.println(":");
 	while(true) {
 		if(Serial.available() > 0) {
-			Serial.readBytesUntil('\n', userPassword, network->getMaxPasswordLength());
+			inputLength = Serial.readBytesUntil('\n', userPassword, network->getMaxPasswordLength());
 			break;
 		}
 
 		delay(250);
+	}
+	for(int i = inputLength; i < network->getMaxPasswordLength(); i += 1) {
+		userPassword[i] = '\0';
 	}
 
 	Serial.println("Attempting connection...");
@@ -125,7 +133,19 @@ bool setupNetwork() {
 
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
-	input->setNetworkData(network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders()));
+	//input->setNetworkData(network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders()));
+
+	char* dat = network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
+
+	Serial.println("JSON Payload:\n");
+	unsigned short i = 0;
+	while(dat[i] != '\0') {
+		Serial.print(dat[i++]);
+	}
+	/*for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
+		Serial.print(dat[i]);
+	}*/
+	Serial.println("\nDone");
 	return true;
 }
 
