@@ -148,7 +148,7 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_REQUEST_TO_SERVER_HEADER_INVALID);
 		return nullptr;
 	}
-	delay(2000); //Adjust based on latency
+	delay(500); //Adjust based on latency // *** OR: maybe run an infinite loop downloading data until client.status() == closed because server should issue disconnect once payload is delivered.
 
 	int bufferIndex = 0;
 	char dataBuffer[DATA_BUFFER_SIZE];
@@ -160,6 +160,15 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 			break;
 		}
 	}
+
+	if(bufferIndex < DATA_BUFFER_SIZE/2) {
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED);
+	}
+
+	/*Serial.print("Used ");
+	Serial.print(bufferIndex);
+	Serial.print(" out of max ");
+	Serial.println(DATA_BUFFER_SIZE);*/
 
 	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
 	if(endOfHeaderIndex != -1) {

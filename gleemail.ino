@@ -135,6 +135,7 @@ bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
 	//input->setNetworkData(network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders()));
 
+	Serial.println("Downloading data...");
 	char* dat = network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
 
 	Serial.println("JSON Payload:\n");
@@ -142,9 +143,6 @@ bool setupInputMethod() {
 	while(dat[i] != '\0') {
 		Serial.print(dat[i++]);
 	}
-	/*for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
-		Serial.print(dat[i]);
-	}*/
 	Serial.println("\nDone");
 	return true;
 }
