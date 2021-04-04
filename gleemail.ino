@@ -141,7 +141,7 @@ bool setupInputMethod() {
 		printErrorCodes();
 		return false;
 	}
-	
+
 	/*Serial.println("JSON Payload:\n");
 	unsigned short i = 0;
 	while(dat[i] != '\0') {
