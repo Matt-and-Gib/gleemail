@@ -9,8 +9,8 @@
 [v]		DEBOUNCE
 [v]		finish BSTree data strcture
 [v]		hardcode morse phrase to char pairs
-[v]			push <MorsePhrase, char> pairs to tree
-[v]		lookup on MorsePhrase (key) in BSTree
+[v]			push <currentMorsePhrase, char> pairs to tree
+[v]		lookup on currentMorsePhrase (key) in BSTree
 		...
 */
 
@@ -22,17 +22,17 @@ MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const uns
 	pins[switchPinIndex] = switchDigitalPin;
 	pins[ledPinIndex] = ledDigitalPin;
 
-	morsePhrase = MorsePhrase();
+	currentMorsePhrase = MorsePhrase();
 }
 
 
 MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
-	//delete morsePhrase;
+	//delete currentMorsePhrase;
 }	
 
 
 char MorseCodeInput::convertPhraseToCharacter() {
-	MorsePhraseCharPair* lookupResult = morseCodeTreeRoot.lookup(morsePhrase);
+	MorsePhraseCharPair* lookupResult = morseCodeTreeRoot.lookup(currentMorsePhrase);
 	if(!lookupResult) {
 		DebugLog::getLog().logError(MORSE_CODE_LOOKUP_FAILED);
 		return 'e';
@@ -43,23 +43,22 @@ char MorseCodeInput::convertPhraseToCharacter() {
 
 
 void MorseCodeInput::pushMorseCharacter(const MorseChar* morseCharacter) {
-	if(morsePhrase.phraseFull()) {
+	if(currentMorsePhrase.phraseFull()) {
 		DebugLog::getLog().logError(ERROR_CODE::MORSE_PHRASE_IMMINENT_OVERFLOW);
 		//pushCharacterToMessage(convertPhraseToCharacter());
 		pushCharacterToMessage('~');
-		morsePhrase.resetPhrase();
+		currentMorsePhrase.resetPhrase();
 	}
 
 	if(morseCharacter == nullptr) {
 		DebugLog::getLog().logError(ERROR_CODE::INPUT_MORSE_CHAR_NOTHING);
-		//pushErrorCode(ERROR_CODE::INPUT_MORSE_CHAR_NOTHING);
 		return;
 	}
 
-	morsePhrase.push(morseCharacter);
-	if(morsePhrase.phraseFull()) {
+	currentMorsePhrase.push(morseCharacter);
+	if(currentMorsePhrase.phraseFull()) {
 		pushCharacterToMessage(convertPhraseToCharacter());
-		morsePhrase.resetPhrase();
+		currentMorsePhrase.resetPhrase();
 	}
 }
 
@@ -99,10 +98,10 @@ void MorseCodeInput::updateElapsedTime(const unsigned long currentCycleTime) {
 
 
 void MorseCodeInput::checkPhraseElapsedThreshold() {
-	if(morsePhrase.phraseStarted()) {
+	if(currentMorsePhrase.phraseStarted()) {
 		if(elapsedCycleTime >= PHRASE_FINISHED_THRESHOLD) {
 			pushCharacterToMessage(convertPhraseToCharacter());
-			morsePhrase.resetPhrase();
+			currentMorsePhrase.resetPhrase();
 		}
 	}
 }
@@ -146,12 +145,12 @@ void MorseCodeInput::setNetworkData(const char* payload) {
 		return;
 	}
 
-	char letter;
+	const char* letter;
 	const char* phrase;
 	for (ArduinoJson::JsonObject elem : doc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
-		letter = elem["char"];
+		letter = elem["symbol"];
 		phrase = elem["phrase"];
-		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(letter, *new MorsePhrase(phrase)));
+		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase)));
 	}
 
 	morseCodeTreeRoot.print();

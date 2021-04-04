@@ -102,6 +102,10 @@ bool setupNetwork() {
 		userSSID[i] = '\0';
 	}
 
+	/*
+		Check entered SSID against available SSIDs
+	*/
+
 	char userPassword[network->getMaxPasswordLength() + 1];
 	Serial.print("Enter password for ");
 	Serial.print(userSSID);

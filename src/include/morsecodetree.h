@@ -47,7 +47,8 @@ protected:
 	MORSE_CHAR_STATE value;
 private:
 };
-//TODO: Make these into references! Why didn't I do this before?
+
+//TODO: Make these into references! Why didn't we do this before?
 static const MorseChar* DOT = new MorseChar(MORSE_CHAR_STATE::DOT);
 static const MorseChar* DASH = new MorseChar(MORSE_CHAR_STATE::DASH);
 static const MorseChar* NOTHING = new MorseChar(MORSE_CHAR_STATE::NOTHING);
@@ -149,7 +150,10 @@ private:
 
 
 struct MorsePhraseCharPair {
-	MorsePhraseCharPair(const char c, MorsePhrase& p) {character = c; morsePhrase = p;}
+	MorsePhraseCharPair(const char c, MorsePhrase& p) {
+		character = c;
+		morsePhrase = p;
+	}
 
 	bool operator==(MorsePhraseCharPair& o) {return morsePhrase == o.morsePhrase;}
 	bool isLessThan(unsigned short depth) {return morsePhrase[depth] == DOT ? true : false;}
