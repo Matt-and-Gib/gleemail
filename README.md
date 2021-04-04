@@ -1,4 +1,5 @@
 # gleemail
+
 ## Table of Contents
 
 1. [Basic Info](#info)
@@ -15,7 +16,7 @@ What is glEEmail? Welcome to the future, kid. glEEmail is like sending your uncl
 
 glEEmail allows you to send messages to (predefined) clients over the Internet via that old Morse Code switch that you have installed next to your computer terminal. Just hook it up and get flyin'!
 
-Okay, for real, glEEmail is a side project while we're waiting for 200 SMD LEDs to arrive from China. The project allows you to test input and output from your Arduino, and to send messages to an Arduino at a different IP address as long as both can connect to the Internet. 
+Okay, for real, glEEmail is a side project while we're waiting for 200 SMD LEDs to arrive from China. The project allows you to test input and output from your Arduino, and to send messages to an Arduino at a different IP address as long as both can connect to the Internet.
 ___
 
 ### <a name="parts"></a>**Components**
@@ -48,13 +49,13 @@ ___
 ### <a name="instructions"></a>**Usage Instructions**
 Important!
 
-In order to use gleemail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses a binary tree populated with JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the Wifi Module).
+In order to use gleemail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses a binary tree populated with JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the WiFi Module).
 
 ![Install Certificate Picture One.png](resources/InstallCertificatePictureOne.png)
 
 ![Install Certificate Picture Two.png](resources/InstallCertificatePictureTwo.png)
 
-Click on Open Uploader Sketch, and upload the project that appears to your Arduino. Next, (back in the Firmware Updater) skip down to Step 3 of the Firmware Updater, click on Add domain, and paste the following: `raw.githubusercontent.com`.
+Click on Open Updater Sketch, and upload the project that appears to your Arduino. Next, (back in the Firmware Updater) skip down to Step 3 of the Firmware Updater, click on Add domain, and paste the following: `raw.githubusercontent.com`.
 
 ![Install Certificate Picture Three.png](resources/InstallCertificatePictureThree.png)
 

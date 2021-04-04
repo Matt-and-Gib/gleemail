@@ -148,7 +148,7 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_REQUEST_TO_SERVER_HEADER_INVALID);
 		return nullptr;
 	}
-	delay(500); //Adjust based on latency // *** OR: maybe run an infinite loop downloading data until client.status() == closed because server should issue disconnect once payload is delivered.
+	delay(3000); //Adjust based on latency // *** OR: maybe run an infinite loop downloading data until client.status() == closed because server should issue disconnect once payload is delivered.
 
 	int bufferIndex = 0;
 	char dataBuffer[DATA_BUFFER_SIZE];

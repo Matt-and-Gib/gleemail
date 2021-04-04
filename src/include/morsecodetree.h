@@ -3,6 +3,10 @@
 
 #include "binarysearchtree.h"
 
+/*	**	DELETE ME WHEN TESTING IS COMPLETE	**	*/
+#include "Arduino.h"
+#include "HardwareSerial.h"
+/*	**	DELETE ME WHEN TESTING IS COMPLETE	**	*/
 
 /*
 	#Definitions
@@ -43,6 +47,7 @@ protected:
 	MORSE_CHAR_STATE value;
 private:
 };
+//TODO: Make these into references! Why didn't I do this before?
 static const MorseChar* DOT = new MorseChar(MORSE_CHAR_STATE::DOT);
 static const MorseChar* DASH = new MorseChar(MORSE_CHAR_STATE::DASH);
 static const MorseChar* NOTHING = new MorseChar(MORSE_CHAR_STATE::NOTHING);
@@ -52,8 +57,28 @@ class MorsePhrase {
 public:
 	MorsePhrase() {
 		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
+		/*for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+			phraseArray[i] = *NOTHING;
+		}*/
+
 		firstOpenIndex = 0;
 	}
+
+	MorsePhrase(const char* phrase) {
+		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
+		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+			if(phrase[i] == '\0') {
+				phraseArray[i] = *NOTHING;
+			} else {
+				if(phrase[i] == '-') {
+					phraseArray[i] = *DASH;
+				} else {
+					phraseArray[i] = *DOT;
+				}
+			}
+		}
+	}
+
 	~MorsePhrase() {delete[] phraseArray;}
 
 	MorseChar* operator[](const unsigned short index) {return &phraseArray[index];}
@@ -178,13 +203,25 @@ public:
 		}
 	}
 
-	void print();
+	void print() {printSubtree(0, this, false);}
 protected:
 	MorseCodeTreeNode* parentNode;
 	MorseCodeTreeNode* lesserNode;
 	MorseCodeTreeNode* greaterNode;
 private:
-	void printSubtree(const short, const MorseCodeTreeNode*, bool);
+	void printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
+		if(node) {
+			for(int i = 0; i < spacingIndex; i += 1) {
+				Serial.print(' ');
+			}
+
+			Serial.print(lesser ? "├── " : "└── ");
+			Serial.println(node->data->character);
+
+			printSubtree(spacingIndex + 4, node->lesserNode, true);
+			printSubtree(spacingIndex + 4, node->greaterNode, false);
+		}
+	}
 };
 
 #endif

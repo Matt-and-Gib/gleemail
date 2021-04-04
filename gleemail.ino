@@ -133,17 +133,22 @@ bool setupNetwork() {
 
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+	Serial.println("Downloading Input Method data...");
 	//input->setNetworkData(network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders()));
-
-	Serial.println("Downloading data...");
-	char* dat = network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
-
-	Serial.println("JSON Payload:\n");
+	char *data = network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
+	if(!data) {
+		Serial.println("Unable to download data!");
+		printErrorCodes();
+		return false;
+	}
+	
+	/*Serial.println("JSON Payload:\n");
 	unsigned short i = 0;
 	while(dat[i] != '\0') {
 		Serial.print(dat[i++]);
 	}
-	Serial.println("\nDone");
+	Serial.println("\nDone");*/
+	input->setNetworkData(data);
 	return true;
 }
 

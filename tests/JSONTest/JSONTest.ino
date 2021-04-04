@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "ArduinoJson-v6.17.3.hpp"
+#include <ArduinoJSON.h>
 
 // The documentation that I'm referencing is from
 // https://github.com/bblanchon/ArduinoJson https://arduinojson.org/v6/assistant/

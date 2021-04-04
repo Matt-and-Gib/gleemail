@@ -4,6 +4,8 @@
 #include "inputmethod.h"
 #include "morsecodetree.h"
 
+#include <ArduinoJson.h>
+
 
 //https://morsecode.world/international/morse2.html
 //https://morsecode.world/international/timing.html
@@ -78,6 +80,8 @@ static constexpr const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
 };
 
 
+static constexpr unsigned short CALCULATED_DOCUMENT_SIZE_IN_BYTES = 3424;
+
 //Maybe the above static constexprs have to live outside the class in order to exist at compile-time?
 
 
@@ -87,7 +91,9 @@ private:
 	const unsigned short ledPinIndex = 1;
 	Pin *pins[3] = {&NULL_PIN, &NULL_PIN, &NULL_PIN};
 
-	MorsePhrase morsePhrase;
+	MorsePhrase morsePhrase; //rename this
+
+	MorseCodeTreeNode& morseCodeTreeRoot = *new MorseCodeTreeNode(*new MorsePhraseCharPair('\0', *new MorsePhrase()), nullptr);
 
 	static constexpr unsigned short DEBOUNCE_THRESHOLD = 25;
 
@@ -101,7 +107,7 @@ private:
 	void processClosedToOpen(const unsigned long);
 	void processOpenToClosed(const unsigned long);
 	void pushMorseCharacter(const MorseChar*);
-	char convertPhraseToCharacter() const;
+	char convertPhraseToCharacter();
 
 	void checkOpenElapsedTime(const unsigned long);
 	void checkPhraseElapsedThreshold();

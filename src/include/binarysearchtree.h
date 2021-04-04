@@ -14,6 +14,8 @@ public:
 
 	BinarySearchTreeNode<T>* insert(T& d);
 	BinarySearchTreeNode<T>* remove(); //NOTE: Never remove from Morse Code tree
+
+	T* getData() {return data;}
 protected:
 	BinarySearchTreeNode<T>* parentNode;
 	BinarySearchTreeNode<T>* lesserNode;

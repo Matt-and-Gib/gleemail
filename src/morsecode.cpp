@@ -31,16 +31,14 @@ MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 }	
 
 
-char MorseCodeInput::convertPhraseToCharacter() const {
-	/*TreeNode* convertedPhrase = rootNode.lookup(MorsePhrase);
-	if(!convertedPhrase) {
-		pushErrorCode(ERROR_CODE::INVALID_CHAR_CONVERSION);
-		return '\0';
+char MorseCodeInput::convertPhraseToCharacter() {
+	MorsePhraseCharPair* lookupResult = morseCodeTreeRoot.lookup(morsePhrase);
+	if(!lookupResult) {
+		DebugLog::getLog().logError(MORSE_CODE_LOOKUP_FAILED);
+		return 'e';
 	}
 
-	return convertedPhrase.value;*/
-
-	return 'a';
+	return lookupResult->character;
 }
 
 
@@ -135,8 +133,28 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long currentCycleTime) 
 
 void MorseCodeInput::setNetworkData(const char* payload) {
 	if(!payload) {
+		DebugLog::getLog().logError(JSON_NULLPTR_PAYLOAD);
 		return;
 	}
+
+	ArduinoJson::DynamicJsonDocument doc(CALCULATED_DOCUMENT_SIZE_IN_BYTES);
+	ArduinoJson::DeserializationError error = deserializeJson(doc, payload);
+
+	if (error) {
+		DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
+		//Serial.println(error.f_str());
+		return;
+	}
+
+	const char* letter; //variable pointer to const char
+	const char* phrase; //variable pointer to const char
+	for (ArduinoJson::JsonObject elem : doc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
+		letter = elem["char"];
+		phrase = elem["phrase"];
+		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(letter[0], *new MorsePhrase(phrase)));
+	}
+
+	morseCodeTreeRoot.print();
 }
 
 
