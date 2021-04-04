@@ -68,7 +68,10 @@ public:
 		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
 		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			if(phrase[i] == '\0') {
-				phraseArray[i] = *NOTHING;
+				for(int j = i; j < MAX_MORSE_PHRASE_LENGTH; j += 1) {
+					phraseArray[j] = *NOTHING;
+				}
+				break;
 			} else {
 				if(phrase[i] == '-') {
 					phraseArray[i] = *DASH;

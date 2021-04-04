@@ -146,12 +146,12 @@ void MorseCodeInput::setNetworkData(const char* payload) {
 		return;
 	}
 
-	const char* letter; //variable pointer to const char
-	const char* phrase; //variable pointer to const char
+	char letter;
+	const char* phrase;
 	for (ArduinoJson::JsonObject elem : doc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
 		letter = elem["char"];
 		phrase = elem["phrase"];
-		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(letter[0], *new MorsePhrase(phrase)));
+		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(letter, *new MorsePhrase(phrase)));
 	}
 
 	morseCodeTreeRoot.print();

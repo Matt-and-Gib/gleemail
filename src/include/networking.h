@@ -173,7 +173,7 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
 	if(endOfHeaderIndex != -1) {
 		const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
-		char* jsonData = new char[LENGTH_OF_JSON_BODY + 1];
+		char* jsonData = new char[LENGTH_OF_JSON_BODY + 1]; //TODO: Is this the correct length to add \0?
 		for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
 			jsonData[i] = dataBuffer[endOfHeaderIndex + i];
 		}
