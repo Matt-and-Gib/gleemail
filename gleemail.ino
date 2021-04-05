@@ -98,12 +98,15 @@ bool setupNetwork() {
 
 		delay(250);
 	}
-	for(int i = inputLength; i < network->getMaxSSIDLength(); i += 1) {
-		userSSID[i] = '\0';
+
+	if(inputLength >= network->getMaxSSIDLength()) {
+		DebugLog::getLog().logError(NETWORK_DATA_SSID_POSSIBLY_TRUNCATED);
 	}
 
+	userSSID[inputLength] = '\0';
+
 	/*
-		Check entered SSID against available SSIDs
+		TODO: Check entered SSID against available SSIDs
 	*/
 
 	char userPassword[network->getMaxPasswordLength() + 1];
@@ -118,9 +121,12 @@ bool setupNetwork() {
 
 		delay(250);
 	}
-	for(int i = inputLength; i < network->getMaxPasswordLength(); i += 1) {
-		userPassword[i] = '\0';
+
+	if(inputLength >= network->getMaxPasswordLength()) {
+		DebugLog::getLog().logError(NETWORK_DATA_PASSWORD_POSSIBLY_TRUNCATED);
 	}
+
+	userPassword[inputLength] = '\0';
 
 	Serial.println("Attempting connection...");
 
@@ -153,6 +159,7 @@ bool setupInputMethod() {
 	}
 	Serial.println("\nDone");*/
 	input->setNetworkData(data);
+	delete[] data;
 	return true;
 }
 
@@ -163,8 +170,8 @@ void setup() {
 		delay(250);
 	}
 
-	if(!setupNetwork()) {
-		//abort();
+	while(!setupNetwork()) {
+		delay(250);
 	}
 
 	if(!setupInputMethod()) {

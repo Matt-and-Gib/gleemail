@@ -36,6 +36,8 @@ struct Pin {
 static Pin NULL_PIN = Pin(-1, PIN_MODE::READ, 0);
 
 
+static const constexpr bool VERBOSE_DEBUG_LOG = true;
+
 static const constexpr unsigned short DEBUG_LOG_INPUT_METHOD_OFFSET = 10;
 static const constexpr unsigned short DEBUG_LOG_NETWORK_OFFSET = 50;
 static const constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
@@ -47,7 +49,7 @@ enum ERROR_CODE: short {
 	//InputMethod range: 10 - 49
 	MORSE_PHRASE_IMMINENT_OVERFLOW = DEBUG_LOG_INPUT_METHOD_OFFSET + 0,
 	//INPUT_MORSE_CHAR_NOTHING = DEBUG_LOG_INPUT_METHOD_OFFSET + 1, //unused
-	MORSE_CODE_LOOKUP_FAILED = DEBUG_LOG_INPUT_METHOD_OFFSET + 2,
+	MORSE_CODE_LOOKUP_FAILED = DEBUG_LOG_INPUT_METHOD_OFFSET + 2, //VERBOSE DEBUG ONLY
 
 	//Network range: 50 - 89
 	NETWORK_CONNECTION_FAILED = DEBUG_LOG_NETWORK_OFFSET + 0,
@@ -59,11 +61,14 @@ enum ERROR_CODE: short {
 	NETWORK_HEADER_TERMINATION_OMITTED = DEBUG_LOG_NETWORK_OFFSET + 6,
 	NETWORK_DATA_BUFFER_OVERFLOW = DEBUG_LOG_NETWORK_OFFSET + 7,
 	NETWORK_DATA_BUFFER_UNDERUTILIZED = DEBUG_LOG_NETWORK_OFFSET + 8,
+	NETWORK_DATA_SSID_POSSIBLY_TRUNCATED = DEBUG_LOG_NETWORK_OFFSET + 9,
+	NETWORK_DATA_PASSWORD_POSSIBLY_TRUNCATED = DEBUG_LOG_NETWORK_OFFSET + 10,
 
 	//JSON range: 90 - 129
 	JSON_NULLPTR_PAYLOAD = DEBUG_LOG_JSON_OFFSET + 0,
 	JSON_DESERIALIZATION_ERROR = DEBUG_LOG_JSON_OFFSET + 1
 };
+
 
 //Remember: DebugLog is a singleton! DO NOT waste memory.
 class DebugLog {
@@ -73,9 +78,12 @@ public:
 		return log;
 	}
 
-	void logError(ERROR_CODE e) {
-		if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
-			errorCodes[errorCodesFirstOpenIndex++] = e;
+
+	void logError(ERROR_CODE e, bool critical = true) {
+		if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
+			if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
+				errorCodes[errorCodesFirstOpenIndex++] = e;
+			}
 		}
 	}
 

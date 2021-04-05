@@ -18,7 +18,7 @@ private:
 
 	char* server;
 
-	static constexpr short DATA_BUFFER_SIZE = 4096;
+	static constexpr short DATA_BUFFER_SIZE = 3072;
 
 	static constexpr char HEADER_END_STRING[] = "\r\n\r\n";
 	static constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;

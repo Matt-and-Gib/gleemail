@@ -12,6 +12,7 @@
 ___
 
 ### <a name="info"></a>**Basic Info**
+
 What is glEEmail? Welcome to the future, kid. glEEmail is like sending your uncle a telegram, except it doesn't cost 25 cents per character. It's easy, and fun (some assembly required).
 
 glEEmail allows you to send messages to (predefined) clients over the Internet via that old Morse Code switch that you have installed next to your computer terminal. Just hook it up and get flyin'!
@@ -20,6 +21,7 @@ Okay, for real, glEEmail is a side project while we're waiting for 200 SMD LEDs 
 ___
 
 ### <a name="parts"></a>**Components**
+
 We're testing glEEmail on an Arduino Nano 33 IoT. For the full parts list that we used (for one user), please see the table below:
 
 |Quantity|Component|
@@ -37,16 +39,21 @@ We're testing glEEmail on an Arduino Nano 33 IoT. For the full parts list that w
 ___
 
 ### <a name="diagram"></a>**Wiring Diagram**
+
 To-do
 
 ___
 
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
+
 To-do
+
+Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
 
 ___
 
 ### <a name="instructions"></a>**Usage Instructions**
+
 Important!
 
 In order to use gleemail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses a binary tree populated with JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the WiFi Module).
@@ -64,14 +71,19 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 ![Install Certificate Picture Four.png](resources/InstallCertificatePictureFour.png)
 
 • How to connect with your friend
-	• To Do
+
+• To Do
+
 • Features
-	• You can hold down the switch to pause input
+
+• You can hold down the switch to pause input
 
 ___
 
 ### <a name="plans"></a>**Future Plans**
+
 We'd like to implement additional input methods, including (but not limited to):
+
 1. Phone app that connects directly to the Arduino, which also stores past messages.
 2. Speech-to-text
 3. Light-level
