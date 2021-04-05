@@ -106,7 +106,7 @@ private:
 
 	void processClosedToOpen(const unsigned long);
 	void processOpenToClosed(const unsigned long);
-	void pushMorseCharacter(const MorseChar*);
+	void pushMorseCharacter(const MorseChar&);
 	char convertPhraseToCharacter();
 
 	void checkOpenElapsedTime(const unsigned long);

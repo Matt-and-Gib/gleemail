@@ -42,7 +42,7 @@ char MorseCodeInput::convertPhraseToCharacter() {
 }
 
 
-void MorseCodeInput::pushMorseCharacter(const MorseChar* morseCharacter) {
+void MorseCodeInput::pushMorseCharacter(const MorseChar& morseCharacter) {
 	if(currentMorsePhrase.phraseFull()) {
 		DebugLog::getLog().logError(ERROR_CODE::MORSE_PHRASE_IMMINENT_OVERFLOW);
 		//pushCharacterToMessage(convertPhraseToCharacter());
@@ -50,10 +50,10 @@ void MorseCodeInput::pushMorseCharacter(const MorseChar* morseCharacter) {
 		currentMorsePhrase.resetPhrase();
 	}
 
-	if(morseCharacter == nullptr) {
+	/*if(morseCharacter == nullptr) {
 		DebugLog::getLog().logError(ERROR_CODE::INPUT_MORSE_CHAR_NOTHING);
 		return;
-	}
+	}*/
 
 	currentMorsePhrase.push(morseCharacter);
 	if(currentMorsePhrase.phraseFull()) {

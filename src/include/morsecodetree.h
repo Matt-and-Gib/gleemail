@@ -49,9 +49,9 @@ private:
 };
 
 //TODO: Make these into references! Why didn't we do this before?
-static const MorseChar* DOT = new MorseChar(MORSE_CHAR_STATE::DOT);
-static const MorseChar* DASH = new MorseChar(MORSE_CHAR_STATE::DASH);
-static const MorseChar* NOTHING = new MorseChar(MORSE_CHAR_STATE::NOTHING);
+static const MorseChar& DOT = *new MorseChar(MORSE_CHAR_STATE::DOT);
+static const MorseChar& DASH = *new MorseChar(MORSE_CHAR_STATE::DASH);
+static const MorseChar& NOTHING = *new MorseChar(MORSE_CHAR_STATE::NOTHING);
 
 
 class MorsePhrase {
@@ -70,30 +70,32 @@ public:
 		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			if(phrase[i] == '\0') {
 				for(int j = i; j < MAX_MORSE_PHRASE_LENGTH; j += 1) {
-					phraseArray[j] = *NOTHING;
+					phraseArray[j] = NOTHING;
 				}
 				break;
 			} else {
 				if(phrase[i] == '-') {
-					phraseArray[i] = *DASH;
+					phraseArray[i] = DASH;
 				} else {
-					phraseArray[i] = *DOT;
+					phraseArray[i] = DOT;
 				}
 			}
 		}
+
+		Serial.println();
 	}
 
 	~MorsePhrase() {delete[] phraseArray;}
 
-	MorseChar* operator[](const unsigned short index) {return &phraseArray[index];}
+	MorseChar& operator[](const unsigned short index) {return phraseArray[index];}
 
 	bool operator==(MorsePhrase& o) {
 		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-			if(phraseArray[i] != *o[i]) {
+			if(phraseArray[i] != o[i]) {
 				return false;
 			}
 
-			if(phraseArray[i] == *NOTHING) {
+			if(phraseArray[i] == NOTHING) {
 				return true;
 			}
 		}
@@ -104,15 +106,15 @@ public:
 	bool operator<(MorsePhrase&o) {
 		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			if(o[i] == NOTHING) {
-				if(phraseArray[i] == *DOT) {
+				if(phraseArray[i] == DOT) {
 					return true;
 				} else {
 					return false;
 				}
 			}
 
-			if(phraseArray[i] != *o[i]) {
-				if(phraseArray[i] == *DOT) {
+			if(phraseArray[i] != o[i]) {
+				if(phraseArray[i] == DOT) {
 					return true;
 				}
 			}
@@ -124,9 +126,9 @@ public:
 	unsigned short getSize() const {return MAX_MORSE_PHRASE_LENGTH;}
 	unsigned short getLength() const {return firstOpenIndex;}
 
-	bool push(const MorseChar* morseCharacterToAdd) {
+	bool push(const MorseChar& morseCharacterToAdd) {
 		if(!phraseFull()) {
-			phraseArray[firstOpenIndex++] = *morseCharacterToAdd;
+			phraseArray[firstOpenIndex++] = morseCharacterToAdd;
 			return true;
 		}
 
@@ -134,7 +136,7 @@ public:
 	}
 	void resetPhrase() {
 		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-			phraseArray[i] = *NOTHING;
+			phraseArray[i] = NOTHING;
 		}
 
 		firstOpenIndex = 0;
@@ -174,10 +176,12 @@ public:
 
 	MorseCodeTreeNode* insert(MorsePhraseCharPair& dataToInsert, unsigned short depth = 0) {
 		if (dataToInsert == *data) {
+			Serial.println("no duplicates allowed");
 			return nullptr; //No duplicates allowed!
 		}
 
 		if(dataToInsert.isLessThan(depth)) {
+			Serial.println("lesser");
 			if(lesserNode == nullptr) {
 				lesserNode = new MorseCodeTreeNode(dataToInsert, this);
 				return lesserNode;
@@ -185,6 +189,7 @@ public:
 				return lesserNode->insert(dataToInsert, depth + 1);
 			}
 		} else {
+			Serial.println("greater");
 			if(greaterNode == nullptr) {
 				greaterNode = new MorseCodeTreeNode(dataToInsert, this);
 				return greaterNode;
