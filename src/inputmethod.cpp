@@ -26,14 +26,16 @@ void InputMethod::getMessageToSend(char *messageOut) {
 
 
 void InputMethod::pushCharacterToMessage(const char c) {
-	messageComplete = false;
+	if(c != CANCEL_CHAR) {
+		messageComplete = false;
 
-	if(messageToSendFirstEmptyIndex < MAX_MESSAGE_LENGTH) {
-		messageToSend[messageToSendFirstEmptyIndex] = c;
-		messageToSendFirstEmptyIndex += 1;
-	} else {
-		//Possibly log error (this should not happen)
-		commitMessage();
+		if(messageToSendFirstEmptyIndex < MAX_MESSAGE_LENGTH) {
+			messageToSend[messageToSendFirstEmptyIndex] = c;
+			messageToSendFirstEmptyIndex += 1;
+		} else {
+			//Possibly log error (this should not happen)
+			commitMessage();
+		}
 	}
 }
 

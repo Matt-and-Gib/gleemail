@@ -35,7 +35,7 @@ char MorseCodeInput::convertPhraseToCharacter() {
 	MorsePhraseCharPair* lookupResult = morseCodeTreeRoot.lookup(currentMorsePhrase);
 	if(!lookupResult) {
 		DebugLog::getLog().logError(MORSE_CODE_LOOKUP_FAILED);
-		return 'e';
+		return CANCEL_CHAR;
 	}
 
 	return lookupResult->character;

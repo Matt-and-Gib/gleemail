@@ -11,6 +11,8 @@ static constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEADER_TER
 
 static constexpr unsigned short MAX_MESSAGE_LENGTH = 32; //Maximum number of characters LCD display can print
 
+static constexpr char CANCEL_CHAR = (char)24;
+
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};
 enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};
 
