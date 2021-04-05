@@ -158,8 +158,10 @@ bool setupInputMethod() {
 		Serial.print(dat[i++]);
 	}
 	Serial.println("\nDone");*/
+	
 	input->setNetworkData(data);
 	delete[] data;
+
 	return true;
 }
 

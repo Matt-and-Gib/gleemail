@@ -6,6 +6,11 @@
 
 #include "global.h"
 
+//REMOVE ME
+#include "Arduino.h"
+#include "HardwareSerial.h"
+//REMOVE ME
+
 
 class Networking {
 private:
@@ -18,7 +23,7 @@ private:
 
 	char* server;
 
-	static constexpr short DATA_BUFFER_SIZE = 3072;
+	static constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
 
 	static constexpr char HEADER_END_STRING[] = "\r\n\r\n";
 	static constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
@@ -148,27 +153,37 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_REQUEST_TO_SERVER_HEADER_INVALID);
 		return nullptr;
 	}
-	delay(3000); //Adjust based on latency // *** OR: maybe run an infinite loop downloading data until client.status() == closed because server should issue disconnect once payload is delivered.
+	//delay(3000); //Adjust based on latency // *** OR: maybe run an infinite loop downloading data until client.status() == closed because server should issue disconnect once payload is delivered.
 
 	int bufferIndex = 0;
-	char dataBuffer[DATA_BUFFER_SIZE];
-	while(client.available()) {
-		if(bufferIndex < DATA_BUFFER_SIZE) {
-			dataBuffer[bufferIndex++] = client.read();
-		} else {
-			DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_OVERFLOW);
-			break;
+	char* dataBuffer = new char[DATA_BUFFER_SIZE];
+	while(client.connected()) {
+		while(client.available()) {
+			if(bufferIndex < DATA_BUFFER_SIZE) {
+				dataBuffer[bufferIndex++] = client.read();
+			} else {
+				DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_OVERFLOW);
+				return nullptr;
+				//break;
+			}
 		}
 	}
 
+
+
+
 	if(bufferIndex < DATA_BUFFER_SIZE/2) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED);
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED, false);
 	}
 
-	/*Serial.print("Used ");
+	/*for(int i = 0; i < bufferIndex; i += 1) {
+		Serial.print(dataBuffer[i]);
+	}*/
+
+	Serial.print("Used ");
 	Serial.print(bufferIndex);
 	Serial.print(" out of max ");
-	Serial.println(DATA_BUFFER_SIZE);*/
+	Serial.println(DATA_BUFFER_SIZE);
 
 	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
 	if(endOfHeaderIndex != -1) {
@@ -179,7 +194,7 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 		}
 		jsonData[LENGTH_OF_JSON_BODY] = '\0';
 
-		//delete[] dataBuffer;
+		delete[] dataBuffer;
 		return jsonData;
 	}
 

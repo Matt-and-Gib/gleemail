@@ -59,7 +59,7 @@ public:
 	MorsePhrase() {
 		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
 		/*for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-			phraseArray[i] = *NOTHING;
+			phraseArray[i] = NOTHING;
 		}*/
 
 		firstOpenIndex = 0;
