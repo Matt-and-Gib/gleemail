@@ -147,7 +147,7 @@ void MorseCodeInput::setNetworkData(const char* payload) {
 		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase)));
 	}
 
-	morseCodeTreeRoot.print();
+	//morseCodeTreeRoot.print();
 }
 
 

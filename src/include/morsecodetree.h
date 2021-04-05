@@ -4,8 +4,8 @@
 #include "binarysearchtree.h"
 
 /*	**	DELETE ME WHEN TESTING IS COMPLETE	**	*/
-#include "Arduino.h"
-#include "HardwareSerial.h"
+//#include "Arduino.h"
+//#include "HardwareSerial.h"
 /*	**	DELETE ME WHEN TESTING IS COMPLETE	**	*/
 
 /*
@@ -204,21 +204,27 @@ public:
 		}
 
 		if(phraseToConvert < data->morsePhrase) {
-			Serial.println("phraseToConvert < data->morsePhrase");
+			if(!lesserNode) {
+				return nullptr;
+			}
+
 			return lesserNode->lookup(phraseToConvert);
 		} else {
-			Serial.println("else : phraseToConvert > data->morsePhrase");
+			if(!greaterNode) {
+				return nullptr;
+			}
+
 			return greaterNode->lookup(phraseToConvert);
 		}
 	}
 
-	void print() {printSubtree(0, this, false);}
+	//void print() {printSubtree(0, this, false);}
 protected:
 	MorseCodeTreeNode* parentNode;
 	MorseCodeTreeNode* lesserNode;
 	MorseCodeTreeNode* greaterNode;
 private:
-	void printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
+	/*void printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
 		if(node) {
 			for(int i = 0; i < spacingIndex; i += 1) {
 				Serial.print(' ');
@@ -230,7 +236,7 @@ private:
 			printSubtree(spacingIndex + 4, node->lesserNode, true);
 			printSubtree(spacingIndex + 4, node->greaterNode, false);
 		}
-	}
+	}*/
 };
 
 #endif
