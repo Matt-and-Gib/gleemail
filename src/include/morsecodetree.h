@@ -81,8 +81,6 @@ public:
 				}
 			}
 		}
-
-		Serial.println();
 	}
 
 	~MorsePhrase() {delete[] phraseArray;}
@@ -176,12 +174,10 @@ public:
 
 	MorseCodeTreeNode* insert(MorsePhraseCharPair& dataToInsert, unsigned short depth = 0) {
 		if (dataToInsert == *data) {
-			Serial.println("no duplicates allowed");
 			return nullptr; //No duplicates allowed!
 		}
 
 		if(dataToInsert.isLessThan(depth)) {
-			Serial.println("lesser");
 			if(lesserNode == nullptr) {
 				lesserNode = new MorseCodeTreeNode(dataToInsert, this);
 				return lesserNode;
@@ -189,7 +185,6 @@ public:
 				return lesserNode->insert(dataToInsert, depth + 1);
 			}
 		} else {
-			Serial.println("greater");
 			if(greaterNode == nullptr) {
 				greaterNode = new MorseCodeTreeNode(dataToInsert, this);
 				return greaterNode;
@@ -209,8 +204,10 @@ public:
 		}
 
 		if(phraseToConvert < data->morsePhrase) {
+			Serial.println("phraseToConvert < data->morsePhrase");
 			return lesserNode->lookup(phraseToConvert);
 		} else {
+			Serial.println("else : phraseToConvert > data->morsePhrase");
 			return greaterNode->lookup(phraseToConvert);
 		}
 	}
