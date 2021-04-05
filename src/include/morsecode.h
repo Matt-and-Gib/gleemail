@@ -6,6 +6,9 @@
 
 #include <ArduinoJson.h>
 
+#include "Arduino.h"
+#include "HardwareSerial.h"
+
 
 //https://morsecode.world/international/morse2.html
 //https://morsecode.world/international/timing.html

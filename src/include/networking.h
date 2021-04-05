@@ -164,13 +164,9 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 			} else {
 				DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_OVERFLOW);
 				return nullptr;
-				//break;
 			}
 		}
 	}
-
-
-
 
 	if(bufferIndex < DATA_BUFFER_SIZE/2) {
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED, false);
