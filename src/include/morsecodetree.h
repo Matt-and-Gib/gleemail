@@ -43,6 +43,16 @@ public:
 		if(value == MORSE_CHAR_STATE::NOTHING) return true;
 		return (value == MORSE_CHAR_STATE::DOT);
 	};
+
+	const char* toString() {
+		if(value == MORSE_CHAR_STATE::DOT) {
+			return "DOT";
+		} else if(value == MORSE_CHAR_STATE::DASH) {
+			return "DASH";
+		} else {
+			return "NOTHING";
+		}
+	}
 protected:
 	MORSE_CHAR_STATE value;
 private:

@@ -21,24 +21,6 @@ MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const uns
 
 	pins[switchPinIndex] = switchDigitalPin;
 	pins[ledPinIndex] = ledDigitalPin;
-
-	currentMorsePhrase = MorsePhrase();
-
-	unsigned short index = 1;
-	MorseChar& c = currentMorsePhrase[index];
-	while(c != NOTHING) {
-		if(c == DOT) {
-			Serial.println("DOT");
-		} else if (c == DASH) {
-			Serial.println("DASH");
-		} else {
-			Serial.println("Uh oh");
-		}
-
-		c = currentMorsePhrase[++index];
-	}
-
-	Serial.println("done");
 }
 
 

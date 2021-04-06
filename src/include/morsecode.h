@@ -6,9 +6,6 @@
 
 #include <ArduinoJson.h>
 
-#include "Arduino.h"
-#include "HardwareSerial.h"
-
 
 //https://morsecode.world/international/morse2.html
 //https://morsecode.world/international/timing.html
@@ -94,7 +91,7 @@ private:
 	const unsigned short ledPinIndex = 1;
 	Pin *pins[3] = {&NULL_PIN, &NULL_PIN, &NULL_PIN};
 
-	MorsePhrase currentMorsePhrase;
+	MorsePhrase& currentMorsePhrase = *new MorsePhrase();
 
 	MorseCodeTreeNode& morseCodeTreeRoot = *new MorseCodeTreeNode(*new MorsePhraseCharPair('\0', *new MorsePhrase()), nullptr);
 
