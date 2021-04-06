@@ -4,11 +4,11 @@
 #include <WiFiUdp.h>
 
 
-IPAddress localIPAddress(192,168,1,110);
-const unsigned short localPort = 2390;
+IPAddress localIPAddress(192, 168, 1, 110);
+const unsigned short localPort = 29453;
 
-const IPAddress friendsIPAddress(75,72,145,98);
-const unsigned short friendsPort = 2390;
+const IPAddress friendsIPAddress(75, 72, 145, 98);
+const unsigned short friendsPort = 29453;
 
 WiFiUDP Udp;
 char sendBuffer[] = "Got your message!";
