@@ -16,7 +16,7 @@ public:
 	InputMethod();
 	~InputMethod();
 
-	virtual void setNetworkData(const char*) = 0;
+	virtual bool setNetworkData(const char*) = 0;
 	virtual const char* getServerAddress() const = 0;
 	virtual const char* const* getRequestHeaders() const = 0;
 

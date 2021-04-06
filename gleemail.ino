@@ -4,11 +4,11 @@
 #include "src/include/networking.h"
 
 
-static Networking *network = new Networking();
+static Networking* network = new Networking();
 
 static unsigned short pinIndex = 0;
-static InputMethod *input;// = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
-static char *messageOut;
+static InputMethod* input;// = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+static char* messageOut = new char[MAX_MESSAGE_LENGTH];
 
 
 void processInputMethod() {
@@ -85,7 +85,7 @@ void setupPins() {
 }
 
 
-bool setupNetwork() {
+bool connectToWiFi() {
 	unsigned short inputLength = 0;
 
 	Serial.println("Enter WiFi SSID:");
@@ -135,6 +135,47 @@ bool setupNetwork() {
 }
 
 
+//256.256.256.256
+//xxx.yyy.zzz.www
+//1.1.1.1
+void connectToPeer() {
+	char *ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
+	unsigned short *ipAddressBuffer = new unsigned short[4];
+
+	Serial.println("Enter your gleepal's IP address:");
+	while(!(Serial.available() > 0)) {
+		delay(250);
+	}
+
+	unsigned short readLength = 0;
+	for(int ipOctetIndex = 0; ipOctetIndex < 4; ipOctetIndex += 1) {
+		readLength = Serial.readBytesUntil('.', ipAddressInputBuffer, MAX_IP_ADDRESS_LENGTH);
+		if(readLength > 0) {
+			ipAddressBuffer[ipOctetIndex] = (int)ipAddressInputBuffer;
+		}
+	}
+
+	Serial.print(ipAddressBuffer[0]);
+	Serial.print(".");
+	Serial.print(ipAddressBuffer[1]);
+	Serial.print(".");
+	Serial.print(ipAddressBuffer[2]);
+	Serial.print(".");
+	Serial.println(ipAddressBuffer[3]);
+
+
+
+	/*Udp.begin(CONNECTION_PORT);
+	Udp.beginPacket(peerIPAddress, CONNECTION_PORT);
+
+	bool connectedToPeer = false;
+
+	while(!connectedToPeer) {
+		Serial.println("A")
+	}*/
+}
+
+
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
 	Serial.println("Downloading Input Method data...");
@@ -153,10 +194,9 @@ bool setupInputMethod() {
 	}
 	Serial.println("\nDone");*/
 
-	input->setNetworkData(data);
+	bool dataParsed = input->setNetworkData(data);
 	delete[] data;
-
-	return true;
+	return dataParsed;
 }
 
 
@@ -166,8 +206,8 @@ void setup() {
 		delay(250);
 	}
 
-	while(!setupNetwork()) {
-		delay(250);
+	while(!connectToWiFi()) {
+		delay(1000);
 	}
 
 	if(!setupInputMethod()) {
@@ -176,10 +216,11 @@ void setup() {
 
 	setupPins();
 
-	messageOut = new char[MAX_MESSAGE_LENGTH];
 	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		messageOut[i] = '\0';
 	}
+
+	connectToPeer();
 
 	Serial.println("Running");
 }

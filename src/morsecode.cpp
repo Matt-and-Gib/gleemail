@@ -122,10 +122,10 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long currentCycleTime) 
 }
 
 
-void MorseCodeInput::setNetworkData(const char* payload) {
+bool MorseCodeInput::setNetworkData(const char* payload) {
 	if(!payload) {
 		DebugLog::getLog().logError(JSON_NULLPTR_PAYLOAD);
-		return;
+		return false;
 	}
 
 	ArduinoJson::DynamicJsonDocument doc(CALCULATED_DOCUMENT_SIZE_IN_BYTES);
@@ -134,7 +134,7 @@ void MorseCodeInput::setNetworkData(const char* payload) {
 	if (error) {
 		DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
 		//Serial.println(error.f_str());
-		return;
+		return false;
 	}
 
 	const char* letter;
@@ -146,6 +146,7 @@ void MorseCodeInput::setNetworkData(const char* payload) {
 	}
 
 	//morseCodeTreeRoot.print();
+	return true;
 }
 
 

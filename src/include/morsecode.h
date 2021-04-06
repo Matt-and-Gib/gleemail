@@ -117,7 +117,7 @@ public:
 	MorseCodeInput(const unsigned short, const unsigned short);
 	~MorseCodeInput();
 
-	void setNetworkData(const char*);
+	bool setNetworkData(const char*);
 	const char* getServerAddress() const {return SERVER;}
 	const char* const* getRequestHeaders() const {return REQUEST_HEADERS;}
 

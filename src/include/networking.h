@@ -3,6 +3,7 @@
 
 #include <SPI.h>
 #include <WiFiNINA.h>
+#include <WiFiUdp.h>
 
 #include "global.h"
 
