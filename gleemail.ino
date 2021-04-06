@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "src/include/global.h"
-#include "src/include/morsecode.h"
 #include "src/include/networking.h"
+#include "src/include/tilttype.h"
 
 
 static Networking *network = new Networking();
@@ -135,14 +135,22 @@ bool setupNetwork() {
 }
 
 
+
+
+
 bool setupInputMethod() {
-	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+	Serial.println("begin");
+	input = new TiltTypeInput(); //new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+	Serial.println("end");
+	return true;
+
 	Serial.println("Downloading Input Method data...");
 	//input->setNetworkData(network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders()));
 	char *data = network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
 	if(!data) {
 		Serial.println("Unable to download data!");
 		printErrorCodes();
+		delete[] data;
 		return false;
 	}
 
@@ -166,14 +174,16 @@ void setup() {
 		delay(250);
 	}
 
-	while(!setupNetwork()) {
+	/*while(!setupNetwork()) {
 		delay(250);
-	}
+	}*/
 
+	Serial.println("Setup input method");
 	if(!setupInputMethod()) {
 		abort();
 	}
 
+	Serial.println("Setup pins");
 	setupPins();
 
 	messageOut = new char[MAX_MESSAGE_LENGTH];

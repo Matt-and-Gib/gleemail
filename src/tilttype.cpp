@@ -1,19 +1,23 @@
 #include "include/tilttype.h"
 
 
-TiltType::TiltType() {
-	if (!IMU.accelerationAvailable() || !IMU.gyroscopeAvailable()) {
+TiltTypeInput::TiltTypeInput() {
+	if(!IMU.begin()) {
+		Serial.println("uh oh");
+	}
+
+	if(!IMU.accelerationAvailable() || !IMU.gyroscopeAvailable()) {
 		Serial.println("Accelerometer and/or gyroscope not available!");
 	}
 }
 
 
-TiltType::~TiltType() {
+TiltTypeInput::~TiltTypeInput() {
 
 }
 
 
-void TiltType::processInput(const unsigned long currentMilliseconds) {
+void TiltTypeInput::processInput(const unsigned long currentMilliseconds) {
 	IMU.readAcceleration(accelerationX, accelerationY, accelerationZ);
 	IMU.readGyroscope(gyroscopeX, gyroscopeY, gyroscopeZ);
 
@@ -32,4 +36,6 @@ void TiltType::processInput(const unsigned long currentMilliseconds) {
 	Serial.print(", ");
 	Serial.print(gyroscopeZ);
 	Serial.println("}");
+
+	delay(1000);
 }

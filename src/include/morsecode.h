@@ -80,7 +80,7 @@ static constexpr const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
 };
 
 
-static constexpr unsigned short CALCULATED_DOCUMENT_SIZE_IN_BYTES = 3424;
+static constexpr unsigned short CALCULATED_DOCUMENT_SIZE_IN_BYTES = 3424; //Maybe calculate this at runtime?
 
 //Maybe the above static constexprs have to live outside the class in order to exist at compile-time?
 

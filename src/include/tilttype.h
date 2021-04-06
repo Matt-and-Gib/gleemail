@@ -9,19 +9,19 @@
 #include "HardwareSerial.h"
 
 
-class TiltType : public InputMethod {
+class TiltTypeInput : public InputMethod {
 public:
-	TiltType();
-	~TiltType();
+	TiltTypeInput();
+	~TiltTypeInput();
 
-	void setNetworkData(const char*);
-	const char* getServerAddress() const;
-	const char* const* getRequestHeaders() const;
+	void setNetworkData(const char*) {}
+	const char* getServerAddress() const {return nullptr;}
+	const char* const* getRequestHeaders() const {return nullptr;}
 
 	Pin **getPins() {return pins;}
 	void processInput(const unsigned long);
 
-	unsigned short getDebounceThreshold();
+	unsigned short getDebounceThreshold() {return 25;}
 private:
 	Pin *pins[1] = {&NULL_PIN};
 
