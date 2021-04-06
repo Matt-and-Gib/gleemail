@@ -50,6 +50,8 @@ To-do
 
 Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
 
+External libraries required: WiFiNINA, ArduinoJSON, and Arduino LSM6DS3
+
 ___
 
 ### <a name="instructions"></a>**Usage Instructions**
