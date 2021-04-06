@@ -7,8 +7,8 @@
 #include "global.h"
 
 //REMOVE ME
-#include "Arduino.h"
-#include "HardwareSerial.h"
+//#include "Arduino.h"
+//#include "HardwareSerial.h"
 //REMOVE ME
 
 
@@ -67,7 +67,7 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
 
 	WiFi.begin(networkName, networkPassword);
 	while(WiFi.status() == WL_IDLE_STATUS) {
-		delay(1000);
+		delay(250);
 	}
 
 	if(WiFi.status() == WL_CONNECTED) {
@@ -81,7 +81,6 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
 
 void Networking::disconnectFromNetwork() {
 	WiFi.disconnect();
-	delay(1000);
 }
 
 
@@ -153,7 +152,6 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_REQUEST_TO_SERVER_HEADER_INVALID);
 		return nullptr;
 	}
-	//delay(3000); //Adjust based on latency // *** OR: maybe run an infinite loop downloading data until client.status() == closed because server should issue disconnect once payload is delivered.
 
 	int bufferIndex = 0;
 	char* dataBuffer = new char[DATA_BUFFER_SIZE];
@@ -172,19 +170,21 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED, false);
 	}
 
-	/*for(int i = 0; i < bufferIndex; i += 1) {
+	/*//Print full response
+	for(int i = 0; i < bufferIndex; i += 1) {
 		Serial.print(dataBuffer[i]);
 	}*/
 
+	/*//Print buffer utilization
 	Serial.print("Used ");
 	Serial.print(bufferIndex);
 	Serial.print(" out of max ");
-	Serial.println(DATA_BUFFER_SIZE);
+	Serial.println(DATA_BUFFER_SIZE);*/
 
 	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
 	if(endOfHeaderIndex != -1) {
 		const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
-		char* jsonData = new char[LENGTH_OF_JSON_BODY + 1]; //TODO: Is this the correct length to add \0?
+		char* jsonData = new char[LENGTH_OF_JSON_BODY];
 		for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
 			jsonData[i] = dataBuffer[endOfHeaderIndex + i];
 		}

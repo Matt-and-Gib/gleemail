@@ -102,12 +102,7 @@ bool setupNetwork() {
 	if(inputLength >= network->getMaxSSIDLength()) {
 		DebugLog::getLog().logError(NETWORK_DATA_SSID_POSSIBLY_TRUNCATED);
 	}
-
 	userSSID[inputLength] = '\0';
-
-	/*
-		TODO: Check entered SSID against available SSIDs
-	*/
 
 	char userPassword[network->getMaxPasswordLength() + 1];
 	Serial.print("Enter password for ");
@@ -125,7 +120,6 @@ bool setupNetwork() {
 	if(inputLength >= network->getMaxPasswordLength()) {
 		DebugLog::getLog().logError(NETWORK_DATA_PASSWORD_POSSIBLY_TRUNCATED);
 	}
-
 	userPassword[inputLength] = '\0';
 
 	Serial.println("Attempting connection...");
