@@ -5,10 +5,10 @@
 
 
 IPAddress localIPAddress(192,168,1,110);
-const unsigned short localPort = 2390;
+const unsigned short localPort = 1900;
 
 const IPAddress friendsIPAddress(75,72,145,98);
-const unsigned short friendsPort = 2390;
+const unsigned short friendsPort = 1900;
 
 WiFiUDP Udp;
 char sendBuffer[] = "Got your message!";
