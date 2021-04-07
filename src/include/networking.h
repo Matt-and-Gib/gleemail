@@ -42,7 +42,7 @@ public:
 
 	bool messageAvailable();
 	bool readMessage(char*, const unsigned short);
-	bool writeMessage(char*[]);
+	bool writeMessage(char*);
 
 	bool connectToPeer(IPAddress&);
 
@@ -100,21 +100,16 @@ bool Networking::messageAvailable() {
 
 
 bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
-	/*
-	char test = 'M';
-	*buffer[0] = test;
-	return true;
-	*/
 	packetSize = udp.read(buffer, bufferLength);
 	buffer[packetSize] = '\0';
 	return true;
 }
 
 
-bool Networking::writeMessage(char* buffer[]) {
+bool Networking::writeMessage(char* buffer) {
 	if(peerIPAddress) {
 		udp.beginPacket(peerIPAddress, CONNECTION_PORT);
-		udp.write(*buffer);
+		udp.write(buffer);
 		udp.endPacket();
 		return true;
 	} else {

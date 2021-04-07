@@ -81,7 +81,7 @@ void updateDisplay() {
 
 void sendNetworkMessage() {
 	if(pendingMessageToSend) {
-		if(!network->writeMessage(&messageToSend)) {
+		if(!network->writeMessage(messageToSend)) {
 			
 		}
 	}
@@ -99,23 +99,22 @@ void printErrorCodes() {
 
 
 void loop() {
-	Serial.println("Fus");
 	getIncomingMessage();
-	Serial.println("Ro");
+	//Serial.println("Ro");
 	processInputMethod();
-	Serial.println("Dah");
+	//Serial.println("Dah");
 	updateMessageToSend();
-	Serial.println("Dragon");
+	//Serial.println("Dragon");
 	updateDisplay();
-	Serial.println("Jazz");
+	//Serial.println("Jazz");
 	sendNetworkMessage();
-	Serial.println("Hands");
+	//Serial.println("Hands");
 	printErrorCodes();
-	Serial.println("Bro");
+	//Serial.println("Bro");
 
 	pendingMessageToSend = false;
 	pendingMessageReceived = false;
-	delay(500);
+	//delay(500);
 }
 
 
