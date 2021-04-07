@@ -21,6 +21,7 @@ private:
 	static constexpr unsigned int MAX_PASSWORD_LENGTH = 63;
 
 	WiFiClient client;
+	WiFiUDP Udp;
 
 	char* server;
 
@@ -36,6 +37,8 @@ public:
 
 	bool connectToNetwork(char*, char*);
 	void disconnectFromNetwork();
+
+	bool connectToPeer(unsigned short (&)[4]);
 
 	bool connectToServer(const char*);
 	bool sendRequestToServer(const char* const*);
@@ -82,6 +85,35 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
 
 void Networking::disconnectFromNetwork() {
 	WiFi.disconnect();
+}
+
+
+bool Networking::connectToPeer(unsigned short (&ipBlocks)[4]) {
+	Udp.begin(CONNECTION_PORT);
+
+	IPAddress friendsIP(ipBlocks[0], ipBlocks[1], ipBlocks[2], ipBlocks[3]);
+
+	Udp.beginPacket(friendsIP, CONNECTION_PORT);
+	Udp.write(NETWORK_HANDSHAKE_MESSAGE);
+	Udp.endPacket();
+
+	unsigned short packetSize = 0;
+	char* receiveBuffer;
+	while(true) {
+		if(Udp.parsePacket()) {
+			packetSize = Udp.read(receiveBuffer, 255);
+			receiveBuffer[packetSize] = '\0';
+			
+			if(receiveBuffer == NETWORK_HANDSHAKE_MESSAGE) { //TODO: implement me! (this is not the correct way to compare c strings)
+				return true;
+			} else {
+				DebugLog::getLog().logError(ERROR_CODE::NETWORK_INVALID_HANDSHAKE_MESSAGE);
+				return false;
+			}
+		}
+
+		delay(1000);
+	}
 }
 
 

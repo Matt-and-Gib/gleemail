@@ -135,44 +135,44 @@ bool connectToWiFi() {
 }
 
 
-//256.256.256.256
-//xxx.yyy.zzz.www
-//1.1.1.1
 void connectToPeer() {
-	char *ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
-	unsigned short *ipAddressBuffer = new unsigned short[4];
+	char ipAddressInputBuffer[MAX_IP_ADDRESS_LENGTH];
+	char* ipAddressInputSubstringBuffer;
+	unsigned short ipAddressParts[4];
+	size_t ipAddressPartsIndex = 0;
 
 	Serial.println("Enter your gleepal's IP address:");
 	while(!(Serial.available() > 0)) {
 		delay(250);
 	}
 
-	unsigned short readLength = 0;
-	for(int ipOctetIndex = 0; ipOctetIndex < 4; ipOctetIndex += 1) {
-		readLength = Serial.readBytesUntil('.', ipAddressInputBuffer, MAX_IP_ADDRESS_LENGTH);
-		if(readLength > 0) {
-			ipAddressBuffer[ipOctetIndex] = (int)ipAddressInputBuffer;
-		}
+	size_t readLength = Serial.readBytesUntil('\n', ipAddressInputBuffer, MAX_IP_ADDRESS_LENGTH);
+	ipAddressInputBuffer[readLength] = '\0';
+	if(readLength < (MAX_IP_ADDRESS_LENGTH / 2)) {
+		return;
 	}
 
-	Serial.print(ipAddressBuffer[0]);
+	while(Serial.available()) {
+		Serial.read();
+	}
+
+	ipAddressInputSubstringBuffer = strtok(ipAddressInputBuffer, ".");
+	while(ipAddressInputSubstringBuffer != nullptr) {
+		ipAddressParts[ipAddressPartsIndex++] = atoi(ipAddressInputSubstringBuffer);
+		ipAddressInputSubstringBuffer = strtok(NULL, ".");
+	}
+
+	Serial.print("Waiting for gleepal at ");
+	Serial.print(ipAddressParts[0]);
 	Serial.print(".");
-	Serial.print(ipAddressBuffer[1]);
+	Serial.print(ipAddressParts[1]);
 	Serial.print(".");
-	Serial.print(ipAddressBuffer[2]);
+	Serial.print(ipAddressParts[2]);
 	Serial.print(".");
-	Serial.println(ipAddressBuffer[3]);
+	Serial.print(ipAddressParts[3]);
+	Serial.println("...");
 
-
-
-	/*Udp.begin(CONNECTION_PORT);
-	Udp.beginPacket(peerIPAddress, CONNECTION_PORT);
-
-	bool connectedToPeer = false;
-
-	while(!connectedToPeer) {
-		Serial.println("A")
-	}*/
+	network->connectToPeer(ipAddressParts);
 }
 
 
