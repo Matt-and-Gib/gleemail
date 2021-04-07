@@ -10,6 +10,11 @@ static unsigned short pinIndex = 0;
 static char* messageOut = new char[MAX_MESSAGE_LENGTH];
 
 
+void getIncomingMessage() {
+
+}
+
+
 void processInputMethod() {
 	pinIndex = 0;
 
@@ -37,6 +42,25 @@ void processInputMethod() {
 }
 
 
+void updateDisplay() {
+	//peek messageToSend
+	//Push peek to inputMessage - write inputMessage to LCD
+	if(input->isMessageReady()) {
+		//Serial.print("message ready! : ");
+		input->getMessageToSend(messageOut);
+		Serial.println(messageOut);
+		//sendMessage(inputMethod->getMessageToSend());
+	}
+	//messageIn = receiveMessage();
+	//printMessage(); //write to LCD buffer, I guess
+}
+
+
+void sendNetworkMessage() {
+
+}
+
+
 void printErrorCodes() {
 	ERROR_CODE e = DebugLog::getLog().getError();
 	while(e != ERROR_CODE::NONE) {
@@ -48,18 +72,10 @@ void printErrorCodes() {
 
 
 void loop() {
+	getIncomingMessage();
 	processInputMethod();
-	//peek messageToSend
-	//Push peek to inputMessage - write inputMessage to LCD
-	if(input->isMessageReady()) {
-		//Serial.print("message ready! : ");
-		input->getMessageToSend(messageOut);
-		Serial.println(messageOut);
-		//sendMessage(inputMethod->getMessageToSend());
-	}
-	//messageIn = receiveMessage();
-	//printMessage(); //write to LCD buffer, I guess
-
+	updateDisplay();
+	sendNetworkMessage();
 	printErrorCodes();
 }
 
