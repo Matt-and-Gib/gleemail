@@ -3,6 +3,7 @@
 
 #include <SPI.h>
 #include <WiFiNINA.h>
+#include <WiFiUdp.h>
 
 #include "global.h"
 
@@ -16,17 +17,18 @@ class Networking {
 private:
 	char* ssid;
 	char* password;
-	static constexpr unsigned short MAX_SSID_LENGTH = 32;
-	static constexpr unsigned int MAX_PASSWORD_LENGTH = 63;
+	static const constexpr unsigned short MAX_SSID_LENGTH = 32;
+	static const constexpr unsigned int MAX_PASSWORD_LENGTH = 63;
 
 	WiFiClient client;
+	WiFiUDP udp;
 
 	char* server;
 
-	static constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
+	static const constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
 
-	static constexpr char HEADER_END_STRING[] = "\r\n\r\n";
-	static constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
+	static const constexpr char HEADER_END_STRING[] = "\r\n\r\n";
+	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
 
 	short findEndOfHeaderIndex(const char*, const unsigned short);
 public:
@@ -35,6 +37,8 @@ public:
 
 	bool connectToNetwork(char*, char*);
 	void disconnectFromNetwork();
+
+	bool connectToPeer(IPAddress&);
 
 	bool connectToServer(const char*);
 	bool sendRequestToServer(const char* const*);
@@ -81,6 +85,43 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
 
 void Networking::disconnectFromNetwork() {
 	WiFi.disconnect();
+}
+
+
+bool Networking::connectToPeer(IPAddress& connectToIP) {
+	udp.begin(CONNECTION_PORT);
+
+	udp.beginPacket(connectToIP, CONNECTION_PORT);
+	udp.write(NETWORK_HANDSHAKE_CHARACTER);
+	udp.endPacket();
+
+	unsigned short packetSize = 0;
+	char* receiveBuffer = new char[2];
+	while(true) {
+		if(udp.parsePacket()) {
+			packetSize = udp.read(receiveBuffer, 2);
+			receiveBuffer[packetSize] = '\0';
+
+			if(receiveBuffer[0] == NETWORK_HANDSHAKE_CHARACTER) {
+				if(udp.remoteIP() != connectToIP) {
+					DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_IP, false);
+					return false;
+				} else {
+					udp.beginPacket(udp.remoteIP(), CONNECTION_PORT);
+					udp.write(NETWORK_HANDSHAKE_CHARACTER);
+					udp.endPacket();
+					return true;
+				}
+			} else {
+				DebugLog::getLog().logError(ERROR_CODE::NETWORK_INVALID_HANDSHAKE_MESSAGE);
+				return false;
+			}
+		}
+
+		delay(1000);
+	}
+
+	delete[] receiveBuffer;
 }
 
 

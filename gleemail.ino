@@ -4,11 +4,10 @@
 #include "src/include/networking.h"
 
 
-static Networking *network = new Networking();
-
+static Networking* network = new Networking();
+static InputMethod* input;
 static unsigned short pinIndex = 0;
-static InputMethod *input;// = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
-static char *messageOut;
+static char* messageOut = new char[MAX_MESSAGE_LENGTH];
 
 
 void processInputMethod() {
@@ -85,7 +84,7 @@ void setupPins() {
 }
 
 
-bool setupNetwork() {
+bool connectToWiFi() {
 	unsigned short inputLength = 0;
 
 	Serial.println("Enter WiFi SSID:");
@@ -135,6 +134,47 @@ bool setupNetwork() {
 }
 
 
+void connectToPeer() {
+	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
+	char* ipAddressInputSubstringBuffer;
+	uint8_t ipAddressParts[4];
+	size_t ipAddressPartsIndex = 0;
+
+	Serial.println("Enter your gleepal's IP address:");
+	while(!(Serial.available() > 0)) {
+		delay(250);
+	}
+
+	size_t readLength = Serial.readBytesUntil('\n', ipAddressInputBuffer, MAX_IP_ADDRESS_LENGTH);
+	ipAddressInputBuffer[readLength] = '\0';
+	while(Serial.available()) {
+		Serial.read();
+	}
+
+	ipAddressInputSubstringBuffer = strtok(ipAddressInputBuffer, ".");
+	while(ipAddressInputSubstringBuffer != nullptr) {
+		ipAddressParts[ipAddressPartsIndex++] = atoi(ipAddressInputSubstringBuffer);
+		ipAddressInputSubstringBuffer = strtok(NULL, ".");
+	}
+
+	IPAddress friendsIP(ipAddressParts[0], ipAddressParts[1], ipAddressParts[2], ipAddressParts[3]);
+
+	Serial.print("Waiting for gleepal at ");
+	Serial.print(friendsIP);
+	Serial.println("...");
+
+	if(!network->connectToPeer(friendsIP)) {
+		Serial.println("Unable to connect to gleepal :(");
+		return;
+	}
+
+	Serial.println("Connected to gleepal!");
+
+	delete[] ipAddressInputSubstringBuffer;
+	delete[] ipAddressInputBuffer;
+}
+
+
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
 	Serial.println("Downloading Input Method data...");
@@ -153,10 +193,9 @@ bool setupInputMethod() {
 	}
 	Serial.println("\nDone");*/
 
-	input->setNetworkData(data);
+	bool dataParsed = input->setNetworkData(data);
 	delete[] data;
-
-	return true;
+	return dataParsed;
 }
 
 
@@ -166,8 +205,12 @@ void setup() {
 		delay(250);
 	}
 
-	while(!setupNetwork()) {
-		delay(250);
+	Serial.println("Welcome to glEEmail!");
+	Serial.println(GLEEMAIL_VERSION);
+	Serial.println();
+
+	while(!connectToWiFi()) {
+		delay(1000);
 	}
 
 	if(!setupInputMethod()) {
@@ -176,10 +219,11 @@ void setup() {
 
 	setupPins();
 
-	messageOut = new char[MAX_MESSAGE_LENGTH];
 	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		messageOut[i] = '\0';
 	}
+
+	connectToPeer();
 
 	Serial.println("Running");
 }
