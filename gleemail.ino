@@ -5,7 +5,7 @@
 
 
 static Networking* network = new Networking();
-static InputMethod* input;// = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+static InputMethod* input;
 static unsigned short pinIndex = 0;
 static char* messageOut = new char[MAX_MESSAGE_LENGTH];
 
@@ -206,6 +206,8 @@ void setup() {
 	}
 
 	Serial.println("Welcome to glEEmail!");
+	Serial.println(GLEEMAIL_VERSION);
+	Serial.println();
 
 	while(!connectToWiFi()) {
 		delay(1000);

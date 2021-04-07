@@ -17,18 +17,18 @@ class Networking {
 private:
 	char* ssid;
 	char* password;
-	static constexpr unsigned short MAX_SSID_LENGTH = 32;
-	static constexpr unsigned int MAX_PASSWORD_LENGTH = 63;
+	static const constexpr unsigned short MAX_SSID_LENGTH = 32;
+	static const constexpr unsigned int MAX_PASSWORD_LENGTH = 63;
 
 	WiFiClient client;
 	WiFiUDP udp;
 
 	char* server;
 
-	static constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
+	static const constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
 
-	static constexpr char HEADER_END_STRING[] = "\r\n\r\n";
-	static constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
+	static const constexpr char HEADER_END_STRING[] = "\r\n\r\n";
+	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
 
 	short findEndOfHeaderIndex(const char*, const unsigned short);
 public:
@@ -38,7 +38,6 @@ public:
 	bool connectToNetwork(char*, char*);
 	void disconnectFromNetwork();
 
-	//bool connectToPeer(uint8_t (&)[4]);
 	bool connectToPeer(IPAddress&);
 
 	bool connectToServer(const char*);
@@ -89,12 +88,8 @@ void Networking::disconnectFromNetwork() {
 }
 
 
-//bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
-	bool Networking::connectToPeer(IPAddress& connectToIP) {
+bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
-
-	//IPAddress friendsIP(ipBlocks[0], ipBlocks[1], ipBlocks[2], ipBlocks[3]);
-	//Serial.println(friendsIP);
 
 	udp.beginPacket(connectToIP, CONNECTION_PORT);
 	udp.write(NETWORK_HANDSHAKE_CHARACTER);
