@@ -80,10 +80,15 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
 		delay(250);
 	}
 
+	if(WiFi.status() == WL_CONNECT_FAILED) {
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_CONNECTION_FAILED, false);
+		return false;
+	}
+
 	if(WiFi.status() == WL_CONNECTED) {
 		return true;
 	} else {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_CONNECTION_FAILED, false);
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNKNOWN_STATUS);
 		return false;
 	}
 }

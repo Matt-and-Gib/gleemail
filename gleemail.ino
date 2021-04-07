@@ -100,21 +100,14 @@ void printErrorCodes() {
 
 void loop() {
 	getIncomingMessage();
-	//Serial.println("Ro");
 	processInputMethod();
-	//Serial.println("Dah");
 	updateMessageToSend();
-	//Serial.println("Dragon");
 	updateDisplay();
-	//Serial.println("Jazz");
 	sendNetworkMessage();
-	//Serial.println("Hands");
 	printErrorCodes();
-	//Serial.println("Bro");
 
 	pendingMessageToSend = false;
 	pendingMessageReceived = false;
-	//delay(500);
 }
 
 
