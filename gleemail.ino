@@ -253,6 +253,7 @@ void setup() {
 	}
 
 	Serial.println("Welcome to glEEmail!");
+	Serial.print("Version ");
 	Serial.println(GLEEMAIL_VERSION);
 	Serial.println();
 

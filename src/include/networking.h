@@ -146,6 +146,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 					DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_IP, false);
 					return false;
 				} else {
+					Serial.println("A-Okay to chat with your bud");
 					*peerIPAddress = connectToIP;
 					Serial.println(*peerIPAddress);
 					udp.beginPacket(*peerIPAddress, CONNECTION_PORT);

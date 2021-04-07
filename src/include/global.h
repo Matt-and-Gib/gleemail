@@ -1,7 +1,7 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-static const constexpr char GLEEMAIL_VERSION[] = "0.1a";
+static const constexpr char GLEEMAIL_VERSION[] = "Alpha 0.01";
 
 static const constexpr bool OFFLINE_MODE = true;
 
