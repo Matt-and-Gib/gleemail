@@ -5,7 +5,7 @@ static constexpr unsigned short BAUD_RATE = 9600;
 
 static constexpr unsigned short MAX_IP_ADDRESS_LENGTH = 15;
 static constexpr unsigned short CONNECTION_PORT = 29453;
-static constexpr char NETWORK_HANDSHAKE_MESSAGE[] = "Ahoy-hoy";
+static constexpr char NETWORK_HANDSHAKE_CHARACTER = 1;
 
 static constexpr char NETWORK_HEADER_USER_AGENT[] = "User-Agent: ArduinoWifiClient";
 static constexpr char NETWORK_HEADER_ACCEPTED_RETURN_TYPE[] = "Accept: */*";
