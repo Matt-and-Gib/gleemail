@@ -100,7 +100,7 @@ void printErrorCodes() {
 
 void loop() {
 	Serial.println("Fus");
-	getIncomingMessage();
+	//getIncomingMessage();
 	Serial.println("Ro");
 	processInputMethod();
 	Serial.println("Dah");
