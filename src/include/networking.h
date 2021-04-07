@@ -127,6 +127,9 @@ bool Networking::writeMessage(char* buffer[]) {
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
+	Serial.print("Sending handshake to: ");
+	Serial.println(connectToIP);
+
 	udp.beginPacket(connectToIP, CONNECTION_PORT);
 	udp.write(NETWORK_HANDSHAKE_CHARACTER);
 	udp.endPacket();
@@ -134,6 +137,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	char* receiveBuffer = new char[2];
 	while(true) {
 		if(udp.parsePacket()) {
+			Serial.println("Got packet");
 			packetSize = udp.read(receiveBuffer, 2);
 			receiveBuffer[packetSize] = '\0';
 
