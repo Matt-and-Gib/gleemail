@@ -37,7 +37,7 @@ public:
 	Networking();
 	~Networking();
 
-	bool connectToNetwork(char*, char*);
+	bool connectToNetwork(char*, char*, bool);
 	void disconnectFromNetwork();
 
 	bool messageAvailable();
@@ -65,7 +65,7 @@ Networking::~Networking() {
 }
 
 
-bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
+bool Networking::connectToNetwork(char* networkName, char* networkPassword, bool retry = true) {
 	if(networkName == nullptr || networkPassword == nullptr) {
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_PASSED_INVALID_PARAMETER);
 		return false;
@@ -82,7 +82,12 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword) {
 
 	if(WiFi.status() == WL_CONNECT_FAILED) {
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_CONNECTION_FAILED, false);
-		return false;
+		if(retry) {
+			delay(500);
+			return connectToNetwork(networkName, networkPassword, false);
+		} else {
+			return false;
+		}
 	}
 
 	if(WiFi.status() == WL_CONNECTED) {
