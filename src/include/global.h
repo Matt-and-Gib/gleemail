@@ -17,7 +17,7 @@ static const constexpr char NETWORK_HEADER_CONNECTION_LIFETIME[] = "Connection: 
 static const constexpr char HEADER_TERMINATION[] = "\r\n\r\n";
 static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEADER_TERMINATION)/sizeof(HEADER_TERMINATION[0]) - 1;
 
-static const constexpr unsigned short MAX_MESSAGE_LENGTH = 32; //Maximum number of characters LCD display can print
+static const constexpr unsigned short MAX_MESSAGE_LENGTH = 16; //Maximum number of characters LCD display can print per line
 
 static const constexpr char CANCEL_CHAR = (char)24;
 
@@ -73,6 +73,7 @@ enum ERROR_CODE: short {
 	NETWORK_DATA_PASSWORD_POSSIBLY_TRUNCATED = DEBUG_LOG_NETWORK_OFFSET + 10,
 	NETWORK_INVALID_HANDSHAKE_MESSAGE = DEBUG_LOG_NETWORK_OFFSET + 11,
 	NETWORK_UNEXPECTED_HANDSHAKE_IP = DEBUG_LOG_NETWORK_OFFSET + 12,
+	NETWORK_INVALID_PEER_IP_ADDRESS = DEBUG_LOG_NETWORK_OFFSET + 13,
 
 	//JSON range: 90 - 129
 	JSON_NULLPTR_PAYLOAD = DEBUG_LOG_JSON_OFFSET + 0,

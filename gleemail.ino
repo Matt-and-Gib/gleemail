@@ -7,11 +7,19 @@
 static Networking* network = new Networking();
 static InputMethod* input;
 static unsigned short pinIndex = 0;
-static char* messageOut = new char[MAX_MESSAGE_LENGTH];
+static char* messageToSend = new char[MAX_MESSAGE_LENGTH + 1];
+static char* messageReceived = new char[MAX_MESSAGE_LENGTH + 1];
+bool pendingMessageToSend = false;
 
 
 void getIncomingMessage() {
+	if(network->messageAvailable()) {
+		if(network->readMessage(&messageReceived, MAX_MESSAGE_LENGTH)) {
 
+		} else {
+
+		}
+	}
 }
 
 
@@ -42,13 +50,25 @@ void processInputMethod() {
 }
 
 
+void updateMessageToSend() {
+	if(input->isMessageReady()) {
+		input->getMessageToSend(messageToSend);
+		pendingMessageToSend = true;
+	}
+}
+
+
 void updateDisplay() {
 	//peek messageToSend
 	//Push peek to inputMessage - write inputMessage to LCD
-	if(input->isMessageReady()) {
+	if(pendingMessageToSend) {
 		//Serial.print("message ready! : ");
-		input->getMessageToSend(messageOut);
-		Serial.println(messageOut);
+		//input->getMessageToSend(messageToSend);
+		Serial.print("Received: ");
+		Serial.println(messageReceived);
+
+		Serial.print("Your message: ");
+		Serial.println(messageToSend);
 		//sendMessage(inputMethod->getMessageToSend());
 	}
 	//messageIn = receiveMessage();
@@ -57,7 +77,11 @@ void updateDisplay() {
 
 
 void sendNetworkMessage() {
-
+	if(pendingMessageToSend) {
+		if(!network->writeMessage(&messageToSend)) {
+			
+		}
+	}
 }
 
 
@@ -74,9 +98,12 @@ void printErrorCodes() {
 void loop() {
 	getIncomingMessage();
 	processInputMethod();
+	updateMessageToSend();
 	updateDisplay();
 	sendNetworkMessage();
 	printErrorCodes();
+
+	pendingMessageToSend = false;
 }
 
 
@@ -225,6 +252,19 @@ void setup() {
 	Serial.println(GLEEMAIL_VERSION);
 	Serial.println();
 
+
+
+	/*for(int i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
+		messageToSend[i] = '\0';
+		messageReceived[i] = '\0';
+	}
+	messageReceived[0] = 'G';
+	Serial.println(messageReceived);
+	network->readMessage(&messageReceived, MAX_MESSAGE_LENGTH);
+	Serial.println(messageReceived);*/
+
+
+
 	while(!connectToWiFi()) {
 		delay(1000);
 	}
@@ -235,8 +275,9 @@ void setup() {
 
 	setupPins();
 
-	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
-		messageOut[i] = '\0';
+	for(int i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
+		messageToSend[i] = '\0';
+		messageReceived[i] = '\0';
 	}
 
 	connectToPeer();

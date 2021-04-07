@@ -22,8 +22,10 @@ private:
 
 	WiFiClient client;
 	WiFiUDP udp;
+	IPAddress* peerIPAddress = nullptr;
 
 	char* server;
+	unsigned short packetSize = 0;
 
 	static const constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
 
@@ -37,6 +39,10 @@ public:
 
 	bool connectToNetwork(char*, char*);
 	void disconnectFromNetwork();
+
+	bool messageAvailable();
+	bool readMessage(char*[], const unsigned short);
+	bool writeMessage(char*[]);
 
 	bool connectToPeer(IPAddress&);
 
@@ -88,6 +94,36 @@ void Networking::disconnectFromNetwork() {
 }
 
 
+bool Networking::messageAvailable() {
+	return udp.parsePacket();
+}
+
+
+bool Networking::readMessage(char* buffer[], const unsigned short bufferLength) {
+	/*
+	char test = 'M';
+	*buffer[0] = test;
+	return true;
+	*/
+	packetSize = udp.read(*buffer, bufferLength);
+	*buffer[packetSize] = '\0';
+	return true;
+}
+
+
+bool Networking::writeMessage(char* buffer[]) {
+	if(peerIPAddress) {
+		udp.beginPacket(*peerIPAddress, CONNECTION_PORT);
+		udp.write(*buffer);
+		udp.endPacket();
+		return true;
+	} else {
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_INVALID_PEER_IP_ADDRESS);
+		return false;
+	}
+}
+
+
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
@@ -95,7 +131,6 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.write(NETWORK_HANDSHAKE_CHARACTER);
 	udp.endPacket();
 
-	unsigned short packetSize = 0;
 	char* receiveBuffer = new char[2];
 	while(true) {
 		if(udp.parsePacket()) {
@@ -107,7 +142,8 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 					DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_IP, false);
 					return false;
 				} else {
-					udp.beginPacket(udp.remoteIP(), CONNECTION_PORT);
+					*peerIPAddress = udp.remoteIP();
+					udp.beginPacket(*peerIPAddress, CONNECTION_PORT);
 					udp.write(NETWORK_HANDSHAKE_CHARACTER);
 					udp.endPacket();
 					return true;
