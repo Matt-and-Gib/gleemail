@@ -313,6 +313,9 @@
                 <mxCell id="kJ7j45__KK4aHd4tXS-V-0" value="printErrorCodes" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1MvEsiqucxaYDKqLwKRQ-1">
                     <mxGeometry x="460" y="510" width="120" height="60" as="geometry"/>
                 </mxCell>
+                <mxCell id="kJ7j45__KK4aHd4tXS-V-2" value="Actor" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1MvEsiqucxaYDKqLwKRQ-1">
+                    <mxGeometry x="280" y="560" width="80" height="130" as="geometry"/>
+                </mxCell>
             </root>
         </mxGraphModel>
     </diagram>
