@@ -91,8 +91,15 @@ void Networking::disconnectFromNetwork() {
 bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
 	udp.begin(CONNECTION_PORT);
 
-	Serial.print("My local IP: ");
-	Serial.println(WiFi.localIP());
+	Serial.print("Sending to: ");
+	Serial.print(ipBlocks[0]);
+	Serial.print(".");
+	Serial.print(ipBlocks[1]);
+	Serial.print(".");
+	Serial.print(ipBlocks[2]);
+	Serial.print(".");
+	Serial.print(ipBlocks[3]);
+	Serial.println("...");
 
 	IPAddress friendsIP(ipBlocks[0], ipBlocks[1], ipBlocks[2], ipBlocks[3]);
 
