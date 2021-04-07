@@ -5,9 +5,8 @@
 
 
 static Networking* network = new Networking();
-
-static unsigned short pinIndex = 0;
 static InputMethod* input;// = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+static unsigned short pinIndex = 0;
 static char* messageOut = new char[MAX_MESSAGE_LENGTH];
 
 
@@ -136,7 +135,7 @@ bool connectToWiFi() {
 
 
 void connectToPeer() {
-	char ipAddressInputBuffer[MAX_IP_ADDRESS_LENGTH];
+	char ipAddressInputBuffer[MAX_IP_ADDRESS_LENGTH + 1];
 	char* ipAddressInputSubstringBuffer;
 	unsigned short ipAddressParts[4];
 	size_t ipAddressPartsIndex = 0;
@@ -147,11 +146,8 @@ void connectToPeer() {
 	}
 
 	size_t readLength = Serial.readBytesUntil('\n', ipAddressInputBuffer, MAX_IP_ADDRESS_LENGTH);
+	Serial.println(readLength);
 	ipAddressInputBuffer[readLength] = '\0';
-	if(readLength < (MAX_IP_ADDRESS_LENGTH / 2)) {
-		return;
-	}
-
 	while(Serial.available()) {
 		Serial.read();
 	}
@@ -172,7 +168,12 @@ void connectToPeer() {
 	Serial.print(ipAddressParts[3]);
 	Serial.println("...");
 
-	network->connectToPeer(ipAddressParts);
+	if(!network->connectToPeer(ipAddressParts)) {
+		Serial.println("Unable to connect to gleepal :(");
+		return;
+	}
+
+	Serial.println("Connected to gleepal!");
 }
 
 

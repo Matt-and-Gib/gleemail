@@ -103,7 +103,7 @@ bool Networking::connectToPeer(unsigned short (&ipBlocks)[4]) {
 		if(udp.parsePacket()) {
 			packetSize = udp.read(receiveBuffer, 255);
 			receiveBuffer[packetSize] = '\0';
-			
+
 			if(receiveBuffer[0] == NETWORK_HANDSHAKE_CHARACTER) { //TODO: test me!
 				udp.beginPacket(udp.remoteIP(), CONNECTION_PORT);
 				udp.write(NETWORK_HANDSHAKE_CHARACTER);
