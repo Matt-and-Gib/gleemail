@@ -22,7 +22,7 @@ private:
 
 	WiFiClient client;
 	WiFiUDP udp;
-	IPAddress* peerIPAddress = nullptr;
+	IPAddress peerIPAddress;
 
 	char* server;
 	unsigned short packetSize = 0;
@@ -113,7 +113,7 @@ bool Networking::readMessage(char* buffer[], const unsigned short bufferLength) 
 
 bool Networking::writeMessage(char* buffer[]) {
 	if(peerIPAddress) {
-		udp.beginPacket(*peerIPAddress, CONNECTION_PORT);
+		udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 		udp.write(*buffer);
 		udp.endPacket();
 		return true;
@@ -147,9 +147,10 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 					return false;
 				} else {
 					Serial.println("A-Okay to chat with your bud");
-					*peerIPAddress = connectToIP;
-					Serial.println(*peerIPAddress);
-					udp.beginPacket(*peerIPAddress, CONNECTION_PORT);
+					peerIPAddress = connectToIP;
+
+					Serial.println(peerIPAddress);
+					udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 					udp.write(NETWORK_HANDSHAKE_CHARACTER);
 					udp.endPacket();
 					return true;
