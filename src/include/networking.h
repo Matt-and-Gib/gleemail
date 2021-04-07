@@ -104,13 +104,17 @@ bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
 	Serial.println("Sent handshake. Listening now.");
 
 	unsigned short packetSize = 0;
-	char* receiveBuffer = new char[256];
+	//char* receiveBuffer = new char[256];
+	char receiveBuffer[256];
 	while(true) {
 		if(udp.parsePacket()) {
 			Serial.println("Got packet!");
 
 			packetSize = udp.read(receiveBuffer, 255);
 			receiveBuffer[packetSize] = '\0';
+
+			Serial.print("Packet received: ");
+			Serial.println(receiveBuffer[0]);
 
 			if(receiveBuffer[0] == NETWORK_HANDSHAKE_CHARACTER) { //TODO: test me!
 				udp.beginPacket(udp.remoteIP(), CONNECTION_PORT);
@@ -126,7 +130,7 @@ bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
 		delay(1000);
 	}
 
-	delete[] receiveBuffer;
+	//delete[] receiveBuffer;
 }
 
 
