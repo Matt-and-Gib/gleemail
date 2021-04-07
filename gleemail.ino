@@ -10,12 +10,13 @@ static unsigned short pinIndex = 0;
 static char* messageToSend = new char[MAX_MESSAGE_LENGTH + 1];
 static char* messageReceived = new char[MAX_MESSAGE_LENGTH + 1];
 bool pendingMessageToSend = false;
+bool pendingMessageReceived = false;
 
 
 void getIncomingMessage() {
 	if(network->messageAvailable()) {
 		if(network->readMessage(&messageReceived, MAX_MESSAGE_LENGTH)) {
-
+			pendingMessageReceived = true;
 		} else {
 
 		}
@@ -61,12 +62,14 @@ void updateMessageToSend() {
 void updateDisplay() {
 	//peek messageToSend
 	//Push peek to inputMessage - write inputMessage to LCD
+	if(pendingMessageReceived) {
+		Serial.print("Received: ");
+		Serial.println(messageReceived);
+	}
+
 	if(pendingMessageToSend) {
 		//Serial.print("message ready! : ");
 		//input->getMessageToSend(messageToSend);
-		Serial.print("Received: ");
-		Serial.println(messageReceived);
-
 		Serial.print("Your message: ");
 		Serial.println(messageToSend);
 		//sendMessage(inputMethod->getMessageToSend());
@@ -104,6 +107,7 @@ void loop() {
 	printErrorCodes();
 
 	pendingMessageToSend = false;
+	pendingMessageReceived = false;
 }
 
 
