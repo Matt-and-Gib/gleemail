@@ -137,7 +137,7 @@ bool connectToWiFi() {
 void connectToPeer() {
 	char ipAddressInputBuffer[MAX_IP_ADDRESS_LENGTH + 1];
 	char* ipAddressInputSubstringBuffer;
-	unsigned short ipAddressParts[4];
+	uint8_t ipAddressParts[4];
 	size_t ipAddressPartsIndex = 0;
 
 	Serial.println("Enter your gleepal's IP address:");
@@ -146,7 +146,7 @@ void connectToPeer() {
 	}
 
 	size_t readLength = Serial.readBytesUntil('\n', ipAddressInputBuffer, MAX_IP_ADDRESS_LENGTH);
-	Serial.println(readLength);
+	//Serial.println(readLength);
 	ipAddressInputBuffer[readLength] = '\0';
 	while(Serial.available()) {
 		Serial.read();

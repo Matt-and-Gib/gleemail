@@ -8,8 +8,8 @@
 #include "global.h"
 
 //REMOVE ME
-//#include "Arduino.h"
-//#include "HardwareSerial.h"
+#include "Arduino.h"
+#include "HardwareSerial.h"
 //REMOVE ME
 
 
@@ -38,7 +38,7 @@ public:
 	bool connectToNetwork(char*, char*);
 	void disconnectFromNetwork();
 
-	bool connectToPeer(unsigned short (&)[4]);
+	bool connectToPeer(uint8_t (&)[4]);
 
 	bool connectToServer(const char*);
 	bool sendRequestToServer(const char* const*);
@@ -88,8 +88,11 @@ void Networking::disconnectFromNetwork() {
 }
 
 
-bool Networking::connectToPeer(unsigned short (&ipBlocks)[4]) {
+bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
 	udp.begin(CONNECTION_PORT);
+
+	Serial.print("My local IP: ");
+	Serial.println(WiFi.localIP());
 
 	IPAddress friendsIP(ipBlocks[0], ipBlocks[1], ipBlocks[2], ipBlocks[3]);
 
@@ -97,10 +100,14 @@ bool Networking::connectToPeer(unsigned short (&ipBlocks)[4]) {
 	udp.write(NETWORK_HANDSHAKE_CHARACTER);
 	udp.endPacket();
 
+	Serial.println("Sent handshake. Listening now.");
+
 	unsigned short packetSize = 0;
 	char* receiveBuffer;
 	while(true) {
 		if(udp.parsePacket()) {
+			Serial.println("Got packet!");
+
 			packetSize = udp.read(receiveBuffer, 255);
 			receiveBuffer[packetSize] = '\0';
 
