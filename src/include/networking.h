@@ -8,8 +8,8 @@
 #include "global.h"
 
 //REMOVE ME
-#include "Arduino.h"
-#include "HardwareSerial.h"
+//#include "Arduino.h"
+//#include "HardwareSerial.h"
 //REMOVE ME
 
 
@@ -38,7 +38,8 @@ public:
 	bool connectToNetwork(char*, char*);
 	void disconnectFromNetwork();
 
-	bool connectToPeer(uint8_t (&)[4]);
+	//bool connectToPeer(uint8_t (&)[4]);
+	bool connectToPeer(IPAddress&);
 
 	bool connectToServer(const char*);
 	bool sendRequestToServer(const char* const*);
@@ -88,39 +89,34 @@ void Networking::disconnectFromNetwork() {
 }
 
 
-bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
+//bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
+	bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
-	IPAddress friendsIP(ipBlocks[0], ipBlocks[1], ipBlocks[2], ipBlocks[3]);
-	Serial.println(friendsIP);
+	//IPAddress friendsIP(ipBlocks[0], ipBlocks[1], ipBlocks[2], ipBlocks[3]);
+	//Serial.println(friendsIP);
 
-	Serial.print("Sending handshake of: ");
-	Serial.println(NETWORK_HANDSHAKE_CHARACTER);
-
-	udp.beginPacket(friendsIP, CONNECTION_PORT);
+	udp.beginPacket(connectToIP, CONNECTION_PORT);
 	udp.write(NETWORK_HANDSHAKE_CHARACTER);
 	udp.endPacket();
 
-	Serial.println("Sent handshake. Listening now.");
-
 	unsigned short packetSize = 0;
-	//char receiveBuffer[8];
-	char* receiveBuffer = new char[256];
+	char* receiveBuffer = new char[2];
 	while(true) {
 		if(udp.parsePacket()) {
-			Serial.println("Got packet!");
-
-			packetSize = udp.read(receiveBuffer, 255);
+			packetSize = udp.read(receiveBuffer, 2);
 			receiveBuffer[packetSize] = '\0';
 
-			Serial.print("Packet received: ");
-			Serial.println(receiveBuffer);
-
-			if(receiveBuffer[0] == NETWORK_HANDSHAKE_CHARACTER) { //TODO: test me!
-				udp.beginPacket(udp.remoteIP(), CONNECTION_PORT);
-				udp.write(NETWORK_HANDSHAKE_CHARACTER);
-				udp.endPacket();
-				return true;
+			if(receiveBuffer[0] == NETWORK_HANDSHAKE_CHARACTER) {
+				if(udp.remoteIP() != connectToIP) {
+					DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_IP, false);
+					return false;
+				} else {
+					udp.beginPacket(udp.remoteIP(), CONNECTION_PORT);
+					udp.write(NETWORK_HANDSHAKE_CHARACTER);
+					udp.endPacket();
+					return true;
+				}
 			} else {
 				DebugLog::getLog().logError(ERROR_CODE::NETWORK_INVALID_HANDSHAKE_MESSAGE);
 				return false;
@@ -129,6 +125,8 @@ bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
 
 		delay(1000);
 	}
+
+	delete[] receiveBuffer;
 }
 
 

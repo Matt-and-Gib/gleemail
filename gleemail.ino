@@ -135,7 +135,7 @@ bool connectToWiFi() {
 
 
 void connectToPeer() {
-	char ipAddressInputBuffer[MAX_IP_ADDRESS_LENGTH + 1];
+	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
 	char* ipAddressInputSubstringBuffer;
 	uint8_t ipAddressParts[4];
 	size_t ipAddressPartsIndex = 0;
@@ -146,7 +146,6 @@ void connectToPeer() {
 	}
 
 	size_t readLength = Serial.readBytesUntil('\n', ipAddressInputBuffer, MAX_IP_ADDRESS_LENGTH);
-	//Serial.println(readLength);
 	ipAddressInputBuffer[readLength] = '\0';
 	while(Serial.available()) {
 		Serial.read();
@@ -158,22 +157,21 @@ void connectToPeer() {
 		ipAddressInputSubstringBuffer = strtok(NULL, ".");
 	}
 
+	IPAddress friendsIP(ipAddressParts[0], ipAddressParts[1], ipAddressParts[2], ipAddressParts[3]);
+
 	Serial.print("Waiting for gleepal at ");
-	Serial.print(ipAddressParts[0]);
-	Serial.print(".");
-	Serial.print(ipAddressParts[1]);
-	Serial.print(".");
-	Serial.print(ipAddressParts[2]);
-	Serial.print(".");
-	Serial.print(ipAddressParts[3]);
+	Serial.print(friendsIP);
 	Serial.println("...");
 
-	if(!network->connectToPeer(ipAddressParts)) {
+	if(!network->connectToPeer(friendsIP)) {
 		Serial.println("Unable to connect to gleepal :(");
 		return;
 	}
 
 	Serial.println("Connected to gleepal!");
+
+	delete[] ipAddressInputSubstringBuffer;
+	delete[] ipAddressInputBuffer;
 }
 
 
@@ -206,6 +204,8 @@ void setup() {
 	while(!Serial) {
 		delay(250);
 	}
+
+	Serial.println("Welcome to glEEmail!");
 
 	while(!connectToWiFi()) {
 		delay(1000);
