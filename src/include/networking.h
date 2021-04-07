@@ -142,7 +142,8 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 					DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_IP, false);
 					return false;
 				} else {
-					*peerIPAddress = udp.remoteIP();
+					*peerIPAddress = connectToIP;
+					Serial.println(*peerIPAddress);
 					udp.beginPacket(*peerIPAddress, CONNECTION_PORT);
 					udp.write(NETWORK_HANDSHAKE_CHARACTER);
 					udp.endPacket();
