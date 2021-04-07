@@ -91,17 +91,11 @@ void Networking::disconnectFromNetwork() {
 bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
 	udp.begin(CONNECTION_PORT);
 
-	Serial.print("Sending to: ");
-	Serial.print(ipBlocks[0]);
-	Serial.print(".");
-	Serial.print(ipBlocks[1]);
-	Serial.print(".");
-	Serial.print(ipBlocks[2]);
-	Serial.print(".");
-	Serial.print(ipBlocks[3]);
-	Serial.println("...");
-
 	IPAddress friendsIP(ipBlocks[0], ipBlocks[1], ipBlocks[2], ipBlocks[3]);
+	Serial.println(friendsIP);
+
+	Serial.print("Sending handshake of: ");
+	Serial.println(NETWORK_HANDSHAKE_CHARACTER);
 
 	udp.beginPacket(friendsIP, CONNECTION_PORT);
 	udp.write(NETWORK_HANDSHAKE_CHARACTER);
@@ -110,7 +104,7 @@ bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
 	Serial.println("Sent handshake. Listening now.");
 
 	unsigned short packetSize = 0;
-	char* receiveBuffer;
+	char* receiveBuffer = new char[256];
 	while(true) {
 		if(udp.parsePacket()) {
 			Serial.println("Got packet!");
@@ -131,6 +125,8 @@ bool Networking::connectToPeer(uint8_t (&ipBlocks)[4]) {
 
 		delay(1000);
 	}
+
+	delete[] receiveBuffer;
 }
 
 
