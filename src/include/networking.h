@@ -41,7 +41,7 @@ public:
 	void disconnectFromNetwork();
 
 	bool messageAvailable();
-	bool readMessage(char**, const unsigned short);
+	bool readMessage(char*, const unsigned short);
 	bool writeMessage(char*[]);
 
 	bool connectToPeer(IPAddress&);
@@ -99,14 +99,14 @@ bool Networking::messageAvailable() {
 }
 
 
-bool Networking::readMessage(char** buffer, const unsigned short bufferLength) {
+bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 	/*
 	char test = 'M';
 	*buffer[0] = test;
 	return true;
 	*/
-	packetSize = udp.read(*buffer, bufferLength);
-	*buffer[packetSize] = '\0';
+	packetSize = udp.read(buffer, bufferLength);
+	buffer[packetSize] = '\0';
 	return true;
 }
 

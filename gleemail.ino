@@ -15,7 +15,7 @@ bool pendingMessageReceived = false;
 
 void getIncomingMessage() {
 	if(network->messageAvailable()) {
-		if(network->readMessage(&messageReceived, MAX_MESSAGE_LENGTH)) {
+		if(network->readMessage(messageReceived, MAX_MESSAGE_LENGTH)) {
 			pendingMessageReceived = true;
 		} else {
 
