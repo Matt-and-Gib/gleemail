@@ -105,13 +105,13 @@ void loop() {
 	processInputMethod();
 	Serial.println("Dah");
 	updateMessageToSend();
-	Serial.println("Dragon")
+	Serial.println("Dragon");
 	updateDisplay();
-	Serial.println("Jazz")
+	Serial.println("Jazz");
 	sendNetworkMessage();
-	Serial.println("Hands")
+	Serial.println("Hands");
 	printErrorCodes();
-	Serial.println("Bro")
+	Serial.println("Bro");
 
 	pendingMessageToSend = false;
 	pendingMessageReceived = false;
