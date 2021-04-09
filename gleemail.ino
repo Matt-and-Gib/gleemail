@@ -1,9 +1,11 @@
 #include "Arduino.h"
 #include "src/include/global.h"
+#include "src/include/display.h"
 #include "src/include/morsecode.h"
 #include "src/include/networking.h"
 
 
+static Display& display = *new Display();
 static Networking* network = new Networking();
 static InputMethod* input;
 static unsigned short pinIndex = 0;
@@ -63,15 +65,17 @@ void updateDisplay() {
 	//peek messageToSend
 	//Push peek to inputMessage - write inputMessage to LCD
 	if(pendingMessageReceived) {
-		Serial.print("Received: ");
-		Serial.println(messageReceived);
+		//Serial.print("Received: ");
+		//Serial.println(messageReceived);
+		display.updateReading(messageReceived);
 	}
 
 	if(pendingMessageToSend) {
 		//Serial.print("message ready! : ");
 		//input->getMessageToSend(messageToSend);
-		Serial.print("Your message: ");
-		Serial.println(messageToSend);
+		//Serial.print("Your message: ");
+		//Serial.println(messageToSend);
+		display.updateWriting(messageToSend);
 		//sendMessage(inputMethod->getMessageToSend());
 	}
 	//messageIn = receiveMessage();
@@ -251,6 +255,8 @@ void setup() {
 	while(!Serial) {
 		delay(250);
 	}
+
+	display.updateReading("Hello, glEEmail!");
 
 	Serial.println("Welcome to glEEmail!");
 	Serial.print("Version ");
