@@ -62,24 +62,19 @@ void updateMessageToSend() {
 
 
 void updateDisplay() {
-	//peek messageToSend
-	//Push peek to inputMessage - write inputMessage to LCD
 	if(pendingMessageReceived) {
 		//Serial.print("Received: ");
 		//Serial.println(messageReceived);
+		display.clearReading();
 		display.updateReading(messageReceived);
 	}
 
 	if(pendingMessageToSend) {
-		//Serial.print("message ready! : ");
-		//input->getMessageToSend(messageToSend);
 		//Serial.print("Your message: ");
 		//Serial.println(messageToSend);
+		display.clearWriting();
 		display.updateWriting(messageToSend);
-		//sendMessage(inputMethod->getMessageToSend());
 	}
-	//messageIn = receiveMessage();
-	//printMessage(); //write to LCD buffer, I guess
 }
 
 
