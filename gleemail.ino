@@ -6,7 +6,7 @@
 
 
 static Display& display = *new Display();
-static Networking* network = new Networking();
+static Networking& network = *new Networking();
 static InputMethod* input;
 static unsigned short pinIndex = 0;
 static char* messageToSend = new char[MAX_MESSAGE_LENGTH + 1];
@@ -16,8 +16,8 @@ bool pendingMessageReceived = false;
 
 
 void getIncomingMessage() {
-	if(network->messageAvailable()) {
-		if(network->readMessage(messageReceived, MAX_MESSAGE_LENGTH)) {
+	if(network.messageAvailable()) {
+		if(network.readMessage(messageReceived, MAX_MESSAGE_LENGTH)) {
 			pendingMessageReceived = true;
 		} else {
 
@@ -85,7 +85,7 @@ void updateDisplay() {
 
 void sendNetworkMessage() {
 	if(pendingMessageToSend) {
-		if(!network->writeMessage(messageToSend)) {
+		if(!network.writeMessage(messageToSend)) {
 			
 		}
 	}
@@ -124,7 +124,7 @@ void setupPins() {
 	Pin *currentPin = pins[i];
 
 	while (*currentPin != NULL_PIN) {
-		/*Important debug messages. Check here first if something seems broken!
+		/*Important debug messages. Check here first if something seems broken with hardware!
 		Serial.print("Index: ");
 		Serial.println(i);
 
@@ -142,42 +142,42 @@ bool connectToWiFi() {
 	unsigned short inputLength = 0;
 
 	Serial.println("Enter WiFi SSID:");
-	char userSSID[network->getMaxSSIDLength() + 1];
+	char userSSID[network.getMaxSSIDLength() + 1];
 	while(true) {
 		if(Serial.available() > 0) {
-			inputLength = Serial.readBytesUntil('\n', userSSID, network->getMaxSSIDLength());
+			inputLength = Serial.readBytesUntil('\n', userSSID, network.getMaxSSIDLength());
 			break;
 		}
 
 		delay(250);
 	}
 
-	if(inputLength >= network->getMaxSSIDLength()) {
+	if(inputLength >= network.getMaxSSIDLength()) {
 		DebugLog::getLog().logError(NETWORK_DATA_SSID_POSSIBLY_TRUNCATED);
 	}
 	userSSID[inputLength] = '\0';
 
-	char userPassword[network->getMaxPasswordLength() + 1];
+	char userPassword[network.getMaxPasswordLength() + 1];
 	Serial.print("Enter password for ");
 	Serial.print(userSSID);
 	Serial.println(":");
 	while(true) {
 		if(Serial.available() > 0) {
-			inputLength = Serial.readBytesUntil('\n', userPassword, network->getMaxPasswordLength());
+			inputLength = Serial.readBytesUntil('\n', userPassword, network.getMaxPasswordLength());
 			break;
 		}
 
 		delay(250);
 	}
 
-	if(inputLength >= network->getMaxPasswordLength()) {
+	if(inputLength >= network.getMaxPasswordLength()) {
 		DebugLog::getLog().logError(NETWORK_DATA_PASSWORD_POSSIBLY_TRUNCATED);
 	}
 	userPassword[inputLength] = '\0';
 
 	Serial.println("Attempting connection...");
 
-	if(!network->connectToNetwork(userSSID, userPassword)) {
+	if(!network.connectToNetwork(userSSID, userPassword)) {
 		Serial.print("Unable to connect to ");
 		Serial.println(userSSID);
 		return false;
@@ -217,7 +217,7 @@ void connectToPeer() {
 	Serial.print(friendsIP);
 	Serial.println("...");
 
-	if(!network->connectToPeer(friendsIP)) {
+	if(!network.connectToPeer(friendsIP)) {
 		Serial.println("Unable to connect to gleepal :(");
 		return;
 	}
@@ -232,8 +232,8 @@ void connectToPeer() {
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
 	Serial.println("Downloading Input Method data...");
-	//input->setNetworkData(network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders()));
-	char *data = network->downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
+
+	char *data = network.downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
 	if(!data) {
 		Serial.println("Unable to download data!");
 		printErrorCodes();
@@ -288,6 +288,6 @@ void setup() {
 		connectToPeer();
 	}
 
-	display.clearWriting();
+	display.clearAll();
 	Serial.println("Running");
 }

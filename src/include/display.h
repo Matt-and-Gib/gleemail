@@ -29,6 +29,7 @@ public:
 	void updateWriting(const char*);
 	void clearReading() {updateReading(DisplayData::BLANK_LINE);}
 	void clearWriting() {updateWriting(DisplayData::BLANK_LINE);}
+	void clearAll() {lcd.clear();}
 };
 
 
