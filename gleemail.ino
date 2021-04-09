@@ -285,7 +285,7 @@ void setup() {
 		messageReceived[i] = '\0';
 	}
 
-	connectToPeer();
+	//connectToPeer();
 
 	Serial.println("Running");
 }
