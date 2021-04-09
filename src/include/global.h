@@ -3,7 +3,7 @@
 
 static const constexpr char GLEEMAIL_VERSION[] = "alpha 0.02a";
 
-static const constexpr bool OFFLINE_MODE = true;
+static const constexpr bool OFFLINE_MODE = false;
 
 static const constexpr unsigned short BAUD_RATE = 9600;
 
