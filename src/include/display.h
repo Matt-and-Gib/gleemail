@@ -4,10 +4,14 @@
 #include <LiquidCrystal.h>
 
 
-enum class PRINT_ROW : bool {TOP = true, BOTTOM = false};
+namespace DisplayData {
+	static const constexpr char BLANK_LINE[] = "                \0";
+}
 
 class Display {
 private:
+	enum class PRINT_ROW : bool {TOP = true, BOTTOM = false};
+
 	static constexpr int RS = 7;
 	static constexpr int EN = 6;
 	static constexpr int D4 = 5;
@@ -21,8 +25,10 @@ private:
 public:
 	Display();
 	~Display();
-	void updateWriting(const char*);
 	void updateReading(const char*);
+	void updateWriting(const char*);
+	void clearReading() {updateReading(DisplayData::BLANK_LINE);}
+	void clearWriting() {updateWriting(DisplayData::BLANK_LINE);}
 };
 
 

@@ -95,8 +95,11 @@ void sendNetworkMessage() {
 void printErrorCodes() {
 	ERROR_CODE e = DebugLog::getLog().getError();
 	while(e != ERROR_CODE::NONE) {
-		Serial.print("\nError Code: ");
-		Serial.println(e);
+		if(!(OFFLINE_MODE && (e == NETWORK_INVALID_PEER_IP_ADDRESS))) {
+			Serial.print("\nError Code: ");
+			Serial.println(e);
+		}
+
 		e = DebugLog::getLog().getError();
 	}
 }
@@ -256,30 +259,19 @@ void setup() {
 		delay(250);
 	}
 
-	display.updateReading("Hello, glEEmail!");
-
 	Serial.println("Welcome to glEEmail!");
 	Serial.print("Version ");
 	Serial.println(GLEEMAIL_VERSION);
 	Serial.println();
 
-
-
-	/*for(int i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
-		messageToSend[i] = '\0';
-		messageReceived[i] = '\0';
-	}
-	messageReceived[0] = 'G';
-	Serial.println(messageReceived);
-	network->readMessage(&messageReceived, MAX_MESSAGE_LENGTH);
-	Serial.println(messageReceived);*/
-
-
+	display.updateReading("Hello, glEEmail!");
+	display.updateWriting("Joining WiFi");
 
 	while(!connectToWiFi()) {
 		delay(1000);
 	}
 
+	display.updateWriting("Downloading Data");
 	if(!setupInputMethod()) {
 		abort();
 	}
@@ -291,7 +283,11 @@ void setup() {
 		messageReceived[i] = '\0';
 	}
 
-	//connectToPeer();
+	if(!OFFLINE_MODE) {
+		display.updateWriting("Wait for glEEpal");
+		connectToPeer();
+	}
 
+	display.clearWriting();
 	Serial.println("Running");
 }
