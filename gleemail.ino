@@ -259,6 +259,10 @@ void setup() {
 	Serial.println(GLEEMAIL_VERSION);
 	Serial.println();
 
+	if(OFFLINE_MODE) {
+		Serial.println("Offline Mode Active\n");
+	}
+
 	display.updateReading("Hello, glEEmail!");
 	display.updateWriting("Joining WiFi");
 
