@@ -10,8 +10,8 @@ private:
 
 	bool messageComplete = false;
 	bool messageRetrieved = false;
-	char *messageToSend;
-	unsigned short int messageToSendFirstEmptyIndex = 0;
+	char *userMessage;
+	unsigned short int userMessageFirstEmptyIndex = 0;
 public:
 	InputMethod();
 	~InputMethod();
@@ -28,10 +28,10 @@ public:
 	unsigned long getLastDebounceTime() const {return lastDebounceTime;}
 	void setLastDebounceTime(const unsigned long t) {lastDebounceTime = t;}
 
-	void getMessageToSend(char *);
+	void getuserMessage(char *);
 	void commitMessage();
 	bool isMessageReady() const {return messageComplete;}
-	bool messageNotEmpty() const {return messageToSend[0] != '\0';}
+	bool messageNotEmpty() const {return userMessage[0] != '\0';}
 	bool isLastCharSpace() const;
 
 	void pushCharacterToMessage(const char c);

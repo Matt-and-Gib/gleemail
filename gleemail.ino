@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "src/include/global.h"
+
 #include "src/include/display.h"
 #include "src/include/morsecode.h"
 #include "src/include/networking.h"
@@ -9,16 +10,16 @@ static Display& display = *new Display();
 static Networking& network = *new Networking();
 static InputMethod* input;
 static unsigned short pinIndex = 0;
-static char* messageToSend = new char[MAX_MESSAGE_LENGTH + 1];
-static char* messageReceived = new char[MAX_MESSAGE_LENGTH + 1];
-bool pendingMessageToSend = false;
-bool pendingMessageReceived = false;
+static char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
+static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
+bool pendingUserMessage = false;
+bool pendingPeerMessage = false;
 
 
 void getIncomingMessage() {
 	if(network.messageAvailable()) {
-		if(network.readMessage(messageReceived, MAX_MESSAGE_LENGTH)) {
-			pendingMessageReceived = true;
+		if(network.readMessage(peerMessage, MAX_MESSAGE_LENGTH)) {
+			pendingPeerMessage = true;
 		} else {
 
 		}
@@ -53,34 +54,32 @@ void processInputMethod() {
 }
 
 
-void updateMessageToSend() {
+void updateUserMessage() {
 	if(input->isMessageReady()) {
-		input->getMessageToSend(messageToSend);
-		pendingMessageToSend = true;
+		input->getuserMessage(userMessage);
+		pendingUserMessage = true;
 	}
 }
 
 
 void updateDisplay() {
-	if(pendingMessageReceived) {
+	if(pendingPeerMessage) {
 		//Serial.print("Received: ");
-		//Serial.println(messageReceived);
-		display.clearReading();
-		display.updateReading(messageReceived);
+		//Serial.println(peerMessage);
+		display.updateReading(peerMessage);
 	}
 
-	if(pendingMessageToSend) {
+	if(pendingUserMessage) {
 		//Serial.print("Your message: ");
-		//Serial.println(messageToSend);
-		display.clearWriting();
-		display.updateWriting(messageToSend);
+		//Serial.println(userMessage);
+		display.updateWriting(userMessage);
 	}
 }
 
 
 void sendNetworkMessage() {
-	if(pendingMessageToSend) {
-		if(!network.writeMessage(messageToSend)) {
+	if(pendingUserMessage) {
+		if(!network.writeMessage(userMessage)) {
 			
 		}
 	}
@@ -103,13 +102,13 @@ void printErrorCodes() {
 void loop() {
 	getIncomingMessage();
 	processInputMethod();
-	updateMessageToSend();
+	updateUserMessage();
 	updateDisplay();
 	sendNetworkMessage();
 	printErrorCodes();
 
-	pendingMessageToSend = false;
-	pendingMessageReceived = false;
+	pendingUserMessage = false;
+	pendingPeerMessage = false;
 }
 
 
@@ -263,8 +262,17 @@ void setup() {
 		Serial.println("Offline Mode Active\n");
 	}
 
+//Test "animation"
 	display.updateReading("Hello, glEEmail!");
+	delay(1500);
 	display.updateWriting("Joining WiFi");
+	delay(1500);
+	display.clearWriting();
+	display.updateReading("Joining WiFi");
+	delay(1500);
+	display.updateWriting("Enter SSID:");
+//
+
 
 	while(!connectToWiFi()) {
 		delay(1000);
@@ -278,8 +286,8 @@ void setup() {
 	setupPins();
 
 	for(int i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
-		messageToSend[i] = '\0';
-		messageReceived[i] = '\0';
+		userMessage[i] = '\0';
+		peerMessage[i] = '\0';
 	}
 
 	if(!OFFLINE_MODE) {
