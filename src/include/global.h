@@ -95,17 +95,11 @@ public:
 
 
 	void logError(ERROR_CODE e) {
-		if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
-			errorCodes[errorCodesFirstOpenIndex++] = e;
-		}
+		log(e, true);
 	}
 
 	void logWarning(ERROR_CODE e) {
-		if(VERBOSE_DEBUG_LOG) {
-			if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
-				errorCodes[errorCodesFirstOpenIndex++] = e;
-			}
-		}
+		log(e, false);
 	}
 
 
@@ -125,6 +119,14 @@ private:
 	}
 	DebugLog(DebugLog const&) = delete;
 	void operator=(DebugLog const&) = delete;
+
+	void log(ERROR_CODE e, bool critical) {
+		if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
+			if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
+				errorCodes[errorCodesFirstOpenIndex++] = e;
+			}
+		}
+	}
 
 	static constexpr unsigned short MAX_ERROR_CODES = 16;
 	ERROR_CODE* errorCodes;
