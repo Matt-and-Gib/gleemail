@@ -279,6 +279,7 @@ void setup() {
 			setupState = SETUP_LEVEL::NETWORK;
 		break;
 
+
 		case SETUP_LEVEL::NETWORK:
 			display.updateWriting("Joining WiFi");
 			delay(SETUP_STEP_DELAY);
@@ -291,6 +292,7 @@ void setup() {
 				setupState = SETUP_LEVEL::INPUT_METHOD;
 			}
 		break;
+
 
 		case SETUP_LEVEL::INPUT_METHOD:
 			display.updateReading("Setting up Input");
@@ -305,10 +307,12 @@ void setup() {
 			}
 		break;
 
+
 		case SETUP_LEVEL::PINS:
 			setupPins();
 			setupState = SETUP_LEVEL::PEER;
 		break;
+
 
 		case SETUP_LEVEL::PEER:
 			if(!OFFLINE_MODE) {
@@ -319,6 +323,7 @@ void setup() {
 			setupState = SETUP_LEVEL::DONE;
 		break;
 
+
 		case SETUP_LEVEL::DONE:
 			Serial.println("Running");
 			display.updateReading("Running");
@@ -326,6 +331,7 @@ void setup() {
 
 			setupComplete = true;
 		break;
+
 
 		default:
 			DebugLog::getLog().logError(ERROR_CODE::UNKNOWN_SETUP_STATE);
