@@ -94,8 +94,14 @@ public:
 	}
 
 
-	void logError(ERROR_CODE e, bool critical = true) {
-		if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
+	void logError(ERROR_CODE e) {
+		if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
+			errorCodes[errorCodesFirstOpenIndex++] = e;
+		}
+	}
+
+	void logWarning(ERROR_CODE e) {
+		if(VERBOSE_DEBUG_LOG) {
 			if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
 				errorCodes[errorCodesFirstOpenIndex++] = e;
 			}

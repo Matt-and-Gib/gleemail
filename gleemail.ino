@@ -235,7 +235,6 @@ bool setupInputMethod() {
 	char *data = network.downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
 	if(!data) {
 		Serial.println("Unable to download data!");
-		printErrorCodes();
 		return false;
 	}
 
@@ -256,7 +255,7 @@ void setup() {
 	enum SETUP_LEVEL : short {WELCOME = 0, NETWORK = 1, INPUT_METHOD = 2, PINS = 3, PEER = 4, DONE = 5};
 	SETUP_LEVEL setupState = WELCOME;
 	bool setupComplete = false;
-	
+
 	const unsigned short SETUP_STEP_DELAY = 1500;
 
 	Serial.begin(BAUD_RATE);

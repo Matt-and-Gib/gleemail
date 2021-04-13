@@ -32,7 +32,7 @@ MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 char MorseCodeInput::convertPhraseToCharacter() {
 	MorsePhraseCharPair* lookupResult = morseCodeTreeRoot.lookup(currentMorsePhrase);
 	if(!lookupResult) {
-		DebugLog::getLog().logError(MORSE_CODE_LOOKUP_FAILED, false);
+		DebugLog::getLog().logWarning(MORSE_CODE_LOOKUP_FAILED);
 		return CANCEL_CHAR;
 	}
 

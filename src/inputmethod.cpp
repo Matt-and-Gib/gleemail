@@ -34,7 +34,7 @@ void InputMethod::pushCharacterToMessage(const char c) {
 			userMessageFirstEmptyIndex += 1;
 
 			if(userMessageFirstEmptyIndex == MAX_MESSAGE_LENGTH) {
-				DebugLog::getLog().logError(MORSE_MESSAGE_TO_SEND_REACHED_MAX_MESSAGE_LENGTH, false);
+				DebugLog::getLog().logWarning(MORSE_MESSAGE_TO_SEND_REACHED_MAX_MESSAGE_LENGTH);
 				commitMessage();
 			}
 		} else {

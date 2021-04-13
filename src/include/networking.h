@@ -81,7 +81,7 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword, bool
 	}
 
 	if(WiFi.status() == WL_CONNECT_FAILED) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_CONNECTION_FAILED, false);
+		DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_CONNECTION_FAILED);
 		if(retry) {
 			delay(500);
 			return connectToNetwork(networkName, networkPassword, false);
@@ -144,7 +144,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 
 			if(receiveBuffer[0] == NETWORK_HANDSHAKE_CHARACTER) {
 				if(udp.remoteIP() != connectToIP) {
-					DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_IP, false);
+					DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_IP);
 					return false;
 				} else {
 					peerIPAddress = connectToIP;
@@ -249,7 +249,7 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 	}
 
 	if(bufferIndex < DATA_BUFFER_SIZE/2) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED, false);
+		DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED);
 	}
 
 	/*//Print full response
