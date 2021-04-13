@@ -53,6 +53,7 @@ enum ERROR_CODE: short {
 	//Meta range: 0 - 9
 	NONE = 0,
 	DEBUG_DEBUG_LOG = 1,
+	UNKNOWN_SETUP_STATE = 2,
 
 	//InputMethod range: 10 - 49
 	MORSE_PHRASE_IMMINENT_OVERFLOW = DEBUG_LOG_INPUT_METHOD_OFFSET + 0,

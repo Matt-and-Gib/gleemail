@@ -136,6 +136,7 @@ bool connectToWiFi() {
 	unsigned short inputLength = 0;
 
 	Serial.println("Enter WiFi SSID:");
+	display.updateWriting("Enter SSID");
 	char userSSID[network.getMaxSSIDLength() + 1];
 	while(true) {
 		if(Serial.available() > 0) {
@@ -155,6 +156,7 @@ bool connectToWiFi() {
 	Serial.print("Enter password for ");
 	Serial.print(userSSID);
 	Serial.println(":");
+	display.updateWriting("Enter Password");
 	while(true) {
 		if(Serial.available() > 0) {
 			inputLength = Serial.readBytesUntil('\n', userPassword, network.getMaxPasswordLength());
@@ -170,14 +172,17 @@ bool connectToWiFi() {
 	userPassword[inputLength] = '\0';
 
 	Serial.println("Attempting connection...");
+	display.updateWriting("Connecting...");
 
 	if(!network.connectToNetwork(userSSID, userPassword)) {
 		Serial.print("Unable to connect to ");
+		display.updateWriting("Failed");
 		Serial.println(userSSID);
 		return false;
 	}
 
 	Serial.println("Connected!");
+	display.updateWriting("Connected!");
 	return true;
 }
 
@@ -248,53 +253,89 @@ bool setupInputMethod() {
 
 
 void setup() {
+	enum SETUP_LEVEL : short {WELCOME = 0, NETWORK = 1, INPUT_METHOD = 2, PINS = 3, PEER = 4, DONE = 5};
+	SETUP_LEVEL setupState = WELCOME;
+	bool setupComplete = false;
+	
+	const unsigned short SETUP_STEP_DELAY = 1500;
+
 	Serial.begin(BAUD_RATE);
 	while(!Serial) {
 		delay(250);
 	}
 
-	Serial.println("Welcome to glEEmail!");
-	Serial.print("Version ");
-	Serial.println(GLEEMAIL_VERSION);
-	Serial.println();
+	do {
+		switch(setupState) {
+		case SETUP_LEVEL::WELCOME:
+			Serial.println("Welcome to glEEmail!");
+			Serial.print("Version ");
+			Serial.println(GLEEMAIL_VERSION);
+			Serial.println();
 
-	if(OFFLINE_MODE) {
-		Serial.println("Offline Mode Active\n");
-	}
+			if(OFFLINE_MODE) {
+				Serial.println("Offline Mode Active\n");
+			}
 
-//Test "animation"
-	display.updateReading("Hello, glEEmail!");
-	delay(1500);
-	display.updateWriting("Joining WiFi");
-	delay(1500);
-	display.clearWriting();
-	display.updateReading("Joining WiFi");
-	delay(1500);
-	display.updateWriting("Enter SSID:");
-//
+			display.updateReading("Hello, glEEmail!");
+			setupState = SETUP_LEVEL::NETWORK;
+		break;
 
+		case SETUP_LEVEL::NETWORK:
+			display.updateWriting("Joining WiFi");
+			delay(SETUP_STEP_DELAY);
 
-	while(!connectToWiFi()) {
-		delay(1000);
-	}
+			display.clearWriting();
+			display.updateReading("Joining WiFi");
+			delay(SETUP_STEP_DELAY);
 
-	display.updateWriting("Downloading Data");
-	if(!setupInputMethod()) {
-		abort();
-	}
+			if(connectToWiFi()) {
+				setupState = SETUP_LEVEL::INPUT_METHOD;
+			}
+		break;
 
-	setupPins();
+		case SETUP_LEVEL::INPUT_METHOD:
+			display.updateReading("Setting up Input");
+			display.updateWriting("Downloading Data");
+			if(setupInputMethod()) {
+				for(int i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
+					userMessage[i] = '\0';
+					peerMessage[i] = '\0';
+				}
 
-	for(int i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
-		userMessage[i] = '\0';
-		peerMessage[i] = '\0';
-	}
+				setupState = SETUP_LEVEL::PINS;
+			}
+		break;
 
-	if(!OFFLINE_MODE) {
-		display.updateWriting("Wait for glEEpal");
-		connectToPeer();
-	}
+		case SETUP_LEVEL::PINS:
+			setupPins();
+			setupState = SETUP_LEVEL::PEER;
+		break;
+
+		case SETUP_LEVEL::PEER:
+			if(!OFFLINE_MODE) {
+				display.updateWriting("Wait for glEEpal");
+				connectToPeer();	
+			}
+
+			setupState = SETUP_LEVEL::DONE;
+		break;
+
+		case SETUP_LEVEL::DONE:
+			Serial.println("Running");
+			display.updateReading("Running");
+			display.clearWriting();
+
+			setupComplete = true;
+		break;
+
+		default:
+			DebugLog::getLog().logError(ERROR_CODE::UNKNOWN_SETUP_STATE);
+		break;
+		}
+
+		printErrorCodes();
+		delay(SETUP_STEP_DELAY);
+	} while (!setupComplete);
 
 	display.clearAll();
-	Serial.println("Running");
 }
