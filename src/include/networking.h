@@ -86,6 +86,7 @@ bool Networking::connectToNetwork(char* networkName, char* networkPassword, bool
 			delay(500);
 			return connectToNetwork(networkName, networkPassword, false);
 		} else {
+			DebugLog::getLog().logError(ERROR_CODE::NETWORK_WIFI_CONNECTION_FAILED_RETRY_OCCURRED);
 			return false;
 		}
 	}

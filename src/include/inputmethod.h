@@ -8,10 +8,14 @@ class InputMethod {
 private:
 	unsigned long lastDebounceTime = 0;
 
+	bool messageChanged = false;
 	bool messageComplete = false;
 	bool messageRetrieved = false;
 	char *userMessage;
 	unsigned short int userMessageFirstEmptyIndex = 0;
+
+	void clearUserMessage();
+	void updateMessageOutBuffer(char *);
 public:
 	InputMethod();
 	~InputMethod();
@@ -28,8 +32,10 @@ public:
 	unsigned long getLastDebounceTime() const {return lastDebounceTime;}
 	void setLastDebounceTime(const unsigned long t) {lastDebounceTime = t;}
 
-	void getuserMessage(char *);
+	void getUserMessage(char *);
+	void peekUserMessage(char *);
 	void commitMessage();
+	bool hasMessageChanged() const {return messageChanged;}
 	bool isMessageReady() const {return messageComplete;}
 	bool messageNotEmpty() const {return userMessage[0] != '\0';}
 	bool isLastCharSpace() const;

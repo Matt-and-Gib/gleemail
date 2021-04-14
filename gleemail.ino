@@ -16,17 +16,6 @@ bool pendingUserMessage = false;
 bool pendingPeerMessage = false;
 
 
-void getIncomingMessage() {
-	if(network.messageAvailable()) {
-		if(network.readMessage(peerMessage, MAX_MESSAGE_LENGTH)) {
-			pendingPeerMessage = true;
-		} else {
-
-		}
-	}
-}
-
-
 void processInputMethod() {
 	pinIndex = 0;
 
@@ -54,10 +43,13 @@ void processInputMethod() {
 }
 
 
-void updateUserMessage() {
-	if(input->isMessageReady()) {
-		input->getuserMessage(userMessage);
-		pendingUserMessage = true;
+void getIncomingMessage() {
+	if(network.messageAvailable()) {
+		if(network.readMessage(peerMessage, MAX_MESSAGE_LENGTH)) {
+			pendingPeerMessage = true;
+		} else {
+			DebugLog::getLog().logError(NETWORK_PEER_MESSAGE_READ_FAILED);
+		}
 	}
 }
 
@@ -69,7 +61,8 @@ void updateDisplay() {
 		display.updateReading(peerMessage);
 	}
 
-	if(pendingUserMessage) {
+	if(input->hasMessageChanged()) {
+		input->peekUserMessage(userMessage);
 		//Serial.print("Your message: ");
 		//Serial.println(userMessage);
 		display.updateWriting(userMessage);
@@ -78,9 +71,11 @@ void updateDisplay() {
 
 
 void sendNetworkMessage() {
-	if(pendingUserMessage) {
+	if(input->isMessageReady()) {
+		input->getUserMessage(userMessage);
+
 		if(!network.writeMessage(userMessage)) {
-			
+			DebugLog::getLog().logError(NETWORK_WRITE_FAILED);
 		}
 	}
 }
@@ -100,9 +95,8 @@ void printErrorCodes() {
 
 
 void loop() {
-	getIncomingMessage();
 	processInputMethod();
-	updateUserMessage();
+	getIncomingMessage();
 	updateDisplay();
 	sendNetworkMessage();
 	printErrorCodes();

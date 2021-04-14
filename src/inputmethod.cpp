@@ -14,19 +14,38 @@ InputMethod::~InputMethod() {
 }
 
 
-void InputMethod::getuserMessage(char *messageOut) {
+void InputMethod::clearUserMessage() {
 	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
-		messageOut[i] = userMessage[i];
 		userMessage[i] = '\0';
 	}
+}
+
+
+void InputMethod::updateMessageOutBuffer(char *messageOut) {
+	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
+		messageOut[i] = userMessage[i];
+	}
+}
+
+
+void InputMethod::getUserMessage(char *messageOut) {
+	updateMessageOutBuffer(messageOut);
+	clearUserMessage();
 
 	userMessageFirstEmptyIndex = 0;
+	messageChanged = true;
 	messageComplete = false;
+}
+
+
+void InputMethod::peekUserMessage(char *messageOut) {
+	updateMessageOutBuffer(messageOut);
 }
 
 
 void InputMethod::pushCharacterToMessage(const char c) {
 	if(c != CANCEL_CHAR) {
+		messageChanged = true;
 		messageComplete = false;
 
 		if(userMessageFirstEmptyIndex < MAX_MESSAGE_LENGTH) {
@@ -47,7 +66,28 @@ void InputMethod::pushCharacterToMessage(const char c) {
 
 void InputMethod::commitMessage() {
 	messageComplete = true;
-	//trim whitespace from message
+
+	for(int i = 0; i < userMessageFirstEmptyIndex; i += 1) {
+		if((int)userMessage[i] > 32) {
+			if(i > 0) {
+				//Maybe note this index as the first character index for trimming later
+				DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_PRECEDING_WHITESPACE);
+			}
+			break;
+		}
+	}
+
+	for(int i = userMessageFirstEmptyIndex - 1; i >= 0; i -= 1) {
+		if((int)userMessage[i] > 32) {
+			if(i < userMessageFirstEmptyIndex - 1) {
+				//Maybe note this index as last character index for trimming later
+				DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_TRAILING_WHITESPACE);
+			}
+			break;
+		}
+	}
+
+	//trim array?
 }
 
 
