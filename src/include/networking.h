@@ -155,14 +155,12 @@ bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 		//DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
 	}
 
-	ArduinoJson::JsonObject b = doc["header"]["type"];
-	Serial.print("JSON object: ");
-	Serial.println(b);
-
-	//char *inTheBuff = b.f_str();
+	const char *inTheBuff = doc["body"]["message"];
+	//Serial.print("JSON object: ");
+	//Serial.println(inTheBuff);
 
 	for(int i = 0; i < bufferLength; i += 1) {
-		//buffer[i] = inTheBuff[i];
+		buffer[i] = inTheBuff[i];
 	}
 
 	/*for(int i = 0; i < bufferLength; i += 1) {
