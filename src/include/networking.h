@@ -10,8 +10,8 @@
 #include "global.h"
 
 //REMOVE ME
-//#include "Arduino.h"
-//#include "HardwareSerial.h"
+#include "Arduino.h"
+#include "HardwareSerial.h"
 //REMOVE ME
 
 
@@ -134,6 +134,7 @@ char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 	break;
 
 	case MESSAGE_TYPE::CHAT:
+		Serial.println("got here");
 		payload["header"]["type"] = "chat";
 		payload["body"]["message"] = body;
 	break;
