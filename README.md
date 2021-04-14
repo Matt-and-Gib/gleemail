@@ -77,6 +77,7 @@ Last updated: 4/13/2021
 |64|Network|Unknown Status|Connection to WiFi router is neither FAILED nor CONNECTED|High|
 |65|Network|Write Failed|Sending message to peer failed|High|
 |66|Network|Peer Message Read Failed||High|
+|67|Network|Unknown Message Type||High|
 |90|JSON|Nullptr Payload|No data provided to deserialize|High|
 |91|JSON|Deserialization Error|Unable to deserialize data into JSON objects|High|
 

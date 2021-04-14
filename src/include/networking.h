@@ -36,6 +36,9 @@ private:
 
 	short findEndOfHeaderIndex(const char*, const unsigned short);
 
+	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
+	char* messageBuffer = new char[MESSAGE_BUFFER_SIZE];
+
 	char* createMessage(char*, const MESSAGE_TYPE);
 public:
 	Networking();
@@ -61,11 +64,14 @@ public:
 
 
 Networking::Networking() {
-	
+	for(int i = 0; i < MESSAGE_BUFFER_SIZE + 1; i += 1) {
+		messageBuffer[i] = '\0';
+	}
 }
 
 Networking::~Networking() {
 	disconnectFromNetwork();
+	delete[] messageBuffer;
 }
 
 
@@ -115,27 +121,39 @@ bool Networking::messageAvailable() {
 
 
 bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
-	packetSize = udp.read(buffer, bufferLength);
+	packetSize = udp.read(messageBuffer, MESSAGE_BUFFER_SIZE);
+	messageBuffer[packetSize] = '\0';
 
-	//char* temp = new char[4096];
-	//udp.read(temp, 4096);
-	//Serial.print("print:");
-	//Serial.println(temp);
-	buffer[packetSize] = '\0';
+	if(packetSize > bufferLength) {
+		//DebugLog::getLog().logError(PACKET_SIZE_GREATER_THAN_BUFFER_LENGTH);
+	}
+
+	ArduinoJson::DynamicJsonDocument doc(MESSAGE_BUFFER_SIZE); //REMEMBER: this will not be enough if the message takes up its full size
+	ArduinoJson::DeserializationError error = deserializeJson(doc, messageBuffer);
+
+	if(error) {
+		//DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
+	}
+
+	for(int i = 0; i < bufferLength; i += 1) {
+		buffer[i] = doc["body"]["message"][i];
+	}
+
+	/*for(int i = 0; i < bufferLength; i += 1) {
+		buffer[i] = messageBuffer[i];
+	}*/
+
 	return true;
 }
 
 
 char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
-	unsigned int DOC_SIZE = 4096;
-	char* messagePayload = new char[DOC_SIZE]; //REMEMBER TO DELETE ME!
-
-	DynamicJsonDocument payload(DOC_SIZE);
+	DynamicJsonDocument payload(MESSAGE_BUFFER_SIZE);
 
 	switch(messageType) {
 	case MESSAGE_TYPE::HANDSHAKE:
 		payload["header"]["type"] = "handshake";
-		payload["body"]["message"] = "four score and seven years ago our forefathers declared this land to be free from British oversight";
+		payload["body"]["message"] = "four score and seven years ago our forefathers declared that breakfast burritos are awesome";
 	break;
 
 	case MESSAGE_TYPE::CHAT:
@@ -143,15 +161,13 @@ char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 		payload["body"]["message"] = body;
 	break;
 
-	case MESSAGE_TYPE::LIFELINE:
-	break;
-
 	default:
+		DebugLog::getLog().logError(NETWORK_UNKNOWN_MESSAGE_TYPE);
 	break;
 	}
 
-	serializeJson(payload, messagePayload, measureJson(payload));
-	return messagePayload;
+	serializeJson(payload, messageBuffer, measureJson(payload));
+	return messageBuffer;
 }
 
 
