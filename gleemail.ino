@@ -256,7 +256,9 @@ void setup() {
 		delay(250);
 	}
 
-	//Clear Serial input buffer
+	while(Serial.available()) {
+		Serial.read();
+	}
 
 	do {
 		switch(setupState) {

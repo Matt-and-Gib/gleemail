@@ -122,7 +122,10 @@ bool Networking::messageAvailable() {
 
 bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 	packetSize = udp.read(messageBuffer, MESSAGE_BUFFER_SIZE);
-	messageBuffer[packetSize] = '\0';
+	//messageBuffer[packetSize] = '\0';
+
+	Serial.print("Buffer: ");
+	Serial.println(messageBuffer);
 
 	if(packetSize > bufferLength) {
 		//DebugLog::getLog().logError(PACKET_SIZE_GREATER_THAN_BUFFER_LENGTH);
@@ -132,10 +135,13 @@ bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 	ArduinoJson::DeserializationError error = deserializeJson(doc, messageBuffer);
 
 	if(error) {
+		Serial.print("JSON Error: ");
+		Serial.print(error.f_str());
 		//DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
 	}
 
-	ArduinoJson::JsonObject b = doc["body"]["message"];
+	ArduinoJson::JsonObject b = doc["header"]["type"];
+	Serial.print("JSON object: ");
 	Serial.println(b);
 
 	for(int i = 0; i < bufferLength; i += 1) {
@@ -169,7 +175,21 @@ char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 	break;
 	}
 
-	serializeJson(payload, messageBuffer, measureJson(payload));
+	serializeJson(payload, messageBuffer, measureJson(payload) + 1);
+
+	/*ArduinoJson::DynamicJsonDocument doc(MESSAGE_BUFFER_SIZE); //REMEMBER: this will not be enough if the message takes up its full size
+	ArduinoJson::DeserializationError error = deserializeJson(payload, messageBuffer);
+
+	if(error) {
+		Serial.print("JSON Error: ");
+		Serial.println(error.f_str());
+		//DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
+	}
+
+	ArduinoJson::JsonObject b = doc["header"]["type"];
+	Serial.print("S->D JSON object: ");
+	Serial.println(b);*/
+
 	return messageBuffer;
 }
 
