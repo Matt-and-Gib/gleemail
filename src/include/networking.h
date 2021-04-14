@@ -5,6 +5,8 @@
 #include <WiFiNINA.h>
 #include <WiFiUdp.h>
 
+#include <ArduinoJson.h>
+
 #include "global.h"
 
 //REMOVE ME
@@ -33,6 +35,8 @@ private:
 	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
 
 	short findEndOfHeaderIndex(const char*, const unsigned short);
+
+	char* createMessage(char*, const MESSAGE_TYPE);
 public:
 	Networking();
 	~Networking();
@@ -42,7 +46,7 @@ public:
 
 	bool messageAvailable();
 	bool readMessage(char*, const unsigned short);
-	bool writeMessage(char*);
+	bool writeMessage(char*, const MESSAGE_TYPE);
 
 	bool connectToPeer(IPAddress&);
 
@@ -117,10 +121,40 @@ bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 }
 
 
-bool Networking::writeMessage(char* buffer) {
+char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
+	unsigned int DOC_SIZE = 4096;
+	char* messagePayload = new char[DOC_SIZE]; //REMEMBER TO DELETE ME!
+
+	DynamicJsonDocument payload(DOC_SIZE);
+
+	switch(messageType) {
+	case MESSAGE_TYPE::HANDSHAKE:
+		payload["header"]["type"] = "handshake";
+		payload["body"]["message"] = "four score and seven years ago our forefathers declared this land to be free from British oversight";
+	break;
+
+	case MESSAGE_TYPE::CHAT:
+		payload["header"]["type"] = "chat";
+		payload["body"]["message"] = body;
+	break;
+
+	case MESSAGE_TYPE::LIFELINE:
+	break;
+
+	default:
+	break;
+	}
+
+	serializeJson(payload, messagePayload, measureJson(payload));
+
+	return messagePayload;
+}
+
+
+bool Networking::writeMessage(char* buffer, const MESSAGE_TYPE messageType) {
 	if(peerIPAddress) {
 		udp.beginPacket(peerIPAddress, CONNECTION_PORT);
-		udp.write(buffer);
+		udp.write(*createMessage(buffer, messageType));
 		udp.endPacket();
 		return true;
 	} else {
@@ -133,6 +167,7 @@ bool Networking::writeMessage(char* buffer) {
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
+	//Change to use WriteMessage
 	udp.beginPacket(connectToIP, CONNECTION_PORT);
 	udp.write(NETWORK_HANDSHAKE_CHARACTER);
 	udp.endPacket();
@@ -149,6 +184,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 					return false;
 				} else {
 					peerIPAddress = connectToIP;
+					//Change to use WriteMessage
 					udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 					udp.write(NETWORK_HANDSHAKE_CHARACTER);
 					udp.endPacket();

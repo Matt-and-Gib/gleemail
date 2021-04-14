@@ -18,6 +18,8 @@ static const constexpr char NETWORK_HEADER_CONNECTION_LIFETIME[] = "Connection: 
 static const constexpr char HEADER_TERMINATION[] = "\r\n\r\n";
 static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEADER_TERMINATION)/sizeof(HEADER_TERMINATION[0]) - 1;
 
+enum class MESSAGE_TYPE : short {HANDSHAKE = 0, CHAT = 1, LIFELINE = 2};
+
 static const constexpr unsigned short MAX_MESSAGE_LENGTH = 16; //Maximum number of characters LCD display can print per line
 
 static const constexpr char CANCEL_CHAR = (char)24;

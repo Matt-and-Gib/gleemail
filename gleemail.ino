@@ -55,9 +55,9 @@ void getIncomingMessage() {
 
 void updateDisplay() {
 	if(pendingPeerMessage) {
-		//Serial.print("Received: ");
-		//Serial.println(peerMessage);
-		display.updateReading(peerMessage);
+		Serial.print("Received: ");
+		Serial.println(peerMessage);
+		//display.updateReading(peerMessage);
 	}
 
 	if(input->hasMessageChanged()) {
@@ -74,7 +74,7 @@ void sendNetworkMessage() {
 		input->getUserMessage(userMessage);
 		//Serial.print("Your message: ");
 		//Serial.println(userMessage);
-		if(!network.writeMessage(userMessage)) {
+		if(!network.writeMessage(userMessage, MESSAGE_TYPE::CHAT)) {
 			DebugLog::getLog().logError(NETWORK_WRITE_FAILED);
 		}
 	}
