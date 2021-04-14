@@ -15,6 +15,26 @@
 //REMOVE ME
 
 
+class Message {
+private:
+	const char* body;
+	MESSAGE_TYPE messageType;
+public:
+	Message() {}
+	Message(const DynamicJsonDocument&);
+	~Message() {}
+
+	bool operator==(const Message& o) {return messageType == o.messageType;}
+};
+
+
+Message::Message(const DynamicJsonDocument& payload) {
+	const int messageT = payload["header"]["type"];
+	messageType = static_cast<MESSAGE_TYPE>(messageT);
+	body = payload["body"]["message"];
+}
+
+
 class Networking {
 private:
 	char* ssid;
@@ -49,7 +69,7 @@ public:
 	void disconnectFromNetwork();
 
 	bool messageAvailable();
-	bool readMessage(char*, const unsigned short);
+	Message* readMessage(char*, const unsigned short);
 	bool writeMessage(char*, const MESSAGE_TYPE);
 
 	bool connectToPeer(IPAddress&);
@@ -132,87 +152,59 @@ void Networking::clearMessageBuffer() {
 }
 
 
-bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
-
+Message* Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 	clearMessageBuffer();
-
 	packetSize = udp.read(messageBuffer, MESSAGE_BUFFER_SIZE);
-	//messageBuffer[packetSize] = '\0';
-
-	Serial.print("Buffer: ");
-	Serial.println(messageBuffer);
 
 	if(packetSize > bufferLength) {
-		//DebugLog::getLog().logError(PACKET_SIZE_GREATER_THAN_BUFFER_LENGTH);
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_PACKET_SIZE_GREATER_THAN_BUFFER_LENGTH);
 	}
 
 	ArduinoJson::DynamicJsonDocument doc(MESSAGE_BUFFER_SIZE); //REMEMBER: this will not be enough if the message takes up its full size
 	ArduinoJson::DeserializationError error = deserializeJson(doc, messageBuffer);
 
 	if(error) {
-		Serial.print("JSON Error: ");
-		Serial.print(error.f_str());
-		//DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
+		//Serial.print("JSON Error: ");
+		//Serial.print(error.f_str());
+		DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
+		return nullptr;
+	} else {
+		/*const char* messageBody = doc["body"]["message"];
+		for(int i = 0; i < bufferLength; i += 1) {
+			buffer[i] = messageBody[i];
+		}*/
+
+		return new Message(doc);
 	}
-
-	const char *inTheBuff = doc["body"]["message"];
-	//Serial.print("JSON object: ");
-	//Serial.println(inTheBuff);
-
-	for(int i = 0; i < bufferLength; i += 1) {
-		buffer[i] = inTheBuff[i];
-	}
-
-	/*for(int i = 0; i < bufferLength; i += 1) {
-		buffer[i] = messageBuffer[i];
-	}*/
-
-	return true;
 }
 
 
 char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
-
 	clearMessageBuffer();
-
 	DynamicJsonDocument payload(MESSAGE_BUFFER_SIZE);
 
 	switch(messageType) {
 	case MESSAGE_TYPE::HANDSHAKE:
-		payload["header"]["type"] = "handshake";
-		payload["body"]["message"] = "four score and seven years ago our forefathers declared that breakfast burritos are awesome";
+		payload["header"]["type"] = static_cast<short>(MESSAGE_TYPE::HANDSHAKE);
+		payload["body"]["message"] = "";
 	break;
 
 	case MESSAGE_TYPE::CHAT:
-		payload["header"]["type"] = "chat";
+		payload["header"]["type"] = static_cast<short>(MESSAGE_TYPE::CHAT);
 		payload["body"]["message"] = body;
 	break;
 
 	default:
-		DebugLog::getLog().logError(NETWORK_UNKNOWN_MESSAGE_TYPE);
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNKNOWN_MESSAGE_TYPE);
 	break;
 	}
 
 	serializeJson(payload, messageBuffer, measureJson(payload) + 1);
-
-	/*ArduinoJson::DynamicJsonDocument doc(MESSAGE_BUFFER_SIZE); //REMEMBER: this will not be enough if the message takes up its full size
-	ArduinoJson::DeserializationError error = deserializeJson(payload, messageBuffer);
-
-	if(error) {
-		Serial.print("JSON Error: ");
-		Serial.println(error.f_str());
-		//DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
-	}
-
-	ArduinoJson::JsonObject b = doc["header"]["type"];
-	Serial.print("S->D JSON object: ");
-	Serial.println(b);*/
-
 	return messageBuffer;
 }
 
 
-bool Networking::writeMessage(char* buffer, const MESSAGE_TYPE messageType) {
+bool Networking::writeMessage(char* buffer, const MESSAGE_TYPE messageType = MESSAGE_TYPE::CHAT) {
 	if(peerIPAddress) {
 		udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 		udp.write(createMessage(buffer, messageType));
@@ -229,12 +221,15 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
 	//Change to use WriteMessage
-	udp.beginPacket(connectToIP, CONNECTION_PORT);
-	udp.write(NETWORK_HANDSHAKE_CHARACTER);
-	udp.endPacket();
+	/*udp.beginPacket(connectToIP, CONNECTION_PORT);
+	udp.write(createMessage(nullptr, MESSAGE_TYPE::HANDSHAKE));//NETWORK_HANDSHAKE_CHARACTER);
+	udp.endPacket();*/
+
+	peerIPAddress = connectToIP;
+	writeMessage(nullptr, MESSAGE_TYPE::HANDSHAKE);
 
 	char* receiveBuffer = new char[2];
-	while(true) {
+	/*while(true) {
 		if(udp.parsePacket()) {
 			packetSize = udp.read(receiveBuffer, 2);
 			receiveBuffer[packetSize] = '\0';
@@ -258,7 +253,10 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 		}
 
 		delay(1000);
-	}
+	}*/
+
+	//DELETE ME
+	return true;
 
 	delete[] receiveBuffer;
 }

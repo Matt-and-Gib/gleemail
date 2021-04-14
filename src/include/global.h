@@ -10,7 +10,7 @@ static const constexpr unsigned short BAUD_RATE = 9600;
 
 static const constexpr unsigned short MAX_IP_ADDRESS_LENGTH = 15;
 static const constexpr unsigned short CONNECTION_PORT = 29453;
-static const constexpr char NETWORK_HANDSHAKE_CHARACTER = '$';
+//static const constexpr char NETWORK_HANDSHAKE_CHARACTER = '$';
 
 static const constexpr char NETWORK_HEADER_USER_AGENT[] = "User-Agent: ArduinoWifiClient";
 static const constexpr char NETWORK_HEADER_ACCEPTED_RETURN_TYPE[] = "Accept: */*";
@@ -84,6 +84,7 @@ enum ERROR_CODE: short {
 	NETWORK_WRITE_FAILED = DEBUG_LOG_NETWORK_OFFSET + 15,
 	NETWORK_PEER_MESSAGE_READ_FAILED = DEBUG_LOG_NETWORK_OFFSET + 16,
 	NETWORK_UNKNOWN_MESSAGE_TYPE = DEBUG_LOG_NETWORK_OFFSET + 17,
+	NETWORK_PACKET_SIZE_GREATER_THAN_BUFFER_LENGTH = DEBUG_LOG_NETWORK_OFFSET + 18,
 
 	//JSON range: 90 - 129
 	JSON_NULLPTR_PAYLOAD = DEBUG_LOG_JSON_OFFSET + 0,
