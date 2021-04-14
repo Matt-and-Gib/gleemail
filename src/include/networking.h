@@ -39,6 +39,7 @@ private:
 	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
 	char* messageBuffer = new char[MESSAGE_BUFFER_SIZE];
 
+	void clearMessageBuffer();
 	char* createMessage(char*, const MESSAGE_TYPE);
 public:
 	Networking();
@@ -120,7 +121,21 @@ bool Networking::messageAvailable() {
 }
 
 
+void Networking::clearMessageBuffer() {
+	for(int i = 0; i < MESSAGE_BUFFER_SIZE; i += 1) {
+		if(messageBuffer[i] == '\0') {
+			break;
+		}
+
+		messageBuffer[i] = '\0';
+	}
+}
+
+
 bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
+
+	clearMessageBuffer();
+
 	packetSize = udp.read(messageBuffer, MESSAGE_BUFFER_SIZE);
 	//messageBuffer[packetSize] = '\0';
 
@@ -144,8 +159,10 @@ bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 	Serial.print("JSON object: ");
 	Serial.println(b);
 
+	//char *inTheBuff = b.f_str();
+
 	for(int i = 0; i < bufferLength; i += 1) {
-		//buffer[i] = b[i];
+		//buffer[i] = inTheBuff[i];
 	}
 
 	/*for(int i = 0; i < bufferLength; i += 1) {
@@ -157,6 +174,9 @@ bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 
 
 char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
+
+	clearMessageBuffer();
+
 	DynamicJsonDocument payload(MESSAGE_BUFFER_SIZE);
 
 	switch(messageType) {
