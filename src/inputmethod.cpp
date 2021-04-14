@@ -33,7 +33,7 @@ void InputMethod::getUserMessage(char *messageOut) {
 	clearUserMessage();
 
 	userMessageFirstEmptyIndex = 0;
-	messageChanged = true;
+	messageChanged = false;
 	messageComplete = false;
 }
 

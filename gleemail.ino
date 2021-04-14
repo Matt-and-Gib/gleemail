@@ -12,7 +12,6 @@ static InputMethod* input;
 static unsigned short pinIndex = 0;
 static char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
 static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
-bool pendingUserMessage = false;
 bool pendingPeerMessage = false;
 
 
@@ -62,7 +61,7 @@ void updateDisplay() {
 	}
 
 	if(input->hasMessageChanged()) {
-		input->peekUserMessage(userMessage);
+		input->peekUserMessage(userMessage); //Note: this will be wasted processing with different input method (i.e. TiltType)
 		//Serial.print("Your message: ");
 		//Serial.println(userMessage);
 		display.updateWriting(userMessage);
@@ -102,7 +101,6 @@ void loop() {
 	sendNetworkMessage();
 	printErrorCodes();
 
-	pendingUserMessage = false;
 	pendingPeerMessage = false;
 }
 
