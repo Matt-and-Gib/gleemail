@@ -115,13 +115,13 @@ bool Networking::messageAvailable() {
 
 
 bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
-	//packetSize = udp.read(buffer, bufferLength);
+	packetSize = udp.read(buffer, bufferLength);
 
-	char* temp = new char[4096];
-	udp.read(temp, 4096);
-	Serial.print("print:");
-	Serial.println(temp);
-	//buffer[packetSize] = '\0';
+	//char* temp = new char[4096];
+	//udp.read(temp, 4096);
+	//Serial.print("print:");
+	//Serial.println(temp);
+	buffer[packetSize] = '\0';
 	return true;
 }
 
