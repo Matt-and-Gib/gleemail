@@ -24,6 +24,8 @@ public:
 	Message(const DynamicJsonDocument&);
 	~Message() {}
 
+	char* toString();
+
 	bool operator==(const Message& o) {return messageType == o.messageType;}
 };
 
@@ -32,6 +34,11 @@ Message::Message(const DynamicJsonDocument& payload) {
 	const int messageT = payload["header"]["type"];
 	messageType = static_cast<MESSAGE_TYPE>(messageT);
 	body = payload["body"]["message"];
+}
+
+
+char* Message::serializeToString() {
+
 }
 
 
@@ -69,7 +76,7 @@ public:
 	void disconnectFromNetwork();
 
 	bool messageAvailable();
-	Message* readMessage(char*, const unsigned short);
+	bool readMessage(char*, const unsigned short);
 	bool writeMessage(char*, const MESSAGE_TYPE);
 
 	bool connectToPeer(IPAddress&);
@@ -152,7 +159,7 @@ void Networking::clearMessageBuffer() {
 }
 
 
-Message* Networking::readMessage(char* buffer, const unsigned short bufferLength) {
+bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
 	clearMessageBuffer();
 	packetSize = udp.read(messageBuffer, MESSAGE_BUFFER_SIZE);
 
@@ -167,19 +174,19 @@ Message* Networking::readMessage(char* buffer, const unsigned short bufferLength
 		//Serial.print("JSON Error: ");
 		//Serial.print(error.f_str());
 		DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
-		return nullptr;
+		return false;
 	} else {
 		/*const char* messageBody = doc["body"]["message"];
 		for(int i = 0; i < bufferLength; i += 1) {
 			buffer[i] = messageBody[i];
 		}*/
 
-		return new Message(doc);
+		return true;
 	}
 }
 
 
-char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
+Message* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 	clearMessageBuffer();
 	DynamicJsonDocument payload(MESSAGE_BUFFER_SIZE);
 
@@ -207,7 +214,7 @@ char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 bool Networking::writeMessage(char* buffer, const MESSAGE_TYPE messageType = MESSAGE_TYPE::CHAT) {
 	if(peerIPAddress) {
 		udp.beginPacket(peerIPAddress, CONNECTION_PORT);
-		udp.write(createMessage(buffer, messageType));
+		udp.write(createMessage(buffer, messageType).serializeToString());
 		udp.endPacket();
 		return true;
 	} else {

@@ -42,6 +42,14 @@ void processInputMethod() {
 }
 
 
+void processNetwork() {
+	//fetches all messages from router buffer & puts them into the message pool
+	//Probably should have a timeout & some way of blocking badly behaving IPs
+
+	//
+}
+
+
 void getIncomingMessage() {
 	if(network.messageAvailable()) {
 		if(network.readMessage(peerMessage, MAX_MESSAGE_LENGTH)) {
