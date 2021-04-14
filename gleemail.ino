@@ -73,7 +73,8 @@ void updateDisplay() {
 void sendNetworkMessage() {
 	if(input->isMessageReady()) {
 		input->getUserMessage(userMessage);
-
+		//Serial.print("Your message: ");
+		//Serial.println(userMessage);
 		if(!network.writeMessage(userMessage)) {
 			DebugLog::getLog().logError(NETWORK_WRITE_FAILED);
 		}
@@ -289,7 +290,7 @@ void setup() {
 
 
 		case SETUP_LEVEL::INPUT_METHOD:
-			display.updateReading("Setting up Input");
+			display.updateReading("Setting Up Input");
 			display.updateWriting("Downloading Data");
 			if(setupInputMethod()) {
 				for(int i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
