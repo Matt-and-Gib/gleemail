@@ -134,7 +134,6 @@ char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 	break;
 
 	case MESSAGE_TYPE::CHAT:
-		Serial.println("got here");
 		payload["header"]["type"] = "chat";
 		payload["body"]["message"] = body;
 	break;
@@ -147,7 +146,8 @@ char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 	}
 
 	serializeJson(payload, messagePayload, measureJson(payload));
-
+	Serial.print("print:");
+	Serial.println(messagePayload);
 	return messagePayload;
 }
 
