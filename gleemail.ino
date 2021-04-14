@@ -256,6 +256,8 @@ void setup() {
 		delay(250);
 	}
 
+	//Clear Serial input buffer
+
 	do {
 		switch(setupState) {
 		case SETUP_LEVEL::WELCOME:

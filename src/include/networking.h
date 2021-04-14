@@ -115,8 +115,13 @@ bool Networking::messageAvailable() {
 
 
 bool Networking::readMessage(char* buffer, const unsigned short bufferLength) {
-	packetSize = udp.read(buffer, bufferLength);
-	buffer[packetSize] = '\0';
+	//packetSize = udp.read(buffer, bufferLength);
+
+	char* temp = new char[4096];
+	udp.read(temp, 4096);
+	Serial.print("print:");
+	Serial.println(temp);
+	//buffer[packetSize] = '\0';
 	return true;
 }
 
@@ -146,8 +151,6 @@ char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 	}
 
 	serializeJson(payload, messagePayload, measureJson(payload));
-	Serial.print("print:");
-	Serial.println(messagePayload);
 	return messagePayload;
 }
 
@@ -155,7 +158,7 @@ char* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 bool Networking::writeMessage(char* buffer, const MESSAGE_TYPE messageType) {
 	if(peerIPAddress) {
 		udp.beginPacket(peerIPAddress, CONNECTION_PORT);
-		udp.write(*createMessage(buffer, messageType));
+		udp.write(createMessage(buffer, messageType));
 		udp.endPacket();
 		return true;
 	} else {
