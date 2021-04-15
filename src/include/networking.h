@@ -8,6 +8,7 @@
 #include <ArduinoJson.h>
 
 #include "global.h"
+#include "queue.h"
 
 //REMOVE ME
 #include "Arduino.h"
@@ -27,6 +28,7 @@ public:
 	char* toString();
 
 	bool operator==(const Message& o) {return messageType == o.messageType;}
+	bool operator==(const MESSAGE_TYPE& o) {return messageType == o;}
 };
 
 
@@ -34,11 +36,6 @@ Message::Message(const DynamicJsonDocument& payload) {
 	const int messageT = payload["header"]["type"];
 	messageType = static_cast<MESSAGE_TYPE>(messageT);
 	body = payload["body"]["message"];
-}
-
-
-char* Message::serializeToString() {
-
 }
 
 
@@ -66,6 +63,7 @@ private:
 	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
 	char* messageBuffer = new char[MESSAGE_BUFFER_SIZE];
 
+	Queue<Message> messagePool;
 	void clearMessageBuffer();
 	char* createMessage(char*, const MESSAGE_TYPE);
 public:
@@ -207,7 +205,7 @@ Message* Networking::createMessage(char* body, const MESSAGE_TYPE messageType) {
 	}
 
 	serializeJson(payload, messageBuffer, measureJson(payload) + 1);
-	return messageBuffer;
+	return nullptr;
 }
 
 
