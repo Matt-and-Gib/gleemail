@@ -2,16 +2,20 @@
 #define QUEUE_H
 
 template <class T>
-struct QueueNode {
+class QueueNode {
+private:
+	QueueNode<T>* node;
+	T* data;
+public:
 	QueueNode(T*);
 	~QueueNode();
 
-	QueueNode<T>* node;
-	T* data;
+	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak
+	QueueNode<T>* getNode() {return node;}
+	void setData(T* d) {data = d;} //possible memory leak
+	T* getData() {return data;}
 
 	void enqueue(T*);
-	QueueNode<T>* getNode() {return node;}
-	T* getData() {return data;}
 };
 
 
@@ -81,7 +85,7 @@ QueueNode<T>* Queue<T>::dequeue() {
 	}
 
 	root = root->getNode();
-	oldRoot->node = nullptr;
+	oldRoot->setNode(nullptr);
 	return oldRoot;
 }
 
@@ -118,12 +122,12 @@ QueueNode<T>* Queue<T>::remove(T& match) {
 	QueueNode<T>* parentNode = nullptr;
 	QueueNode<T>* currentNode = root;
 	while(currentNode) {
-		if(*(currentNode->data) == match) {
+		if(*(currentNode->getData()) == match) {
 			break;
 		}
 
 		parentNode = currentNode;
-		currentNode = currentNode->node;
+		currentNode = currentNode->getNode();
 	}
 
 	if(currentNode) {
@@ -131,8 +135,8 @@ QueueNode<T>* Queue<T>::remove(T& match) {
 			return dequeue();
 		}
 
-		parentNode->node = currentNode->node;
-		currentNode->node = nullptr;
+		parentNode->setNode(currentNode->getNode());
+		currentNode->setNode(nullptr);
 	}
 
 	return currentNode;
