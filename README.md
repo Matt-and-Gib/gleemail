@@ -83,9 +83,11 @@ __
 
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
 
-To-do
+Write me!
 
 Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
+
+See: [flowchart of program execution](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2FglEEmail%20flow.drawio)
 
 ___
 
