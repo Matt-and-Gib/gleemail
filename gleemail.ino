@@ -113,26 +113,6 @@ void loop() {
 }
 
 
-void setupPins() {
-	Pin **pins = input->getPins();
-	unsigned short i = 0;
-	Pin *currentPin = pins[i];
-
-	while (*currentPin != NULL_PIN) {
-		/*Important debug messages. Check here first if something seems broken with hardware!
-		Serial.print("Index: ");
-		Serial.println(i);
-
-		Serial.print(currentPin->pinLocation);
-		Serial.print(" : ");
-		Serial.println(currentPin->mode);*/
-
-		pinMode(currentPin->pinLocation, currentPin->mode);
-		currentPin = pins[++i];
-	}
-}
-
-
 bool connectToWiFi() {
 	unsigned short inputLength = 0;
 
@@ -188,6 +168,49 @@ bool connectToWiFi() {
 }
 
 
+bool setupInputMethod() {
+	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+	Serial.println("Downloading Input Method data...");
+
+	char *data = network.downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
+	if(!data) {
+		Serial.println("Unable to download data!");
+		return false;
+	}
+
+	/*Serial.println("JSON Payload:\n");
+	unsigned short i = 0;
+	while(dat[i] != '\0') {
+		Serial.print(dat[i++]);
+	}
+	Serial.println("\nDone");*/
+
+	bool dataParsed = input->setNetworkData(data);
+	delete[] data;
+	return dataParsed;
+}
+
+
+void setupPins() {
+	Pin **pins = input->getPins();
+	unsigned short i = 0;
+	Pin *currentPin = pins[i];
+
+	while (*currentPin != NULL_PIN) {
+		/*Important debug messages. Check here first if something seems broken with hardware!
+		Serial.print("Index: ");
+		Serial.println(i);
+
+		Serial.print(currentPin->pinLocation);
+		Serial.print(" : ");
+		Serial.println(currentPin->mode);*/
+
+		pinMode(currentPin->pinLocation, currentPin->mode);
+		currentPin = pins[++i];
+	}
+}
+
+
 void connectToPeer() {
 	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
 	char* ipAddressInputSubstringBuffer;
@@ -219,46 +242,16 @@ void connectToPeer() {
 
 	if(!network.connectToPeer(friendsIP)) {
 		Serial.println("Unable to connect to gleepal :(");
-		return;
+	} else {
+		Serial.println("Connected to gleepal!");
 	}
-
-	Serial.println("Connected to gleepal!");
 
 	delete[] ipAddressInputSubstringBuffer;
 	delete[] ipAddressInputBuffer;
 }
 
 
-bool setupInputMethod() {
-	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
-	Serial.println("Downloading Input Method data...");
-
-	char *data = network.downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
-	if(!data) {
-		Serial.println("Unable to download data!");
-		return false;
-	}
-
-	/*Serial.println("JSON Payload:\n");
-	unsigned short i = 0;
-	while(dat[i] != '\0') {
-		Serial.print(dat[i++]);
-	}
-	Serial.println("\nDone");*/
-
-	bool dataParsed = input->setNetworkData(data);
-	delete[] data;
-	return dataParsed;
-}
-
-
 void setup() {
-	enum SETUP_LEVEL : short {WELCOME = 0, NETWORK = 1, INPUT_METHOD = 2, PINS = 3, PEER = 4, DONE = 5};
-	SETUP_LEVEL setupState = WELCOME;
-	bool setupComplete = false;
-
-	const unsigned short SETUP_STEP_DELAY = 1500;
-
 	Serial.begin(BAUD_RATE);
 	while(!Serial) {
 		delay(250);
@@ -267,6 +260,12 @@ void setup() {
 	while(Serial.available()) {
 		Serial.read();
 	}
+
+	enum SETUP_LEVEL : short {WELCOME = 0, NETWORK = 1, INPUT_METHOD = 2, PINS = 3, PEER = 4, DONE = 5};
+	SETUP_LEVEL setupState = WELCOME;
+	bool setupComplete = false;
+
+	const unsigned short SETUP_STEP_DELAY = 1500;
 
 	do {
 		switch(setupState) {
