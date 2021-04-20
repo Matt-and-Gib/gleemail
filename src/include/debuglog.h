@@ -2,6 +2,8 @@
 #define DEBUGLOG_H
 
 
+static const constexpr bool VERBOSE_DEBUG_LOG = true;
+
 static const constexpr unsigned short DEBUG_LOG_INPUT_METHOD_OFFSET = 10;
 static const constexpr unsigned short DEBUG_LOG_NETWORK_OFFSET = 50;
 static const constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
@@ -73,7 +75,7 @@ public:
 private:
 	DebugLog() {
 		errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
-		for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
+		for(unsigned short i = 0; i < MAX_ERROR_CODES; i += 1) {
 			errorCodes[i] = ERROR_CODE::NONE;
 		}
 	}

@@ -3,7 +3,7 @@
 
 InputMethod::InputMethod() {
 	userMessage = new char[MAX_MESSAGE_LENGTH];
-	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
+	for(unsigned short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		userMessage[i] = '\0';
 	}
 }
@@ -15,14 +15,14 @@ InputMethod::~InputMethod() {
 
 
 void InputMethod::clearUserMessage() {
-	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
+	for(unsigned short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		userMessage[i] = '\0';
 	}
 }
 
 
 void InputMethod::updateMessageOutBuffer(char *messageOut) {
-	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
+	for(unsigned short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		messageOut[i] = userMessage[i];
 	}
 }
@@ -67,7 +67,7 @@ void InputMethod::pushCharacterToMessage(const char c) {
 void InputMethod::commitMessage() {
 	messageComplete = true;
 
-	for(int i = 0; i < userMessageFirstEmptyIndex; i += 1) {
+	for(unsigned short i = 0; i < userMessageFirstEmptyIndex; i += 1) {
 		if((int)userMessage[i] > 32) {
 			if(i > 0) {
 				//Maybe note this index as the first character index for trimming later

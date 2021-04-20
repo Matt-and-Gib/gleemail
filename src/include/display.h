@@ -43,8 +43,8 @@ public:
 
 Display::Display() {
 	lcd.begin(16, 2);
-	for(int i = 0; i < DISPLAY_COLUMN_LENGTH; i += 1) {
-		for(int j = 0; j < DISPLAY_ROW_LENGTH; j += 1) {
+	for(unsigned short i = 0; i < DISPLAY_COLUMN_LENGTH; i += 1) {
+		for(unsigned short j = 0; j < DISPLAY_ROW_LENGTH; j += 1) {
 			lcdBuffer[i][j] = ' ';
 		}
 	}

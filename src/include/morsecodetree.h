@@ -68,7 +68,7 @@ class MorsePhrase {
 public:
 	MorsePhrase() {
 		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
-		/*for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+		/*for(unsigned short i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			phraseArray[i] = NOTHING;
 		}*/
 
@@ -77,9 +77,9 @@ public:
 
 	MorsePhrase(const char* phrase) {
 		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
-		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+		for(unsigned short i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			if(phrase[i] == '\0') {
-				for(int j = i; j < MAX_MORSE_PHRASE_LENGTH; j += 1) {
+				for(unsigned short j = i; j < MAX_MORSE_PHRASE_LENGTH; j += 1) {
 					phraseArray[j] = NOTHING;
 				}
 				break;
@@ -98,7 +98,7 @@ public:
 	MorseChar& operator[](const unsigned short index) {return phraseArray[index];}
 
 	bool operator==(MorsePhrase& o) {
-		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+		for(unsigned short i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			if(phraseArray[i] != o[i]) {
 				return false;
 			}
@@ -112,7 +112,7 @@ public:
 	}
 
 	bool operator<(MorsePhrase&o) {
-		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+		for(unsigned short i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			if(o[i] == NOTHING) {
 				if(phraseArray[i] == DOT) {
 					return true;
@@ -143,7 +143,7 @@ public:
 		return false;
 	}
 	void resetPhrase() {
-		for(int i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
+		for(unsigned short i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			phraseArray[i] = NOTHING;
 		}
 
@@ -236,7 +236,7 @@ protected:
 private:
 	/*void printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
 		if(node) {
-			for(int i = 0; i < spacingIndex; i += 1) {
+			for(short i = 0; i < spacingIndex; i += 1) {
 				Serial.print(' ');
 			}
 

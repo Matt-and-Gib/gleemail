@@ -291,7 +291,7 @@ void setup() {
 			display.updateReading("Setting Up Input");
 			display.updateWriting("Downloading Data");
 			if(setupInputMethod()) {
-				for(int i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
+				for(unsigned short i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
 					userMessage[i] = '\0';
 					peerMessage[i] = '\0';
 				}
