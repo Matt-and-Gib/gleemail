@@ -1,6 +1,10 @@
 <mxfile host="65bd71144e" pages="2">
     <diagram id="F1i1hxdfabdLGuhgjaKc" name="Setup">
+<<<<<<< Updated upstream
         <mxGraphModel dx="2318" dy="1656" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+=======
+        <mxGraphModel dx="1159" dy="828" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+>>>>>>> Stashed changes
             <root>
                 <mxCell id="0"/>
                 <mxCell id="weplPnJjXdP7S7As0K1b-1" value="Basic Flow" parent="0"/>
@@ -784,7 +788,11 @@
         </mxGraphModel>
     </diagram>
     <diagram id="A6FAWKzvOfyH2jUEzqCr" name="Loop">
+<<<<<<< Updated upstream
         <mxGraphModel dx="1159" dy="1228" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+=======
+        <mxGraphModel dx="1159" dy="828" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+>>>>>>> Stashed changes
             <root>
                 <mxCell id="1MvEsiqucxaYDKqLwKRQ-0"/>
                 <mxCell id="1MvEsiqucxaYDKqLwKRQ-1" value="Old Loop" parent="1MvEsiqucxaYDKqLwKRQ-0" visible="0"/>
@@ -936,6 +944,48 @@
                     <mxGeometry x="440" y="270" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="CFhJKzpYQG1gfS8cUwgq-0" value="New Loop" parent="1MvEsiqucxaYDKqLwKRQ-0"/>
+<<<<<<< Updated upstream
+=======
+                <mxCell id="zaxJEmLl-J3TEa-ZVsNI-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="CFhJKzpYQG1gfS8cUwgq-0" source="1u9ue475SFIlNVlr21ER-0" target="1u9ue475SFIlNVlr21ER-1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="1u9ue475SFIlNVlr21ER-0" value="loop()" style="rounded=1;whiteSpace=wrap;html=1;" parent="CFhJKzpYQG1gfS8cUwgq-0" vertex="1">
+                    <mxGeometry x="70" y="180" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="zaxJEmLl-J3TEa-ZVsNI-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="CFhJKzpYQG1gfS8cUwgq-0" source="1u9ue475SFIlNVlr21ER-1" target="1u9ue475SFIlNVlr21ER-2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="1u9ue475SFIlNVlr21ER-1" value="processInputMethod()" style="rounded=0;whiteSpace=wrap;html=1;" parent="CFhJKzpYQG1gfS8cUwgq-0" vertex="1">
+                    <mxGeometry x="70" y="280" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="zaxJEmLl-J3TEa-ZVsNI-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="CFhJKzpYQG1gfS8cUwgq-0" source="1u9ue475SFIlNVlr21ER-2" target="1u9ue475SFIlNVlr21ER-3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="1u9ue475SFIlNVlr21ER-2" value="processNetwork()" style="rounded=0;whiteSpace=wrap;html=1;" parent="CFhJKzpYQG1gfS8cUwgq-0" vertex="1">
+                    <mxGeometry x="70" y="380" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="zaxJEmLl-J3TEa-ZVsNI-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="CFhJKzpYQG1gfS8cUwgq-0" source="1u9ue475SFIlNVlr21ER-3" target="1u9ue475SFIlNVlr21ER-4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="1u9ue475SFIlNVlr21ER-3" value="updateDisplay()" style="rounded=0;whiteSpace=wrap;html=1;" parent="CFhJKzpYQG1gfS8cUwgq-0" vertex="1">
+                    <mxGeometry x="70" y="480" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="1u9ue475SFIlNVlr21ER-4" value="printErrorCodes()" style="rounded=0;whiteSpace=wrap;html=1;" parent="CFhJKzpYQG1gfS8cUwgq-0" vertex="1">
+                    <mxGeometry x="70" y="580" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="zaxJEmLl-J3TEa-ZVsNI-6" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="CFhJKzpYQG1gfS8cUwgq-0" source="1u9ue475SFIlNVlr21ER-4" target="1u9ue475SFIlNVlr21ER-0" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="-30" y="740" as="sourcePoint"/>
+                        <mxPoint x="190" y="140" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="130" y="680"/>
+                            <mxPoint x="30" y="680"/>
+                            <mxPoint x="30" y="140"/>
+                            <mxPoint x="130" y="140"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+>>>>>>> Stashed changes
                 <mxCell id="zaxJEmLl-J3TEa-ZVsNI-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="CFhJKzpYQG1gfS8cUwgq-0" source="zaxJEmLl-J3TEa-ZVsNI-8" target="zaxJEmLl-J3TEa-ZVsNI-10" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
@@ -975,6 +1025,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
+<<<<<<< Updated upstream
                 <mxCell id="s5FNHuS3xTPHS39efUqe-1" value="1ms" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="CFhJKzpYQG1gfS8cUwgq-0" vertex="1">
                     <mxGeometry x="240" y="-20" width="40" height="20" as="geometry"/>
                 </mxCell>
@@ -990,11 +1041,17 @@
                 <mxCell id="fx-eze-XUmJhrERLvsC4-0" value="38ms total:" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="CFhJKzpYQG1gfS8cUwgq-0" vertex="1">
                     <mxGeometry x="40" y="-20" width="120" height="20" as="geometry"/>
                 </mxCell>
+=======
+>>>>>>> Stashed changes
             </root>
         </mxGraphModel>
     </diagram>
     <diagram id="SyO-1l2L72q7bp1sNQku" name="Network">
+<<<<<<< Updated upstream
         <mxGraphModel dx="2898" dy="3270" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
+=======
+        <mxGraphModel dx="966" dy="1890" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
+>>>>>>> Stashed changes
             <root>
                 <mxCell id="bTJq3DNs9fMaLHm5sGfA-0"/>
                 <mxCell id="bTJq3DNs9fMaLHm5sGfA-1" value="New Flow" parent="bTJq3DNs9fMaLHm5sGfA-0"/>
@@ -1385,8 +1442,13 @@
                 <mxCell id="2GQQnaBMqYZ3MhvYtUkt-1" value="break" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
                     <mxGeometry x="350" y="-670" width="100" height="60" as="geometry"/>
                 </mxCell>
+<<<<<<< Updated upstream
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-2" value="process messageIn" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.flowchart.on-page_reference;fillColor=#0050ef;strokeColor=#001DBC;fontColor=#ffffff;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
                     <mxGeometry x="1230" y="-520" width="60" height="60" as="geometry"/>
+=======
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-2" value="process message" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.flowchart.on-page_reference;fillColor=#0050ef;strokeColor=#001DBC;fontColor=#ffffff;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1250" y="-520" width="60" height="60" as="geometry"/>
+>>>>>>> Stashed changes
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-3" value="&lt;h1&gt;Idempotency Tokens&lt;/h1&gt;&lt;p&gt;Clear receipt messages's idempotency tokens after a set amount of time. All other idempotency tokens are only cleared on receipt.&lt;/p&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
                     <mxGeometry x="40" y="590" width="260" height="120" as="geometry"/>
@@ -1395,7 +1457,11 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-76" value="process message" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.start_1;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="870" y="77.5" width="100" height="60" as="geometry"/>
+=======
+                    <mxGeometry x="890" y="20" width="100" height="60" as="geometry"/>
+>>>>>>> Stashed changes
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-77" value="Messages In" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.direct_data;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
                     <mxGeometry x="10" y="65" width="130" height="60" as="geometry"/>
@@ -1449,6 +1515,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-106" value="hash message" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="860" y="277.5" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-108" value="hash match?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
@@ -1461,6 +1528,20 @@
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="950" y="497.5" as="sourcePoint"/>
                         <mxPoint x="1050" y="497.5" as="targetPoint"/>
+=======
+                    <mxGeometry x="880" y="220" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-108" value="hash match?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="890" y="320" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-111" value="break" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="890" y="460" width="100" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-113" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-108" target="0Uw1zrmIylhXxxnaPuqy-111" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="970" y="440" as="sourcePoint"/>
+                        <mxPoint x="1070" y="440" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-114" value="No" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-113" connectable="0" vertex="1">
@@ -1470,18 +1551,28 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-115" value="switch(messageType)" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1010" y="397.5" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-116" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-108" target="0Uw1zrmIylhXxxnaPuqy-115" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="980" y="367.5" as="sourcePoint"/>
                         <mxPoint x="1080" y="367.5" as="targetPoint"/>
+=======
+                    <mxGeometry x="1030" y="340" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-116" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-108" target="0Uw1zrmIylhXxxnaPuqy-115" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1000" y="310" as="sourcePoint"/>
+                        <mxPoint x="1100" y="310" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-117" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-116" connectable="0" vertex="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-118" value="HANDSHAKE" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1020" y="1057.5" width="100" height="100" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-119" value="HEARTBEAT" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
@@ -1500,6 +1591,26 @@
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="1110" y="757.5" as="sourcePoint"/>
                         <mxPoint x="1130" y="777.5" as="targetPoint"/>
+=======
+                    <mxGeometry x="1040" y="1000" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-119" value="HEARTBEAT" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1040" y="580" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-120" value="CHAT" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1040" y="860" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-121" value="CONFIRMATION" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1040" y="720" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-122" value="ERROR" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1040" y="440" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-124" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-119" target="0Uw1zrmIylhXxxnaPuqy-121" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1130" y="700" as="sourcePoint"/>
+                        <mxPoint x="1150" y="720" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-125" value="No" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-124" connectable="0" vertex="1">
@@ -1507,8 +1618,13 @@
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-136" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-122" target="0Uw1zrmIylhXxxnaPuqy-119" edge="1">
                     <mxGeometry relative="1" as="geometry">
+<<<<<<< Updated upstream
                         <mxPoint x="1120" y="617.5" as="sourcePoint"/>
                         <mxPoint x="1220" y="617.5" as="targetPoint"/>
+=======
+                        <mxPoint x="1140" y="560" as="sourcePoint"/>
+                        <mxPoint x="1240" y="560" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-137" value="No" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-136" connectable="0" vertex="1">
@@ -1516,8 +1632,13 @@
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-138" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-121" target="0Uw1zrmIylhXxxnaPuqy-120" edge="1">
                     <mxGeometry relative="1" as="geometry">
+<<<<<<< Updated upstream
                         <mxPoint x="1190" y="897.5" as="sourcePoint"/>
                         <mxPoint x="1290" y="897.5" as="targetPoint"/>
+=======
+                        <mxPoint x="1210" y="840" as="sourcePoint"/>
+                        <mxPoint x="1310" y="840" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-139" value="No" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-138" connectable="0" vertex="1">
@@ -1525,8 +1646,13 @@
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-140" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-120" target="0Uw1zrmIylhXxxnaPuqy-118" edge="1">
                     <mxGeometry relative="1" as="geometry">
+<<<<<<< Updated upstream
                         <mxPoint x="1180" y="1037.5" as="sourcePoint"/>
                         <mxPoint x="1280" y="1037.5" as="targetPoint"/>
+=======
+                        <mxPoint x="1200" y="980" as="sourcePoint"/>
+                        <mxPoint x="1300" y="980" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-141" value="No" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-140" connectable="0" vertex="1">
@@ -1540,14 +1666,20 @@
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-146" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-119" target="0Uw1zrmIylhXxxnaPuqy-148" edge="1">
                     <mxGeometry relative="1" as="geometry">
+<<<<<<< Updated upstream
                         <mxPoint x="1130" y="686.5" as="sourcePoint"/>
                         <mxPoint x="1150" y="686.5" as="targetPoint"/>
+=======
+                        <mxPoint x="1150" y="629" as="sourcePoint"/>
+                        <mxPoint x="1170" y="629" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-147" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-146" connectable="0" vertex="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-148" value="update heartbeat received timestamp" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1160" y="657.5" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-151" value="unique idempotency token?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
@@ -1557,6 +1689,17 @@
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="1170" y="877.5" as="sourcePoint"/>
                         <mxPoint x="1270" y="877.5" as="targetPoint"/>
+=======
+                    <mxGeometry x="1180" y="600" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-151" value="unique idempotency token?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1342.5" y="860" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-152" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-120" target="0Uw1zrmIylhXxxnaPuqy-162" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1190" y="820" as="sourcePoint"/>
+                        <mxPoint x="1290" y="820" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-153" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-152" connectable="0" vertex="1">
@@ -1566,6 +1709,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-157" value="record idempotency token" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1462.5" y="937.5" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-158" value="update received message buffer" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
@@ -1575,6 +1719,17 @@
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="1452.5" y="837.5" as="sourcePoint"/>
                         <mxPoint x="1552.5" y="837.5" as="targetPoint"/>
+=======
+                    <mxGeometry x="1482.5" y="880" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-158" value="update received message buffer" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1645" y="880" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0Uw1zrmIylhXxxnaPuqy-159" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-151" target="0Uw1zrmIylhXxxnaPuqy-157" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1472.5" y="780" as="sourcePoint"/>
+                        <mxPoint x="1572.5" y="780" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-160" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-159" connectable="0" vertex="1">
@@ -1584,13 +1739,21 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-162" value="enqueue confirmation message into messageOut" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1160" y="937.5" width="120" height="60" as="geometry"/>
+=======
+                    <mxGeometry x="1180" y="880" width="120" height="60" as="geometry"/>
+>>>>>>> Stashed changes
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-170" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-165" target="0Uw1zrmIylhXxxnaPuqy-106" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-165" value="increment message received counter" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="860" y="177.5" width="120" height="60" as="geometry"/>
+=======
+                    <mxGeometry x="880" y="120" width="120" height="60" as="geometry"/>
+>>>>>>> Stashed changes
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-167" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="RbuY-zfJMc9WdDnwju_b-70" target="3BN7P33_SGN1TyGzmTk9-10" edge="1">
                     <mxGeometry relative="1" as="geometry">
@@ -1601,7 +1764,11 @@
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-168" value="No" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="0Uw1zrmIylhXxxnaPuqy-167" connectable="0" vertex="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
+<<<<<<< Updated upstream
                 <mxCell id="ZGbdo8c10I8iUTWMsDo6-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-171" target="ZGbdo8c10I8iUTWMsDo6-3">
+=======
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-171" target="X57SNWxmdk9vy1OBxDnk-1">
+>>>>>>> Stashed changes
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-171" value="process messages in outgoing messages queue" style="rounded=1;whiteSpace=wrap;html=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
@@ -1611,18 +1778,28 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-1" value="dequeue handshake from messageOut" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1160" y="1077.5" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-2" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-118" target="eqdxF3u0tAGlKU-8HEK5-1" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="1130" y="1147.5" as="sourcePoint"/>
                         <mxPoint x="1175" y="1147.5" as="targetPoint"/>
+=======
+                    <mxGeometry x="1180" y="1020" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-2" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-118" target="eqdxF3u0tAGlKU-8HEK5-1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1150" y="1090" as="sourcePoint"/>
+                        <mxPoint x="1195" y="1090" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-3" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="eqdxF3u0tAGlKU-8HEK5-2" connectable="0" vertex="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-4" value="enqueue confirmation message into MessageOut" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1320" y="1077.5" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-9" value="log error" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
@@ -1632,6 +1809,17 @@
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="1120" y="597.5" as="sourcePoint"/>
                         <mxPoint x="1160" y="597.5" as="targetPoint"/>
+=======
+                    <mxGeometry x="1340" y="1020" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-9" value="log error" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1180" y="460" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-10" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-122" target="eqdxF3u0tAGlKU-8HEK5-9" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1140" y="540" as="sourcePoint"/>
+                        <mxPoint x="1180" y="540" as="targetPoint"/>
+>>>>>>> Stashed changes
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-11" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="eqdxF3u0tAGlKU-8HEK5-10" connectable="0" vertex="1">
@@ -1639,22 +1827,35 @@
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="eqdxF3u0tAGlKU-8HEK5-63" target="eqdxF3u0tAGlKU-8HEK5-78" edge="1">
                     <mxGeometry relative="1" as="geometry">
+<<<<<<< Updated upstream
                         <mxPoint x="1820" y="1107.5" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-63" value="increment handshake received count" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#2a2a2a;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
                     <mxGeometry x="1640" y="1077.5" width="120" height="60" as="geometry"/>
+=======
+                        <mxPoint x="1840" y="1050" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-63" value="increment handshake received count" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#2a2a2a;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1660" y="1020" width="120" height="60" as="geometry"/>
+>>>>>>> Stashed changes
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="eqdxF3u0tAGlKU-8HEK5-67" target="eqdxF3u0tAGlKU-8HEK5-63" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-67" value="doConnected()" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#2a2a2a;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1480" y="1077.5" width="120" height="60" as="geometry"/>
+=======
+                    <mxGeometry x="1500" y="1020" width="120" height="60" as="geometry"/>
+>>>>>>> Stashed changes
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-68" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="eqdxF3u0tAGlKU-8HEK5-4" target="eqdxF3u0tAGlKU-8HEK5-67" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="tFha2cL1WBkU8cRSi73k-2" value="&lt;h1&gt;This may include:&lt;/h1&gt;&lt;p&gt;Set &quot;isConnected&quot; to true,&lt;/p&gt;&lt;p&gt;Start sending heartbeats,&lt;/p&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+<<<<<<< Updated upstream
                     <mxGeometry x="1431.25" y="1172.5" width="217.5" height="120" as="geometry"/>
                 </mxCell>
                 <mxCell id="eqdxF3u0tAGlKU-8HEK5-80" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="eqdxF3u0tAGlKU-8HEK5-71" target="eqdxF3u0tAGlKU-8HEK5-79" edge="1">
@@ -2130,6 +2331,102 @@
                 </mxCell>
                 <mxCell id="0Uw1zrmIylhXxxnaPuqy-73" value="loop()" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" parent="0Uw1zrmIylhXxxnaPuqy-4" vertex="1">
                     <mxGeometry y="740" width="80" height="80" as="geometry"/>
+=======
+                    <mxGeometry x="1460" y="1120" width="217.5" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-80" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="eqdxF3u0tAGlKU-8HEK5-71" target="eqdxF3u0tAGlKU-8HEK5-79" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-71" value="lookup idempotency token in messageOut" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#2a2a2a;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1180" y="740" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-72" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="0Uw1zrmIylhXxxnaPuqy-121" target="eqdxF3u0tAGlKU-8HEK5-71" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1150" y="640" as="sourcePoint"/>
+                        <mxPoint x="1190" y="640" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-73" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="eqdxF3u0tAGlKU-8HEK5-72" connectable="0" vertex="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-77" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="eqdxF3u0tAGlKU-8HEK5-74" target="eqdxF3u0tAGlKU-8HEK5-75" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-74" value="dequeue message from messageOut" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#2a2a2a;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1480" y="740" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-75" value="do callback function from message" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#2a2a2a;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1640" y="740" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-78" value="&#10;&#10;&lt;span style=&quot;color: rgb(240, 240, 240); font-family: helvetica; font-size: 12px; font-style: normal; font-weight: 400; letter-spacing: normal; text-align: center; text-indent: 0px; text-transform: none; word-spacing: 0px; background-color: rgb(42, 42, 42); display: inline; float: none;&quot;&gt;if received more than HANDSHAKE_THRESHOLD, log error&lt;/span&gt;&#10;&#10;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;fillColor=#2a2a2a;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1820" y="1000" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-79" value="idempotency token found?" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;fillColor=#2a2a2a;" parent="bTJq3DNs9fMaLHm5sGfA-1" vertex="1">
+                    <mxGeometry x="1342.5" y="720" width="100" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-81" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="bTJq3DNs9fMaLHm5sGfA-1" source="eqdxF3u0tAGlKU-8HEK5-79" target="eqdxF3u0tAGlKU-8HEK5-74" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1452.5" y="920" as="sourcePoint"/>
+                        <mxPoint x="1492.5" y="920" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eqdxF3u0tAGlKU-8HEK5-82" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" parent="eqdxF3u0tAGlKU-8HEK5-81" connectable="0" vertex="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-0" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#007FFF;strokeWidth=2;fillColor=none;" vertex="1" parent="bTJq3DNs9fMaLHm5sGfA-1">
+                    <mxGeometry x="860" width="1110" height="1120" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="bTJq3DNs9fMaLHm5sGfA-1" source="X57SNWxmdk9vy1OBxDnk-1" target="X57SNWxmdk9vy1OBxDnk-3">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-1" value="record timestamp" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;strokeWidth=1;" vertex="1" parent="bTJq3DNs9fMaLHm5sGfA-1">
+                    <mxGeometry x="1710" y="-980" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-3" value="time delta elapsed?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="bTJq3DNs9fMaLHm5sGfA-1">
+                    <mxGeometry x="1730" y="-880" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-4" value="queue empty?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="bTJq3DNs9fMaLHm5sGfA-1">
+                    <mxGeometry x="1730" y="-760" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-5" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="bTJq3DNs9fMaLHm5sGfA-1" source="X57SNWxmdk9vy1OBxDnk-3" target="X57SNWxmdk9vy1OBxDnk-4">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1780" y="-780" as="sourcePoint"/>
+                        <mxPoint x="1880" y="-780" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-6" value="No" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" connectable="0" vertex="1" parent="X57SNWxmdk9vy1OBxDnk-5">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-7" value="" style="endArrow=classic;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="bTJq3DNs9fMaLHm5sGfA-1" source="X57SNWxmdk9vy1OBxDnk-4" target="X57SNWxmdk9vy1OBxDnk-12">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1640" y="-680" as="sourcePoint"/>
+                        <mxPoint x="1610" y="-680" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="1640" y="-720"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-8" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" connectable="0" vertex="1" parent="X57SNWxmdk9vy1OBxDnk-7">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-9" value="" style="endArrow=classic;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="bTJq3DNs9fMaLHm5sGfA-1" source="X57SNWxmdk9vy1OBxDnk-3" target="X57SNWxmdk9vy1OBxDnk-12">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1590" y="-770" as="sourcePoint"/>
+                        <mxPoint x="1650" y="-840" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="1640" y="-840"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-10" value="Yes" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=middle;" connectable="0" vertex="1" parent="X57SNWxmdk9vy1OBxDnk-9">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-12" value="break" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="bTJq3DNs9fMaLHm5sGfA-1">
+                    <mxGeometry x="1590" y="-680" width="100" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="X57SNWxmdk9vy1OBxDnk-13" value="Function for processing events on heartbeat elapsed duration" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="bTJq3DNs9fMaLHm5sGfA-1">
+                    <mxGeometry x="440" y="280" width="130" height="50" as="geometry"/>
+>>>>>>> Stashed changes
                 </mxCell>
             </root>
         </mxGraphModel>
