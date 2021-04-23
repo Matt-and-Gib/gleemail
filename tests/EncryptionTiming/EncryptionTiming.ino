@@ -6,14 +6,11 @@
 #include "src/tiny-AES-c-1.0.0/aes.hpp"
 
 
-static const constexpr short MESSAGE_LENGTH = 32;
-
-
 void loop() {}
 
 
-void printArr(const uint8_t* const arr, bool cast = true) {
-	for(unsigned short i = 0; i < MESSAGE_LENGTH; i += 1) {
+void printArr(const uint8_t* const arr, const unsigned short len, const bool cast = true) {
+	for(unsigned short i = 0; i < len; i += 1) {
 		if(cast) {
 			Serial.print((char)arr[i]);
 		} else {
@@ -37,13 +34,16 @@ void setup() {
 
 	uint8_t key[] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
 	uint8_t initVector[] = "iviviviviviviviv";
-
 	struct AES_ctx ctx;
 
-	unsigned char message[] = "Hello, glEEmail";
-	unsigned char rawData[MESSAGE_LENGTH];
+	unsigned char message[] = "1234567890abcefg";
+	const unsigned short dataLength = (sizeof(message) | 15) + 1; //will always be larger than message length to ensure null terminator applied, up to 16 bytes in the worst case (message length _is_ a multiple of 16)
+	//Serial.print("dataLength: ");
+	//Serial.println(dataLength);
 
-	for(unsigned short i = 0; i < MESSAGE_LENGTH; i += 1) {
+	unsigned char rawData[dataLength];
+
+	for(unsigned short i = 0; i < dataLength; i += 1) {
 		if(i < sizeof(message) - 1) {
 			rawData[i] = message[i];
 		} else {
@@ -52,15 +52,25 @@ void setup() {
 	}
 
 	Serial.print("raw:\t\t");
-	printArr(rawData);
+	printArr(rawData, dataLength);
+
+	const long startTime = micros();
 
 	AES_init_ctx_iv(&ctx, key, initVector);
-	AES_CBC_encrypt_buffer(&ctx, rawData, MESSAGE_LENGTH);
-	Serial.print("encrypted:\t");
-	printArr(rawData, false);
+	AES_CBC_encrypt_buffer(&ctx, rawData, dataLength);
+	//Serial.print("encrypted:\t");
+	//printArr(rawData, dataLength, false);
 
 	AES_init_ctx_iv(&ctx, key, initVector);
-	AES_CBC_decrypt_buffer(&ctx, rawData, MESSAGE_LENGTH);
-	Serial.print("decrypted:\t");
-	printArr(rawData);
+	AES_CBC_decrypt_buffer(&ctx, rawData, dataLength);
+	//Serial.print("decrypted:\t");
+	//printArr(rawData, dataLength);
+
+	const long elapsed = micros() - startTime;
+
+	Serial.print("Took ");
+	Serial.print(elapsed);
+	Serial.println(" micro seconds");
+
+	//Takes ~1320 microseconds on Arduino Nano 33 IoT
 }
