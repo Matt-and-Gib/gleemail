@@ -36,10 +36,10 @@ void setup() {
 	uint8_t initVector[] = "iviviviviviviviv";
 	struct AES_ctx ctx;
 
-	unsigned char message[] = "1234567890abcefg";
+	unsigned char message[] = "{\n\t\"morsecodetreedata\": [\n\t\t{\"phrase\": \".\", \"symbol\": \"E\"},\n\t\t{\"phrase\": \"-\", \"symbol\": \"T\"},\n\n\t\t{\"phrase\": \"..\", \"symbol\": \"I\"},\n\t\t{\"phrase\": \".-\", \"symbol\": \"A\"},\n\t\t{\"phrase\": \"-.\", \"symbol\": \"N\"},\n\t\t{\"phrase\": \"--\", \"symbol\": \"M\"},\n\n\t\t{\"phrase\": \"...\", \"symbol\": \"S\"},\n\t\t{\"phrase\": \"..-\", \"symbol\": \"U\"},\n\t\t{\"phrase\": \".-.\", \"symbol\": \"R\"},\n\t\t{\"phrase\": \".--\", \"symbol\": \"W\"},\n\t\t{\"phrase\": \"-..\", \"symbol\": \"D\"},\n\t\t{\"phrase\": \"-.-\", \"symbol\": \"K\"},\n\t\t{\"phrase\": \"--.\", \"symbol\": \"G\"},\n\t\t{\"phrase\": \"---\", \"symbol\": \"O\"},\n\n\t\t{\"phrase\": \"....\", \"symbol\": \"H\"},\n\t\t{\"phrase\": \"...-\", \"symbol\": \"V\"},\n\t\t{\"phrase\": \"..-.\", \"symbol\": \"F\"},\n\t\t{\"phrase\": \"..--\", \"symbol\": \" \"},\n\t\t{\"phrase\": \".-..\", \"symbol\": \"L\"},\n\t\t{\"phrase\": \".-.-\", \"symbol\": \" \"},\n\t\t{\"phrase\": \".--.\", \"symbol\": \"P\"},\n\t\t{\"phrase\": \".---\", \"symbol\": \"J\"},\n\t\t{\"phrase\": \"-...\", \"symbol\": \"B\"},\n\t\t{\"phrase\": \"-..-\", \"symbol\": \"X\"},\n\t\t{\"phrase\": \"-.-.\", \"symbol\": \"C\"},\n\t\t{\"phrase\": \"-.--\", \"symbol\": \"Y\"},\n\t\t{\"phrase\": \"--..\", \"symbol\": \"Z\"},\n\t\t{\"phrase\": \"--.-\", \"symbol\": \"Q\"},\n\t\t{\"phrase\": \"---.\", \"symbol\": \" \"},\n\t\t{\"phrase\": \"----\", \"symbol\": \" \"},\n\n\t\t{\"phrase\": \".....\", \"symbol\": \"5\"},\n\t\t{\"phrase\": \"....-\", \"symbol\": \"4\"},\n\t\t{\"phrase\": \"...--\", \"symbol\": \"3\"},\n\t\t{\"phrase\": \"..--.\", \"symbol\": \" \"},\n\t\t{\"phrase\": \"..---\", \"symbol\": \"2\"},\n\t\t{\"phrase\": \".-...\", \"symbol\": \"&\"},\n\t\t{\"phrase\": \".-..-\", \"symbol\": \" \"},\n\t\t{\"phrase\": \".-.-.\", \"symbol\": \"+\"},\n\t\t{\"phrase\": \".--.-\", \"symbol\": \" \"},\n\t\t{\"phrase\": \".----\", \"symbol\": \"1\"},\n\t\t{\"phrase\": \"-....\", \"symbol\": \"6\"},\n\t\t{\"phrase\": \"-...-\", \"symbol\": \"=\"},\n\t\t{\"phrase\": \"-..-.\", \"symbol\": \"/\"},\n\t\t{\"phrase\": \"-.--.\", \"symbol\": \"(\"},\n\t\t{\"phrase\": \"--...\", \"symbol\": \"7\"},\n\t\t{\"phrase\": \"--..-\", \"symbol\": \" \"},\n\t\t{\"phrase\": \"---..\", \"symbol\": \"8\"},\n\t\t{\"phrase\": \"----.\", \"symbol\": \"9\"},\n\t\t{\"phrase\": \"-----\", \"symbol\": \"0\"},\n\n\t\t{\"phrase\": \"..--..\", \"symbol\": \"?\"},\n\t\t{\"phrase\": \".-..-.\", \"symbol\": \"\\\"\"},\n\t\t{\"phrase\": \".-.-.-\", \"symbol\": \".\"},\n\t\t{\"phrase\": \".--.-.\", \"symbol\": \"@\"},\n\t\t{\"phrase\": \".----.\", \"symbol\": \"'\"},\n\t\t{\"phrase\": \"-....-\", \"symbol\": \"-\"},\n\t\t{\"phrase\": \"-.--.-\", \"symbol\": \")\"},\n\t\t{\"phrase\": \"--..--\", \"symbol\": \",\"},\n\t\t{\"phrase\": \"---...\", \"symbol\": \":\"}\n\t]\n}";
 	const unsigned short dataLength = (sizeof(message) | 15) + 1; //will always be larger than message length to ensure null terminator applied, up to 16 bytes in the worst case (message length _is_ a multiple of 16)
-	//Serial.print("dataLength: ");
-	//Serial.println(dataLength);
+	Serial.print("dataLength: ");
+	Serial.println(dataLength);
 
 	unsigned char rawData[dataLength];
 
@@ -51,8 +51,8 @@ void setup() {
 		}
 	}
 
-	Serial.print("raw:\t\t");
-	printArr(rawData, dataLength);
+	//Serial.print("raw:\t\t");
+	//printArr(rawData, dataLength);
 
 	const long startTime = micros();
 
@@ -72,5 +72,6 @@ void setup() {
 	Serial.print(elapsed);
 	Serial.println(" micro seconds");
 
-	//Takes ~1320 microseconds on Arduino Nano 33 IoT
+	//Takes ~1320 microseconds on Arduino Nano 33 IoT for 32 bytes
+	//Takes ~83963 microseconds on Arduino Nano 33 IoT for 2208 bytes
 }
