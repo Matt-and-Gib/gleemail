@@ -15,6 +15,11 @@ static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
 bool pendingPeerMessage = false;
 
 
+static long long frameStartTime = 0;
+static long frameDuration = 0;
+//static long greatestFrameDuration = 0;
+
+
 void processInputMethod() {
 	pinIndex = 0;
 
@@ -43,14 +48,11 @@ void processInputMethod() {
 
 
 void processNetwork() {
-	//fetches all messages from router buffer & puts them into the message pool
-	//Probably should have a timeout & some way of blocking badly behaving IPs
-
-	//
+	network.processNetwork(millis());
 }
 
 
-void getIncomingMessage() {
+/*void getIncomingMessage() {
 	if(network.messageAvailable()) {
 		if(network.readMessage(peerMessage, MAX_MESSAGE_LENGTH)) {
 			pendingPeerMessage = true;
@@ -58,7 +60,7 @@ void getIncomingMessage() {
 			DebugLog::getLog().logError(NETWORK_PEER_MESSAGE_READ_FAILED);
 		}
 	}
-}
+}*/
 
 
 void updateDisplay() {
@@ -77,7 +79,7 @@ void updateDisplay() {
 }
 
 
-void sendNetworkMessage() {
+/*void sendNetworkMessage() {
 	if(input->isMessageReady()) {
 		input->getUserMessage(userMessage);
 		//Serial.print("Your message: ");
@@ -86,7 +88,7 @@ void sendNetworkMessage() {
 			DebugLog::getLog().logError(NETWORK_WRITE_FAILED);
 		}
 	}
-}
+}*/
 
 
 void printErrorCodes() {
@@ -101,13 +103,41 @@ void printErrorCodes() {
 	}
 }
 
+/*
+	Estimated worst case frame: 180ms
+
+	Process network max allocated time: 150ms
+
+	Estimated max time for single message processing: 4ms
+
+	Debounce time: 25ms
+	Dot/Dash Threshold: 265ms
+
+
+	180ms: totally unusable
+	90ms: completely unusalbe
+	45ms: unusable
+	25ms: okay
+	30ms: fine
+	35ms: fine
+	40ms: fine
+	44ms: most unusable
+	43ms: not really usable
+	* 42ms: alright *
+*/
 
 void loop() {
+	frameStartTime = millis();
+
 	processInputMethod();
-	getIncomingMessage();
+	processNetwork();
 	updateDisplay();
-	sendNetworkMessage();
 	printErrorCodes();
+
+	frameDuration = millis() - frameStartTime;
+	if(frameDuration > MAX_FRAME_DURATION_MS) {
+		//log error or something
+	}
 
 	pendingPeerMessage = false;
 }
