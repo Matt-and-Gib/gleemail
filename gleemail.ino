@@ -18,6 +18,7 @@ bool pendingPeerMessage = false;
 static long long frameStartTime = 0;
 static long frameDuration = 0;
 //static long greatestFrameDuration = 0;
+static unsigned short frameLatencyCount = 0;
 
 
 void processInputMethod() {
@@ -33,7 +34,7 @@ void processInputMethod() {
 		currentPin = allPins[++pinIndex];
 	}
 
-	input->processInput(millis());
+	input->processInput(frameStartTime);
 
 	pinIndex = 0;
 	currentPin = allPins[pinIndex];
@@ -48,7 +49,7 @@ void processInputMethod() {
 
 
 void processNetwork() {
-	network.processNetwork(millis());
+	network.processNetwork(frameStartTime);
 }
 
 
@@ -95,7 +96,7 @@ void printErrorCodes() {
 	ERROR_CODE e = DebugLog::getLog().getError();
 	while(e != ERROR_CODE::NONE) {
 		if(!(OFFLINE_MODE && (e == NETWORK_INVALID_PEER_IP_ADDRESS))) {
-			Serial.print("\nError Code: ");
+			Serial.print(F("\nError Code: "));
 			Serial.println(e);
 		}
 
@@ -137,6 +138,13 @@ void loop() {
 	frameDuration = millis() - frameStartTime;
 	if(frameDuration > MAX_FRAME_DURATION_MS) {
 		//log error or something
+		//but keep in mind that logging an error will make the next frame take longer
+		frameLatencyCount += 1;
+		if(frameLatencyCount > FRAME_LATENCY_COUNT_ERROR_THRESHOLD)
+	} else {
+		if(frameLatencyCount > 0) {
+			frameLatencyCount = 0;
+		}
 	}
 
 	pendingPeerMessage = false;
@@ -146,7 +154,7 @@ void loop() {
 bool connectToWiFi() {
 	unsigned short inputLength = 0;
 
-	Serial.println("Enter WiFi SSID:");
+	Serial.println(F("Enter WiFi SSID:"));
 	display.updateWriting("Enter SSID");
 	char userSSID[network.getMaxSSIDLength() + 1];
 	while(true) {
@@ -164,9 +172,9 @@ bool connectToWiFi() {
 	userSSID[inputLength] = '\0';
 
 	char userPassword[network.getMaxPasswordLength() + 1];
-	Serial.print("Enter password for ");
+	Serial.print(F("Enter password for "));
 	Serial.print(userSSID);
-	Serial.println(":");
+	Serial.println(F(":"));
 	display.updateWriting("Enter Password");
 	while(true) {
 		if(Serial.available() > 0) {
@@ -182,17 +190,17 @@ bool connectToWiFi() {
 	}
 	userPassword[inputLength] = '\0';
 
-	Serial.println("Attempting connection...");
+	Serial.println(F("Attempting connection..."));
 	display.updateWriting("Connecting...");
 
 	if(!network.connectToNetwork(userSSID, userPassword)) {
-		Serial.print("Unable to connect to ");
+		Serial.print(F("Unable to connect to "));
 		display.updateWriting("Failed");
 		Serial.println(userSSID);
 		return false;
 	}
 
-	Serial.println("Connected!");
+	Serial.println(F("Connected!"));
 	display.updateWriting("Connected!");
 	return true;
 }
@@ -200,11 +208,11 @@ bool connectToWiFi() {
 
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
-	Serial.println("Downloading Input Method data...");
+	Serial.println(F("Downloading Input Method data..."));
 
 	char *data = network.downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
 	if(!data) {
-		Serial.println("Unable to download data!");
+		Serial.println(F("Unable to download data!"));
 		return false;
 	}
 
@@ -247,7 +255,7 @@ void connectToPeer() {
 	uint8_t ipAddressParts[4];
 	size_t ipAddressPartsIndex = 0;
 
-	Serial.println("Enter your gleepal's IP address:");
+	Serial.println(F("Enter your gleepal's IP address:"));
 	while(!(Serial.available() > 0)) {
 		delay(250);
 	}
@@ -266,14 +274,14 @@ void connectToPeer() {
 
 	IPAddress friendsIP(ipAddressParts[0], ipAddressParts[1], ipAddressParts[2], ipAddressParts[3]);
 
-	Serial.print("Waiting for gleepal at ");
+	Serial.print(F("Waiting for gleepal at "));
 	Serial.print(friendsIP);
-	Serial.println("...");
+	Serial.println(F("..."));
 
 	if(!network.connectToPeer(friendsIP)) {
-		Serial.println("Unable to connect to gleepal :(");
+		Serial.println(F("Unable to connect to gleepal :("));
 	} else {
-		Serial.println("Connected to gleepal!");
+		Serial.println(F("Connected to gleepal!"));
 	}
 
 	delete[] ipAddressInputSubstringBuffer;
@@ -300,13 +308,13 @@ void setup() {
 	do {
 		switch(setupState) {
 		case SETUP_LEVEL::WELCOME:
-			Serial.println("Welcome to glEEmail!");
-			Serial.print("Version ");
+			Serial.println(F("Welcome to glEEmail!"));
+			Serial.print(F("Version "));
 			Serial.println(GLEEMAIL_VERSION);
 			Serial.println();
 
 			if(OFFLINE_MODE) {
-				Serial.println("Offline Mode Active\n");
+				Serial.println(F("Offline Mode Active\n"));
 			}
 
 			display.updateReading("Hello, glEEmail!");

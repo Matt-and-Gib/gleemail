@@ -3,7 +3,8 @@
 
 static const constexpr char GLEEMAIL_VERSION[] = "alpha 0.02a";
 
-static const constexpr short MAX_FRAME_DURATION_MS = 42;
+static const constexpr unsigned short MAX_FRAME_DURATION_MS = 42;
+static const constexpr unsigned short FRAME_LATENCY_COUNT_ERROR_THRESHOLD = 3;
 
 static const constexpr bool OFFLINE_MODE = false;
 static const constexpr bool VERBOSE_DEBUG_LOG = true;
