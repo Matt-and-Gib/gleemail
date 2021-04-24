@@ -14,10 +14,6 @@
 
 #include "internetaccess.h"
 
-//REMOVE ME
-#include "HardwareSerial.h"
-//REMOVE ME
-
 
 class Message {
 private:
@@ -44,20 +40,8 @@ Message::Message(const DynamicJsonDocument& payload) {
 
 class Networking {
 private:
-	InternetAccess internetAccess;
-
 	WiFiUDP udp;
 	IPAddress peerIPAddress;
-
-	char* server;
-	unsigned short packetSize = 0;
-
-	static const constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
-
-	static const constexpr char HEADER_END_STRING[] = "\r\n\r\n";
-	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
-
-	short findEndOfHeaderIndex(const char*, const unsigned short);
 
 	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
 	char* messageBuffer = new char[MESSAGE_BUFFER_SIZE];
@@ -76,17 +60,6 @@ public:
 	Networking();
 	~Networking();
 
-	unsigned short getMaxSSIDLength() const {return internetAccess.getMaxSSIDLength();}
-	unsigned short getMaxPasswordLength() const {return internetAccess.getMaxPasswordLength();}
-
-	bool connectToNetwork(char* n, char* p) {return internetAccess.connectToNetwork(n, p);}
-	void disconnectFromNetwork() {internetAccess.disconnectFromNetwork();}
-
-	bool connectToServer(const char* address) {return internetAccess.connectToWeb(address);}
-	bool sendRequestToServer(const char* const*);
-
-	char* downloadFromServer(const char*, const char* const*);
-
 	void processNetwork(const unsigned long long);
 
 	/*bool messageAvailable();
@@ -104,128 +77,29 @@ Networking::Networking() {
 }
 
 Networking::~Networking() {
-	disconnectFromNetwork();
 	delete[] messageBuffer;
 }
 
 
-bool Networking::sendRequestToServer(const char* const* headers) {
-	const char* headerLine = headers[0];
-	if(headerLine == nullptr) {
-		return false;
-	}
-
-	int headerIndex = 0;
-	while(headerLine != nullptr) {
-		if(headerIndex > 16) { //Replace magic number
-			DebugLog::getLog().logError(ERROR_CODE::NETWORK_HEADER_TERMINATION_OMITTED);
-			return false;
-		}
-
-		internetAccess.writeHeaderLine(headerLine);
-		headerLine = headers[++headerIndex];
-	}
-
-	return true;
-}
-
-
-short Networking::findEndOfHeaderIndex(const char* const rawData, const unsigned short lengthOfData) {
-	unsigned short headerEndSearchIndex = 0;
-	short endOfHeaderIndex = -1;
-
-	for(unsigned short beginningSubstringIndex = 0; beginningSubstringIndex < lengthOfData; beginningSubstringIndex += 1) {
-		if(rawData[beginningSubstringIndex] == '\r') {
-			headerEndSearchIndex = 0;
-			for(unsigned short endSubstringIndex = 0; endSubstringIndex < LENGTH_OF_HEADER_TERMINATION; endSubstringIndex += 1) {
-				if(rawData[beginningSubstringIndex + endSubstringIndex] != HEADER_TERMINATION[headerEndSearchIndex++]) {
-					goto headerEndMismatch;
-				}
-			}
-
-			endOfHeaderIndex = beginningSubstringIndex + LENGTH_OF_HEADER_TERMINATION;
-			break;
-		}
-		headerEndMismatch:;
-	}
-
-	return endOfHeaderIndex;
-}
-
-
-char* Networking::downloadFromServer(const char* server, const char* const* headers) {
-	if(WiFi.status() != WL_CONNECTED) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
-		return nullptr;
-	}
-
-	if(!connectToServer(server)) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_SECURE_CONNECTION_TO_SERVER_FAILED);
-		return nullptr;
-	}
-
-	if(!sendRequestToServer(headers)) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_REQUEST_TO_SERVER_HEADER_INVALID);
-		return nullptr;
-	}
-
-	int bufferIndex = 0;
-	char* dataBuffer = new char[DATA_BUFFER_SIZE];
-	while(internetAccess.activeWebConnection()) {
-		while(internetAccess.responseAvailableFromWeb()) {
-			if(bufferIndex < DATA_BUFFER_SIZE) {
-				dataBuffer[bufferIndex++] = internetAccess.nextCharInWebResponse();
-			} else {
-				DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_OVERFLOW);
-				return nullptr;
-			}
-		}
-	}
-
-	if(bufferIndex < DATA_BUFFER_SIZE/2) {
-		DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED);
-	}
-
-	/*//Print full response
-	for(int i = 0; i < bufferIndex; i += 1) {
-		Serial.print(dataBuffer[i]);
-	}*/
-
-	/*//Print buffer utilization
-	Serial.print("Used ");
-	Serial.print(bufferIndex);
-	Serial.print(" out of max ");
-	Serial.println(DATA_BUFFER_SIZE);*/
-
-	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
-	if(endOfHeaderIndex != -1) {
-		const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
-		char* jsonData = new char[LENGTH_OF_JSON_BODY];
-		for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
-			jsonData[i] = dataBuffer[endOfHeaderIndex + i];
-		}
-		jsonData[LENGTH_OF_JSON_BODY] = '\0';
-
-		delete[] dataBuffer;
-		return jsonData;
-	}
-
-	return nullptr;
-}
-
 
 void Networking::getMessages(const unsigned long long cycleStartTime) {
+	if(cycleStartTime) {
 
+	}
 }
 
 
 void Networking::processIncomingMessages(const unsigned long long cycleStartTime) {
-
+	if(cycleStartTime) {
+		
+	}
 }
 
 
 void Networking::sendOutgoingMessages(const unsigned long long cycleStartTime) {
-
+	if(cycleStartTime) {
+		
+	}
 }
 
 

@@ -3,11 +3,18 @@
 
 #include "src/include/display.h"
 #include "src/include/morsecode.h"
+
+#include "src/include/internetaccess.h"
 #include "src/include/networking.h"
+#include "src/include/webaccess.h"
 
 
 static Display& display = *new Display();
+
+static InternetAccess& internet = *new InternetAccess();
 static Networking& network = *new Networking();
+static WebAccess& webAccess = *new WebAccess();
+
 static InputMethod* input;
 static unsigned short pinIndex = 0;
 static char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
@@ -151,36 +158,36 @@ bool connectToWiFi() {
 
 	Serial.println(F("Enter WiFi SSID:"));
 	display.updateWriting("Enter SSID");
-	char userSSID[network.getMaxSSIDLength() + 1];
+	char userSSID[internet.getMaxSSIDLength() + 1];
 	while(true) {
 		if(Serial.available() > 0) {
-			inputLength = Serial.readBytesUntil('\n', userSSID, network.getMaxSSIDLength());
+			inputLength = Serial.readBytesUntil('\n', userSSID, internet.getMaxSSIDLength());
 			break;
 		}
 
 		delay(250);
 	}
 
-	if(inputLength >= network.getMaxSSIDLength()) {
+	if(inputLength >= internet.getMaxSSIDLength()) {
 		DebugLog::getLog().logError(NETWORK_DATA_SSID_POSSIBLY_TRUNCATED);
 	}
 	userSSID[inputLength] = '\0';
 
-	char userPassword[network.getMaxPasswordLength() + 1];
+	char userPassword[internet.getMaxPasswordLength() + 1];
 	Serial.print(F("Enter password for "));
 	Serial.print(userSSID);
 	Serial.println(F(":"));
 	display.updateWriting("Enter Password");
 	while(true) {
 		if(Serial.available() > 0) {
-			inputLength = Serial.readBytesUntil('\n', userPassword, network.getMaxPasswordLength());
+			inputLength = Serial.readBytesUntil('\n', userPassword, internet.getMaxPasswordLength());
 			break;
 		}
 
 		delay(250);
 	}
 
-	if(inputLength >= network.getMaxPasswordLength()) {
+	if(inputLength >= internet.getMaxPasswordLength()) {
 		DebugLog::getLog().logError(NETWORK_DATA_PASSWORD_POSSIBLY_TRUNCATED);
 	}
 	userPassword[inputLength] = '\0';
@@ -188,7 +195,7 @@ bool connectToWiFi() {
 	Serial.println(F("Attempting connection..."));
 	display.updateWriting("Connecting...");
 
-	if(!network.connectToNetwork(userSSID, userPassword)) {
+	if(!internet.connectToNetwork(userSSID, userPassword)) {
 		Serial.print(F("Unable to connect to "));
 		display.updateWriting("Failed");
 		Serial.println(userSSID);
@@ -205,7 +212,7 @@ bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
 	Serial.println(F("Downloading Input Method data..."));
 
-	char *data = network.downloadFromServer(input->getServerAddress(), input->getRequestHeaders());
+	char *data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
 	if(!data) {
 		Serial.println(F("Unable to download data!"));
 		return false;
