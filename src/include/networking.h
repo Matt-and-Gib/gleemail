@@ -2,11 +2,7 @@
 #define NETWORKING_H
 
 #include "Arduino.h" //Must include for timing e.g. millis()
-
-#include <SPI.h>
-#include <WiFiNINA.h>
 #include <WiFiUdp.h>
-
 #include <ArduinoJson.hpp>
 
 #include "global.h"
@@ -50,11 +46,18 @@ private:
 	void clearMessageBuffer();
 	char* createMessage(char*, const MESSAGE_TYPE);
 
-	void getMessages(const unsigned long long);
+	unsigned long long processStartTime = 0;
+
+	short getMessages(const unsigned short);
+	short getMessagesRemainingTime = 0;
 	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
-	void processIncomingMessages(const unsigned long long);
+
+	short processIncomingMessages(const unsigned short);
+	short processIncomingMessagesRemainingTime = 0;
 	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
-	void sendOutgoingMessages(const unsigned long long);
+
+	short sendOutgoingMessages(const unsigned short);
+	short sendOutgoingMessagesRemainingTime = 0;
 	static const constexpr unsigned short MAX_SEND_OUTGOING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 public:
 	Networking();
@@ -82,31 +85,55 @@ Networking::~Networking() {
 
 
 
-void Networking::getMessages(const unsigned long long cycleStartTime) {
-	if(cycleStartTime) {
+short Networking::getMessages(const unsigned short processingTimeOffset = 0) {
+	processStartTime = millis();
 
+	while(millis() - processStartTime < MAX_GET_MESSAGES_PROCESS_DURATION_MS - processingTimeOffset) {
+		if(udp.parsePacket()) {
+
+		} else {
+			break;
+		}
 	}
+
+	return MAX_GET_MESSAGES_PROCESS_DURATION_MS - (millis() - processStartTime);
 }
 
 
-void Networking::processIncomingMessages(const unsigned long long cycleStartTime) {
-	if(cycleStartTime) {
-		
+short Networking::processIncomingMessages(const unsigned short processingTimeOffset = 0) {
+	processStartTime = millis();
+
+	while(millis() - processStartTime < MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS - processingTimeOffset) {
+		if(udp.parsePacket()) {
+
+		} else {
+			break;
+		}
 	}
+
+	return MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS - (millis() - processStartTime);
 }
 
 
-void Networking::sendOutgoingMessages(const unsigned long long cycleStartTime) {
-	if(cycleStartTime) {
-		
+short Networking::sendOutgoingMessages(const unsigned short processingTimeOffset = 0) {
+	processStartTime = millis();
+
+	while(millis() - processStartTime < MAX_SEND_OUTGOING_MESSAGES_DURATION_MS - processingTimeOffset) {
+		if(udp.parsePacket()) {
+
+		} else {
+			break;
+		}
 	}
+
+	return MAX_SEND_OUTGOING_MESSAGES_DURATION_MS - (millis() - processStartTime);
 }
 
 
 void Networking::processNetwork(const unsigned long long cycleStartTime) {
-	getMessages(cycleStartTime);
-	processIncomingMessages(cycleStartTime);
-	sendOutgoingMessages(cycleStartTime);
+	getMessagesRemainingTime = getMessages();
+	processIncomingMessagesRemainingTime = processIncomingMessages(getMessagesRemainingTime);
+	sendOutgoingMessagesRemainingTime = sendOutgoingMessages(processIncomingMessagesRemainingTime);
 }
 
 
