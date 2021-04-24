@@ -67,27 +67,31 @@ void InputMethod::pushCharacterToMessage(const char c) {
 void InputMethod::commitMessage() {
 	messageComplete = true;
 
-	for(int i = 0; i < userMessageFirstEmptyIndex; i += 1) {
-		if(userMessage[i] > ' ') {
-			if(i > 0) {
-				//Maybe note this index as the first character index for trimming later
-				DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_PRECEDING_WHITESPACE);
-			}
-			break;
-		}
-	}
+	if(userMessageFirstEmptyIndex > 0) {
+		for(unsigned short i = 0; i < userMessageFirstEmptyIndex; i += 1) {
+			if(userMessage[i] > ' ') {
+				if(i != 0) {
+					//Maybe note this index as the first character index for trimming later
+					DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_PRECEDING_WHITESPACE);
 
-	for(int i = userMessageFirstEmptyIndex - 1; i >= 0; i -= 1) {
-		if(userMessage[i] > ' ') {
-			if(i < userMessageFirstEmptyIndex - 1) {
-				//Maybe note this index as last character index for trimming later
-				DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_TRAILING_WHITESPACE);
+					//trim array?
+				}
+				break;
 			}
-			break;
 		}
-	}
 
-	//trim array?
+		for(unsigned short i = userMessageFirstEmptyIndex - 1; i > 0; i -= 1) {
+			if(userMessage[i] > ' ') {
+				if(i < userMessageFirstEmptyIndex - 1) {
+					DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_TRAILING_WHITESPACE); //Maybe change to past-tense: CONTAINED_TRAILING_WHITESPACE
+					userMessage[i + 1] = '\0';
+				}
+				break;
+			}
+		}
+	} else {
+		DebugLog::getLog().logError(INPUT_METHOD_COMMIT_EMPTY_MESSAGE);
+	}
 }
 
 
