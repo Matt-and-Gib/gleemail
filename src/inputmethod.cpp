@@ -68,7 +68,7 @@ void InputMethod::commitMessage() {
 	messageComplete = true;
 
 	for(int i = 0; i < userMessageFirstEmptyIndex; i += 1) {
-		if((int)userMessage[i] > 32) {
+		if(userMessage[i] > ' ') {
 			if(i > 0) {
 				//Maybe note this index as the first character index for trimming later
 				DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_PRECEDING_WHITESPACE);
@@ -78,7 +78,7 @@ void InputMethod::commitMessage() {
 	}
 
 	for(int i = userMessageFirstEmptyIndex - 1; i >= 0; i -= 1) {
-		if((int)userMessage[i] > 32) {
+		if(userMessage[i] > ' ') {
 			if(i < userMessageFirstEmptyIndex - 1) {
 				//Maybe note this index as last character index for trimming later
 				DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_TRAILING_WHITESPACE);
