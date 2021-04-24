@@ -15,10 +15,10 @@ static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
 bool pendingPeerMessage = false;
 
 
-static long long frameStartTime = 0;
-static long frameDuration = 0;
-//static long greatestFrameDuration = 0;
-static unsigned short frameLatencyCount = 0;
+static long long cycleStartTime = 0;
+static long cycleDuration = 0;
+//static long greatestCycleDuration = 0;
+static unsigned short cycleLatencyCount = 0;
 
 
 void processInputMethod() {
@@ -34,7 +34,7 @@ void processInputMethod() {
 		currentPin = allPins[++pinIndex];
 	}
 
-	input->processInput(frameStartTime);
+	input->processInput(cycleStartTime);
 
 	pinIndex = 0;
 	currentPin = allPins[pinIndex];
@@ -49,7 +49,9 @@ void processInputMethod() {
 
 
 void processNetwork() {
-	network.processNetwork(frameStartTime);
+	pendingPeerMessage = false;
+
+	network.processNetwork(cycleStartTime);
 }
 
 
@@ -105,10 +107,6 @@ void printErrorCodes() {
 }
 
 /*
-	Estimated worst case frame: 180ms
-
-	Process network max allocated time: 150ms
-
 	Estimated max time for single message processing: 4ms
 
 	Debounce time: 25ms
@@ -128,26 +126,23 @@ void printErrorCodes() {
 */
 
 void loop() {
-	frameStartTime = millis();
+	cycleStartTime = millis();
 
 	processInputMethod();
 	processNetwork();
 	updateDisplay();
 	printErrorCodes();
 
-	frameDuration = millis() - frameStartTime;
-	if(frameDuration > MAX_FRAME_DURATION_MS) {
-		//log error or something
-		//but keep in mind that logging an error will make the next frame take longer
-		frameLatencyCount += 1;
-		if(frameLatencyCount > FRAME_LATENCY_COUNT_ERROR_THRESHOLD)
-	} else {
-		if(frameLatencyCount > 0) {
-			frameLatencyCount = 0;
+	cycleDuration = millis() - cycleStartTime;
+	if(cycleDuration > MAX_FRAME_DURATION_MS) {
+		cycleLatencyCount += 1;
+		if(cycleLatencyCount > FRAME_LATENCY_COUNT_ERROR_THRESHOLD) {
+			DebugLog::getLog().logError(CONTINUOUS_FRAME_LATENCY);
+			cycleLatencyCount = 0; //Reset to help latency by eliminating guaranteed error code print
 		}
+	} else {
+		cycleLatencyCount = 0;
 	}
-
-	pendingPeerMessage = false;
 }
 
 

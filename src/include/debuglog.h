@@ -2,6 +2,9 @@
 #define DEBUGLOG_H
 
 
+static const constexpr bool VERBOSE_DEBUG_LOG = true;
+
+
 static const constexpr unsigned short DEBUG_LOG_INPUT_METHOD_OFFSET = 10;
 static const constexpr unsigned short DEBUG_LOG_NETWORK_OFFSET = 50;
 static const constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
@@ -10,6 +13,7 @@ enum ERROR_CODE: short {
 	NONE = 0,
 	DEBUG_DEBUG_LOG = 1,
 	UNKNOWN_SETUP_STATE = 2,
+	CONTINUOUS_FRAME_LATENCY = 3,
 
 	//InputMethod range: 10 - 49
 	MORSE_PHRASE_IMMINENT_OVERFLOW = DEBUG_LOG_INPUT_METHOD_OFFSET + 0,

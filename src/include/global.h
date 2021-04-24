@@ -5,14 +5,12 @@
 
 
 static const constexpr char GLEEMAIL_VERSION[] = "alpha 0.02a";
-
-static const constexpr unsigned short MAX_FRAME_DURATION_MS = 42;
-static const constexpr unsigned short FRAME_LATENCY_COUNT_ERROR_THRESHOLD = 3;
-
-static const constexpr bool OFFLINE_MODE = false;
-static const constexpr bool VERBOSE_DEBUG_LOG = true;
-
 static const constexpr unsigned short BAUD_RATE = 9600;
+static const constexpr bool OFFLINE_MODE = true;
+
+static const constexpr unsigned short FRAME_LATENCY_COUNT_ERROR_THRESHOLD = 3;
+static const constexpr unsigned short MAX_FRAME_DURATION_MS = 42;
+static const constexpr unsigned short MAX_NETWORKING_LOOP_DURATION_MS = 36;
 
 static const constexpr unsigned short MAX_IP_ADDRESS_LENGTH = 15;
 static const constexpr unsigned short CONNECTION_PORT = 29453;

@@ -1,17 +1,20 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
+#include "Arduino.h" //Must include for timing e.g. millis()
+
 #include <SPI.h>
 #include <WiFiNINA.h>
 #include <WiFiUdp.h>
 
-#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
 
 #include "global.h"
 #include "queue.h"
 
+#include "internetaccess.h"
+
 //REMOVE ME
-#include "Arduino.h"
 #include "HardwareSerial.h"
 //REMOVE ME
 
@@ -41,12 +44,8 @@ Message::Message(const DynamicJsonDocument& payload) {
 
 class Networking {
 private:
-	char* ssid;
-	char* password;
-	static const constexpr unsigned short MAX_SSID_LENGTH = 32;
-	static const constexpr unsigned int MAX_PASSWORD_LENGTH = 63;
+	InternetAccess internetAccess;
 
-	WiFiClient client;
 	WiFiUDP udp;
 	IPAddress peerIPAddress;
 
@@ -66,28 +65,35 @@ private:
 	Queue<Message> messagePool;
 	void clearMessageBuffer();
 	char* createMessage(char*, const MESSAGE_TYPE);
+
+	void getMessages(const unsigned long long);
+	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
+	void processIncomingMessages(const unsigned long long);
+	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
+	void sendOutgoingMessages(const unsigned long long);
+	static const constexpr unsigned short MAX_SEND_OUTGOING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 public:
 	Networking();
 	~Networking();
 
-	bool connectToNetwork(char*, char*, bool);
-	void disconnectFromNetwork();
+	unsigned short getMaxSSIDLength() const {return internetAccess.getMaxSSIDLength();}
+	unsigned short getMaxPasswordLength() const {return internetAccess.getMaxPasswordLength();}
 
-	bool connectToServer(const char*);
+	bool connectToNetwork(char* n, char* p) {return internetAccess.connectToNetwork(n, p);}
+	void disconnectFromNetwork() {internetAccess.disconnectFromNetwork();}
+
+	bool connectToServer(const char* address) {return internetAccess.connectToWeb(address);}
 	bool sendRequestToServer(const char* const*);
 
 	char* downloadFromServer(const char*, const char* const*);
 
-	unsigned short getMaxSSIDLength() const {return MAX_SSID_LENGTH;}
-	unsigned short getMaxPasswordLength() const {return MAX_PASSWORD_LENGTH;}
-
-	void processNetwork();
+	void processNetwork(const unsigned long long);
 
 	/*bool messageAvailable();
 	bool readMessage(char*, const unsigned short);
-	bool writeMessage(char*, const MESSAGE_TYPE);
+	bool writeMessage(char*, const MESSAGE_TYPE);*/
 
-	bool connectToPeer(IPAddress&);*/
+	bool connectToPeer(IPAddress&) {return false;} //FINISH OR REMOVE ME!
 };
 
 
@@ -100,55 +106,6 @@ Networking::Networking() {
 Networking::~Networking() {
 	disconnectFromNetwork();
 	delete[] messageBuffer;
-}
-
-
-bool Networking::connectToNetwork(char* networkName, char* networkPassword, bool retry = true) {
-	if(networkName == nullptr || networkPassword == nullptr) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_PASSED_INVALID_PARAMETER);
-		return false;
-	}
-
-	if(WiFi.status() == WL_CONNECTED) {
-		disconnectFromNetwork();
-	}
-
-	WiFi.begin(networkName, networkPassword);
-	while(WiFi.status() == WL_IDLE_STATUS) {
-		delay(250);
-	}
-
-	if(WiFi.status() == WL_CONNECT_FAILED) {
-		DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_CONNECTION_FAILED);
-		if(retry) {
-			delay(500);
-			return connectToNetwork(networkName, networkPassword, false);
-		} else {
-			DebugLog::getLog().logError(ERROR_CODE::NETWORK_WIFI_CONNECTION_FAILED_RETRY_OCCURRED);
-			return false;
-		}
-	}
-
-	if(WiFi.status() == WL_CONNECTED) {
-		return true;
-	} else {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNKNOWN_STATUS);
-		return false;
-	}
-}
-
-
-void Networking::disconnectFromNetwork() {
-	WiFi.disconnect();
-}
-
-
-bool Networking::connectToServer(const char* address) {
-	if(!client.connectSSL(address, 443)) {
-		return false;
-	}
-
-	return true;
 }
 
 
@@ -165,7 +122,7 @@ bool Networking::sendRequestToServer(const char* const* headers) {
 			return false;
 		}
 
-		client.println(headerLine);
+		internetAccess.writeHeaderLine(headerLine);
 		headerLine = headers[++headerIndex];
 	}
 
@@ -214,10 +171,10 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 
 	int bufferIndex = 0;
 	char* dataBuffer = new char[DATA_BUFFER_SIZE];
-	while(client.connected()) {
-		while(client.available()) {
+	while(internetAccess.activeWebConnection()) {
+		while(internetAccess.responseAvailableFromWeb()) {
 			if(bufferIndex < DATA_BUFFER_SIZE) {
-				dataBuffer[bufferIndex++] = client.read();
+				dataBuffer[bufferIndex++] = internetAccess.nextCharInWebResponse();
 			} else {
 				DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_OVERFLOW);
 				return nullptr;
@@ -257,10 +214,25 @@ char* Networking::downloadFromServer(const char* server, const char* const* head
 }
 
 
-void Networking::processNetwork(const unsigned long now) {
-	getMessagesFromNetwork();
-	processIncomingMessages();
-	processOutgoingMessages();
+void Networking::getMessages(const unsigned long long cycleStartTime) {
+
+}
+
+
+void Networking::processIncomingMessages(const unsigned long long cycleStartTime) {
+
+}
+
+
+void Networking::sendOutgoingMessages(const unsigned long long cycleStartTime) {
+
+}
+
+
+void Networking::processNetwork(const unsigned long long cycleStartTime) {
+	getMessages(cycleStartTime);
+	processIncomingMessages(cycleStartTime);
+	sendOutgoingMessages(cycleStartTime);
 }
 
 
