@@ -9,6 +9,7 @@
 #include "queue.h"
 
 #include "internetaccess.h"
+#include "security.h"
 
 
 class Message {
@@ -41,12 +42,14 @@ private:
 
 	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
 	char* messageBuffer = new char[MESSAGE_BUFFER_SIZE];
+	unsigned short messageSize = 0;
 
-	Queue<Message> messagePool;
-	void clearMessageBuffer();
-	char* createMessage(char*, const MESSAGE_TYPE);
+	//Queue<Message> messagePool;
+	//void clearMessageBuffer();
+	//char* createMessage(char*, const MESSAGE_TYPE);
 
 	unsigned long long processStartTime = 0;
+	short processRunTime = 0;
 
 	short getMessages(const unsigned short);
 	short getMessagesRemainingTime = 0;
@@ -64,10 +67,6 @@ public:
 	~Networking();
 
 	void processNetwork(const unsigned long long);
-
-	/*bool messageAvailable();
-	bool readMessage(char*, const unsigned short);
-	bool writeMessage(char*, const MESSAGE_TYPE);*/
 
 	bool connectToPeer(IPAddress&) {return false;} //FINISH OR REMOVE ME!
 };
@@ -90,13 +89,26 @@ short Networking::getMessages(const unsigned short processingTimeOffset = 0) {
 
 	while(millis() - processStartTime < MAX_GET_MESSAGES_PROCESS_DURATION_MS - processingTimeOffset) {
 		if(udp.parsePacket()) {
-
+			messageSize = udp.read(messageBuffer, MESSAGE_BUFFER_SIZE);
+			if(udp.remoteIP() == peerIPAddress) {
+				//decrypt message
+				//parse into json
+				//construct message object
+				//enqueue
+			} else {
+				//debug message: unknown sender
+			}
 		} else {
 			break;
 		}
 	}
 
-	return MAX_GET_MESSAGES_PROCESS_DURATION_MS - (millis() - processStartTime);
+	processRunTime = MAX_GET_MESSAGES_PROCESS_DURATION_MS - (millis() - processStartTime);
+	if(processRunTime < 0) {
+		//debug message: took too long
+	}
+
+	return processRunTime;
 }
 
 
@@ -104,14 +116,15 @@ short Networking::processIncomingMessages(const unsigned short processingTimeOff
 	processStartTime = millis();
 
 	while(millis() - processStartTime < MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS - processingTimeOffset) {
-		if(udp.parsePacket()) {
 
-		} else {
-			break;
-		}
 	}
 
-	return MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS - (millis() - processStartTime);
+	processRunTime = MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS - (millis() - processStartTime);
+	if(processRunTime < 0) {
+		//debug message
+	}
+
+	return processRunTime;
 }
 
 
@@ -119,14 +132,15 @@ short Networking::sendOutgoingMessages(const unsigned short processingTimeOffset
 	processStartTime = millis();
 
 	while(millis() - processStartTime < MAX_SEND_OUTGOING_MESSAGES_DURATION_MS - processingTimeOffset) {
-		if(udp.parsePacket()) {
 
-		} else {
-			break;
-		}
 	}
 
-	return MAX_SEND_OUTGOING_MESSAGES_DURATION_MS - (millis() - processStartTime);
+	processRunTime = MAX_SEND_OUTGOING_MESSAGES_DURATION_MS - (millis() - processStartTime);
+	if(processRunTime < 0) {
+		//debug message
+	}
+
+	return processRunTime;
 }
 
 

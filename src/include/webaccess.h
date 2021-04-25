@@ -7,7 +7,6 @@
 class WebAccess {
 private:
 	char* server;
-	unsigned short packetSize = 0;
 
 	static const constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
 
