@@ -33,9 +33,7 @@ We're testing glEEmail on an Arduino Nano 33 IoT. For the full parts list that w
 |1x|10k Ohm Resistor|
 |6x|Jumper Wires|
 |2x|Crimp Connectors|
-|1x|LCD Display|
-|1x|HD44780 LCD Controller|
-|1x|PCF8574T I/O Expander for I2C|
+|1x|LCD HD44780|
 
 ___
 
