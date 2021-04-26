@@ -42,45 +42,69 @@ ___
 
 [View Online Wiring Diagram](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2FNetwork-JSON-Rewrite%2Fwiring%20diagram.drawio)
 
-*** Note: update like to use main branch!
+*** Note: update link to use main branch!
 
 ___
 
 ### <a name="errortable"></a>**Error Codes**
 
 Last updated: 4/13/2021
+<details>
+<summary>0 - 9: General</summary>
 
-|Code|Scope|Title|Notes|Severity|
-|----|-----|-----|-----|--------|
-|0|Meta|None|No error was reported|N/A|
-|1|Meta|Debug Debug Log|Verified that debug log is functional|N/A|
-|2|Meta|Unknown Setup State|An unknown step was specified in setup|High|
-|10|InputMethod|Morse Phrase Imminent Overflow|The Morse phrase is at capacity and must be committed without storing the provided dot/dash|High|
-|12|InputMethod|Morse Code Lookup Failed|The entered combination of dots and dashes does not match any Morse Code pattern|Low|
-|13|InputMethod|Morse Message To Send Reached Max Message Length|Entered message has reached the maximum length and must be sent immediately|Low|
-|14|InputMethod|Morse Message To Send Exceeded Max Message Length|Entered message has exceeded the maximum length and must be sent immediately without storing the provided character|High|
-|15|InputMethod|Message Contains Preceding Whitespace||Low|
-|16|InputMethod|Message Contains Trailing Whitespace||Low|
-|50|Network|Connection Failed||High|
-|51|Network|Passed Invalid Parameter|Provided SSID or password were null pointers|High|
-|52|Network|WiFi Connection Failed Retry Occurred||High|
-|53|Network|Download Impossible Not Connected||High|
-|54|Network|Secure Connection to Server Failed||High|
-|55|Network|Request To Server Header Invalid||High|
-|56|Network|Header Termination Omitted||High|
-|57|Network|Data Buffer Overflow||High|
-|58|Network|Data Buffer Underutilized|The calculated space for the data buffer was too large (likely data download was incomplete)|Low|
-|59|Network|SSID Possibly Truncated|WiFi name provided exceeded maximum length (as defined by IEEE 802.11) and was truncated|High|
-|60|Network|Password Possibly Truncated|WiFi password exceeded maximum length (as defined by IEEE 802.11) and was truncated|High|
-|61|Network|Invalid Handshake Message||High|
-|62|Network|Unexpected Handshake IP|Handshake received but not from user-entered IP address|Low|
-|63|Network|Invalid Peer IP Address||High|
-|64|Network|Unknown Status|Connection to WiFi router is neither FAILED nor CONNECTED|High|
-|65|Network|Write Failed|Sending message to peer failed|High|
-|66|Network|Peer Message Read Failed||High|
-|67|Network|Unknown Message Type||High|
-|90|JSON|Nullptr Payload|No data provided to deserialize|High|
-|91|JSON|Deserialization Error|Unable to deserialize data into JSON objects|High|
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|0|None|No error was reported|N/A|
+|1|Debug Debug Log|Verified that debug log is functional|N/A|
+|2|Unknown Setup State|An unknown step was specified in setup|High|
+</details>
+
+<details>
+<summary>10 - 49: Input</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|10|Morse Phrase Imminent Overflow|The Morse phrase is at capacity and must be committed without storing the provided dot/dash|High|
+|12|Morse Code Lookup Failed|The entered combination of dots and dashes does not match any Morse Code pattern|Low|
+|13|Morse Message To Send Reached Max Message Length|Entered message has reached the maximum length and must be sent immediately|Low|
+|14|Morse Message To Send Exceeded Max Message Length|Entered message has exceeded the maximum length and must be sent immediately without storing the provided character|High|
+|15|Message Contains Preceding Whitespace||Low|
+|16|Message Contains Trailing Whitespace||Low|
+</details>
+
+<details>
+<summary>50 - 89: Network</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|50|Connection Failed||High|
+|51|Passed Invalid Parameter|Provided SSID or password were null pointers|High|
+|52|WiFi Connection Failed Retry Occurred||High|
+|53|Download Impossible Not Connected||High|
+|54|Secure Connection to Server Failed||High|
+|55|Request To Server Header Invalid||High|
+|56|Header Termination Omitted||High|
+|57|Data Buffer Overflow||High|
+|58|Data Buffer Underutilized|The calculated space for the data buffer was too large (likely data download was incomplete)|Low|
+|59|SSID Possibly Truncated|WiFi name provided exceeded maximum length (as defined by IEEE 802.11) and was truncated|High|
+|60|Password Possibly Truncated|WiFi password exceeded maximum length (as defined by IEEE 802.11) and was truncated|High|
+|61|Invalid Handshake Message||High|
+|62|Unexpected Handshake IP|Handshake received but not from user-entered IP address|Low|
+|63|Invalid Peer IP Address||High|
+|64|Unknown Status|Connection to WiFi router is neither FAILED nor CONNECTED|High|
+|65|Write Failed|Sending message to peer failed|High|
+|66|Peer Message Read Failed||High|
+|67|Unknown Message Type||High|
+</details>
+
+<details>
+<summary>90 - 129: JSON</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|90|Nullptr Payload|No data provided to deserialize|High|
+|91|Deserialization Error|Unable to deserialize data into JSON objects|High|
+</details>
 
 ___
 
