@@ -40,7 +40,9 @@ ___
 
 ### <a name="diagram"></a>**Wiring Diagram**
 
-To-do
+[View Online Wiring Diagram](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2FNetwork-JSON-Rewrite%2Fwiring%20diagram.drawio)
+
+*** Note: update like to use main branch!
 
 ___
 
@@ -85,6 +87,10 @@ ___
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
 
 To-do
+
+[View Online Program Flow Diagram](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2FNetwork-JSON-Rewrite%2FglEEmail%20flow.drawio)
+
+*** Note: update link to use main branch!
 
 Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
 
