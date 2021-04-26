@@ -44,6 +44,8 @@ ___
 
 *** Note: update link to use main branch!
 
+For more information about wiring the LCD, we recommend [this tutorial from Ada Fruit](https://learn.adafruit.com/character-lcds/wiring-a-character-lcd)
+
 ___
 
 ### <a name="errortable"></a>**Error Codes**
