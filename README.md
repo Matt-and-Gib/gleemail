@@ -31,9 +31,10 @@ We're testing glEEmail on an Arduino Nano 33 IoT. For the full parts list that w
 |1x|Breadboard|
 |1x|54-410 Switch|
 |1x|10k Ohm Resistor|
-|6x|Jumper Wires|
 |2x|Crimp Connectors|
 |1x|LCD HD44780|
+|1x|270 Ω Resistor|
+|1x|1M Ω Potentiometer|
 
 ___
 
