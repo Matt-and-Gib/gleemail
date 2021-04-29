@@ -106,13 +106,87 @@ bool Networking::getMessages() {
 }
 
 
-bool Networking::processIncomingMessages() {
+/*
+void Networking::processIncomingMessageByType(const Message& msg) {
+	messageReceivedCount += 1;
+	messageHash = hashMessage(msg);
+	if(messageHash != msg.hash) {
+		return;
+	}
 
+	switch(msg.type) {
+	case MESSAGETYPE::ERROR:
+		DebugLog::getLog().logError();
+	break;
+
+	case MESSAGETYPE::HEARTBEAT:
+		lastHeartbeatMS = millis();
+	break;
+
+	case MESSAGETYPE::CONFIRMATION:
+		Message* confirmedMessage = messagesOutHead.removeByIdempotencyToken(msg.idempotencyToken);
+		if(confirmedMessage != nullptr) {
+			confirmedMessage->callback();
+			delete confirmatedMessage;
+		}
+	break;
+
+	case MESSAGETYPE::CHAT:
+		messagesOutHead.enqueue(new Message(MESSAGETYPE::CONFIRMATION, IdempotencyToken::generate()));
+		if(messagesInHead.uniqueIdempotencyToken(msg.idempotencyToken)) {
+			messagesInIdempotencyTokens.enqueue(msg.idempotencyToken);
+			receivedMessage = msg.body;
+		}
+	break;
+
+	case MESSAGETYPE::HANDSHAKE:
+		messagesOutHead.removeByType(MESSAGETYPE::HANDSHAKE);
+		messagesOutHead.enqueue(new Message(MESSAGETYPE::CONFIRMATION, IdempotencyToken::generate()));
+		doConnected();
+		handshakeReceivedCount += 1;
+
+		if(handshareReceivedCount > MAX_HANDSHAKE_THRESHOLD) {
+			DebugLog::getLog().logError();
+		}
+	break;
+
+	default:
+	break;
+	}
+}
+*/
+
+
+bool Networking::processIncomingMessages() {
+	//if messageIn queue contains messages
+	//peek next message
+		//if message type equals current message type
+			//process messageIn
+		//step forward in queue
+		//if currentMessage == nullptr
+			//increment message type priority
+			//if message type priority == DONE
+				//return false;
+		//return true;
+	//else return false;
 }
 
 
 bool Networking::sendOutgoingMessages() {
-
+	//if messageOut queue contains messages
+		//if message type equals current message type
+			//if messageResendDelay elapsed
+				//serialize message
+				//encrypt message
+				//send message
+				//do message type callback
+		//step forward in queue
+		//if current message == nullptr
+			//increment message type priority
+			//if message type priority == DONE
+				//return false
+		//return true
+	//else return false
 }
 
 
@@ -139,6 +213,10 @@ void Networking::processNetwork(const unsigned long long cycleStartTime) {
 
 	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
 	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::processIncomingMessages, MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS);
+	if(timeSensitiveProcessDuration < 0) {
+		//check message count threshold, drop connection/blacklist ip if exceeded
+	}
+
 	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::sendOutgoingMessages, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS);
 }
 
