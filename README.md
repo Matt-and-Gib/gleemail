@@ -118,6 +118,12 @@ To-do
 
 *** Note: update link to use main branch!
 
+Required Libraries
+
+- ArduinoJson by Benoit Blanchon
+- WiFiNINA
+- hd44780 by Bill Perry
+
 Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
 
 ___
@@ -148,6 +154,7 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 • You can hold down the switch to pause input
 
+*** IMPORTANT NODE *** You are limited to sending no more than ~32,768 messages per sitting due to the size of the idempotency token (unsigned short). This decision was made to reduce the message overhead and speed up encrypting and parsing. We understand that this limit will affect most of you, and we apologize for the issue. There is nothing that we can do to change this, so just remember to power-cycle your glee-ware every once in a while.
 ___
 
 ### <a name="plans"></a>**Future Plans**

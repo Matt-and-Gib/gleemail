@@ -2,12 +2,14 @@
 #define SECURITY_H
 
 #define USE_TINY_C_AES 1
+#define USE_CHACHA 0
 
 #if USE_TINY_C_AES
 #include "lib/tiny-AES-c-1.0.0/aes.hpp"
 #ifndef AES128
 #error Must define AES128
 #endif
+#elif USE_CHACHA
 #endif
 
 

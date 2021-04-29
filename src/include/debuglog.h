@@ -8,6 +8,7 @@ static const constexpr bool VERBOSE_DEBUG_LOG = true;
 static const constexpr unsigned short DEBUG_LOG_INPUT_METHOD_OFFSET = 10;
 static const constexpr unsigned short DEBUG_LOG_NETWORK_OFFSET = 50;
 static const constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
+static const constexpr unsigned short DEBUG_LOG_MESSAGEERROR = 130;
 enum ERROR_CODE: short {
 	//Meta range: 0 - 9
 	NONE = 0,
@@ -47,6 +48,8 @@ enum ERROR_CODE: short {
 	//JSON range: 90 - 129
 	JSON_NULLPTR_PAYLOAD = DEBUG_LOG_JSON_OFFSET + 0,
 	JSON_DESERIALIZATION_ERROR = DEBUG_LOG_JSON_OFFSET + 1
+
+	//MessageError range: 130 - 169
 };
 
 

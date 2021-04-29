@@ -26,6 +26,8 @@ enum class MESSAGE_TYPE : short {HANDSHAKE = 0, CHAT = 1, LIFELINE = 2};
 
 static const constexpr unsigned short MAX_MESSAGE_LENGTH = 16; //Maximum number of characters LCD display can print per line
 
+static const constexpr unsigned short JSON_DOCUMENT_SIZE = 64;
+
 static const constexpr char CANCEL_CHAR = (char)24;
 
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};

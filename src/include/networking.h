@@ -12,14 +12,45 @@
 #include "security.h"
 
 
+class MessageError {
+private:
+	ERROR_CODE id;
+	const char* attribute;
+public:
+	MessageError();
+	MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>&);
+	~MessageError();
+};
+
+
+MessageError::MessageError() {
+
+}
+
+
+MessageError::MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
+	const unsigned short tempErrorID = parsedDocument["E"]["D"];
+	id = static_cast<ERROR_CODE>(tempErrorID);
+
+	attribute = parsedDocument["E"]["A"];
+}
+
+
+MessageError::~MessageError() {
+	delete attribute;
+}
+
+
 class Message {
 private:
-	const char* body;
 	MESSAGE_TYPE messageType;
+	unsigned short idempotencyToken;
+	const char* chat;
+	MessageError* error;
 public:
-	Message() {}
-	Message(const DynamicJsonDocument&);
-	~Message() {}
+	Message();
+	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>&);
+	~Message();
 
 	char* toString();
 
@@ -28,10 +59,25 @@ public:
 };
 
 
-Message::Message(const DynamicJsonDocument& payload) {
-	const int messageT = payload["header"]["type"];
-	messageType = static_cast<MESSAGE_TYPE>(messageT);
-	body = payload["body"]["message"];
+Message::Message() {
+
+}
+
+
+
+Message::Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
+	const unsigned short tempMessageType = parsedDocument["T"];
+	messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
+
+	idempotencyToken = parsedDocument["I"];
+	chat = parsedDocument["C"];
+	error = new MessageError(parsedDocument);
+}
+
+
+Message::~Message() {
+	delete chat;
+	delete[] error;
 }
 
 
@@ -43,6 +89,7 @@ private:
 	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
 	char* messageBuffer = new char[MESSAGE_BUFFER_SIZE];
 	unsigned short packetSize = 0;
+
 	//unsigned short messageSize = 0;
 
 	//Queue<Message> messagePool;
@@ -93,6 +140,15 @@ bool Networking::getMessages() {
 		if(udp.remoteIP() == peerIPAddress) {
 			//decrypt message
 			//parse into json
+			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument;
+			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, JSON_DOCUMENT_SIZE);
+			if(parsingError) {
+				DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
+				return true;
+			}
+
+			Message* parsedMessage = new Message(parsedDocument);
+
 			//construct message object
 			//enqueue
 		} else {
