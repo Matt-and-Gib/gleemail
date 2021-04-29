@@ -42,7 +42,8 @@ private:
 
 	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
 	char* messageBuffer = new char[MESSAGE_BUFFER_SIZE];
-	unsigned short messageSize = 0;
+	unsigned short packetSize = 0;
+	//unsigned short messageSize = 0;
 
 	//Queue<Message> messagePool;
 	//void clearMessageBuffer();
@@ -51,17 +52,18 @@ private:
 	unsigned long long processStartTime = 0;
 	short processRunTime = 0;
 
-	short getMessages(const unsigned short);
-	short getMessagesRemainingTime = 0;
+	short timeSensitiveProcessDuration = 0;
+
+	bool getMessages();
 	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
-	short processIncomingMessages(const unsigned short);
-	short processIncomingMessagesRemainingTime = 0;
+	bool processIncomingMessages();
 	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
-	short sendOutgoingMessages(const unsigned short);
-	short sendOutgoingMessagesRemainingTime = 0;
+	bool sendOutgoingMessages();
 	static const constexpr unsigned short MAX_SEND_OUTGOING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
+
+	short doTimeSensesitiveProcess(const unsigned short, bool (Networking::*)(), const unsigned short);
 public:
 	Networking();
 	~Networking();
@@ -84,58 +86,46 @@ Networking::~Networking() {
 
 
 
-short Networking::getMessages(const unsigned short processingTimeOffset = 0) {
+bool Networking::getMessages() {
+	packetSize = udp.parsePacket();
+	if(packetSize > 0) {
+		udp.read(messageBuffer, packetSize);
+		if(udp.remoteIP() == peerIPAddress) {
+			//decrypt message
+			//parse into json
+			//construct message object
+			//enqueue
+		} else {
+			//debug message: unknown sender
+		}
+
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+bool Networking::processIncomingMessages() {
+
+}
+
+
+bool Networking::sendOutgoingMessages() {
+
+}
+
+
+short Networking::doTimeSensesitiveProcess(const unsigned short processingTimeOffset, bool (Networking::*doProcess)(), const unsigned short MAX_PROCESSING_TIME) {
 	processStartTime = millis();
 
-	while(millis() - processStartTime < MAX_GET_MESSAGES_PROCESS_DURATION_MS - processingTimeOffset) {
-		if(udp.parsePacket()) {
-			messageSize = udp.read(messageBuffer, MESSAGE_BUFFER_SIZE);
-			if(udp.remoteIP() == peerIPAddress) {
-				//decrypt message
-				//parse into json
-				//construct message object
-				//enqueue
-			} else {
-				//debug message: unknown sender
-			}
-		} else {
+	while(millis() - processStartTime < MAX_PROCESSING_TIME - processingTimeOffset) {
+		if(!(this->*doProcess)()) {
 			break;
 		}
 	}
 
-	processRunTime = MAX_GET_MESSAGES_PROCESS_DURATION_MS - (millis() - processStartTime);
-	if(processRunTime < 0) {
-		//debug message: took too long
-	}
-
-	return processRunTime;
-}
-
-
-short Networking::processIncomingMessages(const unsigned short processingTimeOffset = 0) {
-	processStartTime = millis();
-
-	while(millis() - processStartTime < MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS - processingTimeOffset) {
-
-	}
-
-	processRunTime = MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS - (millis() - processStartTime);
-	if(processRunTime < 0) {
-		//debug message
-	}
-
-	return processRunTime;
-}
-
-
-short Networking::sendOutgoingMessages(const unsigned short processingTimeOffset = 0) {
-	processStartTime = millis();
-
-	while(millis() - processStartTime < MAX_SEND_OUTGOING_MESSAGES_DURATION_MS - processingTimeOffset) {
-
-	}
-
-	processRunTime = MAX_SEND_OUTGOING_MESSAGES_DURATION_MS - (millis() - processStartTime);
+	processRunTime = MAX_PROCESSING_TIME - (millis() - processStartTime);
 	if(processRunTime < 0) {
 		//debug message
 	}
@@ -145,9 +135,11 @@ short Networking::sendOutgoingMessages(const unsigned short processingTimeOffset
 
 
 void Networking::processNetwork(const unsigned long long cycleStartTime) {
-	getMessagesRemainingTime = getMessages();
-	processIncomingMessagesRemainingTime = processIncomingMessages(getMessagesRemainingTime);
-	sendOutgoingMessagesRemainingTime = sendOutgoingMessages(processIncomingMessagesRemainingTime);
+	timeSensitiveProcessDuration = 0;
+
+	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
+	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::processIncomingMessages, MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS);
+	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::sendOutgoingMessages, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS);
 }
 
 

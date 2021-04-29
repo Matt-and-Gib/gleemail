@@ -40,7 +40,7 @@ ___
 
 ### <a name="diagram"></a>**Wiring Diagram**
 
-[View Online Wiring Diagram](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2FNetwork-JSON-Rewrite%2Fwiring%20diagram.drawio)
+[View Online Wiring Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2FNetwork-JSON-Rewrite%2Fwiring%20diagram.drawio)
 
 *** Note: update link to use main branch!
 
@@ -114,7 +114,7 @@ ___
 
 To-do
 
-[View Online Program Flow Diagram](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2FNetwork-JSON-Rewrite%2FglEEmail%20flow.drawio)
+[View Online Program Flow Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2FNetwork-JSON-Rewrite%2FglEEmail%20flow.drawio)
 
 *** Note: update link to use main branch!
 
