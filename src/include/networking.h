@@ -15,21 +15,29 @@ class IdempotencyToken {
 private:
 	unsigned short value;
 	unsigned long timestamp;
+	unsigned short retryCount;
 public:
-	IdempotencyToken() {}
+	IdempotencyToken() {
+		value = 0;
+		timestamp = 0;
+		retryCount = 0;
+	}
 	IdempotencyToken(const unsigned short v, const unsigned long t) {
 		value = v;
 		timestamp = t;
+		retryCount = 0;
 	}
-	~IdempotencyToken() {}
-
 	IdempotencyToken(const IdempotencyToken& i) {
 		value = i.getValue();
 		timestamp = i.getTimestamp();
+		retryCount = i.getRetryCount();
 	}
+	~IdempotencyToken() {}
 
 	const unsigned short getValue() const {return value;}
 	const unsigned long getTimestamp() const {return timestamp;}
+	const unsigned short getRetryCount() const {return retryCount;}
+	void incrementRetryCount() {retryCount += 1;}
 };
 
 
@@ -115,6 +123,7 @@ private:
 	unsigned long lastHeartbeatMS = 0;
 	static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 5000;
 	static const constexpr unsigned short OUTGOING_MESSAGE_RETRY_TIMEOUT_MS = 60000;
+	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 6000;
 
 	const unsigned long (*nowMS)();
 	void checkHeartbeat();
@@ -275,6 +284,29 @@ bool Networking::processIncomingMessagesQueue() {
 
 
 bool Networking::sendOutgoingMessages() {
+	QueueNode<Message>* nextMessage = messagesOut.peek();
+	if(nextMessage == nullptr) {
+		return false;
+	}
+
+	do {
+		if(nextMessage->getData()->getMessageType() == searchMessageType) {
+			if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getTimestamp() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
+				//serialize message
+				//encrypt message
+				//send message
+				//do callback?
+				return true;
+			}
+		}
+	} while (nextMessage != nullptr);
+
+	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
+	if(searchMessageType == MESSAGE_TYPE::NONE) {
+		return false;
+	} else {
+		return true;
+	}
 	//if messageOut queue contains messages
 		//if message type equals current message type
 			//if messageResendDelay elapsed
@@ -312,12 +344,13 @@ short Networking::doTimeSensesitiveProcess(const unsigned short processingTimeOf
 void Networking::checkHeartbeat() {
 	if(nowMS() - lastHeartbeatMS > FLATLINE_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_FLATLINE);
-		//disconnect ourselves
+		//cut ourselves off from gleepal :<
 	}
 }
 
 
 bool Networking::outgoingTokenTimestampsElapsed() {
+	//find first non-handshake message
 	if(messagesOut.peek()->getData()->getIdempotencyToken()->getTimestamp() > OUTGOING_MESSAGE_RETRY_TIMEOUT_MS) {
 		return true;
 	} else {
@@ -326,6 +359,7 @@ bool Networking::outgoingTokenTimestampsElapsed() {
 }
 
 
+//TODO!
 void Networking::removeExpiredIdempotencyTokens() {
 	IdempotencyToken* nextToken = messagesInIdempotencyTokens.peek()->getData();
 	if(nextToken == nullptr) {
