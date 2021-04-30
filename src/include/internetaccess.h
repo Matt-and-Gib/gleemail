@@ -45,7 +45,7 @@ InternetAccess::~InternetAccess() {
 
 bool InternetAccess::connectToNetwork(char* networkName, char* networkPassword, bool retry = true) {
 	if(networkName == nullptr || networkPassword == nullptr) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_PASSED_INVALID_PARAMETER);
+		DebugLog::getLog().logError(ERROR_CODE::INTERNET_ACCESS_PASSED_INVALID_PARAMETER);
 		return false;
 	}
 
@@ -59,12 +59,12 @@ bool InternetAccess::connectToNetwork(char* networkName, char* networkPassword, 
 	}
 
 	if(WiFi.status() == WL_CONNECT_FAILED) {
-		DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_CONNECTION_FAILED);
+		DebugLog::getLog().logWarning(ERROR_CODE::INTERNET_ACCESS_CONNECTION_FAILED);
 		if(retry) {
 			delay(500);
 			return connectToNetwork(networkName, networkPassword, false);
 		} else {
-			DebugLog::getLog().logError(ERROR_CODE::NETWORK_WIFI_CONNECTION_FAILED_RETRY_OCCURRED);
+			DebugLog::getLog().logError(ERROR_CODE::INTERNET_ACCESS_WIFI_CONNECTION_FAILED_RETRY_OCCURRED);
 			return false;
 		}
 	}

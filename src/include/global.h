@@ -14,7 +14,6 @@ static const constexpr unsigned short MAX_NETWORKING_LOOP_DURATION_MS = 36;
 
 static const constexpr unsigned short MAX_IP_ADDRESS_LENGTH = 15;
 static const constexpr unsigned short CONNECTION_PORT = 29453;
-//static const constexpr char NETWORK_HANDSHAKE_CHARACTER = '$';
 
 static const constexpr char NETWORK_HEADER_USER_AGENT[] = "User-Agent: ArduinoWifiClient";
 static const constexpr char NETWORK_HEADER_ACCEPTED_RETURN_TYPE[] = "Accept: */*";
@@ -22,7 +21,7 @@ static const constexpr char NETWORK_HEADER_CONNECTION_LIFETIME[] = "Connection: 
 static const constexpr char HEADER_TERMINATION[] = "\r\n\r\n";
 static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEADER_TERMINATION)/sizeof(HEADER_TERMINATION[0]) - 1;
 
-enum class MESSAGE_TYPE : short {HANDSHAKE = 0, CHAT = 1, LIFELINE = 2};
+enum class MESSAGE_TYPE : short {ERROR = 0, HEARTBEAT = 1, CONFIRMATION = 2, CHAT = 3, HANDSHAKE = 4, NONE = 5};
 
 static const constexpr unsigned short MAX_MESSAGE_LENGTH = 16; //Maximum number of characters LCD display can print per line
 

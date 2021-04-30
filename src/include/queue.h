@@ -1,6 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+
 template <class T>
 class QueueNode {
 private:
@@ -58,6 +59,7 @@ public:
 
 	//QueueNode<T>* remove(T&, QueueNode<T>*);
 	QueueNode<T>* remove(T&);
+	QueueNode<T>* remove(QueueNode<T>&);
 };
 
 
@@ -123,6 +125,32 @@ QueueNode<T>* Queue<T>::remove(T& match) {
 	QueueNode<T>* currentNode = root;
 	while(currentNode) {
 		if(*(currentNode->getData()) == match) {
+			break;
+		}
+
+		parentNode = currentNode;
+		currentNode = currentNode->getNode();
+	}
+
+	if(currentNode) {
+		if(!parentNode) {
+			return dequeue();
+		}
+
+		parentNode->setNode(currentNode->getNode());
+		currentNode->setNode(nullptr);
+	}
+
+	return currentNode;
+}
+
+
+template <class T>
+QueueNode<T>* Queue<T>::remove(QueueNode<T>& match) {
+	QueueNode<T>* parentNode = nullptr;
+	QueueNode<T>* currentNode = root;
+	while(currentNode) {
+		if(currentNode == &match) {
 			break;
 		}
 

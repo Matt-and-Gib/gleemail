@@ -12,6 +12,28 @@
 #include "security.h"
 
 
+class IdempotencyToken {
+private:
+	unsigned short value;
+	unsigned long timestamp;
+public:
+	IdempotencyToken() {}
+	IdempotencyToken(const unsigned short v, const unsigned long t) {
+		value = v;
+		timestamp = t;
+	}
+	~IdempotencyToken() {}
+
+	IdempotencyToken(const IdempotencyToken& i) {
+		value = i.getValue();
+		timestamp = i.getTimestamp();
+	}
+
+	const unsigned short getValue() const {return value;}
+	const unsigned long getTimestamp() const {return timestamp;}
+};
+
+
 class MessageError {
 private:
 	ERROR_CODE id;
@@ -33,6 +55,8 @@ MessageError::MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedD
 	id = static_cast<ERROR_CODE>(tempErrorID);
 
 	attribute = parsedDocument["E"]["A"];
+
+	//DebugLog::getLog().logWarning(id);
 }
 
 
@@ -44,7 +68,7 @@ MessageError::~MessageError() {
 class Message {
 private:
 	MESSAGE_TYPE messageType;
-	unsigned short idempotencyToken;
+	IdempotencyToken* idempotencyToken;
 	const char* chat;
 	MessageError* error;
 public:
@@ -52,6 +76,8 @@ public:
 	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>&);
 	~Message();
 
+	const MESSAGE_TYPE getMessageType() const {return messageType;}
+	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	char* toString();
 
 	bool operator==(const Message& o) {return messageType == o.messageType;}
@@ -69,13 +95,15 @@ Message::Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
 	const unsigned short tempMessageType = parsedDocument["T"];
 	messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
 
-	idempotencyToken = parsedDocument["I"];
+	unsigned short tempIdempVal = parsedDocument["I"];
+	idempotencyToken = new IdempotencyToken(tempIdempVal, millis());
 	chat = parsedDocument["C"];
 	error = new MessageError(parsedDocument);
 }
 
 
 Message::~Message() {
+	delete[] idempotencyToken;
 	delete chat;
 	delete[] error;
 }
@@ -85,32 +113,42 @@ class Networking {
 private:
 	WiFiUDP udp;
 	IPAddress peerIPAddress;
+	unsigned long lastHeartbeatMS = 0;
+	static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 5000;
+	static const constexpr unsigned short OUTGOING_MESSAGE_RETRY_TIMEOUT_MS = 60000;
+
+	void checkHeartbeat();
 
 	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
 	char* messageBuffer = new char[MESSAGE_BUFFER_SIZE];
 	unsigned short packetSize = 0;
 
-	//unsigned short messageSize = 0;
-
-	//Queue<Message> messagePool;
-	//void clearMessageBuffer();
-	//char* createMessage(char*, const MESSAGE_TYPE);
+	Queue<Message> messagesIn = *new Queue<Message>();
+	Queue<IdempotencyToken> messagesInIdempotencyTokens = *new Queue<IdempotencyToken>;
+	Queue<Message> messagesOut = *new Queue<Message>();
+	MESSAGE_TYPE searchMessageType;
 
 	unsigned long long processStartTime = 0;
 	short processRunTime = 0;
 
-	short timeSensitiveProcessDuration = 0;
+	short unusedTimeSensitiveProcessTime = 0;
 
 	bool getMessages();
 	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
-	bool processIncomingMessages();
-	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
+	bool processIncomingMessagesQueue();
+	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGES_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
 	bool sendOutgoingMessages();
 	static const constexpr unsigned short MAX_SEND_OUTGOING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
 	short doTimeSensesitiveProcess(const unsigned short, bool (Networking::*)(), const unsigned short);
+	void processIncomingMessage(Message&);
+	unsigned short messageReceivedCount = 0;
+	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
+
+	bool outgoingTokenTimestampsElapsed();
+	void removeExpiredIdempotencyTokens();
 public:
 	Networking();
 	~Networking();
@@ -139,20 +177,19 @@ bool Networking::getMessages() {
 		udp.read(messageBuffer, packetSize);
 		if(udp.remoteIP() == peerIPAddress) {
 			//decrypt message
-			//parse into json
+
+			messageReceivedCount += 1;
+
 			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument;
 			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, JSON_DOCUMENT_SIZE);
 			if(parsingError) {
-				DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
+				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			}
 
-			Message* parsedMessage = new Message(parsedDocument);
-
-			//construct message object
-			//enqueue
+			messagesIn.enqueue(new Message(parsedDocument));
 		} else {
-			//debug message: unknown sender
+			DebugLog::getLog().logWarning(NETWORK_UNKNOWN_MESSAGE_SENDER);
 		}
 
 		return true;
@@ -162,69 +199,76 @@ bool Networking::getMessages() {
 }
 
 
-/*
-void Networking::processIncomingMessageByType(const Message& msg) {
-	messageReceivedCount += 1;
-	messageHash = hashMessage(msg);
-	if(messageHash != msg.hash) {
-		return;
-	}
-
-	switch(msg.type) {
-	case MESSAGETYPE::ERROR:
-		DebugLog::getLog().logError();
+void Networking::processIncomingMessage(Message& msg) {
+	switch(msg.getMessageType()) {
+	case MESSAGE_TYPE::ERROR:
+		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getIdempotencyToken())));
+		//DebugLog::getLog().logError();
 	break;
 
-	case MESSAGETYPE::HEARTBEAT:
+	case MESSAGE_TYPE::HEARTBEAT:
 		lastHeartbeatMS = millis();
 	break;
 
-	case MESSAGETYPE::CONFIRMATION:
-		Message* confirmedMessage = messagesOutHead.removeByIdempotencyToken(msg.idempotencyToken);
+	case MESSAGE_TYPE::CONFIRMATION:
+		/*Message* confirmedMessage = messagesOutHead.removeByIdempotencyToken(msg.idempotencyToken);
 		if(confirmedMessage != nullptr) {
 			confirmedMessage->callback();
 			delete confirmatedMessage;
-		}
+		}*/
 	break;
 
-	case MESSAGETYPE::CHAT:
-		messagesOutHead.enqueue(new Message(MESSAGETYPE::CONFIRMATION, IdempotencyToken::generate()));
+	case MESSAGE_TYPE::CHAT:
+		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getIdempotencyToken())));
+		/*messagesOutHead.enqueue(new Message(MESSAGETYPE::CONFIRMATION, IdempotencyToken::generate()));
 		if(messagesInHead.uniqueIdempotencyToken(msg.idempotencyToken)) {
 			messagesInIdempotencyTokens.enqueue(msg.idempotencyToken);
 			receivedMessage = msg.body;
-		}
+		}*/
 	break;
 
-	case MESSAGETYPE::HANDSHAKE:
-		messagesOutHead.removeByType(MESSAGETYPE::HANDSHAKE);
+	case MESSAGE_TYPE::HANDSHAKE:
+		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getIdempotencyToken())));
+		/*messagesOutHead.removeByType(MESSAGETYPE::HANDSHAKE);
 		messagesOutHead.enqueue(new Message(MESSAGETYPE::CONFIRMATION, IdempotencyToken::generate()));
 		doConnected();
 		handshakeReceivedCount += 1;
 
 		if(handshareReceivedCount > MAX_HANDSHAKE_THRESHOLD) {
 			DebugLog::getLog().logError();
-		}
+		}*/
 	break;
 
 	default:
 	break;
 	}
 }
-*/
 
 
-bool Networking::processIncomingMessages() {
-	//if messageIn queue contains messages
-	//peek next message
-		//if message type equals current message type
-			//process messageIn
-		//step forward in queue
-		//if currentMessage == nullptr
-			//increment message type priority
-			//if message type priority == DONE
-				//return false;
-		//return true;
-	//else return false;
+
+bool Networking::processIncomingMessagesQueue() {
+	QueueNode<Message>* nextMessage = messagesIn.peek();
+	if(nextMessage == nullptr) {
+		return false;
+	}
+
+	do {
+		if(nextMessage->getData()->getMessageType() == searchMessageType) {
+			messagesIn.remove(*nextMessage);
+			processIncomingMessage(*(nextMessage->getData()));
+			delete nextMessage;
+			return true;
+		}
+
+		nextMessage = nextMessage->getNode();
+	} while(nextMessage != nullptr);
+
+	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
+	if(searchMessageType == MESSAGE_TYPE::NONE) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 
@@ -248,8 +292,7 @@ bool Networking::sendOutgoingMessages() {
 
 short Networking::doTimeSensesitiveProcess(const unsigned short processingTimeOffset, bool (Networking::*doProcess)(), const unsigned short MAX_PROCESSING_TIME) {
 	processStartTime = millis();
-
-	while(millis() - processStartTime < MAX_PROCESSING_TIME - processingTimeOffset) {
+	while(millis() - processStartTime < MAX_PROCESSING_TIME + processingTimeOffset) {
 		if(!(this->*doProcess)()) {
 			break;
 		}
@@ -257,23 +300,64 @@ short Networking::doTimeSensesitiveProcess(const unsigned short processingTimeOf
 
 	processRunTime = MAX_PROCESSING_TIME - (millis() - processStartTime);
 	if(processRunTime < 0) {
-		//debug message
+		//DebugLog::getLog().logWarning();
 	}
 
 	return processRunTime;
 }
 
 
-void Networking::processNetwork(const unsigned long long cycleStartTime) {
-	timeSensitiveProcessDuration = 0;
+void Networking::checkHeartbeat() {
+	if(millis() - lastHeartbeatMS > FLATLINE_THRESHOLD_MS) {
+		DebugLog::getLog().logError(NETWORK_HEARTBEAT_FLATLINE);
+		//disconnect ourselves
+	}
+}
 
-	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
-	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::processIncomingMessages, MAX_PROCESS_INCOMING_MESSAGES_DURATION_MS);
-	if(timeSensitiveProcessDuration < 0) {
-		//check message count threshold, drop connection/blacklist ip if exceeded
+
+bool Networking::outgoingTokenTimestampsElapsed() {
+	if(messagesOut.peek()->getData()->getIdempotencyToken()->getTimestamp() > OUTGOING_MESSAGE_RETRY_TIMEOUT_MS) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+void Networking::removeExpiredIdempotencyTokens() {
+	IdempotencyToken* nextToken = messagesInIdempotencyTokens.peek();
+	if(nextToken == nullptr) {
+		return;
+	}
+}
+
+
+void Networking::processNetwork(const unsigned long long cycleStartTime) {
+	checkHeartbeat();
+
+	unusedTimeSensitiveProcessTime = doTimeSensesitiveProcess(0, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
+	if(unusedTimeSensitiveProcessTime < 0) {
+		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
+			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
+			//drop connection
+		}
+	} else {
+		messageReceivedCount = 0;
 	}
 
-	timeSensitiveProcessDuration = doTimeSensesitiveProcess(timeSensitiveProcessDuration, &Networking::sendOutgoingMessages, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS);
+	searchMessageType = static_cast<MESSAGE_TYPE>(0);
+	unusedTimeSensitiveProcessTime = doTimeSensesitiveProcess(unusedTimeSensitiveProcessTime, &Networking::processIncomingMessagesQueue, MAX_PROCESS_INCOMING_MESSAGES_QUEUE_DURATION_MS);
+
+	searchMessageType = static_cast<MESSAGE_TYPE>(0);
+	unusedTimeSensitiveProcessTime = doTimeSensesitiveProcess(unusedTimeSensitiveProcessTime, &Networking::sendOutgoingMessages, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS);
+	if(unusedTimeSensitiveProcessTime < 0) {
+		if(outgoingTokenTimestampsElapsed()) {
+			DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
+			//drop connection
+		}
+	}
+
+	removeExpiredIdempotencyTokens();
 }
 
 
