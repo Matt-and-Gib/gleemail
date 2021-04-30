@@ -72,7 +72,7 @@ bool InternetAccess::connectToNetwork(char* networkName, char* networkPassword, 
 	if(WiFi.status() == WL_CONNECTED) {
 		return true;
 	} else {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_UNKNOWN_STATUS);
+		DebugLog::getLog().logError(ERROR_CODE::INTERNET_ACCESS_UNKNOWN_STATUS);
 		return false;
 	}
 }

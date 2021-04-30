@@ -31,7 +31,7 @@ bool WebAccess::sendRequestToServer(InternetAccess& net, const char* const* head
 	int headerIndex = 0;
 	while(headerLine != nullptr) {
 		if(headerIndex > 16) { //Replace magic number
-			DebugLog::getLog().logError(ERROR_CODE::NETWORK_HEADER_TERMINATION_OMITTED);
+			DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_HEADER_TERMINATION_OMITTED);
 			return false;
 		}
 
@@ -68,17 +68,17 @@ short WebAccess::findEndOfHeaderIndex(const char* const rawData, const unsigned 
 
 char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, const char* const* headers) {
 	if(WiFi.status() != WL_CONNECTED) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
 		return nullptr;
 	}
 
 	if(!net.connectToWeb(server)) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_SECURE_CONNECTION_TO_SERVER_FAILED);
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_SECURE_CONNECTION_TO_SERVER_FAILED);
 		return nullptr;
 	}
 
 	if(!sendRequestToServer(net, headers)) {
-		DebugLog::getLog().logError(ERROR_CODE::NETWORK_REQUEST_TO_SERVER_HEADER_INVALID);
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_REQUEST_TO_SERVER_HEADER_INVALID);
 		return nullptr;
 	}
 
@@ -89,14 +89,14 @@ char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, con
 			if(bufferIndex < DATA_BUFFER_SIZE) {
 				dataBuffer[bufferIndex++] = net.nextCharInWebResponse();
 			} else {
-				DebugLog::getLog().logError(ERROR_CODE::NETWORK_DATA_BUFFER_OVERFLOW);
+				DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_OVERFLOW);
 				return nullptr;
 			}
 		}
 	}
 
 	if(bufferIndex < DATA_BUFFER_SIZE/2) {
-		DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_DATA_BUFFER_UNDERUTILIZED);
+		DebugLog::getLog().logWarning(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED);
 	}
 
 	/*//Print full response

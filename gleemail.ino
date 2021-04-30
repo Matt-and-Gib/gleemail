@@ -102,14 +102,14 @@ void updateDisplay() {
 
 
 void printErrorCodes() {
-	ERROR_CODE e = DebugLog::getLog().getError();
+	ERROR_CODE e = DebugLog::getLog().getNextError();
 	while(e != ERROR_CODE::NONE) {
-		if(!(OFFLINE_MODE && (e == NETWORK_INVALID_PEER_IP_ADDRESS))) {
+		//if(!(OFFLINE_MODE && (e == NETWORK_INVALID_PEER_IP_ADDRESS))) {
 			Serial.print(F("\nError Code: "));
 			Serial.println(e);
-		}
+		//}
 
-		e = DebugLog::getLog().getError();
+		e = DebugLog::getLog().getNextError();
 	}
 }
 
@@ -169,7 +169,7 @@ bool connectToWiFi() {
 	}
 
 	if(inputLength >= internet.getMaxSSIDLength()) {
-		DebugLog::getLog().logError(NETWORK_DATA_SSID_POSSIBLY_TRUNCATED);
+		DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
 	}
 	userSSID[inputLength] = '\0';
 
@@ -188,7 +188,7 @@ bool connectToWiFi() {
 	}
 
 	if(inputLength >= internet.getMaxPasswordLength()) {
-		DebugLog::getLog().logError(NETWORK_DATA_PASSWORD_POSSIBLY_TRUNCATED);
+		DebugLog::getLog().logError(INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED);
 	}
 	userPassword[inputLength] = '\0';
 

@@ -325,7 +325,7 @@ bool Networking::outgoingTokenTimestampsElapsed() {
 
 
 void Networking::removeExpiredIdempotencyTokens() {
-	IdempotencyToken* nextToken = messagesInIdempotencyTokens.peek();
+	IdempotencyToken* nextToken = messagesInIdempotencyTokens.peek()->getData();
 	if(nextToken == nullptr) {
 		return;
 	}
