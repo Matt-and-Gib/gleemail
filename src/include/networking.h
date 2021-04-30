@@ -1,7 +1,6 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
-#include "Arduino.h" //Must include for timing e.g. millis()
 #include <WiFiUdp.h>
 #include <ArduinoJson.hpp>
 
@@ -73,7 +72,7 @@ private:
 	MessageError* error;
 public:
 	Message();
-	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>&);
+	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>&, const unsigned long);
 	~Message();
 
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
@@ -91,12 +90,12 @@ Message::Message() {
 
 
 
-Message::Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
+Message::Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS) {
 	const unsigned short tempMessageType = parsedDocument["T"];
 	messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
 
 	unsigned short tempIdempVal = parsedDocument["I"];
-	idempotencyToken = new IdempotencyToken(tempIdempVal, millis());
+	idempotencyToken = new IdempotencyToken(tempIdempVal, currentTimeMS);
 	chat = parsedDocument["C"];
 	error = new MessageError(parsedDocument);
 }
@@ -117,6 +116,7 @@ private:
 	static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 5000;
 	static const constexpr unsigned short OUTGOING_MESSAGE_RETRY_TIMEOUT_MS = 60000;
 
+	const unsigned long (*nowMS)();
 	void checkHeartbeat();
 
 	static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 4096;
@@ -150,16 +150,18 @@ private:
 	bool outgoingTokenTimestampsElapsed();
 	void removeExpiredIdempotencyTokens();
 public:
-	Networking();
+	Networking(const unsigned long (*)());
 	~Networking();
 
-	void processNetwork(const unsigned long long);
+	void processNetwork();
 
 	bool connectToPeer(IPAddress&) {return false;} //FINISH OR REMOVE ME!
 };
 
 
-Networking::Networking() {
+Networking::Networking(const unsigned long (*millis)()) {
+	nowMS = millis;
+
 	for(int i = 0; i < MESSAGE_BUFFER_SIZE + 1; i += 1) {
 		messageBuffer[i] = '\0';
 	}
@@ -187,7 +189,7 @@ bool Networking::getMessages() {
 				return true;
 			}
 
-			messagesIn.enqueue(new Message(parsedDocument));
+			messagesIn.enqueue(new Message(parsedDocument, nowMS()));
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_UNKNOWN_MESSAGE_SENDER);
 		}
@@ -207,7 +209,7 @@ void Networking::processIncomingMessage(Message& msg) {
 	break;
 
 	case MESSAGE_TYPE::HEARTBEAT:
-		lastHeartbeatMS = millis();
+		lastHeartbeatMS = nowMS();
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
@@ -291,14 +293,14 @@ bool Networking::sendOutgoingMessages() {
 
 
 short Networking::doTimeSensesitiveProcess(const unsigned short processingTimeOffset, bool (Networking::*doProcess)(), const unsigned short MAX_PROCESSING_TIME) {
-	processStartTime = millis();
-	while(millis() - processStartTime < MAX_PROCESSING_TIME + processingTimeOffset) {
+	processStartTime = nowMS();
+	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + processingTimeOffset) {
 		if(!(this->*doProcess)()) {
 			break;
 		}
 	}
 
-	processRunTime = MAX_PROCESSING_TIME - (millis() - processStartTime);
+	processRunTime = MAX_PROCESSING_TIME - (nowMS() - processStartTime);
 	if(processRunTime < 0) {
 		//DebugLog::getLog().logWarning();
 	}
@@ -308,7 +310,7 @@ short Networking::doTimeSensesitiveProcess(const unsigned short processingTimeOf
 
 
 void Networking::checkHeartbeat() {
-	if(millis() - lastHeartbeatMS > FLATLINE_THRESHOLD_MS) {
+	if(nowMS() - lastHeartbeatMS > FLATLINE_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_FLATLINE);
 		//disconnect ourselves
 	}
@@ -332,7 +334,7 @@ void Networking::removeExpiredIdempotencyTokens() {
 }
 
 
-void Networking::processNetwork(const unsigned long long cycleStartTime) {
+void Networking::processNetwork() {
 	checkHeartbeat();
 
 	unusedTimeSensitiveProcessTime = doTimeSensesitiveProcess(0, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS);

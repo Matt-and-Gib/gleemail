@@ -9,10 +9,13 @@
 #include "src/include/webaccess.h"
 
 
+const unsigned long getCurrentTimeMS();
+
+
 static Display& display = *new Display();
 
 static InternetAccess& internet = *new InternetAccess();
-static Networking& network = *new Networking();
+static Networking& network = *new Networking(&getCurrentTimeMS);
 static WebAccess& webAccess = *new WebAccess();
 
 static InputMethod* input;
@@ -55,10 +58,15 @@ void processInputMethod() {
 }
 
 
+const unsigned long getCurrentTimeMS() {
+	return millis();
+}
+
+
 void processNetwork() {
 	pendingPeerMessage = false;
 
-	network.processNetwork(cycleStartTime);
+	network.processNetwork();
 }
 
 
