@@ -49,6 +49,9 @@ public:
 	MessageError();
 	MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>&);
 	~MessageError();
+
+	const ERROR_CODE getID() const {return id;}
+	const char* getAttribute() const {return attribute;}
 };
 
 
@@ -85,6 +88,8 @@ public:
 
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
+	const char* getChat() {return chat;}
+	MessageError* getError() {return error;}
 	char* toString();
 
 	bool operator==(const Message& o) {return messageType == o.messageType;}
@@ -138,9 +143,8 @@ private:
 	MESSAGE_TYPE searchMessageType;
 
 	unsigned long long processStartTime = 0;
-	short processRunTime = 0;
-
-	short unusedTimeSensitiveProcessTime = 0;
+	short processElapsedTime = 0;
+	//short unusedTimeSensitiveProcessTime = 0;
 
 	bool getMessages();
 	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
@@ -151,7 +155,7 @@ private:
 	bool sendOutgoingMessages();
 	static const constexpr unsigned short MAX_SEND_OUTGOING_MESSAGES_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
-	short doTimeSensesitiveProcess(const unsigned short, bool (Networking::*)(), const unsigned short);
+	void doTimeSensesitiveProcess(const unsigned short, bool (Networking::*)(), const unsigned short);
 	void processIncomingMessage(Message&);
 	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
@@ -256,7 +260,6 @@ void Networking::processIncomingMessage(Message& msg) {
 }
 
 
-
 bool Networking::processIncomingMessagesQueue() {
 	QueueNode<Message>* nextMessage = messagesIn.peek();
 	if(nextMessage == nullptr) {
@@ -292,13 +295,32 @@ bool Networking::sendOutgoingMessages() {
 	do {
 		if(nextMessage->getData()->getMessageType() == searchMessageType) {
 			if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getTimestamp() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
-				//serialize message
-				//encrypt message
-				//send message
+				char outputBuffer[JSON_DOCUMENT_SIZE];
+				StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
+
+				doc["T"] = static_cast<short>(nextMessage->getData()->getMessageType());
+				doc["I"] = nextMessage->getData()->getIdempotencyToken()->getValue();
+				doc["C"] = nextMessage->getData()->getChat();
+
+				JsonObject E = doc.createNestedObject("E");
+				E["D"] = static_cast<unsigned short>(nextMessage->getData()->getError()->getID());
+				E["A"] = nextMessage->getData()->getError()->getAttribute();
+
+				serializeJson(doc, outputBuffer);
+				//encryptBuffer(outputBuffer, measureJson(doc) + 1);
+
+				udp.beginPacket(peerIPAddress, CONNECTION_PORT);
+				udp.write(outputBuffer);
+				udp.endPacket();
+		
+				nextMessage->getData()->getIdempotencyToken()->incrementRetryCount();
+
 				//do callback?
 				return true;
 			}
 		}
+
+		nextMessage = nextMessage->getNode();
 	} while (nextMessage != nullptr);
 
 	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
@@ -324,20 +346,22 @@ bool Networking::sendOutgoingMessages() {
 }
 
 
-short Networking::doTimeSensesitiveProcess(const unsigned short processingTimeOffset, bool (Networking::*doProcess)(), const unsigned short MAX_PROCESSING_TIME) {
+void Networking::doTimeSensesitiveProcess(const unsigned short previousProcessElapsedTime, bool (Networking::*doProcess)(), const unsigned short MAX_PROCESSING_TIME) {
 	processStartTime = nowMS();
-	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + processingTimeOffset) {
+	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + (MAX_PROCESSING_TIME - previousProcessElapsedTime)) {
 		if(!(this->*doProcess)()) {
 			break;
 		}
 	}
 
-	processRunTime = MAX_PROCESSING_TIME - (nowMS() - processStartTime);
-	if(processRunTime < 0) {
-		//DebugLog::getLog().logWarning();
+	processElapsedTime = nowMS() - processStartTime; 
+	if(processElapsedTime > MAX_PROCESSING_TIME) {
+		if(processElapsedTime > 2 * MAX_PROCESSING_TIME) {
+			//DebugLog::getLog().logError();
+		} else {
+			//DebugLog::getLog().logWarning();
+		}
 	}
-
-	return processRunTime;
 }
 
 
@@ -371,8 +395,8 @@ void Networking::removeExpiredIdempotencyTokens() {
 void Networking::processNetwork() {
 	checkHeartbeat();
 
-	unusedTimeSensitiveProcessTime = doTimeSensesitiveProcess(0, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
-	if(unusedTimeSensitiveProcessTime < 0) {
+	doTimeSensesitiveProcess(0, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
+	if(processElapsedTime > MAX_GET_MESSAGES_PROCESS_DURATION_MS) {
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
 			//drop connection
@@ -382,11 +406,11 @@ void Networking::processNetwork() {
 	}
 
 	searchMessageType = static_cast<MESSAGE_TYPE>(0);
-	unusedTimeSensitiveProcessTime = doTimeSensesitiveProcess(unusedTimeSensitiveProcessTime, &Networking::processIncomingMessagesQueue, MAX_PROCESS_INCOMING_MESSAGES_QUEUE_DURATION_MS);
+	doTimeSensesitiveProcess(processElapsedTime, &Networking::processIncomingMessagesQueue, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
 
 	searchMessageType = static_cast<MESSAGE_TYPE>(0);
-	unusedTimeSensitiveProcessTime = doTimeSensesitiveProcess(unusedTimeSensitiveProcessTime, &Networking::sendOutgoingMessages, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS);
-	if(unusedTimeSensitiveProcessTime < 0) {
+	doTimeSensesitiveProcess(processElapsedTime, &Networking::sendOutgoingMessages, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS);
+	if(processElapsedTime > MAX_SEND_OUTGOING_MESSAGES_DURATION_MS) {
 		if(outgoingTokenTimestampsElapsed()) {
 			DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
 			//drop connection

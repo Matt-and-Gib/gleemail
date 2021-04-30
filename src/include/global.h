@@ -23,9 +23,9 @@ static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEAD
 
 enum class MESSAGE_TYPE : short {ERROR = 0, HEARTBEAT = 1, CONFIRMATION = 2, CHAT = 3, HANDSHAKE = 4, NONE = 5};
 
-static const constexpr unsigned short MAX_MESSAGE_LENGTH = 16; //Maximum number of characters LCD display can print per line
+static const constexpr unsigned short MAX_MESSAGE_LENGTH = 140; // This value is dependent upon JSON_DOCUMENT_SIZE = 256.
 
-static const constexpr unsigned short JSON_DOCUMENT_SIZE = 64;
+static const constexpr unsigned short JSON_DOCUMENT_SIZE = 256; // This is the end of the line, the ultimate determiner of the size of the packets we cand send (bytes)!
 
 static const constexpr char CANCEL_CHAR = (char)24;
 

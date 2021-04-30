@@ -1,6 +1,6 @@
 <mxfile>
     <diagram id="PcLZSLNBghNSFwi_JfMx" name="Standard">
-        <mxGraphModel dx="1745" dy="1150" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="864" dy="1150" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="220" value="Background" parent="0"/>
@@ -755,6 +755,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
+                <mxCell id="222" value="MicroSD Card Adapter" parent="0"/>
             </root>
         </mxGraphModel>
     </diagram>
