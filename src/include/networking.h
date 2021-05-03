@@ -144,7 +144,6 @@ private:
 
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
-	//short unusedTimeSensitiveProcessTime = 0;
 
 	bool getMessages();
 	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
