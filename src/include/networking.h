@@ -216,6 +216,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 	udp.write('$');
 	udp.endPacket();
+	sendHeartbeat();
 
 	char* receiveBuffer = new char[2];
 	while(true) {
@@ -228,7 +229,6 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 			udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 			udp.write('$');
 			udp.endPacket();
-
 			sendHeartbeat();
 
 			return true;
