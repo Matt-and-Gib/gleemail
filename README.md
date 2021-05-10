@@ -35,6 +35,8 @@ We're testing glEEmail on an Arduino Nano 33 IoT. For the full parts list that w
 |1x|LCD HD44780|
 |1x|270 Ω Resistor|
 |1x|10k Ω Potentiometer|
+|1x|Adafruit 4682|
+|1x|Micro SD Card|
 
 ___
 
