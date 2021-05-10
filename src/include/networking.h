@@ -1,8 +1,6 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
-#include "HardwareSerial.h"
-
 #include <WiFiUdp.h>
 #include <ArduinoJson.hpp>
 
@@ -136,8 +134,7 @@ class Networking {
 private:
 	WiFiUDP udp;
 	IPAddress peerIPAddress;
-	//unsigned long lastHeartbeatMS = 0;
-	//static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 5000;
+
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 6000;
 
@@ -145,7 +142,6 @@ private:
 	unsigned short messagesSentCount = 0;
 
 	const unsigned long (*nowMS)();
-	//void checkHeartbeat();
 	unsigned long approxCurrentTime;
 
 	Message* heartbeat;
@@ -192,7 +188,7 @@ public:
 
 	void processNetwork();
 
-	bool connectToPeer(IPAddress&); //{return false;} //FINISH OR REMOVE ME!
+	bool connectToPeer(IPAddress&); //FINISH OR REMOVE ME!
 };
 
 
@@ -215,13 +211,8 @@ Networking::~Networking() {
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
-	//Change to use WriteMessage
-	//udp.beginPacket(connectToIP, CONNECTION_PORT);
-	//udp.write(createMessage(nullptr, MESSAGE_TYPE::HANDSHAKE));//NETWORK_HANDSHAKE_CHARACTER);
-	//udp.endPacket();
-
 	peerIPAddress = connectToIP;
-	//writeMessage(nullptr, MESSAGE_TYPE::HANDSHAKE);
+
 	udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 	udp.write('$');
 	udp.endPacket();
@@ -233,17 +224,19 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 			receiveBuffer[packetSize] = '\0';
 
 			peerIPAddress = connectToIP;
-			//Change to use WriteMessage
+
 			udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 			udp.write('$');
 			udp.endPacket();
+
+			sendHeartbeat();
+
 			return true;
 		}
 
 		delay(1000);
 	}
 
-	//DELETE ME
 	return true;
 
 	delete[] receiveBuffer;
@@ -267,7 +260,6 @@ void Networking::checkHeartbeats() {
 
 
 void Networking::sendHeartbeat() {
-	Serial.println("Sending heartbeat... ");
 	sendOutgoingMessage(*heartbeat);
 }
 
@@ -400,7 +392,6 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 void Networking::processHeartbeat(const unsigned long time) {
 	lastHeartbeatReceivedMS = time;
-	Serial.println("Received heartbeat!");
 }
 
 
