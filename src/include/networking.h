@@ -108,6 +108,8 @@ Message::Message() {
 
 Message::Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS) {
 	const unsigned short tempMessageType = parsedDocument["T"];
+	Serial.print("Constructing message with type: ");
+	Serial.println(tempMessageType);
 	messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
 
 	unsigned short tempIdempVal = parsedDocument["I"];
@@ -307,9 +309,12 @@ bool Networking::getMessages() {
 			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument;
 			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, JSON_DOCUMENT_SIZE);
 			if(parsingError) {
+				Serial.println("Parse failed");
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			}
+
+			Serial.println("Parse succeeded. Enqueueing message");
 
 			messagesIn.enqueue(new Message(parsedDocument, nowMS()));
 		} else {
@@ -480,6 +485,7 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 
 
 void Networking::processNetwork() {
+	Serial.println("top");
 	checkHeartbeats();
 
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS)) {
@@ -503,6 +509,7 @@ void Networking::processNetwork() {
 	}
 
 	removeExpiredIncomingIdempotencyTokens();
+	Serial.println("bottom");
 }
 
 
