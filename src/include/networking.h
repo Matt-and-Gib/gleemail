@@ -108,8 +108,6 @@ Message::Message() {
 
 Message::Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS) {
 	const unsigned short tempMessageType = parsedDocument["T"];
-	Serial.print("Constructing message with type: ");
-	Serial.println(tempMessageType);
 	messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
 
 	unsigned short tempIdempVal = parsedDocument["I"];
@@ -269,9 +267,8 @@ void Networking::checkHeartbeats() {
 
 
 void Networking::sendHeartbeat() {
-	Serial.print("Sending heartbeat... ");
+	Serial.println("Sending heartbeat... ");
 	sendOutgoingMessage(*heartbeat);
-	Serial.println("Done!");
 }
 
 
@@ -309,12 +306,9 @@ bool Networking::getMessages() {
 			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument;
 			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, JSON_DOCUMENT_SIZE);
 			if(parsingError) {
-				Serial.println("Parse failed");
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			}
-
-			Serial.println("Parse succeeded. Enqueueing message");
 
 			messagesIn.enqueue(new Message(parsedDocument, nowMS()));
 		} else {
@@ -419,9 +413,7 @@ bool Networking::processOutgoingMessagesQueue() {
 	do {
 		if(nextMessage->getData()->getMessageType() == searchMessageType) {
 			if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getRetryCount() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
-				Serial.println("Send outgoing message");
 				sendOutgoingMessage(*(nextMessage->getData()));
-				Serial.println("sent");
 				//do callback?
 				return true;
 			}
@@ -487,10 +479,8 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 
 
 void Networking::processNetwork() {
-	Serial.println("top");
 	checkHeartbeats();
 
-	Serial.println("Get messages");
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS)) {
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
@@ -500,11 +490,9 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	Serial.println("Process incoming messages queue");
 	searchMessageType = static_cast<MESSAGE_TYPE>(0);
 	doTimeSensesitiveProcess(processElapsedTime, &Networking::processIncomingMessagesQueue, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
 
-	Serial.println("Process outgoing messages queue");
 	searchMessageType = static_cast<MESSAGE_TYPE>(0);
 	if(!doTimeSensesitiveProcess(processElapsedTime, &Networking::processOutgoingMessagesQueue, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS)) {
 		if(exceededMaxOutgoingTokenRetryCount()) {
@@ -513,9 +501,7 @@ void Networking::processNetwork() {
 		}
 	}
 
-	Serial.println("remove Expired idiot toeksn");
 	removeExpiredIncomingIdempotencyTokens();
-	Serial.println("bottom");
 }
 
 
