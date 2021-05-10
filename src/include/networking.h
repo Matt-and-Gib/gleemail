@@ -48,7 +48,6 @@ public:
 	MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
 		const unsigned short tempErrorID = parsedDocument["E"]["D"];
 		id = static_cast<ERROR_CODE>(tempErrorID);
-		DebugLog::getLog().logWarning(id);
 		attribute = parsedDocument["E"]["A"];
 	}
 	~MessageError() {
@@ -305,7 +304,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::ERROR:
 		//check for unique idempotency token
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-		//DebugLog::getLog().logWarning();
+		DebugLog::getLog().logWarning(msg.getData()->getError()->getID());
 	break;
 
 	case MESSAGE_TYPE::HEARTBEAT:
