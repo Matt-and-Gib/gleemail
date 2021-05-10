@@ -419,7 +419,9 @@ bool Networking::processOutgoingMessagesQueue() {
 	do {
 		if(nextMessage->getData()->getMessageType() == searchMessageType) {
 			if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getRetryCount() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
+				Serial.println("Send outgoing message");
 				sendOutgoingMessage(*(nextMessage->getData()));
+				Serial.println("sent");
 				//do callback?
 				return true;
 			}
@@ -511,6 +513,7 @@ void Networking::processNetwork() {
 		}
 	}
 
+	Serial.println("remove Expired idiot toeksn");
 	removeExpiredIncomingIdempotencyTokens();
 	Serial.println("bottom");
 }
