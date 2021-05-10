@@ -474,14 +474,14 @@ bool Networking::exceededMaxOutgoingTokenRetryCount() {
 
 // Potential optimization: process more than one token per frame & make into time sensitive process
 void Networking::removeExpiredIncomingIdempotencyTokens() {
-	IdempotencyToken* nextToken = messagesInIdempotencyTokens.peek()->getData();
-	if(nextToken == nullptr) {
+	QueueNode<IdempotencyToken>* nextTokenNode = messagesInIdempotencyTokens.peek();
+	if(nextTokenNode == nullptr) {
 		return;
 	}
 
-	if(nowMS() > nextToken->getTimestamp() + (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
+	if(nowMS() > nextTokenNode->getData()->getTimestamp() + (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
 		messagesInIdempotencyTokens.dequeue();
-		delete nextToken;
+		delete nextTokenNode;
 	}
 }
 
