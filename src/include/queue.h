@@ -8,40 +8,30 @@ private:
 	QueueNode<T>* node;
 	T* data;
 public:
-	QueueNode(T*);
-	~QueueNode();
+	QueueNode(T* d) {
+		data = d;
+		node = nullptr;
+	}
+
+	~QueueNode() {
+		delete &data;
+		delete[] node;
+	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak
 	QueueNode<T>* getNode() {return node;}
 	void setData(T* d) {data = d;} //possible memory leak
 	T* getData() {return data;}
 
-	void enqueue(T*);
-};
-
-
-template <class T>
-QueueNode<T>::QueueNode(T* d) {
-	data = d;
-	node = nullptr;
-}
-
-
-template <class T>
-QueueNode<T>::~QueueNode() {
-	delete &data;
-	delete[] node;
-}
-
-
-template <class T>
-void QueueNode<T>::enqueue(T* o) {
-	if(!node) {
-		node = new QueueNode<T>(o);
-	} else {
-		node->enqueue(o);
+	QueueNode<T>* enqueue(T* o) {
+		if(!node) {
+			node = new QueueNode<T>(o);
+			return node;
+		} else {
+			return node->enqueue(o);
+		}
 	}
-}
+};
 
 
 template <class T>
@@ -53,7 +43,7 @@ public:
 		root = nullptr;
 	}
 
-	void enqueue(T*); //puts node at end of queue
+	QueueNode<T>* enqueue(T*); //puts node at end of queue
 	QueueNode<T>* dequeue(); //take first node
 	QueueNode<T>* peek(); //returns first node
 
@@ -64,11 +54,12 @@ public:
 
 
 template <class T>
-void Queue<T>::enqueue(T* o) {
+QueueNode<T>* Queue<T>::enqueue(T* o) {
 	if(!root) {
 		root = new QueueNode<T>(o);
+		return root;
 	} else {
-		root->enqueue(o);
+		return root->enqueue(o);
 	}
 }
 
