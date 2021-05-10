@@ -470,8 +470,6 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 
 
 void Networking::processNetwork() {
-	checkHeartbeats();
-
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS)) {
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
@@ -483,6 +481,8 @@ void Networking::processNetwork() {
 
 	searchMessageType = static_cast<MESSAGE_TYPE>(0);
 	doTimeSensesitiveProcess(processElapsedTime, &Networking::processIncomingMessagesQueue, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
+
+	checkHeartbeats();
 
 	searchMessageType = static_cast<MESSAGE_TYPE>(0);
 	if(!doTimeSensesitiveProcess(processElapsedTime, &Networking::processOutgoingMessagesQueue, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS)) {
