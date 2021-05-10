@@ -192,7 +192,7 @@ public:
 
 	void processNetwork();
 
-	bool connectToPeer(IPAddress&) {return false;} //FINISH OR REMOVE ME!
+	bool connectToPeer(IPAddress&); //{return false;} //FINISH OR REMOVE ME!
 };
 
 
@@ -209,6 +209,46 @@ Networking::Networking(const unsigned long (*millis)(), const long u) {
 Networking::~Networking() {
 	delete[] messageBuffer;
 }
+
+
+//REWRITE ME
+bool Networking::connectToPeer(IPAddress& connectToIP) {
+	udp.begin(CONNECTION_PORT);
+
+	//Change to use WriteMessage
+	//udp.beginPacket(connectToIP, CONNECTION_PORT);
+	//udp.write(createMessage(nullptr, MESSAGE_TYPE::HANDSHAKE));//NETWORK_HANDSHAKE_CHARACTER);
+	//udp.endPacket();
+
+	peerIPAddress = connectToIP;
+	//writeMessage(nullptr, MESSAGE_TYPE::HANDSHAKE);
+	udp.beginPacket(peerIPAddress, CONNECTION_PORT);
+	udp.write('$');
+	udp.endPacket();
+
+	char* receiveBuffer = new char[2];
+	while(true) {
+		if(udp.parsePacket()) {
+			packetSize = udp.read(receiveBuffer, 2);
+			receiveBuffer[packetSize] = '\0';
+
+			peerIPAddress = connectToIP;
+			//Change to use WriteMessage
+			udp.beginPacket(peerIPAddress, CONNECTION_PORT);
+			udp.write('$');
+			udp.endPacket();
+			return true;
+		}
+
+		delay(1000);
+	}
+
+	//DELETE ME
+	return true;
+
+	delete[] receiveBuffer;
+}
+//REWRITE ME
 
 
 void Networking::checkHeartbeats() {
@@ -558,8 +598,8 @@ void Networking::processNetwork() {
 	peerIPAddress = connectToIP;
 	writeMessage(nullptr, MESSAGE_TYPE::HANDSHAKE);
 
-	char* receiveBuffer = new char[2];*/
-	/*while(true) {
+	char* receiveBuffer = new char[2];
+	while(true) {
 		if(udp.parsePacket()) {
 			packetSize = udp.read(receiveBuffer, 2);
 			receiveBuffer[packetSize] = '\0';
@@ -583,8 +623,8 @@ void Networking::processNetwork() {
 		}
 
 		delay(1000);
-	}*/
-/*
+	}
+
 	//DELETE ME
 	return true;
 
