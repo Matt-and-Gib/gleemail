@@ -47,6 +47,8 @@ public:
 	QueueNode<T>* dequeue(); //take first node
 	QueueNode<T>* peek(); //returns first node
 
+	QueueNode<T>* find(T&);
+
 	//QueueNode<T>* remove(T&, QueueNode<T>*);
 	QueueNode<T>* remove(T&);
 	QueueNode<T>* remove(QueueNode<T>&);
@@ -90,6 +92,21 @@ QueueNode<T>* Queue<T>::peek() {
 	}
 
 	return root;
+}
+
+
+template <class T>
+QueueNode<T>* Queue<T>::find(T& f) {
+	T* currentNode = root;
+	while(currentNode != nullptr) {
+		if(currentNode == f) {
+			return currentNode;
+		}
+
+		currentNode = currentNode->getNode();
+	}
+
+	return nullptr;
 }
 
 

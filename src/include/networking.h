@@ -30,6 +30,8 @@ public:
 		retryCount = i.getRetryCount();
 	}
 
+	bool operator==(const IdempotencyToken& o) {return value == o.getValue();}
+
 	const unsigned short getValue() const {return value;}
 	const unsigned long getTimestamp() const {return timestamp;}
 	const unsigned short getRetryCount() const {return retryCount;}
@@ -265,7 +267,10 @@ void Networking::sendOutgoingMessage(Message& msg) {
 bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, QueueNode<Message>* nextMessage) {
 	if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getRetryCount() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
 		sendOutgoingMessage(*(nextMessage->getData()));
-		//do callback?
+		//do callback? (delete confirmation message?)
+		if(nextMessage->getData()->getMessageType() == MESSAGE_TYPE::CONFIRMATION) {
+			messagesOut.remove(*nextMessage);
+		}
 		return true;
 	} else {
 		return false;
@@ -320,13 +325,12 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::CHAT:
-		//check for unique idempotency token
-		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-		/*messagesOutHead.enqueue(new Message(MESSAGETYPE::CONFIRMATION, IdempotencyToken::generate()));
-		if(messagesInHead.uniqueIdempotencyToken(msg.idempotencyToken)) {
-			messagesInIdempotencyTokens.enqueue(msg.idempotencyToken);
-			receivedMessage = msg.body;
-		}*/
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, msg.getData()->getIdempotencyToken()->getValue(), nullptr, nullptr));
+
+		if(!messagesInIdempotencyTokens.find(msg.getData()->getIdempotencyToken())) {
+			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+			//update received message buffer
+		}
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
