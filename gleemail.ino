@@ -15,7 +15,7 @@ const unsigned long getCurrentTimeMS();
 static Display& display = *new Display();
 
 static InternetAccess& internet = *new InternetAccess();
-static Networking& network = *new Networking(&getCurrentTimeMS);
+static Networking& network = *new Networking(&getCurrentTimeMS, 0);
 static WebAccess& webAccess = *new WebAccess();
 
 static InputMethod* input;

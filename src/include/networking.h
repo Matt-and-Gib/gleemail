@@ -1,6 +1,8 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
+#include "HardwareSerial.h"
+
 #include <WiFiUdp.h>
 #include <ArduinoJson.hpp>
 
@@ -84,6 +86,7 @@ private:
 public:
 	Message();
 	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>&, const unsigned long);
+	Message(MESSAGE_TYPE, IdempotencyToken*, char*, MessageError*);
 	~Message();
 
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
@@ -114,6 +117,14 @@ Message::Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, c
 }
 
 
+Message::Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, MessageError* e) {
+	messageType = t;
+	idempotencyToken = i;
+	chat = c;
+	error = e;
+}
+
+
 Message::~Message() {
 	delete[] idempotencyToken;
 	delete chat;
@@ -129,6 +140,9 @@ private:
 	//static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 5000;
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 6000;
+
+	unsigned long uuid;
+	unsigned short messagesSentCount = 0;
 
 	const unsigned long (*nowMS)();
 	//void checkHeartbeat();
@@ -173,7 +187,7 @@ private:
 	bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyTokens();
 public:
-	Networking(const unsigned long (*)());
+	Networking(const unsigned long (*)(), const long u);
 	~Networking();
 
 	void processNetwork();
@@ -182,8 +196,10 @@ public:
 };
 
 
-Networking::Networking(const unsigned long (*millis)()) {
+Networking::Networking(const unsigned long (*millis)(), const long u) {
 	nowMS = millis;
+	uuid = u + nowMS(); //CHANGE ME!
+	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), nullptr, nullptr);
 
 	for(int i = 0; i < MESSAGE_BUFFER_SIZE + 1; i += 1) {
 		messageBuffer[i] = '\0';
@@ -211,7 +227,9 @@ void Networking::checkHeartbeats() {
 
 
 void Networking::sendHeartbeat() {
-	//writeMessage(heartbeat);
+	Serial.print("Sending heartbeat... ");
+	sendOutgoingMessage(*heartbeat);
+	Serial.println("Done!");
 }
 
 
@@ -343,6 +361,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 void Networking::processHeartbeat(const unsigned long time) {
 	lastHeartbeatReceivedMS = time;
+	Serial.println("Received heartbeat!");
 }
 
 
@@ -406,18 +425,17 @@ bool Networking::exceededMaxOutgoingTokenRetryCount() {
 }
 
 
-//TODO!
+// Potential optimization: process more than one token per frame & make into time sensitive process
 void Networking::removeExpiredIncomingIdempotencyTokens() {
 	IdempotencyToken* nextToken = messagesInIdempotencyTokens.peek()->getData();
 	if(nextToken == nullptr) {
 		return;
 	}
 
-	//COMPLETE THIS!!!
-
-	//MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS
-
-	//FINISH ME!
+	if(nowMS() > nextToken->getTimestamp() + (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
+		messagesInIdempotencyTokens.dequeue();
+		delete nextToken;
+	}
 }
 
 
