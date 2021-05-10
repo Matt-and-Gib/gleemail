@@ -1,4 +1,8 @@
-# gleemail
+## **glEEmail**
+
+### _Voted† 100% better than Discord!*_
+
+___
 
 ## Table of Contents
 
@@ -9,6 +13,7 @@
 5. [Getting Started in the Code](#gettingstarted)
 6. [Usage Instructions](#instructions)
 7. [Future Plans](#plans)
+8. [Legal Info](#legal)
 
 ___
 
@@ -171,3 +176,16 @@ We'd like to implement additional input methods, including (but not limited to):
 6. Game controller
 7. Touch screen keyboard
 8. Single-button random messages (magic 8 ball style)
+
+
+___
+
+### <a name="legal"></a>**Legal Info**
+
+glEEmail is Open Source with no promise of support!
+
+`†by glEEmail developers`
+
+`*in terms of hardware** support`
+
+`**Arduino`

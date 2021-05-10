@@ -31,7 +31,7 @@ static long cycleDuration = 0;
 static unsigned short cycleLatencyCount = 0;
 
 
-void processInputMethod() {
+void updateInputMethod() {
 	pinIndex = 0;
 
 	Pin **allPins = input->getPins();
@@ -63,10 +63,12 @@ const unsigned long getCurrentTimeMS() {
 }
 
 
-void processNetwork() {
-	pendingPeerMessage = false;
-
+void updateNetwork() {
 	network.processNetwork();
+
+	/*if(network.messageAvailable()) {
+		pendingPeerMessage = true;
+	}*/
 }
 
 
@@ -143,8 +145,8 @@ void printErrorCodes() {
 void loop() {
 	cycleStartTime = millis();
 
-	processInputMethod();
-	processNetwork();
+	updateInputMethod();
+	updateNetwork();
 	updateDisplay();
 	printErrorCodes();
 

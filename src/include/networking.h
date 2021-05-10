@@ -103,7 +103,7 @@ private:
 	IPAddress peerIPAddress;
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
-	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 6000;
+	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 250;
 
 	unsigned long uuid;
 	unsigned short messagesSentCount = 0;
@@ -114,8 +114,8 @@ private:
 	Message* heartbeat;
 	unsigned long lastHeartbeatSentMS = 0;
 	unsigned long lastHeartbeatReceivedMS = 0;
-	static const constexpr unsigned short HEARTBEAT_RESEND_THRESHOLD_MS = 3000;
-	static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 5 * HEARTBEAT_RESEND_THRESHOLD_MS;
+	static const constexpr unsigned short HEARTBEAT_RESEND_THRESHOLD_MS = 1000;
+	static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 4 * HEARTBEAT_RESEND_THRESHOLD_MS;
 	void sendHeartbeat();
 	void processHeartbeat(const unsigned long);
 	void checkHeartbeats();
