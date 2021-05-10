@@ -488,6 +488,7 @@ void Networking::processNetwork() {
 	Serial.println("top");
 	checkHeartbeats();
 
+	Serial.println("Get messages");
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, MAX_GET_MESSAGES_PROCESS_DURATION_MS)) {
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
@@ -497,9 +498,11 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
+	Serial.println("Process incoming messages queue");
 	searchMessageType = static_cast<MESSAGE_TYPE>(0);
 	doTimeSensesitiveProcess(processElapsedTime, &Networking::processIncomingMessagesQueue, MAX_GET_MESSAGES_PROCESS_DURATION_MS);
 
+	Serial.println("Process outgoing messages queue");
 	searchMessageType = static_cast<MESSAGE_TYPE>(0);
 	if(!doTimeSensesitiveProcess(processElapsedTime, &Networking::processOutgoingMessagesQueue, MAX_SEND_OUTGOING_MESSAGES_DURATION_MS)) {
 		if(exceededMaxOutgoingTokenRetryCount()) {
