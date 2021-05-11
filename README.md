@@ -1,6 +1,6 @@
-## **glEEmail**
+# **glEEmail**
 
-### _Voted† 100% better than Discord!*_
+## _Voted† 100% better than Discord!*_
 
 ___
 
@@ -28,17 +28,19 @@ ___
 
 ### <a name="parts"></a>**Components**
 
-We're testing glEEmail on an Arduino Nano 33 IoT. For the full parts list that we used (for one user), please see the table below:
+We're testing glEEmail on an Arduino Nano 33 IoT, however it should work on any Arduino with WiFi capabilities (or any Arduino connected to a WiFi radio module, with minor modifications). If you're considering using glEEmail on a different Arduino, please make sure that it has sufficient space; glEEmail uses ~40,000 bytes of program storage space and ~3,200 bytes of dynamic memory with global variables. Additionally, please note that the Adafruit 4682 must be powered with 3.3V (it cannot run on 5V).
+
+For the full parts list that we used (for a single user), please see the table below:
 
 |Quantity|Component|
 |-------------|:---|
 |1x|Nano 33 IoT|
 |1x|Breadboard|
 |1x|54-410 Switch|
-|1x|10k Ω Resistor|
 |2x|Crimp Connectors|
 |1x|LCD HD44780|
 |1x|270 Ω Resistor|
+|1x|10k Ω Resistor|
 |1x|10k Ω Potentiometer|
 |1x|Adafruit 4682|
 |1x|Micro SD Card|
@@ -51,7 +53,7 @@ ___
 
 *** Note: update link to use main branch!
 
-For more information about wiring the LCD, we recommend [this tutorial from Ada Fruit](https://learn.adafruit.com/character-lcds/wiring-a-character-lcd)
+For more information about wiring the LCD HD44780, we recommend [this tutorial from Ada Fruit](https://learn.adafruit.com/character-lcds/wiring-a-character-lcd)
 
 ___
 
@@ -119,7 +121,7 @@ ___
 
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
 
-To-do
+To-do...
 
 [View Online Program Flow Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2FNetwork-JSON-Rewrite%2FglEEmail%20flow.drawio)
 
@@ -128,8 +130,9 @@ To-do
 Required Libraries
 
 - ArduinoJson by Benoit Blanchon
-- WiFiNINA
 - hd44780 by Bill Perry
+- WiFiNINA
+- SD
 
 Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
 
@@ -155,13 +158,13 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 • How to connect with your friend
 
-• To Do
+- To Do
 
 • Features
 
-• You can hold down the switch to pause input
+- You can hold down the switch to pause input
 
-*** IMPORTANT NODE *** You are limited to sending no more than ~32,768 messages per sitting due to the size of the idempotency token (unsigned short). This decision was made to reduce the message overhead and speed up encrypting and parsing. We understand that this limit will affect most of you, and we apologize for the issue. There is nothing that we can do to change this, so just remember to power-cycle your glee-ware every once in a while.
+***IMPORTANT NOTE:*** You are limited to sending no more than ~32,768 messages per sitting due to the size of the idempotency token (unsigned short) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glee-ware every once in a while.
 ___
 
 ### <a name="plans"></a>**Future Plans**
@@ -177,12 +180,11 @@ We'd like to implement additional input methods, including (but not limited to):
 7. Touch screen keyboard
 8. Single-button random messages (magic 8 ball style)
 
-
 ___
 
 ### <a name="legal"></a>**Legal Info**
 
-glEEmail is Open Source with no promise of support!
+glEEmail is Open Source with no promise of support! Please feel free to contribute by submitting pull requests or issues. Contact us if you have any questions.
 
 `†by glEEmail developers`
 
