@@ -184,7 +184,7 @@ ___
 
 ### <a name="legal"></a>**Legal Info**
 
-glEEmail is Open Source with no promise of support! Please feel free to contribute by submitting pull requests or issues. Contact us if you have any questions.
+glEEmail is Open Source with no promise of support! Please feel free to contribute by submitting pull requests or issues. Contact us if you have any questions (or want to glEE-chat).
 
 `†by glEEmail developers`
 
