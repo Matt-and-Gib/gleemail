@@ -168,6 +168,7 @@ public:
 	~Networking();
 
 	void processNetwork();
+	void sendChatMessage(char*);
 
 	bool connectToPeer(IPAddress&); //FINISH OR REMOVE ME!
 };
@@ -188,6 +189,11 @@ Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(
 
 Networking::~Networking() {
 	delete[] messageBuffer;
+}
+
+
+void Networking::sendChatMessage(char* chat) {
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, 0), chat, nullptr, nullptr));
 }
 
 
