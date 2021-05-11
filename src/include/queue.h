@@ -97,9 +97,9 @@ QueueNode<T>* Queue<T>::peek() {
 
 template <class T>
 QueueNode<T>* Queue<T>::find(T& f) {
-	T* currentNode = root;
+	QueueNode<T>* currentNode = root;
 	while(currentNode != nullptr) {
-		if(currentNode == f) {
+		if(*currentNode->getData() == f) {
 			return currentNode;
 		}
 
@@ -155,6 +155,8 @@ QueueNode<T>* Queue<T>::remove(T& match) {
 
 template <class T>
 QueueNode<T>* Queue<T>::remove(QueueNode<T>& match) {
+	//return remove(*match.getData());
+	
 	QueueNode<T>* parentNode = nullptr;
 	QueueNode<T>* currentNode = root;
 	while(currentNode) {

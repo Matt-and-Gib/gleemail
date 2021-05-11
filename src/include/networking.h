@@ -325,9 +325,9 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::CHAT:
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, msg.getData()->getIdempotencyToken()->getValue(), nullptr, nullptr));
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, nullptr));
 
-		if(!messagesInIdempotencyTokens.find(msg.getData()->getIdempotencyToken())) {
+		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
 			//update received message buffer
 		}
