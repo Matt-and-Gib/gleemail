@@ -67,6 +67,7 @@ private:
 	IdempotencyToken* idempotencyToken;
 	const char* chat;
 	MessageError* error;
+	bool (*postProcess)(Queue<Message>&, QueueNode<Message>&);
 public:
 	Message() {
 
@@ -79,12 +80,15 @@ public:
 		idempotencyToken = new IdempotencyToken(tempIdempVal, currentTimeMS);
 		chat = parsedDocument["C"];
 		error = new MessageError(parsedDocument);
+
+		postProcess = nullptr;
 	}
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, MessageError* e) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, MessageError* e, bool (*p)(Queue<Message>&, QueueNode<Message>&)) {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
 		error = e;
+		postProcess = p;
 	}
 	~Message() {
 		delete[] idempotencyToken;
@@ -96,6 +100,7 @@ public:
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
 	MessageError* getError() {return error;}
+	bool doPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*postProcess)(q, n);}
 };
 
 
@@ -135,6 +140,7 @@ private:
 
 	bool processQueue(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 	bool processIncomingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
+	void (*chatMessageReceivedCallback)(const char*);
 	bool processOutgoingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
 
 	bool getMessages(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
@@ -152,8 +158,13 @@ private:
 
 	bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyTokens();
+
+	static bool removeFromQueue(Queue<Message>& fromQueue, QueueNode<Message>& node) {
+		delete fromQueue.remove(node);
+		return true;
+	}
 public:
-	Networking(const unsigned long (*)(), const long u);
+	Networking(const unsigned long (*)(), void (*)(const char*), const long u);
 	~Networking();
 
 	void processNetwork();
@@ -162,11 +173,12 @@ public:
 };
 
 
-Networking::Networking(const unsigned long (*millis)(), const long u) {
+Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(const char*), const long u) {
 	nowMS = millis;
-	
 	uuid = u + nowMS(); //CHANGE ME!
-	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), nullptr, nullptr);
+	chatMessageReceivedCallback = chatMsgCallback;
+
+	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, nullptr, nullptr, nullptr, nullptr);
 
 	for(int i = 0; i < JSON_DOCUMENT_SIZE; i += 1) {
 		messageBuffer[i] = '\0';
@@ -268,9 +280,8 @@ bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, Qu
 	if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getRetryCount() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
 		sendOutgoingMessage(*(nextMessage->getData()));
 		//do callback? (delete confirmation message?)
-		if(nextMessage->getData()->getMessageType() == MESSAGE_TYPE::CONFIRMATION) {
-			messagesOut.remove(*nextMessage);
-		}
+
+		nextMessage->getData()->doPostProcess(messagesOut, *nextMessage);
 		return true;
 	} else {
 		return false;
@@ -324,12 +335,13 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 		}*/
 	break;
 
+	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	case MESSAGE_TYPE::CHAT:
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, nullptr));
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, nullptr, &removeFromQueue));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-			//update received message buffer
+			(*chatMessageReceivedCallback)(msg.getData()->getChat());
 		}
 	break;
 
@@ -449,6 +461,7 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
+	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	searchMessageType = START_MESSAGE_TYPE;
 	doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn);
 

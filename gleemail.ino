@@ -10,12 +10,14 @@
 
 
 const unsigned long getCurrentTimeMS();
+void updateDisplayWithPeerChat(const char*);
+void updateDisplayWithUserChat(const char*);
 
 
 static Display& display = *new Display();
 
 static InternetAccess& internet = *new InternetAccess();
-static Networking& network = *new Networking(&getCurrentTimeMS, 0);
+static Networking& network = *new Networking(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0);
 static WebAccess& webAccess = *new WebAccess();
 
 static InputMethod* input;
@@ -83,7 +85,20 @@ void updateNetwork() {
 }*/
 
 
-void updateDisplay() {
+void updateDisplayWithPeerChat(const char* messageBody) {
+	display.updateReading(messageBody);
+}
+
+
+void updateDisplayWithUserChat(const char* messageBody) {
+	input->peekUserMessage(userMessage); //Note: this will be wasted processing with different input method (i.e. TiltType)
+	//Serial.print("Your message: ");
+	//Serial.println(userMessage);
+	display.updateWriting(userMessage);
+}
+
+
+/*void updateDisplay() {
 	if(pendingPeerMessage) {
 		//Serial.print("Received: ");
 		//Serial.println(peerMessage);
@@ -96,7 +111,7 @@ void updateDisplay() {
 		//Serial.println(userMessage);
 		display.updateWriting(userMessage);
 	}
-}
+}*/
 
 
 /*void sendNetworkMessage() {
@@ -147,7 +162,7 @@ void loop() {
 
 	updateInputMethod();
 	updateNetwork();
-	updateDisplay();
+	//updateDisplay();
 	printErrorCodes();
 
 	cycleDuration = millis() - cycleStartTime;
