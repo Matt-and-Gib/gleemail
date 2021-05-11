@@ -85,6 +85,11 @@ void updateNetwork() {
 }*/
 
 
+void sendChatMessage(char* chat) {
+	network.sendChatMessage(chat);
+}
+
+
 void updateDisplayWithPeerChat(const char* messageBody) {
 	display.updateReading(messageBody);
 }
@@ -234,7 +239,7 @@ bool connectToWiFi() {
 
 
 bool setupInputMethod() {
-	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN);
+	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &sendChatMessage);
 	Serial.println(F("Downloading Input Method data..."));
 
 	char *data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());

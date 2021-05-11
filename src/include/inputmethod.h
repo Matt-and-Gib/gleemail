@@ -16,8 +16,10 @@ private:
 
 	void clearUserMessage();
 	void updateMessageOutBuffer(char *);
+
+	void (*sendMessage)(char*);
 public:
-	InputMethod();
+	InputMethod(void (*)(char*));
 	~InputMethod();
 
 	virtual bool setNetworkData(const char*) = 0;

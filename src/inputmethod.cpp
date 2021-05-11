@@ -1,7 +1,8 @@
 #include "include/inputmethod.h"
 
 
-InputMethod::InputMethod() {
+InputMethod::InputMethod(void (*s)(char*)) {
+	sendMessage = s;
 	userMessage = new char[MAX_MESSAGE_LENGTH];
 	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		userMessage[i] = '\0';
@@ -65,7 +66,7 @@ void InputMethod::pushCharacterToMessage(const char c) {
 
 
 void InputMethod::commitMessage() {
-	messageComplete = true;
+	//messageComplete = true;
 
 	if(userMessageFirstEmptyIndex > 0) {
 		for(unsigned short i = 0; i < userMessageFirstEmptyIndex; i += 1) {
@@ -89,6 +90,8 @@ void InputMethod::commitMessage() {
 				break;
 			}
 		}
+
+		(*sendMessage)(userMessage);
 	} else {
 		DebugLog::getLog().logError(INPUT_METHOD_COMMIT_EMPTY_MESSAGE);
 	}
