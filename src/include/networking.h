@@ -254,17 +254,19 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 
 // Potential optimization: process more than one token per frame & make into time sensitive process
 void Networking::removeExpiredIncomingIdempotencyTokens() {
-	QueueNode<IdempotencyToken>* nextTokenNode = messagesInIdempotencyTokens.peek();
-	if(nextTokenNode == nullptr) {
+	//QueueNode<IdempotencyToken>* nextTokenNode = messagesInIdempotencyTokens.peek();
+	//if(nextTokenNode == nullptr) {
+	if(messagesInIdempotencyTokens.peek() == nullptr) {
 		return;
 	}
 
-	if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
-		Serial.println("Dequeueing expired token");
-		messagesInIdempotencyTokens.dequeue();
-		Serial.println("Deleting expired token");
-		delete nextTokenNode;
-		Serial.println("Deleted expired token");
+	//if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
+	if(nowMS() > messagesInIdempotencyTokens.peek()->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
+		Serial.println("Dequeueing and deleting expired token");
+		delete messagesInIdempotencyTokens.dequeue();
+		//Serial.println("Deleting expired token");
+		//delete nextTokenNode;
+		//Serial.println("Deleted expired token");
 	}
 }
 
@@ -498,7 +500,6 @@ bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessEl
 
 
 void Networking::processNetwork() {
-	Serial.println("Get Messages");
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
 		//Maybe log error about get messages (specifically) being slow
 
@@ -510,7 +511,6 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	Serial.println("Process Incoming Queue");
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
 	//Maybe log error about process incoming messages (specifically) being slow
@@ -518,7 +518,6 @@ void Networking::processNetwork() {
 
 	checkHeartbeats();
 
-	Serial.println("Process Outgoing Queue");
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
 		//Maybe log error about process outgoing messages (specifically) being slow
@@ -529,7 +528,6 @@ void Networking::processNetwork() {
 	}
 
 	removeExpiredIncomingIdempotencyTokens();
-	Serial.println("Done removing expired idempotency tokens");
 }
 
 #endif
