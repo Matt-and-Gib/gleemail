@@ -54,10 +54,10 @@ public:
 class MessageError {
 private:
 	ERROR_CODE id = ERROR_CODE::MESSAGE_ERROR_NONE;
-	char* attribute = nullptr;
+	const char* attribute;
 public:
 	MessageError() {
-
+		attribute = nullptr;
 	}
 	MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
 		const unsigned short tempErrorID = parsedDocument["E"]["D"];
@@ -200,7 +200,7 @@ Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(
 	uuid = u + nowMS(); //CHANGE ME!
 	chatMessageReceivedCallback = chatMsgCallback;
 
-	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, nullptr, nullptr, nullptr);
+	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(0, 0), nullptr, nullptr);
 
 	for(int i = 0; i < JSON_DOCUMENT_SIZE; i += 1) {
 		messageBuffer[i] = '\0';
@@ -304,6 +304,7 @@ void Networking::sendOutgoingMessage(Message& msg) {
 	StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
 
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
+	//doc["I"] = msg.getIdempotencyToken() ? msg.getIdempotencyToken()->getValue() : 0;
 	doc["I"] = msg.getIdempotencyToken()->getValue();
 	doc["C"] = msg.getChat();
 
