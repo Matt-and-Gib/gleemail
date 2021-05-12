@@ -142,6 +142,7 @@ private:
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
 
+	QueueNode<Message>* messageOutConfirmationNode;
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
 	bool processQueue(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
@@ -342,14 +343,14 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
-		QueueNode<Message>* messageOutNode = messagesOut.peek();
-		while(messageOutNode) {
-			if(messageOutNode->getData()->getIdempotencyToken() == msg.getIdempotencyToken()) {
-				delete messagesOut.remove(messageOutNode);
+		messageOutConfirmationNode = messagesOut.peek();
+		while(messageOutConfirmationNode) {
+			if(messageOutConfirmationNode->getData()->getIdempotencyToken() == msg.getData()->getIdempotencyToken()) {
+				delete messagesOut.remove(*messageOutConfirmationNode);
 				break;
 			}
 
-			messageOutNode = messageOutNode->getNode();
+			messageOutConfirmationNode = messageOutConfirmationNode->getNode();
 		}
 		/*Message* confirmedMessage = messagesOut.removeByIdempotencyToken(msg.getIdempotencyToken());
 		if(confirmedMessage != nullptr) {
