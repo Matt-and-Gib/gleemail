@@ -56,7 +56,7 @@ private:
 	const char* attribute;
 public:
 	MessageError() {
-		attribute = "";
+
 	}
 	MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
 		const unsigned short tempErrorID = parsedDocument["E"]["D"];
@@ -64,7 +64,7 @@ public:
 		attribute = parsedDocument["E"]["A"];
 	}
 	~MessageError() {
-		delete[] attribute;
+		//delete[] attribute;
 	}
 
 	const ERROR_CODE getID() const {return id;}
