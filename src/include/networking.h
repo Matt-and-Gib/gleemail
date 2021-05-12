@@ -32,7 +32,8 @@ public:
 		retryCount = i.getRetryCount();
 	}
 	~IdempotencyToken() {
-		Serial.println("goodbye!");
+		Serial.print("destructing token: ");
+		Serial.println(value);
 	}
 
 	bool operator==(const IdempotencyToken& o) {
