@@ -120,7 +120,9 @@ private:
 	IPAddress peerIPAddress;
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
-	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 250;
+	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //250;
+
+	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
 
 	unsigned long uuid;
 	unsigned short messagesSentCount = 0;
@@ -257,9 +259,8 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 		return;
 	}
 
-	if(nowMS() > nextTokenNode->getData()->getTimestamp() + (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
-		messagesInIdempotencyTokens.dequeue();
-		delete nextTokenNode;
+	if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
+		delete messagesInIdempotencyTokens.dequeue();
 	}
 }
 
