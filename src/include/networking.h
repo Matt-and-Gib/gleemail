@@ -67,6 +67,8 @@ private:
 	IdempotencyToken* idempotencyToken;
 	const char* chat;
 	MessageError* error;
+
+	static bool noProcess(Queue<Message>& q, QueueNode<Message>& n) {return true;}
 	bool (*postProcess)(Queue<Message>&, QueueNode<Message>&);
 public:
 	Message() {
@@ -81,14 +83,15 @@ public:
 		chat = parsedDocument["C"];
 		error = new MessageError(parsedDocument);
 
-		postProcess = nullptr;
+		postProcess = &noProcess;
 	}
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, MessageError* e, bool (*p)(Queue<Message>&, QueueNode<Message>&)) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, MessageError* e, bool (*p)(Queue<Message>&, QueueNode<Message>&) = &noProcess) {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
 		error = e;
-		postProcess = p;
+
+		postProcess = !p ? &noProcess : p;
 	}
 	~Message() {
 		delete[] idempotencyToken;
