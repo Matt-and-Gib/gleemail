@@ -61,7 +61,7 @@ public:
 		attribute = parsedDocument["E"]["A"];
 	}
 	~MessageError() {
-		delete attribute;
+		delete[] attribute;
 	}
 
 	const ERROR_CODE getID() const {return id;}
@@ -101,9 +101,9 @@ public:
 		postProcess = p; //!p ? &noProcess : p;
 	}
 	~Message() {
-		delete[] idempotencyToken;
-		delete chat;
-		delete[] error;
+		delete idempotencyToken;
+		delete[] chat;
+		delete error;
 	}
 
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
@@ -263,6 +263,8 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 	//if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
 	if(nowMS() > messagesInIdempotencyTokens.peek()->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
 		Serial.println("Dequeueing and deleting expired token");
+		Serial.print("Message to delete has token ");
+		Serial.println(messagesInIdempotencyTokens.peek()->getData()->getValue());
 		delete messagesInIdempotencyTokens.dequeue();
 		//Serial.println("Deleting expired token");
 		//delete nextTokenNode;
