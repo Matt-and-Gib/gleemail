@@ -482,6 +482,8 @@ bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessEl
 
 
 void Networking::processNetwork() {
+	Serial.println(".");
+
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
 		//Maybe log error about get messages (specifically) being slow
 
