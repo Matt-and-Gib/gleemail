@@ -268,7 +268,7 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 		Serial.print("Message to delete has token ");
 		Serial.println(messagesInIdempotencyTokens.peek()->getData()->getValue());
 		//delete messagesInIdempotencyTokens.dequeue();
-		delete messagesInIdempotencyTokens.remove(*messagesInIdempotencyTokens.peek());
+		delete[] messagesInIdempotencyTokens.remove(*messagesInIdempotencyTokens.peek());
 		Serial.println("Deleted");
 		//Serial.println("Deleting expired token");
 		//delete nextTokenNode;
@@ -468,6 +468,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				return true;
 			}
 
+			Serial.println("About to enqueue");
 			intoQueue.enqueue(new Message(parsedDocument, nowMS()));
 			/*if(!((this->*callback)(intoQueue, intoQueue.enqueue(new Message(parsedDocument, nowMS()))))) {
 				//log error?
