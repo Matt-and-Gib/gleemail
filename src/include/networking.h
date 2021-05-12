@@ -342,7 +342,16 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
-		/*Message* confirmedMessage = messagesOutHead.removeByIdempotencyToken(msg.idempotencyToken);
+		QueueNode<Message>* messageOutNode = messagesOut.peek();
+		while(messageOutNode) {
+			if(messageOutNode->getData()->getIdempotencyToken() == msg.getIdempotencyToken()) {
+				delete messagesOut.remove(messageOutNode);
+				break;
+			}
+
+			messageOutNode = messageOutNode->getNode();
+		}
+		/*Message* confirmedMessage = messagesOut.removeByIdempotencyToken(msg.getIdempotencyToken());
 		if(confirmedMessage != nullptr) {
 			confirmedMessage->callback();
 			delete confirmatedMessage;
