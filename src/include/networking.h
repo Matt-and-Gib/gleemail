@@ -64,7 +64,7 @@ public:
 		attribute = parsedDocument["E"]["A"];
 	}
 	~MessageError() {
-		delete[] attribute;
+		//delete[] attribute;
 	}
 
 	const ERROR_CODE getID() const {return id;}
@@ -276,7 +276,7 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 			Serial.println("nodeToDel is nullptr");
 		}
 
-		delete &nodeToDel;
+		delete nodeToDel;
 		Serial.println("Deleted");
 		//Serial.println("Deleting expired token");
 		//delete nextTokenNode;
@@ -515,7 +515,7 @@ bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessEl
 
 
 void Networking::processNetwork() {
-	Serial.print('.');
+	//Serial.print('.');
 	//Serial.println("get message");
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
 		//Maybe log error about get messages (specifically) being slow

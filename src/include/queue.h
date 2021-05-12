@@ -14,7 +14,7 @@ public:
 	}
 
 	~QueueNode() {
-		delete &data; //possible memory leak, potentially deleting reference to pointer instead of pointer value
+		delete data; //possible memory leak, potentially deleting reference to pointer instead of pointer value
 		delete node;
 	}
 
