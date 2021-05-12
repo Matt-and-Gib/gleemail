@@ -114,7 +114,7 @@ private:
 	IPAddress peerIPAddress;
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
-	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 250;
+	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //minimize in the future
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
 
 	unsigned long uuid;
