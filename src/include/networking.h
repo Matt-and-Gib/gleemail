@@ -90,8 +90,7 @@ public:
 		idempotencyToken = i;
 		chat = c;
 		error = e;
-
-		postProcess = !p ? &noProcess : p;
+		postProcess = p; //!p ? &noProcess : p;
 	}
 	~Message() {
 		delete[] idempotencyToken;
@@ -141,6 +140,8 @@ private:
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
 
+	QueueNode<Message>* queueStartNode;
+	QueueNode<Message>* holdingNode;
 	bool processQueue(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 	bool processIncomingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
 	void (*chatMessageReceivedCallback)(const char*);
@@ -286,7 +287,7 @@ void Networking::sendOutgoingMessage(Message& msg) {
 
 
 bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, QueueNode<Message>* nextMessage) {
-	if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getRetryCount() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
+	if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getTimestamp() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
 		sendOutgoingMessage(*(nextMessage->getData()));
 
 		//do callback? (delete confirmation message?)
@@ -383,20 +384,17 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 
 
 bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& fromQueue) {
-	QueueNode<Message>* nextMessage = fromQueue.peek(); //Bug: outgoing messages are not removed from the queue when they're sent, so this processQueue() will send the first message over and over until it times out
-	if(nextMessage == nullptr) {
-		return false;
-	}
-
-	do {
-		if(nextMessage->getData()->getMessageType() == searchMessageType) {
-			if((this->*processMessage)(fromQueue, nextMessage)) {
+	while(queueStartNode != nullptr) {
+		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
+			holdingNode = queueStartNode->getNode();
+			if((this->*processMessage)(fromQueue, queueStartNode)) {
+				queueStartNode = holdingNode;
 				return true;
 			}
 		}
 
-		nextMessage = nextMessage->getNode();
-	} while(nextMessage != nullptr);
+		queueStartNode = queueStartNode->getNode();
+	}
 
 	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
 	if(searchMessageType == MESSAGE_TYPE::NONE) {
@@ -472,20 +470,27 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
-	searchMessageType = START_MESSAGE_TYPE;
-	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
+	queueStartNode = messagesIn.peek();
+	if(queueStartNode) {
+		searchMessageType = START_MESSAGE_TYPE;
+		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
 		//Maybe log error about process incoming messages (specifically) being slow
+		}
+	} else {
+		processElapsedTime = 0;
 	}
 
 	checkHeartbeats();
 
-	searchMessageType = START_MESSAGE_TYPE;
-	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
-		//Maybe log error about process outgoing messages (specifically) being slow
-		if(exceededMaxOutgoingTokenRetryCount()) {
-			DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
-			//drop connection
+	queueStartNode = messagesOut.peek();
+	if(queueStartNode) {
+		searchMessageType = START_MESSAGE_TYPE;
+		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
+			//Maybe log error about process outgoing messages (specifically) being slow
+			if(exceededMaxOutgoingTokenRetryCount()) {
+				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
+				//drop connection
+			}
 		}
 	}
 
