@@ -87,6 +87,7 @@ void sendChatMessage(char* chat) {
 
 
 void updateDisplayWithPeerChat(const char* messageBody) {
+	Serial.println("Update display with peer chat");
 	display.updateReading(messageBody);
 }
 
