@@ -53,7 +53,7 @@ public:
 
 class MessageError {
 private:
-	ERROR_CODE id = MESSAGE_ERROR::MESSAGE_ERROR_NONE;
+	ERROR_CODE id = ERROR_CODE::MESSAGE_ERROR_NONE;
 	char* attribute = nullptr;
 public:
 	MessageError() {
