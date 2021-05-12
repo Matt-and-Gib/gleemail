@@ -475,7 +475,7 @@ void Networking::processNetwork() {
 	}
 
 	queueStartNode = messagesIn.peek();
-	if(queueStartNode) {
+	if(queueStartNode != nullptr) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
 		//Maybe log error about process incoming messages (specifically) being slow
@@ -487,7 +487,7 @@ void Networking::processNetwork() {
 	checkHeartbeats();
 
 	queueStartNode = messagesOut.peek();
-	if(queueStartNode) {
+	if(queueStartNode != nullptr) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
 			//Maybe log error about process outgoing messages (specifically) being slow
