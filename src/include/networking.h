@@ -291,6 +291,13 @@ void Networking::sendOutgoingMessage(Message& msg) {
 
 bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, QueueNode<Message>* nextMessage) {
 	if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getTimestamp() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
+
+		Serial.print("Sending message of type ");
+		Serial.print(static_cast<short>(nextMessage->getData()->getMessageType()));
+		Serial.print(' ');
+		Serial.print("with idempotency token ");
+		Serial.println(nextMessage->getData()->getIdempotencyToken()->getValue());
+
 		sendOutgoingMessage(*(nextMessage->getData()));
 
 		//do callback? (delete confirmation message?)
@@ -343,6 +350,9 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
+
+		Serial.println("Received confirmation");
+
 		messageOutConfirmationNode = messagesOut.peek();
 		while(messageOutConfirmationNode) {
 			if(messageOutConfirmationNode->getData()->getIdempotencyToken() == msg.getData()->getIdempotencyToken()) {
@@ -352,11 +362,6 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 			messageOutConfirmationNode = messageOutConfirmationNode->getNode();
 		}
-		/*Message* confirmedMessage = messagesOut.removeByIdempotencyToken(msg.getIdempotencyToken());
-		if(confirmedMessage != nullptr) {
-			confirmedMessage->callback();
-			delete confirmatedMessage;
-		}*/
 	break;
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
@@ -485,13 +490,16 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
+	Serial.println("Begin process incoming messages");
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
 	//Maybe log error about process incoming messages (specifically) being slow
 	}
+	Serial.println("End process incoming messages");
 
 	checkHeartbeats();
 
+	Serial.println("Begin process outgoing messages");
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
 		//Maybe log error about process outgoing messages (specifically) being slow
@@ -500,6 +508,7 @@ void Networking::processNetwork() {
 			//drop connection
 		}
 	}
+	Serial.println("End process outgoing messages");
 
 	removeExpiredIncomingIdempotencyTokens();
 }
