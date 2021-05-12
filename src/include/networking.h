@@ -313,6 +313,9 @@ void Networking::sendOutgoingMessage(Message& msg) {
 	serializeJson(doc, outputBuffer);
 	//encryptBuffer(outputBuffer, measureJson(doc) + 1);
 
+	Serial.print("Sending serialized body: ");
+	Serial.println(outputBuffer);
+
 	udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 	udp.write(outputBuffer);
 	udp.endPacket();
@@ -407,6 +410,10 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, nullptr, &removeFromQueue));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
+
+			Serial.print("a new chat message has been received. chat: ");
+			Serial.println(msg.getData()->getChat());
+
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
 			(*chatMessageReceivedCallback)(msg.getData()->getChat());
 		}
