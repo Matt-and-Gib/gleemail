@@ -394,6 +394,10 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 	while(queueStartNode != nullptr) {
 
 		Serial.println("process queue queueStartNode != nullptr");
+		Serial.print("Message type: ");
+		Serial.println(static_cast<short>(queueStartNode->getData()->getMessageType()));
+		Serial.print("Searching for message type ");
+		Serial.println(static_cast<short>(searchMessageType));
 
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
 
