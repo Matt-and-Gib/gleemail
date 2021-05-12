@@ -182,7 +182,7 @@ Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(
 	uuid = u + nowMS(); //CHANGE ME!
 	chatMessageReceivedCallback = chatMsgCallback;
 
-	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, nullptr, nullptr, nullptr, nullptr);
+	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, nullptr, nullptr, nullptr);
 
 	for(int i = 0; i < JSON_DOCUMENT_SIZE; i += 1) {
 		messageBuffer[i] = '\0';
@@ -196,7 +196,7 @@ Networking::~Networking() {
 
 
 void Networking::sendChatMessage(char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, 0), chat, nullptr, nullptr));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, 0), chat, nullptr));
 }
 
 
@@ -288,8 +288,8 @@ void Networking::sendOutgoingMessage(Message& msg) {
 bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, QueueNode<Message>* nextMessage) {
 	if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getRetryCount() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
 		sendOutgoingMessage(*(nextMessage->getData()));
-		//do callback? (delete confirmation message?)
 
+		//do callback? (delete confirmation message?)
 		nextMessage->getData()->doPostProcess(messagesOut, *nextMessage);
 		return true;
 	} else {
@@ -383,7 +383,7 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 
 
 bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& fromQueue) {
-	QueueNode<Message>* nextMessage = fromQueue.peek();
+	QueueNode<Message>* nextMessage = fromQueue.peek(); //Bug: outgoing messages are not removed from the queue when they're sent, so this processQueue() will send the first message over and over until it times out
 	if(nextMessage == nullptr) {
 		return false;
 	}
@@ -462,6 +462,8 @@ bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessEl
 
 void Networking::processNetwork() {
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
+		//Maybe log error about get messages (specifically) being slow
+
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
 			//drop connection
@@ -472,12 +474,15 @@ void Networking::processNetwork() {
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	searchMessageType = START_MESSAGE_TYPE;
-	doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn);
+	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
+		//Maybe log error about process incoming messages (specifically) being slow
+	}
 
 	checkHeartbeats();
 
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
+		//Maybe log error about process outgoing messages (specifically) being slow
 		if(exceededMaxOutgoingTokenRetryCount()) {
 			DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
 			//drop connection
