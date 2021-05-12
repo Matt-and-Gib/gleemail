@@ -1,6 +1,8 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
+#include "HardwareSerial.h"
+
 #include <WiFiUdp.h>
 #include <ArduinoJson.hpp>
 
@@ -301,6 +303,7 @@ bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, Qu
 
 void Networking::sendHeartbeat() {
 	sendOutgoingMessage(*heartbeat);
+	Serial.println("Sent heartbeat");
 }
 
 
@@ -335,6 +338,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 	case MESSAGE_TYPE::HEARTBEAT:
 		processHeartbeat(nowMS());
+		Serial.println("Receieved heartbeat");
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:

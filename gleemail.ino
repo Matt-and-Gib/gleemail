@@ -130,10 +130,10 @@ void updateDisplayWithUserChat(const char* messageBody) {
 void printErrorCodes() {
 	ERROR_CODE e = DebugLog::getLog().getNextError();
 	while(e != ERROR_CODE::NONE) {
-		if(!(OFFLINE_MODE && (e == NETWORK_HEARTBEAT_FLATLINE))) {
+		//if(!(OFFLINE_MODE && (e == NETWORK_HEARTBEAT_FLATLINE))) {
 			Serial.print(F("\nError Code: "));
 			Serial.println(e);
-		}
+		//}
 
 		e = DebugLog::getLog().getNextError();
 	}
