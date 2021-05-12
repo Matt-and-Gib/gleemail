@@ -200,8 +200,33 @@ Networking::~Networking() {
 }
 
 
+char* copyString(char* original) {
+	/*char* duplicateString = new char[MAX_MESSAGE_LENGTH];
+	bool endOfOriginalString = false;
+	for(short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
+		if(endOfOriginalString) {
+			duplicateString[i] = '\0';
+		} else {
+			if(original[i] == '\0') {
+				endOfOriginalString = true;
+				duplicateString[i] = '\0';
+			} else {
+				duplicateString[i] = original[i];
+			}
+		}
+	}*/
+
+	char* duplicate = new char[MAX_MESSAGE_LENGTH];
+	for(short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
+		duplicate[i] = original[i];
+	}
+
+	return duplicate;
+}
+
+
 void Networking::sendChatMessage(char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, 0), chat, nullptr));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, 0), copyString(chat), nullptr));
 	Serial.print("enqueued chat message with body: ");
 	Serial.println(chat);
 }
