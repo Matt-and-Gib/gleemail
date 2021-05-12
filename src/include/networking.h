@@ -98,6 +98,8 @@ public:
 		delete[] error;
 	}
 
+	bool operator==(Message& o) {return (*idempotencyToken == *o.getIdempotencyToken());}
+
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
@@ -143,6 +145,7 @@ private:
 
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
+	QueueNode<Message>* messageOutWithMatchingIdempotencyToken;
 	bool processQueue(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 	bool processIncomingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
 	void (*chatMessageReceivedCallback)(const char*);
@@ -342,6 +345,12 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
+		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
+		if(messageOutWithMatchingIdempotencyToken) {
+			messagesOut.remove(*messageOutWithMatchingIdempotencyToken); //memory leak
+		}
+	
+	
 		/*Message* confirmedMessage = messagesOutHead.removeByIdempotencyToken(msg.idempotencyToken);
 		if(confirmedMessage != nullptr) {
 			confirmedMessage->callback();
