@@ -202,6 +202,8 @@ Networking::~Networking() {
 
 void Networking::sendChatMessage(char* chat) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, 0), chat, nullptr));
+	Serial.print("enqueued chat message with body: ");
+	Serial.println(chat);
 }
 
 
@@ -347,7 +349,10 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
+			Serial.println("found chat to match confirmation");
 			messagesOut.remove(*messageOutWithMatchingIdempotencyToken); //memory leak
+		} else {
+			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 		}
 	
 	
