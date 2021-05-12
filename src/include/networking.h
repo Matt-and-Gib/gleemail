@@ -200,7 +200,7 @@ Networking::~Networking() {
 
 
 void Networking::sendChatMessage(char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, 0), chat, nullptr));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), chat, nullptr));
 }
 
 
@@ -366,6 +366,9 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	case MESSAGE_TYPE::CHAT:
+
+		Serial.println("Received chat");
+
 		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, nullptr, &removeFromQueue));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
@@ -490,16 +493,13 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	Serial.println("Begin process incoming messages");
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
 	//Maybe log error about process incoming messages (specifically) being slow
 	}
-	Serial.println("End process incoming messages");
 
 	checkHeartbeats();
 
-	Serial.println("Begin process outgoing messages");
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
 		//Maybe log error about process outgoing messages (specifically) being slow
@@ -508,7 +508,6 @@ void Networking::processNetwork() {
 			//drop connection
 		}
 	}
-	Serial.println("End process outgoing messages");
 
 	removeExpiredIncomingIdempotencyTokens();
 }
