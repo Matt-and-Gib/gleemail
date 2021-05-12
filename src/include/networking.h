@@ -390,6 +390,9 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& fromQueue) {
 	while(queueStartNode != nullptr) {
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
+
+			Serial.println("message type match");
+
 			holdingNode = queueStartNode->getNode();
 			if((this->*processMessage)(fromQueue, queueStartNode)) {
 				queueStartNode = holdingNode;
