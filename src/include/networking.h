@@ -200,6 +200,9 @@ Networking::~Networking() {
 
 
 void Networking::sendChatMessage(char* chat) {
+
+	Serial.println("Enqueue new chat message");
+
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), chat, nullptr));
 }
 
@@ -482,7 +485,7 @@ bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessEl
 
 
 void Networking::processNetwork() {
-	Serial.println(".");
+	Serial.println();
 
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
 		//Maybe log error about get messages (specifically) being slow
