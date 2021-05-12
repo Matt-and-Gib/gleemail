@@ -265,10 +265,18 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 
 	//if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
 	if(nowMS() > messagesInIdempotencyTokens.peek()->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
-		Serial.print("Message to delete has token ");
+		Serial.print("idempotency token to delete has value ");
 		Serial.println(messagesInIdempotencyTokens.peek()->getData()->getValue());
 		//delete messagesInIdempotencyTokens.dequeue();
-		delete[] messagesInIdempotencyTokens.remove(*messagesInIdempotencyTokens.peek());
+		QueueNode<IdempotencyToken>* nodeToDel = messagesInIdempotencyTokens.dequeue();
+		if(nodeToDel) {
+			Serial.print("nodeToDel exists and has value ");
+			Serial.println(nodeToDel->getData()->getValue());
+		} else {
+			Serial.println("nodeToDel is nullptr");
+		}
+
+		delete &nodeToDel;
 		Serial.println("Deleted");
 		//Serial.println("Deleting expired token");
 		//delete nextTokenNode;
