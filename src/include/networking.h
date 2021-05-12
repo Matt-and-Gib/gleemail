@@ -31,6 +31,9 @@ public:
 		timestamp = i.getTimestamp();
 		retryCount = i.getRetryCount();
 	}
+	~IdempotencyToken() {
+		Serial.println("goodbye!");
+	}
 
 	bool operator==(const IdempotencyToken& o) {
 		Serial.print("overloaded token compare between ");
@@ -262,11 +265,11 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 
 	//if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
 	if(nowMS() > messagesInIdempotencyTokens.peek()->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRATION_THRESHOLD_MS) {
-		Serial.println("Dequeueing and deleting expired token");
 		Serial.print("Message to delete has token ");
 		Serial.println(messagesInIdempotencyTokens.peek()->getData()->getValue());
 		//delete messagesInIdempotencyTokens.dequeue();
 		delete messagesInIdempotencyTokens.remove(*messagesInIdempotencyTokens.peek());
+		Serial.println("Deleted");
 		//Serial.println("Deleting expired token");
 		//delete nextTokenNode;
 		//Serial.println("Deleted expired token");

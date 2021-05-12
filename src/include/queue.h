@@ -14,8 +14,8 @@ public:
 	}
 
 	~QueueNode() {
-		delete &data;
-		delete[] node;
+		delete data;
+		delete node;
 	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak
