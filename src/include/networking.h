@@ -32,7 +32,13 @@ public:
 		retryCount = i.getRetryCount();
 	}
 
-	bool operator==(const IdempotencyToken& o) {return value == o.getValue();}
+	bool operator==(const IdempotencyToken& o) {
+		Serial.print("overloaded token compare between ");
+		Serial.print(value);
+		Serial.print(" and ");
+		Serial.println(o.getValue());
+		return value == o.getValue();
+	}
 
 	const unsigned short getValue() const {return value;}
 	const unsigned long getTimestamp() const {return timestamp;}
@@ -354,11 +360,13 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 	case MESSAGE_TYPE::CONFIRMATION:
 
-		Serial.println("Received confirmation");
+		Serial.print("Received confirmation for token ");
+		Serial.println(msg.getData()->getIdempotencyToken()->getValue());
 
 		messageOutConfirmationNode = messagesOut.peek();
 		while(messageOutConfirmationNode) {
-			if(messageOutConfirmationNode->getData()->getIdempotencyToken() == msg.getData()->getIdempotencyToken()) {
+			if(*(messageOutConfirmationNode->getData()->getIdempotencyToken()) == *(msg.getData()->getIdempotencyToken())) {
+				Serial.println("Found confirmation - chat ID match, deleting...");
 				delete messagesOut.remove(*messageOutConfirmationNode);
 				break;
 			}
