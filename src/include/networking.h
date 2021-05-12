@@ -515,7 +515,8 @@ bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessEl
 
 
 void Networking::processNetwork() {
-	Serial.println("get message");
+	Serial.print('.');
+	//Serial.println("get message");
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
 		//Maybe log error about get messages (specifically) being slow
 
@@ -527,7 +528,7 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	Serial.println("process incoming");
+	//Serial.println("process incoming");
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
 	//Maybe log error about process incoming messages (specifically) being slow
@@ -535,7 +536,7 @@ void Networking::processNetwork() {
 
 	checkHeartbeats();
 
-	Serial.println("process outgoing");
+	//Serial.println("process outgoing");
 	searchMessageType = START_MESSAGE_TYPE;
 	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
 		//Maybe log error about process outgoing messages (specifically) being slow
