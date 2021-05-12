@@ -1,8 +1,6 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
-#include "HardwareSerial.h"
-
 #include <WiFiUdp.h>
 #include <ArduinoJson.hpp>
 
@@ -388,21 +386,9 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 
 
 bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& fromQueue) {
-
-	Serial.println("process queue top");
-
+	queueStartNode = fromQueue.peek();
 	while(queueStartNode != nullptr) {
-
-		Serial.println("process queue queueStartNode != nullptr");
-		Serial.print("Message type: ");
-		Serial.println(static_cast<short>(queueStartNode->getData()->getMessageType()));
-		Serial.print("Searching for message type ");
-		Serial.println(static_cast<short>(searchMessageType));
-
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
-
-			Serial.println("message type match");
-
 			holdingNode = queueStartNode->getNode();
 			if((this->*processMessage)(fromQueue, queueStartNode)) {
 				queueStartNode = holdingNode;
@@ -487,33 +473,19 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	queueStartNode = messagesIn.peek();
-	if(queueStartNode) {
-
-		Serial.println("Looking in incoming message queue");
-
-		searchMessageType = START_MESSAGE_TYPE;
-		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
-		//Maybe log error about process incoming messages (specifically) being slow
-		}
-	} else {
-		processElapsedTime = 0;
+	searchMessageType = START_MESSAGE_TYPE;
+	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
+	//Maybe log error about process incoming messages (specifically) being slow
 	}
 
 	checkHeartbeats();
 
-	queueStartNode = messagesOut.peek();
-	if(queueStartNode) {
-
-		Serial.println("Looking in outgoing message queue");
-
-		searchMessageType = START_MESSAGE_TYPE;
-		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
-			//Maybe log error about process outgoing messages (specifically) being slow
-			if(exceededMaxOutgoingTokenRetryCount()) {
-				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
-				//drop connection
-			}
+	searchMessageType = START_MESSAGE_TYPE;
+	if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
+		//Maybe log error about process outgoing messages (specifically) being slow
+		if(exceededMaxOutgoingTokenRetryCount()) {
+			DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
+			//drop connection
 		}
 	}
 
