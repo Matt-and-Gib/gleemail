@@ -278,6 +278,9 @@ void Networking::sendOutgoingMessage(Message& msg) {
 	serializeJson(doc, outputBuffer);
 	//encryptBuffer(outputBuffer, measureJson(doc) + 1);
 
+	Serial.print("Sending: ");
+	Serial.println(outputBuffer);
+
 	udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 	udp.write(outputBuffer);
 	udp.endPacket();

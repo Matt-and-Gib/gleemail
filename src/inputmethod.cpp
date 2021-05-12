@@ -92,6 +92,7 @@ void InputMethod::commitMessage() {
 		}
 
 		(*sendMessage)(userMessage);
+		clearUserMessage();
 	} else {
 		DebugLog::getLog().logError(INPUT_METHOD_COMMIT_EMPTY_MESSAGE);
 	}
