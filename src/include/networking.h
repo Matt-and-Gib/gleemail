@@ -265,7 +265,8 @@ void Networking::removeExpiredIncomingIdempotencyTokens() {
 		Serial.println("Dequeueing and deleting expired token");
 		Serial.print("Message to delete has token ");
 		Serial.println(messagesInIdempotencyTokens.peek()->getData()->getValue());
-		delete messagesInIdempotencyTokens.dequeue();
+		//delete messagesInIdempotencyTokens.dequeue();
+		delete messagesInIdempotencyTokens.remove(*messagesInIdempotencyTokens.peek());
 		//Serial.println("Deleting expired token");
 		//delete nextTokenNode;
 		//Serial.println("Deleted expired token");
