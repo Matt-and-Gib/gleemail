@@ -53,8 +53,8 @@ public:
 
 class MessageError {
 private:
-	ERROR_CODE id;
-	const char* attribute;
+	ERROR_CODE id = MESSAGE_ERROR::MESSAGE_ERROR_NONE;
+	char* attribute = nullptr;
 public:
 	MessageError() {
 
@@ -65,7 +65,7 @@ public:
 		attribute = parsedDocument["E"]["A"];
 	}
 	~MessageError() {
-		//delete[] attribute;
+		delete[] attribute;
 	}
 
 	const ERROR_CODE getID() const {return id;}
@@ -215,7 +215,8 @@ Networking::~Networking() {
 
 void Networking::sendChatMessage(char* chat) {
 
-	Serial.println("Enqueue new chat message");
+	Serial.print("Enqueue new chat message: ");
+	Serial.println(chat);
 
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), chat, nullptr));
 }
