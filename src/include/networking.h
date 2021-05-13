@@ -29,6 +29,10 @@ public:
 		timestamp = i.getTimestamp();
 		retryCount = i.getRetryCount();
 	}
+	~IdempotencyToken() {
+		Serial.print("destructor for token ");
+		Serial.println(value);
+	}
 
 	bool operator==(const IdempotencyToken& o) {return value == o.getValue();}
 
@@ -39,13 +43,14 @@ public:
 };
 
 
-class MessageError {
+/*class MessageError {
 private:
 	ERROR_CODE id;
 	const char* attribute;
 public:
 	MessageError() {
-
+		id = ERROR_CODE::MESSAGE_ERROR_NONE;
+		attribute = new char[0];
 	}
 	MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
 		const unsigned short tempErrorID = parsedDocument["E"]["D"];
@@ -53,12 +58,12 @@ public:
 		attribute = parsedDocument["E"]["A"];
 	}
 	~MessageError() {
-		delete attribute;
+		delete[] attribute;
 	}
 
 	const ERROR_CODE getID() const {return id;}
 	const char* getAttribute() const {return attribute;}
-};
+};*/
 
 
 class Message {
@@ -66,7 +71,7 @@ private:
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
 	const char* chat;
-	MessageError* error;
+	//MessageError* error;
 
 	static bool noProcess(Queue<Message>& q, QueueNode<Message>& n) {return true;}
 	bool (*postProcess)(Queue<Message>&, QueueNode<Message>&);
@@ -81,21 +86,21 @@ public:
 		unsigned short tempIdempVal = parsedDocument["I"];
 		idempotencyToken = new IdempotencyToken(tempIdempVal, currentTimeMS);
 		chat = parsedDocument["C"];
-		error = new MessageError(parsedDocument);
+		//error = new MessageError(parsedDocument);
 
 		postProcess = &noProcess;
 	}
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, MessageError* e, bool (*p)(Queue<Message>&, QueueNode<Message>&) = &noProcess) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ bool (*p)(Queue<Message>&, QueueNode<Message>&) = &noProcess) {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
-		error = e;
+		//error = e;
 		postProcess = p;
 	}
 	~Message() {
-		delete[] idempotencyToken;
-		delete chat;
-		delete[] error;
+		delete idempotencyToken;
+		delete[] chat;
+		//delete error;
 	}
 
 	bool operator==(Message& o) {return (*idempotencyToken == *o.getIdempotencyToken());}
@@ -103,7 +108,7 @@ public:
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
-	MessageError* getError() {return error;}
+	//MessageError* getError() {return error;}
 	bool doPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*postProcess)(q, n);}
 };
 
@@ -143,6 +148,8 @@ private:
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
 
+	char* copyString(char*);
+
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
 	QueueNode<Message>* messageOutWithMatchingIdempotencyToken;
@@ -165,7 +172,7 @@ private:
 	void processIncomingMessage(QueueNode<Message>&);
 
 	bool exceededMaxOutgoingTokenRetryCount();
-	void removeExpiredIncomingIdempotencyTokens();
+	void removeExpiredIncomingIdempotencyToken();
 
 	static bool removeFromQueue(Queue<Message>& fromQueue, QueueNode<Message>& node) {
 		delete fromQueue.remove(node);
@@ -187,7 +194,7 @@ Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(
 	uuid = u + nowMS(); //CHANGE ME!
 	chatMessageReceivedCallback = chatMsgCallback;
 
-	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, nullptr, nullptr, nullptr);
+	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, nullptr, /*nullptr,*/ nullptr);
 
 	for(int i = 0; i < JSON_DOCUMENT_SIZE; i += 1) {
 		messageBuffer[i] = '\0';
@@ -200,7 +207,7 @@ Networking::~Networking() {
 }
 
 
-char* copyString(char* original) {
+char* Networking::copyString(char* original) {
 	/*char* duplicateString = new char[MAX_MESSAGE_LENGTH];
 	bool endOfOriginalString = false;
 	for(short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
@@ -270,15 +277,17 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 
 
 // Potential optimization: process more than one token per frame & make into time sensitive process
-void Networking::removeExpiredIncomingIdempotencyTokens() {
+void Networking::removeExpiredIncomingIdempotencyToken() {
 	QueueNode<IdempotencyToken>* nextTokenNode = messagesInIdempotencyTokens.peek();
 	if(nextTokenNode == nullptr) {
 		return;
 	}
 
 	if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS) {
+		Serial.println("Incoming token idempotency token expired!");
 		messagesInIdempotencyTokens.dequeue();
 		delete nextTokenNode;
+		Serial.println("deleted");
 	}
 }
 
@@ -301,9 +310,9 @@ void Networking::sendOutgoingMessage(Message& msg) {
 	doc["I"] = msg.getIdempotencyToken()->getValue();
 	doc["C"] = msg.getChat();
 
-	JsonObject E = doc.createNestedObject("E");
+	/*JsonObject E = doc.createNestedObject("E");
 	E["D"] = static_cast<unsigned short>(msg.getError()->getID());
-	E["A"] = msg.getError()->getAttribute();
+	E["A"] = msg.getError()->getAttribute();*/
 
 	serializeJson(doc, outputBuffer);
 	//encryptBuffer(outputBuffer, measureJson(doc) + 1);
@@ -364,7 +373,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::ERROR:
 		//check for unique idempotency token
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-		DebugLog::getLog().logWarning(msg.getData()->getError()->getID());
+		//DebugLog::getLog().logWarning(msg.getData()->getError()->getID());
 	break;
 
 	case MESSAGE_TYPE::HEARTBEAT:
@@ -390,7 +399,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	case MESSAGE_TYPE::CHAT:
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, nullptr, &removeFromQueue));
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
@@ -538,7 +547,7 @@ void Networking::processNetwork() {
 		}
 	}
 
-	removeExpiredIncomingIdempotencyTokens();
+	removeExpiredIncomingIdempotencyToken();
 }
 
 #endif
