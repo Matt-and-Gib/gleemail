@@ -84,8 +84,8 @@ private:
 	static bool noOutgoingProcess(Queue<Message>& q, QueueNode<Message>& n) {return true;}
 	bool (*outgoingPostProcess)(Queue<Message>&, QueueNode<Message>&);
 
-	static void noIncomingProcess() {return;}
-	void (*incomingPostProcess)();
+	static void noConfirmedProcess() {return;}
+	void (*confirmedPostProcess)();
 public:
 	Message() {
 
@@ -101,15 +101,15 @@ public:
 		//error = new MessageError(parsedDocument);
 
 		outgoingPostProcess = &noOutgoingProcess;
-		incomingPostProcess = &noIncomingProcess;
+		confirmedPostProcess = &noConfirmedProcess;
 	}
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ bool (*op)(Queue<Message>&, QueueNode<Message>&) = &noOutgoingProcess, void (*ip)() = &noIncomingProcess) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ bool (*op)(Queue<Message>&, QueueNode<Message>&), void (*cp)()) {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
 		//error = e;
-		outgoingPostProcess = op;
-		incomingPostProcess = ip;
+		outgoingPostProcess = !op ? &noOutgoingProcess : op; //Remove conditional check by relocating noOutgoingProcess?
+		confirmedPostProcess = !cp ? &noConfirmedProcess : cp; //Remove conditional check by relocating noIncomingProcess?
 	}
 	~Message() {
 		delete idempotencyToken;
@@ -124,14 +124,31 @@ public:
 	const char* getChat() {return chat;}
 	//MessageError* getError() {return error;}
 	bool doOutgoingPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*outgoingPostProcess)(q, n);}
-	void doIncomingPostProcess() {(*incomingPostProcess)();}
+	void doConfirmedPostProcess() {(*confirmedPostProcess)();}
+};
+
+
+// To use in the future to map IP addresses (or uuids)
+class glEEpal {
+private:
+	IPAddress palIPAddress;
+	unsigned short handshakeIdempotencyTokenValue;
+public:
+	glEEpal(const IPAddress ip, const unsigned short h) {
+		palIPAddress = ip;
+		handshakeIdempotencyTokenValue = h;
+	}
+
+	const IPAddress getIPAddress() const {return palIPAddress;}
+	const unsigned short getHandshakeIdempotencyTokenValue() const {return handshakeIdempotencyTokenValue;}
 };
 
 
 class Networking {
 private:
 	WiFiUDP udp;
-	IPAddress peerIPAddress;
+	glEEpal* glEEpalInfo;
+
 	bool connected = false;
 	void connectionEstablished();
 
@@ -213,7 +230,7 @@ Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(
 	uuid = u + nowMS(); //CHANGE ME!
 	chatMessageReceivedCallback = chatMsgCallback;
 
-	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(0, 0), /*nullptr,*/ nullptr);
+	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(0, 0), nullptr, /*nullptr,*/ nullptr, nullptr);
 
 	for(int i = 0; i < JSON_DOCUMENT_SIZE; i += 1) {
 		messageBuffer[i] = '\0';
@@ -222,12 +239,13 @@ Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(
 
 
 Networking::~Networking() {
+	delete glEEpalInfo;
 	delete[] messageBuffer;
 }
 
 
 void Networking::sendChatMessage(const char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, nullptr));
 }
 
 
@@ -271,7 +289,10 @@ void Networking::sendChatMessage(const char* chat) {
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
-	peerIPAddress = connectToIP;
+	const unsigned short handshakeValue = uuid + messagesSentCount;
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(handshakeValue, 0), nullptr, nullptr, &connectionEstablished));
+	glEEpalInfo = new glEEpal(connectToIP, handshakeValue);
+	//peerIPAddress = connectToIP;
 }
 
 
@@ -323,7 +344,7 @@ void Networking::sendOutgoingMessage(Message& msg) {
 	//Serial.print("Sending: ");
 	//Serial.println(outputBuffer);
 
-	udp.beginPacket(peerIPAddress, CONNECTION_PORT);
+	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 	udp.write(outputBuffer);
 	udp.endPacket();
 
@@ -386,13 +407,13 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
-			//messageOutWithMatchingIdempotencyToken->doOutgoingPostProcess(nullptr, nullptr);
+			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess();
 			messagesOut.remove(*messageOutWithMatchingIdempotencyToken); //memory leak
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 		}
-	
-	
+
+
 		/*Message* confirmedMessage = messagesOutHead.removeByIdempotencyToken(msg.idempotencyToken);
 		if(confirmedMessage != nullptr) {
 			confirmedMessage->callback();
@@ -402,7 +423,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	case MESSAGE_TYPE::CHAT:
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue));
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken()))); //Maybe this copy constructor is the source of a seg fault on delete?
@@ -411,12 +432,13 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue));
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
 			connectionEstablished();
 			//remove handshake from outgoing message queue
+			messagesOut.remove()
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
 		}
@@ -475,7 +497,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 	packetSize = udp.parsePacket();
 	if(packetSize > 0) {
 		udp.read(messageBuffer, packetSize);
-		if(udp.remoteIP() == peerIPAddress) {
+		if(udp.remoteIP() == glEEpalInfo->getIPAddress()) {
 			//decrypt message
 
 			messageReceivedCount += 1;
