@@ -100,7 +100,7 @@ public:
 	}
 	~Message() {
 		delete idempotencyToken;
-		//delete[] chat;
+		delete[] chat;
 		//delete error;
 	}
 
