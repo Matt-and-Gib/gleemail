@@ -432,7 +432,9 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, QueueNode<Message>* nextMessage) {
 	messagesIn.remove(*nextMessage);
 	processIncomingMessage(*nextMessage);
+	Serial.println("deleting incoming message queue node");
 	delete nextMessage;
+	Serial.println("deleted incoming message queue node");
 	return true;
 }
 
@@ -442,6 +444,7 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
 			holdingNode = queueStartNode->getNode();
 			if((this->*processMessage)(fromQueue, queueStartNode)) {
+				Serial.println("process queue succeeded");
 				queueStartNode = holdingNode;
 				return true;
 			}
@@ -475,6 +478,9 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			}
+
+			Serial.print("Got: ");
+			Serial.println(messageBuffer);
 
 			intoQueue.enqueue(new Message(parsedDocument, nowMS()));
 			/*if(!((this->*callback)(intoQueue, intoQueue.enqueue(new Message(parsedDocument, nowMS()))))) {
