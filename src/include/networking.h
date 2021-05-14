@@ -118,7 +118,7 @@ private:
 	WiFiUDP udp;
 	IPAddress peerIPAddress;
 
-	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
+	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 9;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //minimize in the future
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
 
@@ -547,6 +547,13 @@ void Networking::processNetwork() {
 				//drop connection
 			}
 		}
+
+		/*********************************************************	DEBUG ONLY	*/
+		if(exceededMaxOutgoingTokenRetryCount()) {
+			Serial.println("outgoing message exceeded max count... removing!");
+			delete messagesOut.dequeue();
+		}
+		/*********************************************************	DEBUG ONLY	*/
 	}
 
 	removeExpiredIncomingIdempotencyToken();
