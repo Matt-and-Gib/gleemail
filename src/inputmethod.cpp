@@ -95,8 +95,8 @@ void InputMethod::commitMessage() {
 			}
 		}
 
-		Serial.print("Commiting: "); //DEBUG
-		Serial.println(userMessage); //DEBUG
+		//Serial.print("Commiting: "); //DEBUG
+		//Serial.println(userMessage); //DEBUG
 
 		(*sendMessage)(userMessage);
 		clearUserMessage();

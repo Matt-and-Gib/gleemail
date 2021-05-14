@@ -16,11 +16,11 @@ public:
 	}
 
 	~QueueNode() {
-		Serial.println("QueueNode destructor: Deleting data...");
+		//Serial.println("QueueNode destructor: Deleting data...");
 		delete data;
-		Serial.println("QueueNode destructor: Deleting node...");
+		//Serial.println("QueueNode destructor: Deleting node...");
 		delete node;
-		Serial.println("QueueNode destructor: Done!");
+		//Serial.println("QueueNode destructor: Done!");
 	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak

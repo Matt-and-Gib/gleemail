@@ -118,7 +118,7 @@ private:
 	WiFiUDP udp;
 	IPAddress peerIPAddress;
 
-	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 9;
+	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //minimize in the future
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
 
@@ -296,7 +296,7 @@ void Networking::removeExpiredIncomingIdempotencyToken() {
 
 bool Networking::exceededMaxOutgoingTokenRetryCount() {
 	//find first non-handshake message
-	if(messagesOut.peek()->getData()->getIdempotencyToken()->getRetryCount() > MAX_OUTGOING_MESSAGE_RETRY_COUNT) {
+	if(messagesOut.peek()->getData()->getIdempotencyToken()->getRetryCount() >= MAX_OUTGOING_MESSAGE_RETRY_COUNT) {
 		return true;
 	} else {
 		return false;
@@ -404,7 +404,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
-			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken()))); //Maybe this copy constructor is the source of a seg fault on delete?
 			(*chatMessageReceivedCallback)(msg.getData()->getChat());
 		}
 	break;
@@ -549,14 +549,14 @@ void Networking::processNetwork() {
 		}
 
 		/*********************************************************	DEBUG ONLY	*/
-		if(exceededMaxOutgoingTokenRetryCount()) {
+		/*if(exceededMaxOutgoingTokenRetryCount()) {
 			Serial.println("outgoing message exceeded max count... removing!");
 			delete messagesOut.dequeue();
 
 			Serial.println("adding idempotency token for testing purposes...");
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(617, nowMS()));
 			Serial.println("...enqueued!");
-		}
+		}*/
 		/*********************************************************	DEBUG ONLY	*/
 	}
 

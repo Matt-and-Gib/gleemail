@@ -2,7 +2,7 @@
 #define INPUTMETHOD_H
 
 #include "global.h"
-#include "Arduino.h" //REMOVE ME
+//#include "Arduino.h" //REMOVE ME
 
 
 class InputMethod {
