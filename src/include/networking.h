@@ -235,7 +235,7 @@ char* Networking::copyString(char* original) {
 
 
 void Networking::sendChatMessage(char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat), nullptr));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat)/*, nullptr*/));
 	Serial.print("enqueued chat message with body: ");
 	Serial.println(chat);
 }
