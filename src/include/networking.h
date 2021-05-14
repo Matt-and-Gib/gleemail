@@ -85,7 +85,8 @@ public:
 
 		unsigned short tempIdempVal = parsedDocument["I"];
 		idempotencyToken = new IdempotencyToken(tempIdempVal, currentTimeMS);
-		chat = parsedDocument["C"];
+		const char* tempChat = parsedDocument["C"];
+		chat = copyString(tempChat, MAX_MESSAGE_LENGTH);
 		//error = new MessageError(parsedDocument);
 
 		postProcess = &noProcess;
@@ -178,14 +179,12 @@ private:
 		delete fromQueue.remove(node);
 		return true;
 	}
-
-	char* copyString(char*);
 public:
 	Networking(const unsigned long (*)(), void (*)(const char*), const long u);
 	~Networking();
 
 	void processNetwork();
-	void sendChatMessage(char*);
+	void sendChatMessage(const char*);
 
 	bool connectToPeer(IPAddress&); //FINISH OR REMOVE ME!
 };
@@ -209,33 +208,8 @@ Networking::~Networking() {
 }
 
 
-char* Networking::copyString(char* original) {
-	/*char* duplicateString = new char[MAX_MESSAGE_LENGTH];
-	bool endOfOriginalString = false;
-	for(short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
-		if(endOfOriginalString) {
-			duplicateString[i] = '\0';
-		} else {
-			if(original[i] == '\0') {
-				endOfOriginalString = true;
-				duplicateString[i] = '\0';
-			} else {
-				duplicateString[i] = original[i];
-			}
-		}
-	}*/
-
-	char* duplicate = new char[MAX_MESSAGE_LENGTH];
-	for(short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
-		duplicate[i] = original[i];
-	}
-
-	return duplicate;
-}
-
-
-void Networking::sendChatMessage(char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat)/*, nullptr*/));
+void Networking::sendChatMessage(const char* chat) {
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/));
 	Serial.print("enqueued chat message with body: ");
 	Serial.println(chat);
 }
