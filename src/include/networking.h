@@ -552,6 +552,10 @@ void Networking::processNetwork() {
 		if(exceededMaxOutgoingTokenRetryCount()) {
 			Serial.println("outgoing message exceeded max count... removing!");
 			delete messagesOut.dequeue();
+
+			Serial.println("adding idempotency token for testing purposes...");
+			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(617, nowMS()));
+			Serial.println("...enqueued!");
 		}
 		/*********************************************************	DEBUG ONLY	*/
 	}
