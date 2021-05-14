@@ -99,7 +99,7 @@ public:
 	}
 	~Message() {
 		delete idempotencyToken;
-		delete[] chat;
+		//delete[] chat;
 		//delete error;
 	}
 
@@ -479,8 +479,8 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				return true;
 			}
 
-			Serial.print("Got: ");
-			Serial.println(messageBuffer);
+			//Serial.print("Got: ");
+			//Serial.println(messageBuffer);
 
 			intoQueue.enqueue(new Message(parsedDocument, nowMS()));
 			/*if(!((this->*callback)(intoQueue, intoQueue.enqueue(new Message(parsedDocument, nowMS()))))) {
