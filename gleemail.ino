@@ -92,8 +92,8 @@ void sendChatMessage(char* chat) {
 
 
 void updateDisplayWithPeerChat(const char* messageBody) {
-	Serial.print("Update display with peer chat: ");
-	Serial.println(messageBody);
+	//Serial.print("Update display with peer chat: ");
+	//Serial.println(messageBody);
 	display.updateReading(messageBody);
 }
 
@@ -313,11 +313,11 @@ void connectToPeer() {
 	Serial.print(friendsIP);
 	Serial.println(F("..."));
 
-	if(!network.connectToPeer(friendsIP)) {
+	/*if(!network.connectToPeer(friendsIP)) {
 		Serial.println(F("Unable to connect to gleepal :("));
 	} else {
 		Serial.println(F("Connected to gleepal!"));
-	}
+	}*/
 
 	delete[] ipAddressInputSubstringBuffer;
 	delete[] ipAddressInputBuffer;

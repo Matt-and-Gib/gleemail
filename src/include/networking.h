@@ -81,8 +81,11 @@ private:
 	const char* chat;
 	//MessageError* error;
 
-	static bool noProcess(Queue<Message>& q, QueueNode<Message>& n) {return true;}
-	bool (*postProcess)(Queue<Message>&, QueueNode<Message>&);
+	static bool noOutgoingProcess(Queue<Message>& q, QueueNode<Message>& n) {return true;}
+	bool (*outgoingPostProcess)(Queue<Message>&, QueueNode<Message>&);
+
+	static void noIncomingProcess() {return;}
+	void (*incomingPostProcess)();
 public:
 	Message() {
 
@@ -97,14 +100,16 @@ public:
 		chat = copyString(tempChat, MAX_MESSAGE_LENGTH);
 		//error = new MessageError(parsedDocument);
 
-		postProcess = &noProcess;
+		outgoingPostProcess = &noOutgoingProcess;
+		incomingPostProcess = &noIncomingProcess;
 	}
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ bool (*p)(Queue<Message>&, QueueNode<Message>&) = &noProcess) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ bool (*op)(Queue<Message>&, QueueNode<Message>&) = &noOutgoingProcess, void (*ip)() = &noIncomingProcess) {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
 		//error = e;
-		postProcess = p;
+		outgoingPostProcess = op;
+		incomingPostProcess = ip;
 	}
 	~Message() {
 		delete idempotencyToken;
@@ -118,7 +123,8 @@ public:
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
 	//MessageError* getError() {return error;}
-	bool doPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*postProcess)(q, n);}
+	bool doOutgoingPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*outgoingPostProcess)(q, n);}
+	void doIncomingPostProcess() {(*incomingPostProcess)();}
 };
 
 
@@ -126,6 +132,8 @@ class Networking {
 private:
 	WiFiUDP udp;
 	IPAddress peerIPAddress;
+	bool connected = false;
+	void connectionEstablished();
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //minimize in the future
@@ -143,8 +151,10 @@ private:
 	static const constexpr unsigned short HEARTBEAT_RESEND_THRESHOLD_MS = 1000;
 	static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 4 * HEARTBEAT_RESEND_THRESHOLD_MS;
 	void sendHeartbeat();
-	void processHeartbeat(const unsigned long);
-	void checkHeartbeats();
+	void listenToHeartbeat(const unsigned long);
+	void checkHeartbeat();
+	void dontCheckHeartbeat() {return;}
+	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on successful connection
 
 	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
@@ -222,7 +232,7 @@ void Networking::sendChatMessage(const char* chat) {
 
 
 //REWRITE ME
-bool Networking::connectToPeer(IPAddress& connectToIP) {
+/*bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
 	peerIPAddress = connectToIP;
@@ -254,8 +264,21 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	return true;
 
 	delete[] receiveBuffer;
-}
+}*/
 //REWRITE ME
+
+
+bool Networking::connectToPeer(IPAddress& connectToIP) {
+	udp.begin(CONNECTION_PORT);
+
+	peerIPAddress = connectToIP;
+}
+
+
+void Networking::connectionEstablished() { // Make this the callback function of handshake
+	connected = true;
+	processHeartbeat = &Networking::checkHeartbeat;
+}
 
 
 // Potential optimization: process more than one token per frame & make into time sensitive process
@@ -314,7 +337,7 @@ bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, Qu
 		sendOutgoingMessage(*(nextMessage->getData()));
 
 		//do callback? (delete confirmation message?)
-		nextMessage->getData()->doPostProcess(messagesOut, *nextMessage);
+		nextMessage->getData()->doOutgoingPostProcess(messagesOut, *nextMessage);
 		return true;
 	} else {
 		return false;
@@ -327,7 +350,7 @@ void Networking::sendHeartbeat() {
 }
 
 
-void Networking::checkHeartbeats() {
+void Networking::checkHeartbeat() {
 	approxCurrentTime = nowMS();
 
 	if(approxCurrentTime - lastHeartbeatReceivedMS > FLATLINE_THRESHOLD_MS) {
@@ -343,7 +366,7 @@ void Networking::checkHeartbeats() {
 }
 
 
-void Networking::processHeartbeat(const unsigned long time) {
+void Networking::listenToHeartbeat(const unsigned long time) {
 	lastHeartbeatReceivedMS = time;
 }
 
@@ -357,12 +380,13 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::HEARTBEAT:
-		processHeartbeat(nowMS());
+		listenToHeartbeat(nowMS());
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
+			//messageOutWithMatchingIdempotencyToken->doOutgoingPostProcess(nullptr, nullptr);
 			messagesOut.remove(*messageOutWithMatchingIdempotencyToken); //memory leak
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
@@ -387,8 +411,18 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
-		//check for unique idempotency token
-		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue));
+
+		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
+			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+			connectionEstablished();
+			//remove handshake from outgoing message queue
+		} else {
+			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
+		}
+
+
+
 		/*messagesOutHead.removeByType(MESSAGETYPE::HANDSHAKE);
 		messagesOutHead.enqueue(new Message(MESSAGETYPE::CONFIRMATION, IdempotencyToken::generate()));
 		doConnected();
@@ -511,14 +545,14 @@ void Networking::processNetwork() {
 		}
 	}
 
-	checkHeartbeats();
+	(this->*processHeartbeat)();
 
 	queueStartNode = messagesOut.peek();
 	if(queueStartNode) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
 			//Maybe log error about process outgoing messages (specifically) being slow
-			if(exceededMaxOutgoingTokenRetryCount()) {
+			if(connected && exceededMaxOutgoingTokenRetryCount()) {
 				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
 				//drop connection
 			}
