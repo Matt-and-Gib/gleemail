@@ -1,7 +1,8 @@
 #include "include/inputmethod.h"
 
 
-InputMethod::InputMethod(void (*s)(char*)) {
+InputMethod::InputMethod(void (*c)(char*), void (*s)(char*)) {
+	messageChanged = c;
 	sendMessage = s;
 	userMessage = new char[MAX_MESSAGE_LENGTH];
 	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
@@ -19,10 +20,11 @@ void InputMethod::clearUserMessage() {
 	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		userMessage[i] = '\0';
 	}
+	userMessageFirstEmptyIndex = 0;
 }
 
 
-void InputMethod::updateMessageOutBuffer(char *messageOut) {
+/*void InputMethod::updateMessageOutBuffer(char *messageOut) {
 	for(int i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
 		messageOut[i] = userMessage[i];
 	}
@@ -41,17 +43,19 @@ void InputMethod::getUserMessage(char *messageOut) {
 
 void InputMethod::peekUserMessage(char *messageOut) {
 	updateMessageOutBuffer(messageOut);
-}
+}*/
 
 
 void InputMethod::pushCharacterToMessage(const char c) {
 	if(c != CANCEL_CHAR) {
-		messageChanged = true;
-		messageComplete = false;
+		//messageChanged = true;
+		//messageComplete = false;
 
 		if(userMessageFirstEmptyIndex < MAX_MESSAGE_LENGTH) {
 			userMessage[userMessageFirstEmptyIndex] = c;
 			userMessageFirstEmptyIndex += 1;
+
+			messageChanged(userMessage);
 
 			if(userMessageFirstEmptyIndex == MAX_MESSAGE_LENGTH) {
 				DebugLog::getLog().logWarning(MORSE_MESSAGE_TO_SEND_REACHED_MAX_MESSAGE_LENGTH);
@@ -90,6 +94,9 @@ void InputMethod::commitMessage() {
 				break;
 			}
 		}
+
+		//Serial.print("Commiting: "); //DEBUG
+		//Serial.println(userMessage); //DEBUG
 
 		(*sendMessage)(userMessage);
 		clearUserMessage();

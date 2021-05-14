@@ -5,8 +5,9 @@
 
 
 static const constexpr char GLEEMAIL_VERSION[] = "alpha 3a";
-static const constexpr unsigned short BAUD_RATE = 9600;
 static const constexpr bool OFFLINE_MODE = false;
+
+static const constexpr unsigned short BAUD_RATE = 9600;
 
 static const constexpr unsigned short FRAME_LATENCY_COUNT_ERROR_THRESHOLD = 3;
 static const constexpr unsigned short MAX_FRAME_DURATION_MS = 42;
@@ -29,6 +30,30 @@ static const constexpr unsigned short MAX_MESSAGE_LENGTH = 140; // This value is
 static const constexpr unsigned short JSON_DOCUMENT_SIZE = 256; // This is the end of the line, the ultimate determiner of the size of the packets we cand send (bytes)!
 
 static const constexpr char CANCEL_CHAR = (char)24;
+
+static char* copyString(const char* original, const unsigned short LEN) {
+/*char* duplicateString = new char[MAX_MESSAGE_LENGTH];
+	bool endOfOriginalString = false;
+	for(short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
+		if(endOfOriginalString) {
+			duplicateString[i] = '\0';
+		} else {
+			if(original[i] == '\0') {
+				endOfOriginalString = true;
+				duplicateString[i] = '\0';
+			} else {
+				duplicateString[i] = original[i];
+			}
+		}
+	}*/
+
+	char* duplicate = new char[LEN]; //on the heap
+	for(short i = 0; i < LEN; i += 1) {
+		duplicate[i] = original[i];
+	}
+
+	return duplicate;
+}
 
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};
 enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};

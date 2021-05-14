@@ -1,8 +1,6 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#include "HardwareSerial.h"
-
 
 template <class T>
 class QueueNode {
@@ -16,11 +14,8 @@ public:
 	}
 
 	~QueueNode() {
-		//Serial.println("QueueNode destructor: Deleting data...");
-		delete data;
-		//Serial.println("QueueNode destructor: Deleting node...");
-		delete node;
-		//Serial.println("QueueNode destructor: Done!");
+		delete &data;
+		delete[] node;
 	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak
@@ -79,7 +74,7 @@ QueueNode<T>* Queue<T>::dequeue() {
 
 	QueueNode<T>* oldRoot = root;
 
-	if(root->getNode() == nullptr) {
+	if(!root->getNode()) {
 		root = nullptr;
 		return oldRoot;
 	}
