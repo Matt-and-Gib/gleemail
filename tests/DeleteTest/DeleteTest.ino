@@ -66,26 +66,26 @@ struct TestObj {
 
 void advTest() {
 	TestObj* myObj = new TestObj();
-	Queue<IdempotencyToken> messagesInIdempotencyTokens = *new Queue<IdempotencyToken>;
-	QueueNode<TestObj> msg = *new QueueNode<TestObj>(myObj);
+	Queue<IdempotencyToken>* messagesInIdempotencyTokens = new Queue<IdempotencyToken>;
+	QueueNode<TestObj>* msg = new QueueNode<TestObj>(myObj);
 
-	messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+	messagesInIdempotencyTokens->enqueue(new IdempotencyToken(*(msg->getData()->getIdempotencyToken())));
 
 	Serial.println("Created and enqueued objects");
 
-	QueueNode<IdempotencyToken>* nextTokenNode = messagesInIdempotencyTokens.peek();
-	messagesInIdempotencyTokens.dequeue();
-	//delete nextTokenNode;
-	//Serial.println("Deleted nextTokenNode");
+	QueueNode<IdempotencyToken>* nextTokenNode = messagesInIdempotencyTokens->peek();
+	messagesInIdempotencyTokens->dequeue();
+	delete nextTokenNode;
+	Serial.println("Deleted nextTokenNode");
 	
-	delete &msg; //ERROR HERE: probably something to do with taking address?
+	delete msg;
 	Serial.println("Deleted msg");
 
-	//delete &messagesInIdempotencyTokens;
-	//Serial.println("Deleted messagesInIdempotencyTokens");
+	delete messagesInIdempotencyTokens;
+	Serial.println("Deleted messagesInIdempotencyTokens");
 
-	//delete myObj;
-	//Serial.println("Deleted myObj");
+	delete myObj;
+	Serial.println("Deleted myObj");
 
 	Serial.println("All deletions complete");
 }
@@ -99,8 +99,8 @@ void setup() {
 
 	Serial.println("Start");
 
-	basicTest();
-	Serial.println("Basic Test Done");
+	//basicTest();
+	//Serial.println("Basic Test Done");
 
 	advTest();
 	Serial.println("Advanced Test Done");
@@ -110,5 +110,5 @@ void setup() {
 
 
 void loop() {
-
+	
 }
