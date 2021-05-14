@@ -363,7 +363,8 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
-			messagesOut.remove(*messageOutWithMatchingIdempotencyToken); //memory leak
+			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess();
+			delete messagesOut.remove(*messageOutWithMatchingIdempotencyToken);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 		}
