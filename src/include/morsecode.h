@@ -114,7 +114,7 @@ private:
 	void checkMessageElapsedThresholds();
 	void resetMorsePhrase();
 public:
-	MorseCodeInput(const unsigned short, const unsigned short, void (*)(char*));
+	MorseCodeInput(const unsigned short, const unsigned short, void (*)(char*), void (*)(char*));
 	~MorseCodeInput();
 
 	bool setNetworkData(const char*);
