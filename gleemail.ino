@@ -81,6 +81,11 @@ void updateNetwork() {
 }*/
 
 
+void userMessageChanged(char* chat) {
+	display.updateWriting(chat);
+}
+
+
 void sendChatMessage(char* chat) {
 	network.sendChatMessage(chat);
 }
@@ -91,12 +96,12 @@ void updateDisplayWithPeerChat(const char* messageBody) {
 }
 
 
-void updateDisplayWithUserChat(const char* messageBody) {
-	input->peekUserMessage(userMessage); //Note: this will be wasted processing with different input method (i.e. TiltType)
+/*void updateDisplayWithUserChat(const char* messageBody) {
+	//input->peekUserMessage(userMessage); //Note: this will be wasted processing with different input method (i.e. TiltType)
 	//Serial.print("Your message: ");
 	//Serial.println(userMessage);
-	display.updateWriting(userMessage);
-}
+	//display.updateWriting(userMessage);
+}*/
 
 
 /*void updateDisplay() {
@@ -153,7 +158,7 @@ void printErrorCodes() {
 	30ms: fine
 	35ms: fine
 	40ms: fine
-	44ms: most unusable
+	44ms: mostly unusable
 	43ms: not really usable
 	* 42ms: alright *
 */
@@ -235,7 +240,7 @@ bool connectToWiFi() {
 
 
 bool setupInputMethod() {
-	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &sendChatMessage);
+	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
 	Serial.println(F("Downloading Input Method data..."));
 
 	char *data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
