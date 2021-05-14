@@ -30,8 +30,7 @@ public:
 		retryCount = i.getRetryCount();
 	}
 	~IdempotencyToken() {
-		Serial.print("destructor for token ");
-		Serial.println(value);
+
 	}
 
 	bool operator==(const IdempotencyToken& o) {return value == o.getValue();}
@@ -47,15 +46,24 @@ public:
 private:
 	ERROR_CODE id;
 	const char* attribute;
+
+	static const constexpr unsigned short MAX_ATTRIBUTE_SIZE = 1;
 public:
 	MessageError() {
 		id = ERROR_CODE::MESSAGE_ERROR_NONE;
-		attribute = new char[0];
+		attribute =  new char[MAX_ATTRIBUTE_SIZE];
+		//attribute[0] = '\0';
+	}
+	MessageError(const ERROR_CODE c, const char* a) {
+		id = c;
+		attribute = a;
 	}
 	MessageError(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument) {
 		const unsigned short tempErrorID = parsedDocument["E"]["D"];
 		id = static_cast<ERROR_CODE>(tempErrorID);
-		attribute = parsedDocument["E"]["A"];
+
+		const char* tempAttribute = parsedDocument["E"]["A"];
+		attribute = copyString(tempAttribute, MAX_ATTRIBUTE_SIZE);
 	}
 	~MessageError() {
 		delete[] attribute;
@@ -210,8 +218,6 @@ Networking::~Networking() {
 
 void Networking::sendChatMessage(const char* chat) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/));
-	Serial.print("enqueued chat message with body: ");
-	Serial.println(chat);
 }
 
 
@@ -260,10 +266,8 @@ void Networking::removeExpiredIncomingIdempotencyToken() {
 	}
 
 	if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS) {
-		Serial.println("Incoming token idempotency token expired!");
 		messagesInIdempotencyTokens.dequeue();
 		delete nextTokenNode;
-		Serial.println("deleted");
 	}
 }
 
@@ -293,8 +297,8 @@ void Networking::sendOutgoingMessage(Message& msg) {
 	serializeJson(doc, outputBuffer);
 	//encryptBuffer(outputBuffer, measureJson(doc) + 1);
 
-	Serial.print("Sending: ");
-	Serial.println(outputBuffer);
+	//Serial.print("Sending: ");
+	//Serial.println(outputBuffer);
 
 	udp.beginPacket(peerIPAddress, CONNECTION_PORT);
 	udp.write(outputBuffer);
@@ -359,7 +363,6 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
-			Serial.println("found chat to match confirmation");
 			messagesOut.remove(*messageOutWithMatchingIdempotencyToken); //memory leak
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
@@ -406,9 +409,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, QueueNode<Message>* nextMessage) {
 	messagesIn.remove(*nextMessage);
 	processIncomingMessage(*nextMessage);
-	Serial.println("deleting incoming message queue node");
 	delete nextMessage;
-	Serial.println("deleted incoming message queue node");
 	return true;
 }
 
@@ -418,7 +419,6 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
 			holdingNode = queueStartNode->getNode();
 			if((this->*processMessage)(fromQueue, queueStartNode)) {
-				Serial.println("process queue succeeded");
 				queueStartNode = holdingNode;
 				return true;
 			}
@@ -452,9 +452,6 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			}
-
-			//Serial.print("Got: ");
-			//Serial.println(messageBuffer);
 
 			intoQueue.enqueue(new Message(parsedDocument, nowMS()));
 			/*if(!((this->*callback)(intoQueue, intoQueue.enqueue(new Message(parsedDocument, nowMS()))))) {
@@ -494,7 +491,6 @@ bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessEl
 
 
 void Networking::processNetwork() {
-	//Serial.print('.');
 	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
 		//Maybe log error about get messages (specifically) being slow
 
@@ -527,17 +523,6 @@ void Networking::processNetwork() {
 				//drop connection
 			}
 		}
-
-		/*********************************************************	DEBUG ONLY	*/
-		/*if(exceededMaxOutgoingTokenRetryCount()) {
-			Serial.println("outgoing message exceeded max count... removing!");
-			delete messagesOut.dequeue();
-
-			Serial.println("adding idempotency token for testing purposes...");
-			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(617, nowMS()));
-			Serial.println("...enqueued!");
-		}*/
-		/*********************************************************	DEBUG ONLY	*/
 	}
 
 	removeExpiredIncomingIdempotencyToken();
