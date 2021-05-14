@@ -408,7 +408,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
 			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess();
-			messagesOut.remove(*messageOutWithMatchingIdempotencyToken); //memory leak
+			delete messagesOut.remove(*messageOutWithMatchingIdempotencyToken);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 		}
