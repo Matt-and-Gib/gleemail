@@ -140,34 +140,34 @@ private:
 	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
 
-	Queue<Message> messagesIn = *new Queue<Message>();
-	Queue<IdempotencyToken> messagesInIdempotencyTokens = *new Queue<IdempotencyToken>;
-	Queue<Message> messagesOut = *new Queue<Message>();
+	Queue<Message> messagesIn;
+	Queue<IdempotencyToken> messagesInIdempotencyTokens;
+	Queue<Message> messagesOut;
 	MESSAGE_TYPE searchMessageType;
 
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
 
-	char* copyString(char*);
+	bool doTimeSensesitiveProcess(const unsigned short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
 	QueueNode<Message>* messageOutWithMatchingIdempotencyToken;
 	bool processQueue(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 	bool processIncomingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
+	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
+	
 	void (*chatMessageReceivedCallback)(const char*);
+
 	bool processOutgoingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
+	static const constexpr unsigned short MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
 	bool getMessages(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
+	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
 
 	void sendOutgoingMessage(Message&);
-
-	bool doTimeSensesitiveProcess(const unsigned short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
-	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
-	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
-	static const constexpr unsigned short MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
 	void processIncomingMessage(QueueNode<Message>&);
 
@@ -178,6 +178,8 @@ private:
 		delete fromQueue.remove(node);
 		return true;
 	}
+
+	char* copyString(char*);
 public:
 	Networking(const unsigned long (*)(), void (*)(const char*), const long u);
 	~Networking();
