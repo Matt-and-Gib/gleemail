@@ -5,9 +5,11 @@
 
 
 static const constexpr char GLEEMAIL_VERSION[] = "alpha 3a";
-static const constexpr bool OFFLINE_MODE = false;
+static const constexpr bool OFFLINE_MODE = true;
 
 static const constexpr unsigned short BAUD_RATE = 9600;
+
+static const constexpr unsigned short STORAGE_SLAVE_SELECT_PIN = 10;
 
 static const constexpr unsigned short FRAME_LATENCY_COUNT_ERROR_THRESHOLD = 3;
 static const constexpr unsigned short MAX_FRAME_DURATION_MS = 42;
@@ -76,6 +78,5 @@ struct Pin {
 };
 
 static Pin NULL_PIN = Pin(-1, PIN_MODE::READ, 0);
-
 
 #endif

@@ -363,7 +363,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
-			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess();
+			//messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess();
 			delete messagesOut.remove(*messageOutWithMatchingIdempotencyToken);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
@@ -447,7 +447,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 			messageReceivedCount += 1;
 
-			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument;
+			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
 			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, JSON_DOCUMENT_SIZE);
 			if(parsingError) {
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);

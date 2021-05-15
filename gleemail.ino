@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "src/include/global.h"
 
+#include "src/include/storage.h"
 #include "src/include/display.h"
 #include "src/include/morsecode.h"
 
@@ -14,11 +15,12 @@ void updateDisplayWithPeerChat(const char*);
 void updateDisplayWithUserChat(const char*);
 
 
-static Display& display = *new Display();
+static Storage storage;
+static Display display;
 
-static InternetAccess& internet = *new InternetAccess();
-static Networking& network = *new Networking(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0);
-static WebAccess& webAccess = *new WebAccess();
+static InternetAccess internet;
+static Networking network(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0);
+static WebAccess webAccess;
 
 static InputMethod* input;
 static unsigned short pinIndex = 0;
@@ -186,6 +188,25 @@ void loop() {
 }
 
 
+bool prepareStorage() {
+	if(!storage.begin()) {
+		Serial.println(F("Storage unavailable!"));
+		return false;
+	}
+
+	storage.savePrefs();
+
+	if(!storage.loadPrefs()) {
+		Serial.println(F("Unable to read prefs!"));
+		return false;
+	}
+
+	Serial.println(F("Storage prepared!"));
+
+	return true;
+}
+
+
 bool connectToWiFi() {
 	unsigned short inputLength = 0;
 
@@ -334,8 +355,9 @@ void setup() {
 		Serial.read();
 	}
 
-	enum SETUP_LEVEL : short {WELCOME = 0, NETWORK = 1, INPUT_METHOD = 2, PINS = 3, PEER = 4, DONE = 5};
+	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
 	SETUP_LEVEL setupState = WELCOME;
+	bool sdCardUsable = false;
 	bool setupComplete = false;
 
 	const unsigned short SETUP_STEP_DELAY = 1500;
@@ -353,6 +375,18 @@ void setup() {
 			}
 
 			display.updateReading("Hello, glEEmail!");
+			setupState = SETUP_LEVEL::STORAGE;
+		break;
+
+
+		case SETUP_LEVEL::STORAGE:
+			Serial.println(F("Searching Storage..."));
+			if(!prepareStorage()) {
+				Serial.println(F("SD Card cannot be used"));
+				sdCardUsable = false;
+			} else {
+				sdCardUsable = true;
+			}
 			setupState = SETUP_LEVEL::NETWORK;
 		break;
 

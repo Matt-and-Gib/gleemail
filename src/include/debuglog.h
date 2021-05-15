@@ -75,6 +75,27 @@ enum ERROR_CODE: short {
 
 //Remember: DebugLog is a singleton! DO NOT waste memory.
 class DebugLog {
+private:
+	DebugLog() {
+		errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
+		for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
+			errorCodes[i] = ERROR_CODE::NONE;
+		}
+	}
+	DebugLog(DebugLog const&) = delete;
+	void operator=(DebugLog const&) = delete;
+
+	void log(ERROR_CODE e, bool critical) {
+		if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
+			if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
+				errorCodes[errorCodesFirstOpenIndex++] = e;
+			}
+		}
+	}
+
+	static constexpr unsigned short MAX_ERROR_CODES = 16;
+	ERROR_CODE* errorCodes;
+	unsigned short errorCodesFirstOpenIndex = 0;
 public:
 	static DebugLog& getLog() {
 		static DebugLog log;
@@ -98,27 +119,6 @@ public:
 			return ERROR_CODE::NONE;
 		}
 	}
-private:
-	DebugLog() {
-		errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
-		for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
-			errorCodes[i] = ERROR_CODE::NONE;
-		}
-	}
-	DebugLog(DebugLog const&) = delete;
-	void operator=(DebugLog const&) = delete;
-
-	void log(ERROR_CODE e, bool critical) {
-		if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
-			if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
-				errorCodes[errorCodesFirstOpenIndex++] = e;
-			}
-		}
-	}
-
-	static constexpr unsigned short MAX_ERROR_CODES = 16;
-	ERROR_CODE* errorCodes;
-	unsigned short errorCodesFirstOpenIndex = 0;
 };
 
 
