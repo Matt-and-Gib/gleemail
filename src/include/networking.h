@@ -426,7 +426,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
-			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken()))); //Maybe this copy constructor is the source of a seg fault on delete?
+			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
 			(*chatMessageReceivedCallback)(msg.getData()->getChat());
 		}
 	break;
