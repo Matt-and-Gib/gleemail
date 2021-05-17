@@ -54,6 +54,20 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 		disconnectFromNetwork();
 	}
 
+	Serial.print(F("SSID: \'"));
+	Serial.print(networkName);
+	Serial.println(F("\'"));
+
+	Serial.print(F("Length: "));
+	Serial.println(strlen(networkName));
+
+	Serial.print(F("Password: \'"));
+	Serial.print(networkPassword);
+	Serial.println(F("\'"));
+
+	Serial.print(F("Length: "));
+	Serial.println(strlen(networkPassword));
+
 	WiFi.begin(networkName, networkPassword);
 	while(WiFi.status() == WL_IDLE_STATUS) {
 		delay(250);

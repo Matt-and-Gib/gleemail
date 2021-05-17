@@ -48,6 +48,10 @@ bool Storage::loadPrefs() {
 
 		unsigned short dataLength = 0;
 		char data[prefsFile.size() + 1];
+		if(prefsFile.size() + 1 > PREFS_DOCUMENT_SIZE) {
+			DebugLog::getLog().logError(ERROR_CODE::STORAGE_PREFS_FILE_SIZE_GREATER_THAN_PREFS_DOCUMENT_SIZE);
+		}
+
 		while(prefsFile.available()) {
 			/*if(prefsFile.peek() == '\r' || prefsFile.peek() == '\n') {
 				Serial.println(F("stopping at line break"));
