@@ -31,7 +31,7 @@ static const constexpr unsigned short MAX_MESSAGE_LENGTH = 140; // This value is
 
 static const constexpr unsigned short JSON_DOCUMENT_SIZE = 256; // This is the end of the line, the ultimate determiner of the size of the packets we cand send (bytes)!
 
-static const constexpr unsigned short PREFS_DOCUMENT_SIZE = 96;
+static const constexpr unsigned short PREFS_DOCUMENT_SIZE = 128;
 
 static const constexpr char CANCEL_CHAR = (char)24;
 

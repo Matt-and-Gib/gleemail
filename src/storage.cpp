@@ -45,24 +45,21 @@ bool Storage::loadPrefs() {
 	File prefsFile = SD.open("GLEEMAIL/PREFS.GMD", FILE_READ);
 	if(prefsFile) {
 		Serial.println(F("Opened for reading!"));
-		
-		unsigned short dataLength = 0;
-		char data[PREFS_DOCUMENT_SIZE];
-		while(prefsFile.available()) {
-			data[dataLength] = prefsFile.read();
-			/*Serial.print(data[dataLength]);
-			Serial.print(F(" is character "));
-			Serial.println(dataLength);*/
 
+		unsigned short dataLength = 0;
+		char data[prefsFile.size()];
+		while(prefsFile.available()) {
+			if(prefsFile.peek() == '\r' || prefsFile.peek() == '\n') {
+				break;
+			}
+			data[dataLength] = prefsFile.read();
 			dataLength += 1;
 		}
 
 		prefsFile.close();
+		data[dataLength] = '\0';
 
-		Serial.print(F("Data length: "));
-		Serial.println(dataLength);
-
-		Serial.print(F("Data: "));
+		Serial.print(F("Data:"));
 		Serial.println(data);
 
 		if(!Preferences::getPrefs().loadSerializedPrefs(data, dataLength)) {

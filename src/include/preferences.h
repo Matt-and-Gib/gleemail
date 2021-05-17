@@ -15,6 +15,7 @@ private:
 	void operator=(Preferences const&) = delete;
 
 	unsigned short preferencesFileVersion = 1;
+	unsigned short morseCodeCharPairsVersion = 2;
 	char* wifiSSID;
 	char* wifiPassword;
 public:
@@ -28,6 +29,7 @@ public:
 		StaticJsonDocument<PREFS_DOCUMENT_SIZE> doc;
 
 		doc["Preferences Version"] = preferencesFileVersion;
+		doc["Morse Code Char Pairs Version"] = morseCodeCharPairsVersion;
 		if(wifiSSID) {
 			doc["WiFiSSID"] = wifiSSID;
 		}
@@ -41,7 +43,7 @@ public:
 	}
 
 	bool loadSerializedPrefs(char* input, const unsigned short length) {
-		StaticJsonDocument<48> doc;
+		StaticJsonDocument<PREFS_DOCUMENT_SIZE> doc;
 
 		DeserializationError error = deserializeJson(doc, input, length);
 
@@ -52,6 +54,7 @@ public:
 		}
 
 		preferencesFileVersion = doc["Preferences Version"];
+		morseCodeCharPairsVersion = doc["Morse Code Char Pairs Version"];
 
 		const char* tempSSID = doc["WiFiSSID"];
 		wifiSSID = copyString(tempSSID, strlen(tempSSID));

@@ -404,7 +404,7 @@ void setup() {
 		case SETUP_LEVEL::STORAGE:
 			Serial.println(F("Searching Storage..."));
 			if(!prepareStorage()) {
-				Serial.println(F("SD Card cannot be used"));
+				Serial.println(F("SD Card not available"));
 			}
 
 			setupState = SETUP_LEVEL::NETWORK;
