@@ -30,7 +30,7 @@ bool Storage::clearSavedPrefs(const unsigned short confirmationNumber) {
 		return false;
 	}
 
-	return SD.remove(F("GLEEMAIL/PREFS.GMD"));
+	return SD.remove("GLEEMAIL/PREFS.GMD");
 
 	/*if(!SD.remove(F("GLEEMAIL/PREFS.GMD"))) {
 		Serial.println(F("Couldn't delete prefs file"));
@@ -50,6 +50,10 @@ bool Storage::loadPrefs() {
 		char data[PREFS_DOCUMENT_SIZE];
 		while(prefsFile.available()) {
 			data[dataLength] = prefsFile.read();
+			/*Serial.print(data[dataLength]);
+			Serial.print(F(" is character "));
+			Serial.println(dataLength);*/
+
 			dataLength += 1;
 		}
 
@@ -65,20 +69,20 @@ bool Storage::loadPrefs() {
 			Serial.println(F("Couldn't deserialize prefs!"));
 			return false;
 		}
+
+		Serial.println(F("Closed prefs."));
+		return true;
 	} else {
 		Serial.println(F("Unable to open"));
 		prefsFile.close();
 		return false;
 	}
-
-	Serial.println(F("Closed prefs."));
-	return true;
 }
 
 
 bool Storage::savePrefs() {
 	Serial.println(F("Opening prefs..."));
-	File prefsFile = SD.open(F("GLEEMAIL/PREFS.GMD"), FILE_WRITE);
+	File prefsFile = SD.open(F("GLEEMAIL/PREFS.GMD"), O_WRITE | O_CREAT);
 
 	if(prefsFile) {
 		Serial.println(F("Opened for writing!"));
@@ -88,13 +92,15 @@ bool Storage::savePrefs() {
 		Serial.println(F("done"));
 
 		prefsFile.println(prefsData); //Encrypt me!
+		prefsFile.close();
+
 		delete[] prefsData;
+
+		Serial.println(F("Closed prefs."));
+		return true;
 	} else {
 		Serial.println(F("Unable to open"));
+		prefsFile.close();
 		return false;
 	}
-	prefsFile.close();
-	Serial.println(F("Closed prefs."));
-
-	return true;
 }

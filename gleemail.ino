@@ -366,17 +366,17 @@ void setup() {
 		delay(250);
 	}
 
-	storage.begin();
+	while(Serial.available()) {
+		Serial.read();
+	}
+
+	/*storage.begin();
 	if(!storage.clearSavedPrefs(1337)) {
 		Serial.println(F("Unable to delete!"));
 	}
 
 	Serial.println(F("Done"));
-	abort();
-
-	while(Serial.available()) {
-		Serial.read();
-	}
+	abort();*/
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
 	SETUP_LEVEL setupState = WELCOME;
