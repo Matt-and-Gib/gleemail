@@ -50,6 +50,7 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 	}
 
 	if(WiFi.status() == WL_CONNECTED) {
+		Serial.println(F("Connect to network while already connected!"));
 		disconnectFromNetwork();
 	}
 
@@ -60,9 +61,10 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 
 	if(WiFi.status() == WL_CONNECT_FAILED) {
 		DebugLog::getLog().logWarning(ERROR_CODE::INTERNET_ACCESS_CONNECTION_FAILED);
+		Serial.println(F("Connection failed. Disconnecting before retry"));
 		disconnectFromNetwork();
 		if(retry) {
-			delay(500);
+			delay(2000);
 			return connectToNetwork(networkName, networkPassword, false);
 		} else {
 			DebugLog::getLog().logError(ERROR_CODE::INTERNET_ACCESS_WIFI_CONNECTION_FAILED_RETRY_OCCURRED);
