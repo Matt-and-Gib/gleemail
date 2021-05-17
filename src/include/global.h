@@ -36,21 +36,6 @@ static const constexpr unsigned short PREFS_DOCUMENT_SIZE = 128;
 static const constexpr char CANCEL_CHAR = (char)24;
 
 static char* copyString(const char* original, const unsigned short LEN) {
-/*char* duplicateString = new char[MAX_MESSAGE_LENGTH];
-	bool endOfOriginalString = false;
-	for(short i = 0; i < MAX_MESSAGE_LENGTH; i += 1) {
-		if(endOfOriginalString) {
-			duplicateString[i] = '\0';
-		} else {
-			if(original[i] == '\0') {
-				endOfOriginalString = true;
-				duplicateString[i] = '\0';
-			} else {
-				duplicateString[i] = original[i];
-			}
-		}
-	}*/
-
 	char* duplicate = new char[LEN]; //on the heap
 	for(short i = 0; i < LEN; i += 1) {
 		duplicate[i] = original[i];
@@ -58,6 +43,17 @@ static char* copyString(const char* original, const unsigned short LEN) {
 
 	return duplicate;
 }
+
+static char* copyAndTerminateString(const char* original, const unsigned short LEN) {
+	char* duplicate = new char[LEN + 1]; //on the heap
+	for(short i = 0; i < LEN; i += 1) {
+		duplicate[i] = original[i];
+	}
+	duplicate[LEN] = '\0';
+	
+	return duplicate;
+}
+
 
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};
 enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};

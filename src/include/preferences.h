@@ -57,10 +57,40 @@ public:
 		morseCodeCharPairsVersion = doc["Morse Code Char Pairs Version"];
 
 		const char* tempSSID = doc["WiFiSSID"];
-		wifiSSID = copyString(tempSSID, strlen(tempSSID));
+		wifiSSID = copyAndTerminateString(tempSSID, strlen(tempSSID));
 
 		const char* tempPassword = doc["WiFiPassword"];
-		wifiPassword = copyString(tempPassword, strlen(tempPassword));
+		wifiPassword = copyAndTerminateString(tempPassword, strlen(tempPassword));
+
+
+		Serial.print(F("tempSSID: \'"));
+		Serial.print(tempSSID);
+		Serial.println(F("\'"));
+
+		Serial.print(F("Length: "));
+		Serial.println(strlen(tempSSID));
+
+		Serial.print(F("tempPassword: \'"));
+		Serial.print(tempPassword);
+		Serial.println(F("\'"));
+
+		Serial.print(F("Length: "));
+		Serial.println(strlen(tempPassword));
+
+
+		Serial.print(F("WIFISSID: \'"));
+		Serial.print(wifiSSID);
+		Serial.println(F("\'"));
+
+		Serial.print(F("Length: "));
+		Serial.println(strlen(wifiSSID));
+
+		Serial.print(F("WIFIPassword: \'"));
+		Serial.print(wifiPassword);
+		Serial.println(F("\'"));
+
+		Serial.print(F("Length: "));
+		Serial.println(strlen(wifiPassword));
 	}
 
 	const char* getWiFiSSID() const {return wifiSSID;}
