@@ -94,7 +94,6 @@ void sendChatMessage(char* chat) {
 
 
 void updateDisplayWithPeerChat(const char* messageBody) {
-	Serial.print("Update display with peer chat: ");
 	Serial.println(messageBody);
 	display.updateReading(messageBody);
 }
@@ -420,7 +419,6 @@ void setup() {
 
 
 		case SETUP_LEVEL::STORAGE:
-			Serial.println(F("Searching Storage..."));
 			if(!prepareStorage()) {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 			}
@@ -447,6 +445,7 @@ void setup() {
 
 
 		case SETUP_LEVEL::INPUT_METHOD:
+			Serial.println(millis());
 			display.updateReading("Setting Up Input");
 			display.updateWriting("Downloading Data");
 			if(setupInputMethod()) {
@@ -456,6 +455,7 @@ void setup() {
 				}
 
 				setupState = SETUP_LEVEL::PINS;
+				Serial.println(millis());
 			}
 		break;
 
