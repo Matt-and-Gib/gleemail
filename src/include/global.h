@@ -4,8 +4,8 @@
 #include "debuglog.h"
 
 
-static const constexpr char GLEEMAIL_VERSION[] = "alpha 3a";
-static const constexpr bool OFFLINE_MODE = true;
+static const constexpr char GLEEMAIL_VERSION[] = "alpha 3b";
+static const constexpr bool OFFLINE_MODE = false;
 
 static const constexpr unsigned short BAUD_RATE = 9600;
 

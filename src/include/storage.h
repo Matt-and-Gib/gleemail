@@ -8,14 +8,17 @@
 #include "preferences.h"
 
 
+static const constexpr char rootPath[9] = "GLEEMAIL";
+static const constexpr char prefsPath[19] = "GLEEMAIL/PREFS.GMD";
+
 class Storage {
 private:
-//NOTE: all paths are full caps, and file names must be in 8.3 format
+	//NOTE: all paths are full caps, and file names must be in 8.3 format
 	/*static const constexpr char pathSeparator = '/';
-	static const constexpr char rootName[9] = "glEEmail";
-	static const constexpr char prefsName[11] = "prefs.json";
+	static const constexpr char rootName[9] = "GLEEMAIL";
+	static const constexpr char prefsName[11] = "PREFS.GMD";
 	static const constexpr char prefsPath[] = rootName + pathSeparator + prefsName;*/
-	//static const constexpr char prefsPath[] = "";
+
 public:
 	Storage();
 	~Storage();

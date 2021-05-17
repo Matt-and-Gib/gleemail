@@ -50,23 +50,8 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 	}
 
 	if(WiFi.status() == WL_CONNECTED) {
-		Serial.println(F("Connect to network while already connected!"));
 		disconnectFromNetwork();
 	}
-
-	Serial.print(F("SSID: \'"));
-	Serial.print(networkName);
-	Serial.println(F("\'"));
-
-	Serial.print(F("Length: "));
-	Serial.println(strlen(networkName));
-
-	Serial.print(F("Password: \'"));
-	Serial.print(networkPassword);
-	Serial.println(F("\'"));
-
-	Serial.print(F("Length: "));
-	Serial.println(strlen(networkPassword));
 
 	WiFi.begin(networkName, networkPassword);
 	while(WiFi.status() == WL_IDLE_STATUS) {
@@ -75,7 +60,6 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 
 	if(WiFi.status() == WL_CONNECT_FAILED) {
 		DebugLog::getLog().logWarning(ERROR_CODE::INTERNET_ACCESS_CONNECTION_FAILED);
-		Serial.println(F("Connection failed. Disconnecting before retry"));
 		disconnectFromNetwork();
 		if(retry) {
 			delay(2000);
@@ -96,7 +80,6 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 		return true;
 	} else {
 		DebugLog::getLog().logError(ERROR_CODE::INTERNET_ACCESS_UNKNOWN_STATUS);
-		Serial.print(F("Wifi Status: "));
 		Serial.println(tempStat);
 		
 		return false;
@@ -106,7 +89,6 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 
 void InternetAccess::disconnectFromNetwork() {
 	WiFi.disconnect();
-	Serial.println(F("Disconnected."));
 }
 
 #endif

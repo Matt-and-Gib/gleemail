@@ -3,6 +3,8 @@
 
 #include <ArduinoJson.h>
 
+#include "global.h"
+
 
 //Remember: Preferences is a singleton! DO NOT waste memory.
 class Preferences {
@@ -24,6 +26,12 @@ public:
 		return prefs;
 	}
 
+	const char* getWiFiSSID() const {return wifiSSID;}
+	void setWiFiSSID(char* s) {wifiSSID = s;}
+
+	const char* getWiFiPassword() const {return wifiPassword;}
+	void setWiFiPassword(char* p) {wifiPassword = p;}
+
 	const char* serializePrefs() const {
 		char output[PREFS_DOCUMENT_SIZE];
 		StaticJsonDocument<PREFS_DOCUMENT_SIZE> doc;
@@ -44,12 +52,12 @@ public:
 
 	bool loadSerializedPrefs(char* input, const unsigned short length) {
 		StaticJsonDocument<PREFS_DOCUMENT_SIZE> doc;
-
 		DeserializationError error = deserializeJson(doc, input, length);
 
 		if(error) {
-			Serial.print(F("deserializeJson() failed: "));
-			Serial.println(error.f_str());
+			//Serial.print(F("deserializeJson() failed: "));
+			//Serial.println(error.f_str());
+			DebugLog::getLog().logError(ERROR_CODE::JSON_PREFS_DESERIALIZATION_ERROR);
 			return false;
 		}
 
@@ -61,43 +69,7 @@ public:
 
 		const char* tempPassword = doc["WiFiPassword"];
 		wifiPassword = copyAndTerminateString(tempPassword, strlen(tempPassword));
-
-
-		Serial.print(F("tempSSID: \'"));
-		Serial.print(tempSSID);
-		Serial.println(F("\'"));
-
-		Serial.print(F("Length: "));
-		Serial.println(strlen(tempSSID));
-
-		Serial.print(F("tempPassword: \'"));
-		Serial.print(tempPassword);
-		Serial.println(F("\'"));
-
-		Serial.print(F("Length: "));
-		Serial.println(strlen(tempPassword));
-
-
-		Serial.print(F("WIFISSID: \'"));
-		Serial.print(wifiSSID);
-		Serial.println(F("\'"));
-
-		Serial.print(F("Length: "));
-		Serial.println(strlen(wifiSSID));
-
-		Serial.print(F("WIFIPassword: \'"));
-		Serial.print(wifiPassword);
-		Serial.println(F("\'"));
-
-		Serial.print(F("Length: "));
-		Serial.println(strlen(wifiPassword));
 	}
-
-	const char* getWiFiSSID() const {return wifiSSID;}
-	void setWiFiSSID(char* s) {wifiSSID = s;}
-
-	const char* getWiFiPassword() const {return wifiPassword;}
-	void setWiFiPassword(char* p) {wifiPassword = p;}
 };
 
 #endif

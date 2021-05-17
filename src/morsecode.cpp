@@ -132,7 +132,7 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 	ArduinoJson::DeserializationError error = deserializeJson(doc, payload);
 
 	if (error) {
-		DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
+		DebugLog::getLog().logError(ERROR_CODE::JSON_INPUT_DATA_DESERIALIZATION_ERROR);
 		//Serial.println(error.f_str());
 		return false;
 	}

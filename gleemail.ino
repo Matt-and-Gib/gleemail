@@ -190,28 +190,46 @@ void loop() {
 
 bool prepareStorage() {
 	if(!storage.begin()) {
-		Serial.println(F("Storage unavailable!"));
 		return false;
 	}
 
 	if(!storage.loadPrefs()) {
-		Serial.println(F("Unable to read prefs!"));
-		return false;
+		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
 	}
-
-	Serial.println(F("Storage prepared!"));
 
 	return true;
 }
 
 
+bool promptForNewWiFiCredentials() {
+	/*unsigned short USER_INPUT_TIMESPAN = 100; //Move this sad lonely variable to its home in the clouds
+	unsigned long timespan = millis() + USER_INPUT_TIMESPAN;
+	char userInput[1];
+
+	Serial.print("Would you like to use a new WiFi SSID & Password? (Y, N)");
+	while(millis() < timespan) {
+		if(Serial.available() > 0) {
+			Serial.readBytesUntil('\n', userInput, 1);
+			break;
+		}
+	}
+
+	if(userInput[0] == 'Y' || userInput[0] == 'y') {
+		return true;
+	} else {
+		return false;
+	}*/
+
+	return false;
+}
+
+
 bool connectToWiFi(bool forceManual = false) {
 	bool changedLoginInfo = forceManual;
-	if(!Preferences::getPrefs().getWiFiSSID() || !Preferences::getPrefs().getWiFiPassword()) {
-		Serial.println(F("SSID or Password wasn't stored"));
 
-		char desiredSSID[internet.getMaxSSIDLength() + 1];
-		char desiredPassword[internet.getMaxPasswordLength() + 1];
+	if(forceManual || (!Preferences::getPrefs().getWiFiSSID() || !Preferences::getPrefs().getWiFiPassword())) {
+		char desiredSSID[internet.getMaxSSIDLength()];
+		char desiredPassword[internet.getMaxPasswordLength()];
 		unsigned short inputLength = 0;
 
 		Serial.println(F("Enter WiFi SSID:"));
@@ -229,8 +247,7 @@ bool connectToWiFi(bool forceManual = false) {
 			DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
 		}
 
-		desiredSSID[inputLength] = '\0';
-		Preferences::getPrefs().setWiFiSSID(copyString(desiredSSID, inputLength + 1));
+		Preferences::getPrefs().setWiFiSSID(copyAndTerminateString(desiredSSID, inputLength));
 
 		Serial.print(F("Enter password for "));
 		Serial.print(Preferences::getPrefs().getWiFiSSID());
@@ -248,12 +265,11 @@ bool connectToWiFi(bool forceManual = false) {
 		if(inputLength >= internet.getMaxPasswordLength()) {
 			DebugLog::getLog().logError(INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED);
 		}
-		desiredPassword[inputLength] = '\0';
-		Preferences::getPrefs().setWiFiPassword(copyString(desiredPassword, inputLength + 1));
+
+		Preferences::getPrefs().setWiFiPassword(copyAndTerminateString(desiredPassword, inputLength));
 
 		changedLoginInfo = true;
 	} else {
-		Serial.println(F("Trying saved WiFi credentials"));
 		changedLoginInfo = false;
 	}
 
@@ -264,9 +280,6 @@ bool connectToWiFi(bool forceManual = false) {
 		display.updateWriting("Failed");
 		Serial.print(F("Unable to connect to "));
 		Serial.println(Preferences::getPrefs().getWiFiSSID());
-
-		Preferences::getPrefs().setWiFiSSID(nullptr);
-		Preferences::getPrefs().setWiFiPassword(nullptr);
 
 		return false;
 	}
@@ -386,6 +399,7 @@ void setup() {
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
 	SETUP_LEVEL setupState = WELCOME;
 	bool setupComplete = false;
+	bool networkForceNewCredentials = false;
 
 	const unsigned short SETUP_STEP_DELAY = 1500;
 
@@ -409,7 +423,7 @@ void setup() {
 		case SETUP_LEVEL::STORAGE:
 			Serial.println(F("Searching Storage..."));
 			if(!prepareStorage()) {
-				Serial.println(F("SD Card not available"));
+				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 			}
 
 			setupState = SETUP_LEVEL::NETWORK;
@@ -424,8 +438,10 @@ void setup() {
 			display.updateReading("Joining WiFi");
 			delay(SETUP_STEP_DELAY);
 
-			if(connectToWiFi()) {
+			if(connectToWiFi(networkForceNewCredentials)) {
 				setupState = SETUP_LEVEL::INPUT_METHOD;
+			} else {
+				networkForceNewCredentials = promptForNewWiFiCredentials();
 			}
 		break;
 
