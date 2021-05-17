@@ -47,11 +47,12 @@ bool Storage::loadPrefs() {
 		Serial.println(F("Opened for reading!"));
 
 		unsigned short dataLength = 0;
-		char data[prefsFile.size()];
+		char data[prefsFile.size() + 1];
 		while(prefsFile.available()) {
-			if(prefsFile.peek() == '\r' || prefsFile.peek() == '\n') {
+			/*if(prefsFile.peek() == '\r' || prefsFile.peek() == '\n') {
+				Serial.println(F("stopping at line break"));
 				break;
-			}
+			}*/
 			data[dataLength] = prefsFile.read();
 			dataLength += 1;
 		}
@@ -88,7 +89,7 @@ bool Storage::savePrefs() {
 		Serial.println(prefsData);
 		Serial.println(F("done"));
 
-		prefsFile.println(prefsData); //Encrypt me!
+		prefsFile.print(prefsData); //Encrypt me!
 		prefsFile.close();
 
 		delete[] prefsData;

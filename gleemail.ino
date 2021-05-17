@@ -206,6 +206,7 @@ bool prepareStorage() {
 
 
 bool connectToWiFi(bool forceManual = false) {
+	bool changedLoginInfo = forceManual;
 	if(!Preferences::getPrefs().getWiFiSSID() || !Preferences::getPrefs().getWiFiPassword()) {
 		Serial.println(F("SSID or Password wasn't stored"));
 
@@ -249,16 +250,15 @@ bool connectToWiFi(bool forceManual = false) {
 		}
 		desiredPassword[inputLength] = '\0';
 		Preferences::getPrefs().setWiFiPassword(copyString(desiredPassword, inputLength + 1));
+
+		changedLoginInfo = true;
 	} else {
 		Serial.println(F("Trying saved WiFi credentials"));
+		changedLoginInfo = false;
 	}
 
 	Serial.println(F("Attempting connection..."));
 	display.updateWriting("Connecting...");
-
-	//Serial.print(F("Password: "));
-	//char* tempPassTest = Preferences::getPrefs().getWiFiPassword();
-	//char
 
 	if(!internet.connectToNetwork(Preferences::getPrefs().getWiFiSSID(), Preferences::getPrefs().getWiFiPassword())) {
 		display.updateWriting("Failed");
@@ -269,6 +269,11 @@ bool connectToWiFi(bool forceManual = false) {
 		Preferences::getPrefs().setWiFiPassword(nullptr);
 
 		return false;
+	}
+
+	if(changedLoginInfo) {
+		Serial.println(F("Saving successful WiFi credentials"));
+		storage.savePrefs();
 	}
 
 	Serial.println(F("Connected!"));
@@ -420,8 +425,6 @@ void setup() {
 			delay(SETUP_STEP_DELAY);
 
 			if(connectToWiFi()) {
-				Serial.println(F("Saving successful WiFi credentials"));
-				storage.savePrefs();
 				setupState = SETUP_LEVEL::INPUT_METHOD;
 			}
 		break;
