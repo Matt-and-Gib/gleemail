@@ -206,7 +206,7 @@ bool promptForNewWiFiCredentials() {
 	unsigned long timespan = millis() + USER_INPUT_TIMESPAN;
 	char userInput[1];
 
-	Serial.print("Would you like to use a new WiFi SSID & Password? (Y, N)");
+	Serial.println(F("Would you like to use a new WiFi SSID & Password? (Y, N)"));
 	while(millis() < timespan) {
 		if(Serial.available() > 0) {
 			Serial.readBytesUntil('\n', userInput, 1);
@@ -285,7 +285,6 @@ bool connectToWiFi(bool forceManual = false) {
 	}
 
 	if(changedLoginInfo) {
-		Serial.println(F("Saving successful WiFi credentials"));
 		storage.savePrefs();
 	}
 
@@ -431,6 +430,7 @@ void setup() {
 
 
 		case SETUP_LEVEL::NETWORK:
+			Serial.println(F("Joining WiFi"));
 			display.updateWriting("Joining WiFi");
 			delay(SETUP_STEP_DELAY);
 
