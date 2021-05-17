@@ -256,6 +256,10 @@ bool connectToWiFi(bool forceManual = false) {
 	Serial.println(F("Attempting connection..."));
 	display.updateWriting("Connecting...");
 
+	//Serial.print(F("Password: "));
+	//char* tempPassTest = Preferences::getPrefs().getWiFiPassword();
+	//char
+
 	if(!internet.connectToNetwork(Preferences::getPrefs().getWiFiSSID(), Preferences::getPrefs().getWiFiPassword())) {
 		display.updateWriting("Failed");
 		Serial.print(F("Unable to connect to "));
@@ -361,6 +365,14 @@ void setup() {
 	while(!Serial) {
 		delay(250);
 	}
+
+	storage.begin();
+	if(!storage.clearSavedPrefs(1337)) {
+		Serial.println(F("Unable to delete!"));
+	}
+
+	Serial.println(F("Done"));
+	abort();
 
 	while(Serial.available()) {
 		Serial.read();

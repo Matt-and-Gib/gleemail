@@ -14,8 +14,6 @@ private:
 	Preferences(Preferences const&) = delete;
 	void operator=(Preferences const&) = delete;
 
-	static const constexpr unsigned short PREFS_DOCUMENT_SIZE = 96;
-
 	unsigned short preferencesFileVersion = 1;
 	char* wifiSSID;
 	char* wifiPassword;
@@ -56,17 +54,9 @@ public:
 		preferencesFileVersion = doc["Preferences Version"];
 
 		const char* tempSSID = doc["WiFiSSID"];
-		Serial.print("tempSSID: ");
-		Serial.println(tempSSID);
-		Serial.print(strlen(tempSSID));
-		Serial.println(" bytes long");
 		wifiSSID = copyString(tempSSID, strlen(tempSSID));
 
 		const char* tempPassword = doc["WiFiPassword"];
-		Serial.print("tempPassword: ");
-		Serial.println(tempPassword);
-		Serial.print(strlen(tempPassword));
-		Serial.println(" bytes long");
 		wifiPassword = copyString(tempPassword, strlen(tempPassword));
 	}
 
