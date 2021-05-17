@@ -28,11 +28,17 @@ static char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
 static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
 bool pendingPeerMessage = false;
 
+void (*doAsynchronousProcess)();
 
 static long long cycleStartTime = 0;
 static long cycleDuration = 0;
 //static long greatestCycleDuration = 0;
 static unsigned short cycleLatencyCount = 0;
+
+
+void checkVersionRequestComplete() {
+	
+}
 
 
 void updateInputMethod() {
@@ -172,6 +178,7 @@ void loop() {
 	updateInputMethod();
 	updateNetwork();
 	//updateDisplay();
+	doAsynchronousProcess();
 	printErrorCodes();
 
 	cycleDuration = millis() - cycleStartTime;
@@ -295,8 +302,15 @@ bool connectToWiFi(bool forceManual = false) {
 
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
-	Serial.println(F("Downloading Input Method data..."));
 
+	//check if MCCP is stored
+	//no: do existing
+	//yes:
+		//send request for version info
+		//doAsynchronousProcess = &checkVersionRequestComplete;
+		//input->setNetworkData(storage.getMorseCodeCharPairs());
+
+	Serial.println(F("Downloading Input Method data..."));
 	char *data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
 	if(!data) {
 		Serial.println(F("Unable to download data!"));
@@ -443,6 +457,13 @@ void setup() {
 			}
 		break;
 
+/*
+~7.0 sec
+~2.5 sec
+~2.0 sec
+~1.7 sec
+~1.4 sec
+*/
 
 		case SETUP_LEVEL::INPUT_METHOD:
 			Serial.println(millis());
