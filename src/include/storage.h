@@ -2,7 +2,6 @@
 #define STORAGE_H
 
 #include <SD.h>
-#include <ArduinoJson.h>
 #include "Arduino.h"
 
 #include "global.h"
@@ -24,6 +23,7 @@ public:
 	bool begin();
 	bool loadPrefs();
 	bool savePrefs();
+	bool clearSavedPrefs(const unsigned short);
 };
 
 #endif

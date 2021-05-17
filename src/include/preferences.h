@@ -7,7 +7,10 @@
 //Remember: Preferences is a singleton! DO NOT waste memory.
 class Preferences {
 private:
-	Preferences() {}
+	Preferences() {
+		wifiSSID = nullptr;
+		wifiPassword = nullptr;
+	}
 	Preferences(Preferences const&) = delete;
 	void operator=(Preferences const&) = delete;
 
@@ -27,12 +30,51 @@ public:
 		StaticJsonDocument<PREFS_DOCUMENT_SIZE> doc;
 
 		doc["Preferences Version"] = preferencesFileVersion;
-		doc["WiFiSSID"] = wifiSSID;
-		doc["WiFiPassword"] = wifiPassword;;
+		if(wifiSSID) {
+			doc["WiFiSSID"] = wifiSSID;
+		}
+
+		if(wifiPassword) {
+			doc["WiFiPassword"] = wifiPassword;;
+		}
 
 		serializeJson(doc, output);
 		return copyString(output, PREFS_DOCUMENT_SIZE);
 	}
+
+	bool loadSerializedPrefs(char* input, const unsigned short length) {
+		StaticJsonDocument<48> doc;
+
+		DeserializationError error = deserializeJson(doc, input, length);
+
+		if(error) {
+			Serial.print(F("deserializeJson() failed: "));
+			Serial.println(error.f_str());
+			return false;
+		}
+
+		preferencesFileVersion = doc["Preferences Version"];
+
+		const char* tempSSID = doc["WiFiSSID"];
+		Serial.print("tempSSID: ");
+		Serial.println(tempSSID);
+		Serial.print(strlen(tempSSID));
+		Serial.println(" bytes long");
+		wifiSSID = copyString(tempSSID, strlen(tempSSID));
+
+		const char* tempPassword = doc["WiFiPassword"];
+		Serial.print("tempPassword: ");
+		Serial.println(tempPassword);
+		Serial.print(strlen(tempPassword));
+		Serial.println(" bytes long");
+		wifiPassword = copyString(tempPassword, strlen(tempPassword));
+	}
+
+	const char* getWiFiSSID() const {return wifiSSID;}
+	void setWiFiSSID(char* s) {wifiSSID = s;}
+
+	const char* getWiFiPassword() const {return wifiPassword;}
+	void setWiFiPassword(char* p) {wifiPassword = p;}
 };
 
 #endif

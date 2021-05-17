@@ -194,8 +194,6 @@ bool prepareStorage() {
 		return false;
 	}
 
-	storage.savePrefs();
-
 	if(!storage.loadPrefs()) {
 		Serial.println(F("Unable to read prefs!"));
 		return false;
@@ -207,52 +205,65 @@ bool prepareStorage() {
 }
 
 
-bool connectToWiFi() {
-	unsigned short inputLength = 0;
+bool connectToWiFi(bool forceManual = false) {
+	if(!Preferences::getPrefs().getWiFiSSID() || !Preferences::getPrefs().getWiFiPassword()) {
+		Serial.println(F("SSID or Password wasn't stored"));
 
-	Serial.println(F("Enter WiFi SSID:"));
-	display.updateWriting("Enter SSID");
-	char userSSID[internet.getMaxSSIDLength() + 1];
-	while(true) {
-		if(Serial.available() > 0) {
-			inputLength = Serial.readBytesUntil('\n', userSSID, internet.getMaxSSIDLength());
-			break;
+		char desiredSSID[internet.getMaxSSIDLength() + 1];
+		char desiredPassword[internet.getMaxPasswordLength() + 1];
+		unsigned short inputLength = 0;
+
+		Serial.println(F("Enter WiFi SSID:"));
+		display.updateWriting("Enter SSID");
+		while(true) {
+			if(Serial.available() > 0) {
+				inputLength = Serial.readBytesUntil('\n', desiredSSID, internet.getMaxSSIDLength());
+				break;
+			}
+
+			delay(250);
 		}
 
-		delay(250);
-	}
-
-	if(inputLength >= internet.getMaxSSIDLength()) {
-		DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
-	}
-	userSSID[inputLength] = '\0';
-
-	char userPassword[internet.getMaxPasswordLength() + 1];
-	Serial.print(F("Enter password for "));
-	Serial.print(userSSID);
-	Serial.println(F(":"));
-	display.updateWriting("Enter Password");
-	while(true) {
-		if(Serial.available() > 0) {
-			inputLength = Serial.readBytesUntil('\n', userPassword, internet.getMaxPasswordLength());
-			break;
+		if(inputLength >= internet.getMaxSSIDLength()) {
+			DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
 		}
 
-		delay(250);
-	}
+		desiredSSID[inputLength] = '\0';
+		Preferences::getPrefs().setWiFiSSID(copyString(desiredSSID, inputLength + 1));
 
-	if(inputLength >= internet.getMaxPasswordLength()) {
-		DebugLog::getLog().logError(INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED);
+		Serial.print(F("Enter password for "));
+		Serial.print(Preferences::getPrefs().getWiFiSSID());
+		Serial.println(F(":"));
+		display.updateWriting("Enter Password");
+		while(true) {
+			if(Serial.available() > 0) {
+				inputLength = Serial.readBytesUntil('\n', desiredPassword, internet.getMaxPasswordLength());
+				break;
+			}
+
+			delay(250);
+		}
+
+		if(inputLength >= internet.getMaxPasswordLength()) {
+			DebugLog::getLog().logError(INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED);
+		}
+		desiredPassword[inputLength] = '\0';
+		Preferences::getPrefs().setWiFiPassword(copyString(desiredPassword, inputLength + 1));
+	} else {
+		Serial.println(F("Trying saved WiFi credentials"));
 	}
-	userPassword[inputLength] = '\0';
 
 	Serial.println(F("Attempting connection..."));
 	display.updateWriting("Connecting...");
 
-	if(!internet.connectToNetwork(userSSID, userPassword)) {
-		Serial.print(F("Unable to connect to "));
+	if(!internet.connectToNetwork(Preferences::getPrefs().getWiFiSSID(), Preferences::getPrefs().getWiFiPassword())) {
 		display.updateWriting("Failed");
-		Serial.println(userSSID);
+		Serial.print(F("Unable to connect to "));
+		Serial.println(Preferences::getPrefs().getWiFiSSID());
+
+		Preferences::getPrefs().setWiFiSSID(nullptr);
+		Preferences::getPrefs().setWiFiPassword(nullptr);
+
 		return false;
 	}
 
@@ -357,7 +368,6 @@ void setup() {
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
 	SETUP_LEVEL setupState = WELCOME;
-	bool sdCardUsable = false;
 	bool setupComplete = false;
 
 	const unsigned short SETUP_STEP_DELAY = 1500;
@@ -383,10 +393,8 @@ void setup() {
 			Serial.println(F("Searching Storage..."));
 			if(!prepareStorage()) {
 				Serial.println(F("SD Card cannot be used"));
-				sdCardUsable = false;
-			} else {
-				sdCardUsable = true;
 			}
+
 			setupState = SETUP_LEVEL::NETWORK;
 		break;
 
@@ -400,6 +408,8 @@ void setup() {
 			delay(SETUP_STEP_DELAY);
 
 			if(connectToWiFi()) {
+				Serial.println(F("Saving successful WiFi credentials"));
+				storage.savePrefs();
 				setupState = SETUP_LEVEL::INPUT_METHOD;
 			}
 		break;

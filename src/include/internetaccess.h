@@ -22,7 +22,7 @@ public:
 	unsigned short getMaxSSIDLength() const {return MAX_SSID_LENGTH;}
 	unsigned short getMaxPasswordLength() const {return MAX_PASSWORD_LENGTH;}
 
-	bool connectToNetwork(char*, char*, bool);
+	bool connectToNetwork(const char*, const char*, bool);
 	void disconnectFromNetwork();
 
 	bool connectToWeb(const char* address) {return client.connectSSL(address, 443);}
@@ -43,7 +43,7 @@ InternetAccess::~InternetAccess() {
 }
 
 
-bool InternetAccess::connectToNetwork(char* networkName, char* networkPassword, bool retry = true) {
+bool InternetAccess::connectToNetwork(const char* networkName, const char* networkPassword, bool retry = true) {
 	if(networkName == nullptr || networkPassword == nullptr) {
 		DebugLog::getLog().logError(ERROR_CODE::INTERNET_ACCESS_PASSED_INVALID_PARAMETER);
 		return false;

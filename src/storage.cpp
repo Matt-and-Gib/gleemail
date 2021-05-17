@@ -18,44 +18,63 @@ bool Storage::begin() {
 
 	if(!SD.exists("GLEEMAIL")) {
 		SD.mkdir("GLEEMAIL");
-		Serial.println("Created glEEmail directory in SD card");
+		Serial.println(F("Created glEEmail directory in SD card"));
 	} else {
-		Serial.println("glEEmail directory already exists!");
+		Serial.println(F("glEEmail directory already exists!"));
 	}
 }
 
 
+bool Storage::clearSavedPrefs(const unsigned short confirmationNumber) {
+	if(confirmationNumber != 1337) {
+		return false;
+	}
+
+	SD.remove(F("GLEEMAIL/PREFS.GMD"));
+	return SD.rmdir(F("GLEEMAIL"));
+}
+
+
 bool Storage::loadPrefs() {
-	Serial.println("Opening prefs...");
-	File prefsFile = SD.open("GLEEMAIL/PREFS.GMD", FILE_READ);
+	Serial.println(F("Opening prefs..."));
+	File prefsFile = SD.open(F("GLEEMAIL/PREFS.GMD"), FILE_READ);
 	if(prefsFile) {
-		Serial.println("Opened for reading!");
-		while(prefsFile.available()) {
-			Serial.write(prefsFile.read());
+		Serial.println(F("Opened for reading!"));
+		const unsigned short dataLength = prefsFile.available();
+		char data[dataLength];
+
+		for(unsigned short index = 0; index < dataLength; index += 1) {
+			data[index] = prefsFile.read();
+		}
+		Serial.println(data);
+
+		if(!Preferences::getPrefs().loadSerializedPrefs(data, dataLength)) {
+			Serial.println(F("Couldn't deserialize prefs!"));
+			return false;
 		}
 	} else {
-		Serial.println("Unable to open");
+		Serial.println(F("Unable to open"));
 		return false;
 	}
 	prefsFile.close();
-	Serial.println("Closed prefs.");
+	Serial.println(F("Closed prefs."));
 	return true;
 }
 
 
 bool Storage::savePrefs() {
-	Serial.println("Opening prefs...");
-	File prefsFile = SD.open("GLEEMAIL/PREFS.GMD", FILE_WRITE);
+	Serial.println(F("Opening prefs..."));
+	File prefsFile = SD.open(F("GLEEMAIL/PREFS.GMD"), FILE_WRITE);
 
 	if(prefsFile) {
-		Serial.println("Opened for writing!");
-		prefsFile.println(Preferences::getPrefs().serializePrefs());
+		Serial.println(F("Opened for writing!"));
+		prefsFile.println(Preferences::getPrefs().serializePrefs()); //Encrypt me!
 	} else {
-		Serial.println("Unable to open");
+		Serial.println(F("Unable to open"));
 		return false;
 	}
 	prefsFile.close();
-	Serial.println("Closed prefs.");
+	Serial.println(F("Closed prefs."));
 
 	return true;
 }
