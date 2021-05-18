@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "src/include/global.h"
+#include "src/include/preferences.h"
 
 #include "src/include/storage.h"
 #include "src/include/display.h"
@@ -199,9 +200,13 @@ bool prepareStorage() {
 		return false;
 	}
 
-	if(!storage.loadPrefs()) {
+	char* preferencesData = storage.readFile(prefsPath);
+	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
+	} else {
+		Preferences::getPrefs().loadSerializedPrefs(preferencesData, storage.lastReadFileLength());
 	}
+	delete[] preferencesData;
 
 	return true;
 }
@@ -291,7 +296,8 @@ bool connectToWiFi(bool forceManual = false) {
 	}
 
 	if(changedLoginInfo) {
-		storage.savePrefs();
+		//storage.savePrefs();
+		storage.writeFile(Preferences::getPrefs().serializePrefs(), prefsPath, false/*CHANGE TO TRUE WHEN ENCRYPTION IS READY, YO*/);
 	}
 
 	Serial.println(F("Connected!"));
@@ -312,9 +318,35 @@ bool setupInputMethod() {
 			return false;
 		}
 
-		storage.saveFile(data, morseCodeCharPairsPath);
+		storage.writeFile(data, morseCodeCharPairsPath);
 	} else {
 		Serial.println(F("Data exists on SD card!"));
+
+		/*StaticJsonDocument<16> filter;
+		filter["size"] = true;
+
+		StaticJsonDocument<16> sizeDoc;
+		deserializeJson(sizeDoc, data, DeserializationOption::Filter(filter));
+		const unsigned short mccpSize = sizeDoc["size"];
+
+		DynamicJsonDocument mccpDoc(mccpSize);
+		DeserializationError error = deserializeJson(mccpDoc, data);
+
+		if(error) {
+			Serial.println(error.f_str());
+		}
+
+		const char* letter;
+		const char* phrase;
+		for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
+			letter = elem["symbol"];
+			phrase = elem["phrase"];
+			Serial.print(F("Adding: "));
+			Serial.print(phrase);
+			Serial.print(F(" : "));
+			Serial.println(letter);
+		}*/
+
 		//send request for version info
 		//doAsynchronousProcess = &verifyInputMethodData;
 	}

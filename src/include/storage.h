@@ -2,29 +2,24 @@
 #define STORAGE_H
 
 #include <SD.h>
-#include "Arduino.h"
 
 #include "global.h"
-#include "preferences.h"
 
-
-//NOTE: all paths are full caps, and file names must be in 8.3 format
-static const constexpr char rootPath[9] = "GLEEMAIL";
-static const constexpr char prefsPath[19] = "GLEEMAIL/PREFS.GMD";
-static const constexpr char morseCodeCharPairsPath[18] = "GLEEMAIL/MCCP.GMD";
 
 class Storage {
 private:
+	unsigned int dataLength = 0;
 public:
 	Storage();
 	~Storage();
 
 	bool begin();
-	bool clearSavedPrefs(const unsigned short);
-	bool loadPrefs();
-	bool savePrefs();
-	bool loadMorseCodeCharPairs();
-	bool saveFile(const char*, const char*);
+	bool clearFile(const char* filePath);
+
+	bool writeFile(const char* data, const char* filePath, const bool encrypt = false);
+
+	char* readFile(const char* filePath, const bool decrypt = false);
+	const unsigned int lastReadFileLength() const {return dataLength == 0 ? 0 : dataLength + 1;}
 };
 
 #endif
