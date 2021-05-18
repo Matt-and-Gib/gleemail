@@ -126,8 +126,25 @@ bool Storage::loadMorseCodeCharPairs() {
 			Serial.print(F(" : "));
 			Serial.println(letter);
 		}
+
+		return true;
 	} else {
 		mccpFile.close();
+		return false;
+	}
+}
+
+
+bool Storage::saveFile(const char* data, const char* filePath) { //The data that is sent into saveFile() ABSOLUTELY MUST BE TERMINATED!
+	File saveToFile = SD.open(filePath, O_WRITE | O_CREAT);
+
+	if(saveToFile) {
+		saveToFile.print(data);
+		saveToFile.close();
+
+		return true;
+	} else {
+		saveToFile.close();
 		return false;
 	}
 }

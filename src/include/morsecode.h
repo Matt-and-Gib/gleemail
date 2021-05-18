@@ -66,7 +66,7 @@ static const constexpr unsigned short SWITCH_PIN_INDEX = 9;
 
 static const constexpr short REQUEST_HEADERS_LENGTH = 7;
 static const constexpr char SERVER[] = "raw.githubusercontent.com";
-static const constexpr char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/MorseCodeCharPairs.json HTTP/1.1";
+static const constexpr char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairs.json HTTP/1.1"; //TODO: CHANGE ME TO MAIN BRANCH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!i!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 static const constexpr char HOST[] = "Host: raw.githubusercontent.com";
 
 static const constexpr char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {

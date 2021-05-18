@@ -8,7 +8,7 @@ class WebAccess {
 private:
 	char* server;
 
-	static const constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
+	static const constexpr short DATA_BUFFER_SIZE = 4096; //Arbitrary size of download data buffer (increase as needed)
 
 	static const constexpr char HEADER_END_STRING[] = "\r\n\r\n";
 	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;

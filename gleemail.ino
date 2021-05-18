@@ -303,23 +303,33 @@ bool connectToWiFi(bool forceManual = false) {
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
 
+	char* data = storage.readFile(morseCodeCharPairsPath);
+	if(!data) {
+		Serial.println(F("Downloading Input Method data..."));
+		data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
+		if(!data) {
+			Serial.println(F("Unable to download data!"));
+			return false;
+		}
+
+		storage.saveFile(data, morseCodeCharPairsPath);
+	} else {
+		Serial.println(F("Data exists on SD card!"));
+		//send request for version info
+		//doAsynchronousProcess = &verifyInputMethodData;
+	}
 
 	//check if MCCP is stored
 	//no:
 		//download from GitHub
-		//parse
 		//store on SD
 	//yes:
 		//send request for version info
 		//doAsynchronousProcess = &verifyInputMethodData;
-		//input->setNetworkData(storage.getMorseCodeCharPairs());
 
-	Serial.println(F("Downloading Input Method data..."));
-	char *data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
-	if(!data) {
-		Serial.println(F("Unable to download data!"));
-		return false;
-	}
+	//input->setNetworkData(storage.getMorseCodeCharPairs());
+
+	
 
 	/*Serial.println("JSON Payload:\n");
 	unsigned short i = 0;
@@ -470,7 +480,6 @@ void setup() {
 */
 
 		case SETUP_LEVEL::INPUT_METHOD:
-			Serial.println(millis());
 			display.updateReading("Setting Up Input");
 			display.updateWriting("Downloading Data");
 			if(setupInputMethod()) {
@@ -480,7 +489,6 @@ void setup() {
 				}
 
 				setupState = SETUP_LEVEL::PINS;
-				Serial.println(millis());
 			}
 		break;
 

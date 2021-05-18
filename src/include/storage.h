@@ -24,6 +24,7 @@ public:
 	bool loadPrefs();
 	bool savePrefs();
 	bool loadMorseCodeCharPairs();
+	bool saveFile(const char*, const char*);
 };
 
 #endif
