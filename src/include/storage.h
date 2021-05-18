@@ -18,7 +18,7 @@ public:
 
 	bool writeFile(const char* data, const char* filePath, const bool encrypt = false);
 
-	char* readFile(const char* filePath, const bool decrypt = false);
+	const char* readFile(const char* filePath, const bool decrypt = false); //Remember to delete! Stores on heap
 	const unsigned int lastReadFileLength() const {return dataLength == 0 ? 0 : dataLength + 1;}
 };
 

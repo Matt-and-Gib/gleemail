@@ -48,7 +48,7 @@ bool Storage::writeFile(const char* data, const char* filePath, const bool encry
 
 
 //REMEMBER TO DELETE! This is on the heap
-char* Storage::readFile(const char* filePath, const bool decrypt) {
+const char* Storage::readFile(const char* filePath, const bool decrypt) {
 	dataLength = 0;
 	File readFromFile = SD.open(filePath, FILE_READ);
 	if(readFromFile) {

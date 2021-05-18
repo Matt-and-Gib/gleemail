@@ -200,7 +200,7 @@ bool prepareStorage() {
 		return false;
 	}
 
-	char* preferencesData = storage.readFile(prefsPath);
+	const char* preferencesData = storage.readFile(prefsPath);
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
 	} else {
@@ -309,7 +309,7 @@ bool connectToWiFi(bool forceManual = false) {
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
 
-	char* data = storage.readFile(morseCodeCharPairsPath);
+	const char* data = storage.readFile(morseCodeCharPairsPath);
 	if(!data) {
 		Serial.println(F("Downloading Input Method data..."));
 		data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
@@ -322,12 +322,17 @@ bool setupInputMethod() {
 	} else {
 		Serial.println(F("Data exists on SD card!"));
 
-		/*StaticJsonDocument<16> filter;
+		const unsigned fileLength = storage.lastReadFileLength();
+
+		StaticJsonDocument<16> filter;
 		filter["size"] = true;
 
 		StaticJsonDocument<16> sizeDoc;
 		deserializeJson(sizeDoc, data, DeserializationOption::Filter(filter));
 		const unsigned short mccpSize = sizeDoc["size"];
+
+		Serial.print(F("Size property from SD card Morse Code Char Pairs: "));
+		Serial.println(mccpSize);
 
 		DynamicJsonDocument mccpDoc(mccpSize);
 		DeserializationError error = deserializeJson(mccpDoc, data);
@@ -345,7 +350,7 @@ bool setupInputMethod() {
 			Serial.print(phrase);
 			Serial.print(F(" : "));
 			Serial.println(letter);
-		}*/
+		}
 
 		//send request for version info
 		//doAsynchronousProcess = &verifyInputMethodData;
