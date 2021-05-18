@@ -61,26 +61,73 @@ bool Storage::loadPrefs() {
 
 
 bool Storage::savePrefs() {
-	Serial.println(F("Opening prefs..."));
-	File prefsFile = SD.open(F("GLEEMAIL/PREFS.GMD"), O_WRITE | O_CREAT);
+	File prefsFile = SD.open(prefsPath, O_WRITE | O_CREAT);
 
 	if(prefsFile) {
-		Serial.println(F("Opened for writing!"));
 		const char* prefsData = Preferences::getPrefs().serializePrefs();
-		Serial.print(F("Saving: "));
-		Serial.println(prefsData);
-		Serial.println(F("done"));
-
 		prefsFile.print(prefsData); //Encrypt me!
 		prefsFile.close();
 
 		delete[] prefsData;
-
-		Serial.println(F("Closed prefs."));
 		return true;
 	} else {
-		Serial.println(F("Unable to open"));
 		prefsFile.close();
+		return false;
+	}
+}
+
+/*
+	{
+		"size": 3072	
+	}
+
+	StaticJsonDocument<16> filter;
+	filter["size"] = true;
+
+	StaticJsonDocument<16> doc;
+	deserializeJson(doc, input_json, DeserializationOption::Filter(filter));
+*/
+
+
+bool Storage::loadMorseCodeCharPairs() {
+	File mccpFile = SD.open(morseCodeCharPairsPath, FILE_READ);
+	if(mccpFile) {
+		unsigned short dataLength = 0;
+		char data[mccpFile.size() + 1];
+
+		while(mccpFile.available()) {
+			data[dataLength++] = mccpFile.read();
+		}
+
+		mccpFile.close();
+		data[dataLength] = '\0';
+
+		StaticJsonDocument<16> filter;
+		filter["size"] = true;
+
+		StaticJsonDocument<16> sizeDoc;
+		deserializeJson(sizeDoc, data, DeserializationOption::Filter(filter));
+		const unsigned short mccpSize = sizeDoc["size"];
+
+		DynamicJsonDocument mccpDoc(mccpSize);
+		DeserializationError error = deserializeJson(mccpDoc, data);
+
+		if(error) {
+			Serial.println(error.f_str());
+		}
+
+		const char* letter;
+		const char* phrase;
+		for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
+			letter = elem["symbol"];
+			phrase = elem["phrase"];
+			Serial.print(F("Adding: "));
+			Serial.print(phrase);
+			Serial.print(F(" : "));
+			Serial.println(letter);
+		}
+	} else {
+		mccpFile.close();
 		return false;
 	}
 }

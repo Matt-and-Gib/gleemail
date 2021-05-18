@@ -128,10 +128,10 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 		return false;
 	}
 
-	ArduinoJson::DynamicJsonDocument doc(CALCULATED_DOCUMENT_SIZE_IN_BYTES);
+	ArduinoJson::DynamicJsonDocument doc(CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES);
 	ArduinoJson::DeserializationError error = deserializeJson(doc, payload);
 
-	if (error) {
+	if(error) {
 		DebugLog::getLog().logError(ERROR_CODE::JSON_INPUT_DATA_DESERIALIZATION_ERROR);
 		//Serial.println(error.f_str());
 		return false;

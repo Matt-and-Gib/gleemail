@@ -36,7 +36,7 @@ static long cycleDuration = 0;
 static unsigned short cycleLatencyCount = 0;
 
 
-void checkVersionRequestComplete() {
+void verifyInputMethodData() {
 	
 }
 
@@ -303,11 +303,15 @@ bool connectToWiFi(bool forceManual = false) {
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
 
+
 	//check if MCCP is stored
-	//no: do existing
+	//no:
+		//download from GitHub
+		//parse
+		//store on SD
 	//yes:
 		//send request for version info
-		//doAsynchronousProcess = &checkVersionRequestComplete;
+		//doAsynchronousProcess = &verifyInputMethodData;
 		//input->setNetworkData(storage.getMorseCodeCharPairs());
 
 	Serial.println(F("Downloading Input Method data..."));
@@ -350,7 +354,7 @@ void setupPins() {
 }
 
 
-void connectToPeer() {
+void connectToPeer() { //Use PEER wait time to do asynchronousProcess
 	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
 	char* ipAddressInputSubstringBuffer;
 	uint8_t ipAddressParts[4];
@@ -487,7 +491,7 @@ void setup() {
 		break;
 
 
-		case SETUP_LEVEL::PEER:
+		case SETUP_LEVEL::PEER: //Use PEER wait time to do asynchronousProcess
 			if(!OFFLINE_MODE) {
 				display.updateWriting("Wait for glEEpal");
 				connectToPeer();	

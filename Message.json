@@ -1,9 +1,0 @@
-{
-	"T": 0,		//Message Type
-	"I": 65535,	//Idempotency Token
-	"C": "",	//Chat Body
-	"E": {		//Error
-		"D": 0,	//ID
-		"A": ""	//Attribute
-	}
-}
