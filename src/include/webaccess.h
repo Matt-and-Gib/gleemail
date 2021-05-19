@@ -109,8 +109,8 @@ char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, con
 		DebugLog::getLog().logWarning(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED);
 	}
 
-	/*//Print full response
-	for(int i = 0; i < bufferIndex; i += 1) {
+	//Print full response
+	/*for(int i = 0; i < bufferIndex; i += 1) {
 		Serial.print(dataBuffer[i]);
 	}*/
 

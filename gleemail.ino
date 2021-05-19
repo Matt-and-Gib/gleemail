@@ -45,8 +45,7 @@ void checkMorseCodeCharPairsDownloadComplete() {
 
 
 void verifyInputMethodData() {
-	Serial.println(F("verify..."));
-
+	Serial.println(F("verifying..."));
 	if(internet.activeWebConnection() && internet.responseAvailableFromWeb()) {
 		Serial.println(F("web connection inactive"));
 
@@ -65,11 +64,24 @@ void verifyInputMethodData() {
 			}
 		}
 
-		rawVersionNumber[EXPECTED_VERSION_NUMBER_LENGTH] = '\0';
+		short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
+		if(endOfHeaderIndex != -1) {
+			const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
+			char* jsonData = new char[LENGTH_OF_JSON_BODY];
+			for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
+				jsonData[i] = dataBuffer[endOfHeaderIndex + i];
+			}
+			jsonData[LENGTH_OF_JSON_BODY] = '\0';
+		}
 
-		Serial.println(F("done reading"));
+		Serial.print(F("raw: "));
+		Serial.println(rawVersionNumber);
 
 		short versionNumber = atoi(rawVersionNumber);
+
+		Serial.print(F("Downloaded version number: "));
+		Serial.println(versionNumber);
+
 		if(versionNumber != Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
 			DebugLog::getLog().logWarning(INPUT_METHOD_MORSE_CODE_CHAR_PAIRS_VERSION_MISMATCH);
 
@@ -353,27 +365,39 @@ bool connectToWiFi(bool forceManual = false) {
 bool setupInputMethod() {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
 
+	const char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
+	const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
+		SERVER_REQUEST,
+		NETWORK_HEADER_USER_AGENT,
+		HOST,
+		NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
+		NETWORK_HEADER_CONNECTION_LIFETIME,
+		HEADER_TERMINATION,
+		nullptr
+	};
+
 	const char* data = storage.readFile(morseCodeCharPairsPath);
 	if(!data) {
 		Serial.println(F("Downloading Input Method data..."));
+		data = webAccess.downloadFromServer(internet, input->getServerAddress(), REQUEST_HEADERS);
+		if(!data) {
+			Serial.println(F("Unable to download version data!"));
+			return false;
+		}
+
+		const unsigned short downloadedMorseCodeCharPairsVersion = atoi(data);
+		delete[] data;
+
 		data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
 		if(!data) {
 			Serial.println(F("Unable to download data!"));
 			return false;
 		}
 
+		Preferences::getPrefs().setMorseCodeCharPairsVersion(downloadedMorseCodeCharPairsVersion);
 		storage.writeFile(data, morseCodeCharPairsPath);
 	} else {
-		const char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
-		const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
-			SERVER_REQUEST,
-			NETWORK_HEADER_USER_AGENT,
-			HOST,
-			NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
-			NETWORK_HEADER_CONNECTION_LIFETIME,
-			HEADER_TERMINATION,
-			nullptr
-		};
+		
 
 		webAccess.sendRequestToServer(internet, input->getServerAddress(), REQUEST_HEADERS);
 		doAsynchronousProcess = &verifyInputMethodData;

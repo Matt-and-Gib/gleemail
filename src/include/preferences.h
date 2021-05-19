@@ -35,6 +35,7 @@ public:
 	void setWiFiPassword(char* p) {wifiPassword = p;}
 
 	const unsigned short getMorseCodeCharPairsVersion() {return morseCodeCharPairsVersion;}
+	void setMorseCodeCharPairsVersion(const unsigned short v) {morseCodeCharPairsVersion = v;}
 
 	const char* serializePrefs() const {
 		DynamicJsonDocument doc(CALCULATED_PREFS_SIZE);
@@ -89,6 +90,8 @@ public:
 
 
 		morseCodeCharPairsVersion = doc["Morse Code Char Pairs Version"];
+		Serial.print(F("MCCP Version: "));
+		Serial.println(morseCodeCharPairsVersion);
 
 		const char* tempSSID = doc["WiFiSSID"];
 		wifiSSID = copyAndTerminateString(tempSSID, strlen(tempSSID));
