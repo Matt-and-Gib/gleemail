@@ -1,5 +1,5 @@
 {
-	"size": 3072,
+	"size": 4096,
 	"morsecodetreedata": [
 		{"phrase": ".", "symbol": "E"},
 		{"phrase": "-", "symbol": "T"},
