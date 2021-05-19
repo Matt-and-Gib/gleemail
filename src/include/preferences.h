@@ -16,10 +16,9 @@ private:
 	Preferences(Preferences const&) = delete;
 	void operator=(Preferences const&) = delete;
 
-	const static unsigned short PREFERENCES_SIZE = 64;
+	const static unsigned short PREFERENCES_VERSION = 1;
+	const static unsigned short CALCULATED_PREFS_SIZE = 64; //This value represents the size of the current (most up-to-date) version of the preferences file, possibly different than what is on the SD
 
-	unsigned short size = 0;
-	unsigned short preferencesFileVersion = 1;
 	unsigned short morseCodeCharPairsVersion = 2;
 	char* wifiSSID;
 	char* wifiPassword;
@@ -36,11 +35,10 @@ public:
 	void setWiFiPassword(char* p) {wifiPassword = p;}
 
 	const char* serializePrefs() const {
-		char output[size];
-		StaticJsonDocument<size> doc;
-		//DynamicJsonDocument doc(size);
+		DynamicJsonDocument doc(CALCULATED_PREFS_SIZE);
 
-		doc["Preferences Version"] = preferencesFileVersion;
+		doc["Size"] = CALCULATED_PREFS_SIZE;
+		doc["Preferences Version"] = PREFERENCES_VERSION;
 		doc["Morse Code Char Pairs Version"] = morseCodeCharPairsVersion;
 		if(wifiSSID) {
 			doc["WiFiSSID"] = wifiSSID;
@@ -50,25 +48,33 @@ public:
 			doc["WiFiPassword"] = wifiPassword;;
 		}
 
-		serializeJson(doc, output);
-		return copyString(output, size);
+		const unsigned short outputSize = measureJson(doc);
+		char output[outputSize];
+
+		serializeJson(doc, output, outputSize);
+		return copyAndTerminateString(output, outputSize);
 	}
 
-	bool loadSerializedPrefs(const char* input, const unsigned short length) {
+	bool deserializePrefs(const char* input, const unsigned short length) {
+
 		StaticJsonDocument<32> filter;
 		filter["Size"] = true;
 
 		StaticJsonDocument<32> sizeDoc;
 		deserializeJson(sizeDoc, input, DeserializationOption::Filter(filter));
-		size = sizeDoc["Size"];
+		const unsigned short size = sizeDoc["Size"];
 
 		Serial.print(F("Size property from SD card Prefs: "));
 		Serial.println(size);
 
+		if(size != CALCULATED_PREFS_SIZE) {
+			//DebugLog::getLog().logWarning(PREFERENCES_SIZE_MISMATCH);
+		}
 
 
 
-		StaticJsonDocument<size> doc;
+
+		DynamicJsonDocument doc(size);
 		DeserializationError error = deserializeJson(doc, input, length);
 
 		if(error) {
@@ -78,7 +84,12 @@ public:
 			return false;
 		}
 
-		preferencesFileVersion = doc["Preferences Version"];
+		const unsigned short preferencesFileVersion = doc["Preferences Version"];
+		if(preferencesFileVersion != PREFERENCES_VERSION) {
+			//DebugLog::getLog().logWarning(PREFERENCES_FILE_VERSION_MISMATCH);
+		}
+
+
 		morseCodeCharPairsVersion = doc["Morse Code Char Pairs Version"];
 
 		const char* tempSSID = doc["WiFiSSID"];

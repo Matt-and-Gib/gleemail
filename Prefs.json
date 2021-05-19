@@ -2,6 +2,6 @@
 	"Size": 384,
 	"Preferences Version": 1,
 	"Morse Code Char Pairs Version": 2,
-	"WiFiSSID": "00000000000000000000000000000000",
-	"WiFiPassword": "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeffffffffffggg"
+	"WiFiSSID": "_________UP_TO_32_BYTES_________",
+	"WiFiPassword": "________________________UP_TO_63_BYTES_________________________" 
 }

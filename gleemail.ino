@@ -204,7 +204,7 @@ bool prepareStorage() {
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
 	} else {
-		Preferences::getPrefs().loadSerializedPrefs(preferencesData, storage.lastReadFileLength());
+		Preferences::getPrefs().deserializePrefs(preferencesData, storage.lastReadFileLength());
 	}
 	delete[] preferencesData;
 
@@ -297,7 +297,9 @@ bool connectToWiFi(bool forceManual = false) {
 
 	if(changedLoginInfo) {
 		//storage.savePrefs();
-		storage.writeFile(Preferences::getPrefs().serializePrefs(), prefsPath, false/*CHANGE TO TRUE WHEN ENCRYPTION IS READY, YO*/);
+		const char* prefsData = Preferences::getPrefs().serializePrefs();
+		storage.writeFile(prefsData, prefsPath, false/*CHANGE TO TRUE WHEN ENCRYPTION IS READY, YO*/);
+		delete[] prefsData;
 	}
 
 	Serial.println(F("Connected!"));
