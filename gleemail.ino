@@ -454,7 +454,7 @@ void setup() {
 	}
 
 	/*storage.begin();
-	if(!storage.clearSavedPrefs(1337)) {
+	if(!storage.clearFile(prefsPath)) {
 		Serial.println(F("Unable to delete!"));
 	}
 

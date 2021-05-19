@@ -175,13 +175,25 @@ Required Libraries
 
 Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
 
+<details>
+<summary>Steps to take after changing certain files</summary>
+
+- preferences.h
+	- Increment `PREFERENCES_VERSION` in `preferences.h`
+	- Re-Calculate `CALCULATED_PREFS_SIZE` in `preferences.h`
+
+- MorseCodeCharPairs.json (note: don't forget to update your `SERVER` and `SERVER_REQUEST` URLs to forked repo)
+	- Increment `morseCodeCharPairsVersion` in `preferences.h`
+	- Re-Calculate `CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES` in `MorseCodeCharPairs.json` & `morsecode.h`
+
+</details>
 ___
 
 ### <a name="instructions"></a>**Usage Instructions**
 
 Important!
 
-In order to use gleemail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses a binary tree populated with JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the WiFi Module).
+In order to use glEEmail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses a binary tree populated with JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the WiFi Module).
 
 ![Install Certificate Picture One.png](resources/InstallCertificatePictureOne.png)
 
