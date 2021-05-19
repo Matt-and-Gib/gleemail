@@ -184,7 +184,7 @@ Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing
 
 - MorseCodeCharPairs.json (note: don't forget to update your `SERVER` and `SERVER_REQUEST` URLs to forked repo)
 	- Increment `morseCodeCharPairsVersion` in `preferences.h`
-	- Re-Calculate `CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES` in `MorseCodeCharPairs.json` & `morsecode.h`
+	- Re-Calculate `CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES` in `MorseCodeCharPairs.json`
 
 </details>
 ___

@@ -324,7 +324,7 @@ bool setupInputMethod() {
 	} else {
 		Serial.println(F("Data exists on SD card!"));
 
-		const unsigned fileLength = storage.lastReadFileLength();
+		/*const unsigned fileLength = storage.lastReadFileLength();
 
 		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
 		filter["size"] = true;
@@ -352,7 +352,7 @@ bool setupInputMethod() {
 			Serial.print(phrase);
 			Serial.print(F(" : "));
 			Serial.println(letter);
-		}
+		}*/
 
 		//send request for version info
 		//doAsynchronousProcess = &verifyInputMethodData;
@@ -454,7 +454,7 @@ void setup() {
 	}
 
 //----------USED TO CLEAR THE SD CARD----------
-
+/*
 	storage.begin();
 	if(!storage.clearFile(prefsPath)) {
 		Serial.println(F("Unable to Prefs path"));
@@ -465,7 +465,7 @@ void setup() {
 
 	Serial.println(F("Files deleted successfully. Halting"));
 	abort();
-	
+*/
 //----------USED TO CLEAR THE SD CARD----------
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};

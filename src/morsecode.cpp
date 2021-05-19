@@ -128,7 +128,31 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 		return false;
 	}
 
-	ArduinoJson::DynamicJsonDocument doc(CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES);
+	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
+	filter["size"] = true;
+
+	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
+	deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
+	const unsigned short mccpSize = sizeDoc["size"];
+
+	Serial.print(F("Size property from SD card Morse Code Char Pairs: "));
+	Serial.println(mccpSize);
+
+	DynamicJsonDocument mccpDoc(mccpSize);
+	DeserializationError error = deserializeJson(mccpDoc, payload);
+
+	if(error) {
+		Serial.println(error.f_str());
+	}
+
+	const char* letter;
+	const char* phrase;
+	for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
+		letter = elem["symbol"];
+		phrase = elem["phrase"];
+	}
+
+	/*ArduinoJson::DynamicJsonDocument doc(CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES);
 	ArduinoJson::DeserializationError error = deserializeJson(doc, payload);
 
 	if(error) {
@@ -143,7 +167,7 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 		letter = elem["symbol"];
 		phrase = elem["phrase"];
 		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase)));
-	}
+	}*/
 
 	//morseCodeTreeRoot.print();
 	return true;
