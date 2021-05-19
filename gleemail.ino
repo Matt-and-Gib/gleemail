@@ -326,10 +326,10 @@ bool setupInputMethod() {
 
 		const unsigned fileLength = storage.lastReadFileLength();
 
-		StaticJsonDocument<16> filter;
+		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
 		filter["size"] = true;
 
-		StaticJsonDocument<16> sizeDoc;
+		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
 		deserializeJson(sizeDoc, data, DeserializationOption::Filter(filter));
 		const unsigned short mccpSize = sizeDoc["size"];
 
@@ -453,13 +453,20 @@ void setup() {
 		Serial.read();
 	}
 
-	/*storage.begin();
+//----------USED TO CLEAR THE SD CARD----------
+
+	storage.begin();
 	if(!storage.clearFile(prefsPath)) {
-		Serial.println(F("Unable to delete!"));
+		Serial.println(F("Unable to Prefs path"));
+	}
+	if(!storage.clearFile(morseCodeCharPairsPath)) {
+		Serial.println(F("Unable to delete MorseCodeCharPairs path"));
 	}
 
-	Serial.println(F("Done"));
-	abort();*/
+	Serial.println(F("Files deleted successfully. Halting"));
+	abort();
+	
+//----------USED TO CLEAR THE SD CARD----------
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
 	SETUP_LEVEL setupState = WELCOME;

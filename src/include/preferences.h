@@ -56,10 +56,10 @@ public:
 	}
 
 	bool deserializePrefs(const char* input, const unsigned short length) {
-		StaticJsonDocument<32> filter;
+		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
 		filter["Size"] = true;
 
-		StaticJsonDocument<32> sizeDoc;
+		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
 		deserializeJson(sizeDoc, input, DeserializationOption::Filter(filter));
 		const unsigned short size = sizeDoc["Size"];
 
