@@ -45,29 +45,40 @@ void checkMorseCodeCharPairsDownloadComplete() {
 
 
 void verifyInputMethodData() {
-	if(!net.activeWebConnecion()) {
+	Serial.println(F("verify..."));
+
+	if(internet.activeWebConnection() && internet.responseAvailableFromWeb()) {
+		Serial.println(F("web connection inactive"));
+
 		unsigned short versionNumberIndex = 0;
 		const unsigned short EXPECTED_VERSION_NUMBER_LENGTH = 2;
 		char rawVersionNumber[EXPECTED_VERSION_NUMBER_LENGTH];
-		while(net.responseAvailableFromWeb()) {
-			rawVersionNumber[versionNumberIndex++] = net.nextCharInWebResponse();
+		while(internet.responseAvailableFromWeb()) {
+			Serial.print(F("read byte "));
+			Serial.println(F(versionNumberIndex));
+
+			rawVersionNumber[versionNumberIndex++] = internet.nextCharInWebResponse();
 
 			if(versionNumberIndex > EXPECTED_VERSION_NUMBER_LENGTH) {
-				DebugLog::getLog().logError();
+				DebugLog::getLog().logError(INPUT_METHOD_VERSION_NUMBER_OVERFLOW);
 				break;
 			}
 		}
 
 		rawVersionNumber[EXPECTED_VERSION_NUMBER_LENGTH] = '\0';
 
+		Serial.println(F("done reading"));
+
 		short versionNumber = atoi(rawVersionNumber);
 		if(versionNumber != Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
-			DebugLog::getLog().logWarning();
+			DebugLog::getLog().logWarning(INPUT_METHOD_MORSE_CODE_CHAR_PAIRS_VERSION_MISMATCH);
 
 			webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders());
 			doAsynchronousProcess = &checkMorseCodeCharPairsDownloadComplete;
+			Serial.println(F("look for check download complete"));
 		} else {
 			doAsynchronousProcess = &noAsynchronousProcess;
+			Serial.println(F("no asynch procs"));
 		}
 	}
 }
@@ -445,8 +456,8 @@ void setup() {
 	}
 
 //----------USED TO CLEAR THE SD CARD----------
-
-	/*storage.begin();
+/*
+	storage.begin();
 	if(!storage.clearFile(prefsPath)) {
 		Serial.println(F("Unable to Prefs path"));
 	}
@@ -455,8 +466,8 @@ void setup() {
 	}
 
 	Serial.println(F("Files deleted successfully. Halting"));
-	abort();*/
-
+	abort();
+*/
 //----------USED TO CLEAR THE SD CARD----------
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
