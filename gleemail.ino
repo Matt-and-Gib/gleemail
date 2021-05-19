@@ -526,6 +526,9 @@ void setup() {
 */
 
 		case SETUP_LEVEL::INPUT_METHOD:
+			Serial.print(F("Input Method Start Time: "));
+			Serial.println(millis());
+
 			display.updateReading("Setting Up Input");
 			display.updateWriting("Downloading Data");
 			if(setupInputMethod()) {
@@ -536,6 +539,9 @@ void setup() {
 
 				setupState = SETUP_LEVEL::PINS;
 			}
+
+			Serial.print(F("Input Method End Time: "));
+			Serial.println(millis());
 		break;
 
 
