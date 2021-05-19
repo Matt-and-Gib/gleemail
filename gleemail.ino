@@ -29,7 +29,8 @@ static char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
 static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
 bool pendingPeerMessage = false;
 
-void (*doAsynchronousProcess)();
+static void noAsynchronousProcess() {}
+void (*doAsynchronousProcess)() = &noAsynchronousProcess;
 
 static long long cycleStartTime = 0;
 static long cycleDuration = 0;
@@ -322,40 +323,8 @@ bool setupInputMethod() {
 
 		storage.writeFile(data, morseCodeCharPairsPath);
 	} else {
-		Serial.println(F("Data exists on SD card!"));
-
-		/*const unsigned fileLength = storage.lastReadFileLength();
-
-		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
-		filter["size"] = true;
-
-		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
-		deserializeJson(sizeDoc, data, DeserializationOption::Filter(filter));
-		const unsigned short mccpSize = sizeDoc["size"];
-
-		Serial.print(F("Size property from SD card Morse Code Char Pairs: "));
-		Serial.println(mccpSize);
-
-		DynamicJsonDocument mccpDoc(mccpSize);
-		DeserializationError error = deserializeJson(mccpDoc, data);
-
-		if(error) {
-			Serial.println(error.f_str());
-		}
-
-		const char* letter;
-		const char* phrase;
-		for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
-			letter = elem["symbol"];
-			phrase = elem["phrase"];
-			Serial.print(F("Adding: "));
-			Serial.print(phrase);
-			Serial.print(F(" : "));
-			Serial.println(letter);
-		}*/
-
 		//send request for version info
-		//doAsynchronousProcess = &verifyInputMethodData;
+		doAsynchronousProcess = &verifyInputMethodData;
 	}
 
 	//check if MCCP is stored
