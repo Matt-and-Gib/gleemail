@@ -31,6 +31,7 @@ bool pendingPeerMessage = false;
 
 static void noAsynchronousProcess() {}
 void (*doAsynchronousProcess)() = &noAsynchronousProcess;
+static unsigned short verifyInputMethodDataStep = 0;
 
 static long long cycleStartTime = 0;
 static long cycleDuration = 0;
@@ -38,8 +39,37 @@ static long cycleDuration = 0;
 static unsigned short cycleLatencyCount = 0;
 
 
+void checkMorseCodeCharPairsDownloadComplete() {
+
+}
+
+
 void verifyInputMethodData() {
-	
+	if(!net.activeWebConnecion()) {
+		unsigned short versionNumberIndex = 0;
+		const unsigned short EXPECTED_VERSION_NUMBER_LENGTH = 2;
+		char rawVersionNumber[EXPECTED_VERSION_NUMBER_LENGTH];
+		while(net.responseAvailableFromWeb()) {
+			rawVersionNumber[versionNumberIndex++] = net.nextCharInWebResponse();
+
+			if(versionNumberIndex > EXPECTED_VERSION_NUMBER_LENGTH) {
+				DebugLog::getLog().logError();
+				break;
+			}
+		}
+
+		rawVersionNumber[EXPECTED_VERSION_NUMBER_LENGTH] = '\0';
+
+		short versionNumber = atoi(rawVersionNumber);
+		if(versionNumber != Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
+			DebugLog::getLog().logWarning();
+
+			webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders());
+			doAsynchronousProcess = &checkMorseCodeCharPairsDownloadComplete;
+		} else {
+			doAsynchronousProcess = &noAsynchronousProcess;
+		}
+	}
 }
 
 
@@ -323,28 +353,20 @@ bool setupInputMethod() {
 
 		storage.writeFile(data, morseCodeCharPairsPath);
 	} else {
-		//send request for version info
+		const char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
+		const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
+			SERVER_REQUEST,
+			NETWORK_HEADER_USER_AGENT,
+			HOST,
+			NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
+			NETWORK_HEADER_CONNECTION_LIFETIME,
+			HEADER_TERMINATION,
+			nullptr
+		};
+
+		webAccess.sendRequestToServer(internet, input->getServerAddress(), REQUEST_HEADERS);
 		doAsynchronousProcess = &verifyInputMethodData;
 	}
-
-	//check if MCCP is stored
-	//no:
-		//download from GitHub
-		//store on SD
-	//yes:
-		//send request for version info
-		//doAsynchronousProcess = &verifyInputMethodData;
-
-	//input->setNetworkData(storage.getMorseCodeCharPairs());
-
-	
-
-	/*Serial.println("JSON Payload:\n");
-	unsigned short i = 0;
-	while(dat[i] != '\0') {
-		Serial.print(dat[i++]);
-	}
-	Serial.println("\nDone");*/
 
 	bool dataParsed = input->setNetworkData(data);
 	delete[] data;
@@ -423,8 +445,8 @@ void setup() {
 	}
 
 //----------USED TO CLEAR THE SD CARD----------
-/*
-	storage.begin();
+
+	/*storage.begin();
 	if(!storage.clearFile(prefsPath)) {
 		Serial.println(F("Unable to Prefs path"));
 	}
@@ -433,8 +455,8 @@ void setup() {
 	}
 
 	Serial.println(F("Files deleted successfully. Halting"));
-	abort();
-*/
+	abort();*/
+
 //----------USED TO CLEAR THE SD CARD----------
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};

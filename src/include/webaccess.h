@@ -13,16 +13,17 @@ private:
 	static const constexpr char HEADER_END_STRING[] = "\r\n\r\n";
 	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
 
+	bool writeHeadersToServer(InternetAccess&, const char* const*);
+
 	short findEndOfHeaderIndex(const char*, const unsigned short);
 public:
 	bool connectToServer(InternetAccess& net, const char* address) {return net.connectToWeb(address);}
-	bool sendRequestToServer(InternetAccess&, const char* const*);
-
+	bool sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers);
 	char* downloadFromServer(InternetAccess&, const char*, const char* const*);
 };
 
 
-bool WebAccess::sendRequestToServer(InternetAccess& net, const char* const* headers) {
+bool WebAccess::writeHeadersToServer(InternetAccess& net, const char* const* headers) {
 	const char* headerLine = headers[0];
 	if(headerLine == nullptr) {
 		return false;
@@ -37,6 +38,26 @@ bool WebAccess::sendRequestToServer(InternetAccess& net, const char* const* head
 
 		net.writeHeaderLine(headerLine);
 		headerLine = headers[++headerIndex];
+	}
+
+	return true;
+}
+
+
+bool WebAccess::sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers) {
+	if(WiFi.status() != WL_CONNECTED) {
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
+		return false;
+	}
+
+	if(!net.connectToWeb(server)) {
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_SECURE_CONNECTION_TO_SERVER_FAILED);
+		return false;
+	}
+
+	if(!writeHeadersToServer(net, headers)) {
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_REQUEST_TO_SERVER_HEADER_INVALID);
+		return false;
 	}
 
 	return true;
@@ -67,18 +88,7 @@ short WebAccess::findEndOfHeaderIndex(const char* const rawData, const unsigned 
 
 
 char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, const char* const* headers) {
-	if(WiFi.status() != WL_CONNECTED) {
-		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
-		return nullptr;
-	}
-
-	if(!net.connectToWeb(server)) {
-		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_SECURE_CONNECTION_TO_SERVER_FAILED);
-		return nullptr;
-	}
-
-	if(!sendRequestToServer(net, headers)) {
-		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_REQUEST_TO_SERVER_HEADER_INVALID);
+	if(!sendRequestToServer(net, server, headers)) {
 		return nullptr;
 	}
 

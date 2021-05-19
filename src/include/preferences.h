@@ -19,7 +19,7 @@ private:
 	const static unsigned short PREFERENCES_VERSION = 1;
 	const static unsigned short CALCULATED_PREFS_SIZE = 384; //This value represents the size of the current (most up-to-date) version of the preferences file, possibly different than what is on the SD
 
-	unsigned short morseCodeCharPairsVersion = 3;
+	unsigned short morseCodeCharPairsVersion = 0;
 	char* wifiSSID;
 	char* wifiPassword;
 public:
@@ -33,6 +33,8 @@ public:
 
 	const char* getWiFiPassword() const {return wifiPassword;}
 	void setWiFiPassword(char* p) {wifiPassword = p;}
+
+	const unsigned short getMorseCodeCharPairsVersion() {return morseCodeCharPairsVersion;}
 
 	const char* serializePrefs() const {
 		DynamicJsonDocument doc(CALCULATED_PREFS_SIZE);

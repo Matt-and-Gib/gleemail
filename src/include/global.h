@@ -23,6 +23,8 @@ static const constexpr unsigned short MAX_NETWORKING_LOOP_DURATION_MS = 36;
 static const constexpr unsigned short MAX_IP_ADDRESS_LENGTH = 15;
 static const constexpr unsigned short CONNECTION_PORT = 29453;
 
+static const constexpr char SERVER[] = "raw.githubusercontent.com";
+static const constexpr char HOST[] = "Host: raw.githubusercontent.com";
 static const constexpr char NETWORK_HEADER_USER_AGENT[] = "User-Agent: ArduinoWifiClient";
 static const constexpr char NETWORK_HEADER_ACCEPTED_RETURN_TYPE[] = "Accept: */*";
 static const constexpr char NETWORK_HEADER_CONNECTION_LIFETIME[] = "Connection: close";
