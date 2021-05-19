@@ -17,9 +17,9 @@ private:
 	void operator=(Preferences const&) = delete;
 
 	const static unsigned short PREFERENCES_VERSION = 1;
-	const static unsigned short CALCULATED_PREFS_SIZE = 64; //This value represents the size of the current (most up-to-date) version of the preferences file, possibly different than what is on the SD
+	const static unsigned short CALCULATED_PREFS_SIZE = 384; //This value represents the size of the current (most up-to-date) version of the preferences file, possibly different than what is on the SD
 
-	unsigned short morseCodeCharPairsVersion = 2;
+	unsigned short morseCodeCharPairsVersion = 3;
 	char* wifiSSID;
 	char* wifiPassword;
 public:
@@ -56,16 +56,12 @@ public:
 	}
 
 	bool deserializePrefs(const char* input, const unsigned short length) {
-
 		StaticJsonDocument<32> filter;
 		filter["Size"] = true;
 
 		StaticJsonDocument<32> sizeDoc;
 		deserializeJson(sizeDoc, input, DeserializationOption::Filter(filter));
 		const unsigned short size = sizeDoc["Size"];
-
-		Serial.print(F("Size property from SD card Prefs: "));
-		Serial.println(size);
 
 		if(size != CALCULATED_PREFS_SIZE) {
 			//DebugLog::getLog().logWarning(PREFERENCES_SIZE_MISMATCH);
