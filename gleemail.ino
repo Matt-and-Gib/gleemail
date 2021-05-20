@@ -46,51 +46,33 @@ void checkMorseCodeCharPairsDownloadComplete() {
 
 void verifyInputMethodData() {
 	Serial.println(F("verifying..."));
-	if(internet.activeWebConnection() && internet.responseAvailableFromWeb()) {
+	if(internet.responseAvailableFromWeb()) {
 		Serial.println(F("web connection inactive"));
 
-		unsigned short versionNumberIndex = 0;
-		const unsigned short EXPECTED_VERSION_NUMBER_LENGTH = 2;
-		char rawVersionNumber[EXPECTED_VERSION_NUMBER_LENGTH];
-		while(internet.responseAvailableFromWeb()) {
-			Serial.print(F("read byte "));
-			Serial.println(F(versionNumberIndex));
+		char* rawValue = webAccess.downloadFromServer(internet);
 
-			rawVersionNumber[versionNumberIndex++] = internet.nextCharInWebResponse();
+		Serial.print(F("raw value: "));
+		Serial.println(rawValue);
 
-			if(versionNumberIndex > EXPECTED_VERSION_NUMBER_LENGTH) {
-				DebugLog::getLog().logError(INPUT_METHOD_VERSION_NUMBER_OVERFLOW);
-				break;
-			}
-		}
+		const unsigned short latestVersionNumber = atoi(rawValue);
 
-		short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
-		if(endOfHeaderIndex != -1) {
-			const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
-			char* jsonData = new char[LENGTH_OF_JSON_BODY];
-			for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
-				jsonData[i] = dataBuffer[endOfHeaderIndex + i];
-			}
-			jsonData[LENGTH_OF_JSON_BODY] = '\0';
-		}
+		delete[] rawValue;
 
-		Serial.print(F("raw: "));
-		Serial.println(rawVersionNumber);
+		Serial.print(F("latest version number: "));
+		Serial.println(latestVersionNumber);
 
-		short versionNumber = atoi(rawVersionNumber);
-
-		Serial.print(F("Downloaded version number: "));
-		Serial.println(versionNumber);
-
-		if(versionNumber != Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
-			DebugLog::getLog().logWarning(INPUT_METHOD_MORSE_CODE_CHAR_PAIRS_VERSION_MISMATCH);
-
-			webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders());
-			doAsynchronousProcess = &checkMorseCodeCharPairsDownloadComplete;
-			Serial.println(F("look for check download complete"));
-		} else {
+		if(latestVersionNumber == Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
+			Serial.println(F("Versions match!"));
 			doAsynchronousProcess = &noAsynchronousProcess;
-			Serial.println(F("no asynch procs"));
+		} else {
+			Serial.println(F("Morse Code Char Pairs version mismatch!"));
+			
+			/*
+			if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders())) {
+				//this is a huge problem! sendRequestToServer can fail only if WiFi is not connected, the SSL certificate for raw.githubusercontent.com is invalid, or if too few or too many headers are sent.
+			}
+			*/
+			doAsynchronousProcess = &checkMorseCodeCharPairsDownloadComplete;
 		}
 	}
 }
@@ -199,10 +181,10 @@ void updateDisplayWithPeerChat(const char* messageBody) {
 void printErrorCodes() {
 	ERROR_CODE e = DebugLog::getLog().getNextError();
 	while(e != ERROR_CODE::NONE) {
-		//if(!(OFFLINE_MODE && (e == NETWORK_HEARTBEAT_FLATLINE))) {
+		if(!(OFFLINE_MODE && (e == NETWORK_HEARTBEAT_FLATLINE))) {
 			Serial.print(F("\nError Code: "));
 			Serial.println(e);
-		//}
+		}
 
 		e = DebugLog::getLog().getNextError();
 	}
@@ -379,26 +361,53 @@ bool setupInputMethod() {
 	const char* data = storage.readFile(morseCodeCharPairsPath);
 	if(!data) {
 		Serial.println(F("Downloading Input Method data..."));
-		data = webAccess.downloadFromServer(internet, input->getServerAddress(), REQUEST_HEADERS);
+
+		Serial.println(F("version info."));
+		if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), REQUEST_HEADERS)) {
+			delete[] data;
+			delete input;
+			return false;
+		}
+
+		data = webAccess.downloadFromServer(internet);
 		if(!data) {
 			Serial.println(F("Unable to download version data!"));
+			delete[] data;
+			delete input;
 			return false;
 		}
 
 		const unsigned short downloadedMorseCodeCharPairsVersion = atoi(data);
+
+		Serial.print(F("v: "));
+		Serial.println(downloadedMorseCodeCharPairsVersion);
+
 		delete[] data;
 
-		data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
-		if(!data) {
-			Serial.println(F("Unable to download data!"));
+
+
+		Serial.println(F("data."));
+		if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders())) {
+			delete[] data;
+			delete input;
 			return false;
 		}
 
-		Preferences::getPrefs().setMorseCodeCharPairsVersion(downloadedMorseCodeCharPairsVersion);
-		storage.writeFile(data, morseCodeCharPairsPath);
-	} else {
-		
+		data = webAccess.downloadFromServer(internet);
+		if(!data) {
+			Serial.println(F("Unable to download data!"));
+			delete[] data;
+			delete input;
+			return false;
+		}
 
+		storage.writeFile(data, morseCodeCharPairsPath);
+
+		Preferences::getPrefs().setMorseCodeCharPairsVersion(downloadedMorseCodeCharPairsVersion);
+		const char* prefsData = Preferences::getPrefs().serializePrefs();
+		storage.writeFile(prefsData, prefsPath);
+		delete[] prefsData;
+	} else {
 		webAccess.sendRequestToServer(internet, input->getServerAddress(), REQUEST_HEADERS);
 		doAsynchronousProcess = &verifyInputMethodData;
 	}

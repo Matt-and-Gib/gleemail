@@ -14,12 +14,12 @@ private:
 	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
 
 	bool writeHeadersToServer(InternetAccess&, const char* const*);
-
-	short findEndOfHeaderIndex(const char*, const unsigned short);
 public:
 	bool connectToServer(InternetAccess& net, const char* address) {return net.connectToWeb(address);}
 	bool sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers);
-	char* downloadFromServer(InternetAccess&, const char*, const char* const*);
+	char* downloadFromServer(InternetAccess&);
+
+	static short findEndOfHeaderIndex(const char*, const unsigned short);
 };
 
 
@@ -87,11 +87,7 @@ short WebAccess::findEndOfHeaderIndex(const char* const rawData, const unsigned 
 }
 
 
-char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, const char* const* headers) {
-	if(!sendRequestToServer(net, server, headers)) {
-		return nullptr;
-	}
-
+char* WebAccess::downloadFromServer(InternetAccess& net) {
 	int bufferIndex = 0;
 	char* dataBuffer = new char[DATA_BUFFER_SIZE];
 	while(net.activeWebConnection()) {
@@ -105,14 +101,16 @@ char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, con
 		}
 	}
 
+	dataBuffer[bufferIndex] = '\0';
+
 	if(bufferIndex < DATA_BUFFER_SIZE/2) {
 		DebugLog::getLog().logWarning(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED);
 	}
 
 	//Print full response
-	/*for(int i = 0; i < bufferIndex; i += 1) {
+	for(int i = 0; i < bufferIndex; i += 1) {
 		Serial.print(dataBuffer[i]);
-	}*/
+	}
 
 	/*//Print buffer utilization
 	Serial.print("Used ");
@@ -123,16 +121,21 @@ char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, con
 	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
 	if(endOfHeaderIndex != -1) {
 		const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
-		char* jsonData = new char[LENGTH_OF_JSON_BODY];
+
+		Serial.print(F("length of body: "));
+		Serial.println(LENGTH_OF_JSON_BODY);
+
+		char* payloadData = new char[LENGTH_OF_JSON_BODY];
 		for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
-			jsonData[i] = dataBuffer[endOfHeaderIndex + i];
+			payloadData[i] = dataBuffer[endOfHeaderIndex + i];
 		}
-		jsonData[LENGTH_OF_JSON_BODY] = '\0';
+		payloadData[LENGTH_OF_JSON_BODY] = '\0';
 
 		delete[] dataBuffer;
-		return jsonData;
+		return payloadData;
 	}
 
+	delete[] dataBuffer;
 	return nullptr;
 }
 
