@@ -90,8 +90,8 @@ public:
 
 
 		morseCodeCharPairsVersion = doc["Morse Code Char Pairs Version"];
-		Serial.print(F("MCCP Version: "));
-		Serial.println(morseCodeCharPairsVersion);
+		//Serial.print(F("MCCP Version: "));
+		//Serial.println(morseCodeCharPairsVersion);
 
 		const char* tempSSID = doc["WiFiSSID"];
 		wifiSSID = copyAndTerminateString(tempSSID, strlen(tempSSID));

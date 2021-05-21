@@ -439,7 +439,7 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 
 
 bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
-	packetSize = udp.parsePacket();
+	packetSize = udp.parsePacket(); //destroys body of HTTPS responses
 	if(packetSize > 0) {
 		udp.read(messageBuffer, packetSize);
 		if(udp.remoteIP() == peerIPAddress) {

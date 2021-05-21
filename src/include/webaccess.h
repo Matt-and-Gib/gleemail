@@ -96,6 +96,7 @@ char* WebAccess::downloadFromServer(InternetAccess& net) {
 				dataBuffer[bufferIndex++] = net.nextCharInWebResponse();
 			} else {
 				DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_OVERFLOW);
+				delete[] dataBuffer;
 				return nullptr;
 			}
 		}
@@ -108,9 +109,10 @@ char* WebAccess::downloadFromServer(InternetAccess& net) {
 	}
 
 	//Print full response
-	for(int i = 0; i < bufferIndex; i += 1) {
+	/*for(int i = 0; i < bufferIndex; i += 1) {
 		Serial.print(dataBuffer[i]);
 	}
+	Serial.println('\n');*/
 
 	/*//Print buffer utilization
 	Serial.print("Used ");
@@ -122,8 +124,8 @@ char* WebAccess::downloadFromServer(InternetAccess& net) {
 	if(endOfHeaderIndex != -1) {
 		const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
 
-		Serial.print(F("length of body: "));
-		Serial.println(LENGTH_OF_JSON_BODY);
+		//Serial.print(F("length of body: "));
+		//Serial.println(LENGTH_OF_JSON_BODY);
 
 		char* payloadData = new char[LENGTH_OF_JSON_BODY];
 		for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
