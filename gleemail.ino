@@ -258,7 +258,7 @@ void sendChatMessage(char* chat) {
 
 
 void updateDisplayWithPeerChat(const char* messageBody) {
-	Serial.println(messageBody);
+	//Serial.println(messageBody);
 	display.updateReading(messageBody);
 }
 
