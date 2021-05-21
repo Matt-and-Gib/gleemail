@@ -112,11 +112,11 @@ private:
 	const char* chat;
 	//MessageError* error;
 
-	static void noOutgoingProcess(Queue<Message>& q, QueueNode<Message>& n) {}
-	void (*outgoingPostProcess)(Queue<Message>&, QueueNode<Message>&);
+	static void noOutgoingProcess(Queue<Message>& q, Message& n) {}
+	void (*outgoingPostProcess)(Queue<Message>&, Message&);
 
-	static void noConfirmedProcess(Networking& n, Queue<Message>& messagesOut, QueueNode<Message>& msg) {return;}
-	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&);
+	static void noConfirmedProcess(Networking& n, Queue<Message>& messagesOut, QueueNode<Message>& messageIn, Message& messageOut) {}
+	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&);
 public:
 	Message() {}
 	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) {
@@ -134,7 +134,7 @@ public:
 
 		sender = from;
 	}
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, QueueNode<Message>&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&)) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
@@ -155,8 +155,8 @@ public:
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
 	//MessageError* getError() {return error;}
-	void doOutgoingPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*outgoingPostProcess)(q, n);}
-	void doConfirmedPostProcess(Networking& n, Queue<Message>& mo, QueueNode<Message>& msg) {(*confirmedPostProcess)(n, mo, msg);}
+	void doOutgoingPostProcess(Queue<Message>& q, Message& n) {return (*outgoingPostProcess)(q, n);}
+	void doConfirmedPostProcess(Networking& n, Queue<Message>& mo, QueueNode<Message>& messageIn) {(*confirmedPostProcess)(n, mo, messageIn, *this);}
 };
 
 
@@ -226,12 +226,11 @@ private:
 	bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyToken();
 
-	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& msg) {
+	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
 		Serial.println(F("removeFromQueue Wrapper"));
-		removeFromQueue(messagesOutQueue, msg);
+		removeFromQueue(messagesOutQueue, messageOut);
 	}
-	static void removeFromQueue(Queue<Message>& fromQueue, QueueNode<Message>& node) {
-		Serial.println(F("removeFromQueue"));
+	static void removeFromQueue(Queue<Message>& fromQueue, Message& node) { //QueueNode<Message>& node) {
 		QueueNode<Message>* temp = fromQueue.remove(node);
 		if(!temp) {
 			Serial.println(F("trying to delete nullptr"));
@@ -239,7 +238,7 @@ private:
 		delete temp;
 	}
 
-	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& msg) {
+	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
 		//look through list of glEEpals to find match with msg.getSender()
 
 		QueueNode<Message>* nextNode = messagesOutQueue.peek();
@@ -397,7 +396,7 @@ bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, Qu
 		sendOutgoingMessage(*(nextMessage->getData()));
 
 		//do callback? (delete confirmation message?)
-		nextMessage->getData()->doOutgoingPostProcess(messagesOut, *nextMessage);
+		nextMessage->getData()->doOutgoingPostProcess(messagesOut, *(nextMessage->getData()));
 		return true;
 	} else {
 		return false;
@@ -444,7 +443,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
-		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
+		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData()); //remove outgoing chat message
 		if(messageOutWithMatchingIdempotencyToken) {
 			Serial.println(F("do confirmed post process"));
 			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg);
@@ -476,7 +475,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-			connectionEstablished(*this, messagesOut, msg);
+			connectionEstablished(*this, messagesOut, msg, *msg.getData());
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
 		}
