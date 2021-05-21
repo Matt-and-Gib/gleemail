@@ -186,7 +186,7 @@ private:
 	void sendHeartbeat();
 	void listenToHeartbeat(const unsigned long);
 	void checkHeartbeat();
-	void dontCheckHeartbeat() {return;}
+	void dontCheckHeartbeat() {}
 	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on successful connection
 
 	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
@@ -233,17 +233,17 @@ private:
 		delete fromQueue.remove(node);
 	}
 
-	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& msg) { // Make this the callback function of handshake
-		n.connected = true;
-		n.processHeartbeat = &Networking::checkHeartbeat;
-
+	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& msg) {
 		//look through list of glEEpals to find match with msg.getSender()
 
-		//remove handshake from outgoing message queue
 		QueueNode<Message>* nextNode = messagesOutQueue.peek();
 		while(nextNode != nullptr) {
 			if(nextNode->getData()->getIdempotencyToken()->getValue() == n.glEEpalInfo->getHandshakeIdempotencyTokenValue()) {
 				delete messagesOutQueue.remove(*nextNode);
+
+				n.connected = true;
+				n.processHeartbeat = &Networking::checkHeartbeat;
+				n.listenToHeartbeat(n.nowMS());
 				break;
 			}
 
