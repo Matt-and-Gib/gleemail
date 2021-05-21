@@ -177,6 +177,8 @@ private:
 	const unsigned long (*nowMS)();
 	unsigned long approxCurrentTime;
 
+	void dropConnection();
+
 	Message* heartbeat;
 	unsigned long lastHeartbeatSentMS = 0;
 	unsigned long lastHeartbeatReceivedMS = 0;
@@ -270,6 +272,15 @@ Networking::~Networking() {
 }
 
 
+void Networking::dropConnection() {
+	connected = false;
+	processHeartbeat = &Networking::dontCheckHeartbeat;
+
+	delete glEEpalInfo;
+	glEEpalInfo = nullptr;
+}
+
+
 void Networking::sendChatMessage(const char* chat) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
 }
@@ -353,7 +364,7 @@ void Networking::checkHeartbeat() {
 
 	if(approxCurrentTime - lastHeartbeatReceivedMS > FLATLINE_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_FLATLINE);
-		//cut ourselves off from gleepal :<
+		dropConnection();
 		return;
 	}
 
@@ -419,7 +430,6 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 				connectionEstablished(*this, messagesOut, msg, *(messageOutNode->getData()));
 			} else {
 				DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_FROM_CONNECTED_IP);
-				//log error that we were not sending handshakes, but received one
 			}
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
@@ -482,9 +492,6 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			}
 
 			intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
-			/*if(!((this->*callback)(intoQueue, intoQueue.enqueue(new Message(parsedDocument, nowMS()))))) {
-				//log error?
-			}*/
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_UNKNOWN_MESSAGE_SENDER);
 		}
@@ -524,7 +531,7 @@ void Networking::processNetwork() {
 
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
-			//drop connection
+			dropConnection();
 		}
 	} else {
 		messageReceivedCount = 0;
@@ -548,7 +555,7 @@ void Networking::processNetwork() {
 			//Maybe log error about process outgoing messages (specifically) being slow
 			if(connected && exceededMaxOutgoingTokenRetryCount()) { //this is not safe for group chat because connected will be true after the first glEEconnection
 				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
-				//drop connection
+				dropConnection();
 			}
 		}
 	}

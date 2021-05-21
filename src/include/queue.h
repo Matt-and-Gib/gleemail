@@ -47,6 +47,9 @@ public:
 	Queue() {
 		root = nullptr;
 	}
+	~Queue() {
+		delete root;
+	}
 
 	QueueNode<T>* enqueue(T*); //puts node at end of queue
 	QueueNode<T>* dequeue(); //take first node
