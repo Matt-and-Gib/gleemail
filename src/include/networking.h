@@ -8,6 +8,32 @@
 #include "queue.h"
 
 
+// To use in the future to map IP addresses (or uuids)
+class glEEpal {
+private:
+	IPAddress palIPAddress;
+	unsigned short outgoingHandshakeIdempotencyTokenValue;
+public:
+	glEEpal() {}
+
+	glEEpal(const IPAddress ip, const unsigned short h) {
+		palIPAddress = ip;
+		outgoingHandshakeIdempotencyTokenValue = h;
+	}
+
+	bool operator==(glEEpal& o) {
+		return palIPAddress == o.getIPAddress();
+	}
+	bool operator==(IPAddress a) {
+		return palIPAddress == a;
+	}
+
+	const IPAddress getIPAddress() const {return palIPAddress;}
+	const unsigned short getHandshakeIdempotencyTokenValue() const {return outgoingHandshakeIdempotencyTokenValue;}
+};
+glEEpal* glEEself = new glEEpal();
+
+
 class IdempotencyToken {
 private:
 	unsigned short value;
@@ -79,21 +105,21 @@ class Networking;
 
 class Message {
 private:
+	glEEpal& sender = *glEEself;
+
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
 	const char* chat;
 	//MessageError* error;
 
-	static bool noOutgoingProcess(Queue<Message>& q, QueueNode<Message>& n) {return true;}
-	bool (*outgoingPostProcess)(Queue<Message>&, QueueNode<Message>&);
+	static void noOutgoingProcess(Queue<Message>& q, QueueNode<Message>& n) {}
+	void (*outgoingPostProcess)(Queue<Message>&, QueueNode<Message>&);
 
-	static void noConfirmedProcess(Networking& n) {return;}
-	void (*confirmedPostProcess)(Networking&);
+	static void noConfirmedProcess(Networking& n, Queue<Message>& messagesOut, QueueNode<Message>& msg) {return;}
+	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&);
 public:
-	Message() {
-
-	}
-	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS) {
+	Message() {}
+	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) {
 		const unsigned short tempMessageType = parsedDocument["T"];
 		messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
 
@@ -105,8 +131,10 @@ public:
 
 		outgoingPostProcess = &noOutgoingProcess;
 		confirmedPostProcess = &noConfirmedProcess;
+
+		sender = from;
 	}
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ bool (*op)(Queue<Message>&, QueueNode<Message>&), void (*cp)(Networking&)) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, QueueNode<Message>&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&)) {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
@@ -122,28 +150,13 @@ public:
 
 	bool operator==(Message& o) {return (*idempotencyToken == *o.getIdempotencyToken());}
 
+	const glEEpal& getSender() const {return sender;}
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
 	//MessageError* getError() {return error;}
-	bool doOutgoingPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*outgoingPostProcess)(q, n);}
-	void doConfirmedPostProcess(Networking& n) {(*confirmedPostProcess)(n);}
-};
-
-
-// To use in the future to map IP addresses (or uuids)
-class glEEpal {
-private:
-	IPAddress palIPAddress;
-	unsigned short handshakeIdempotencyTokenValue;
-public:
-	glEEpal(const IPAddress ip, const unsigned short h) {
-		palIPAddress = ip;
-		handshakeIdempotencyTokenValue = h;
-	}
-
-	const IPAddress getIPAddress() const {return palIPAddress;}
-	const unsigned short getHandshakeIdempotencyTokenValue() const {return handshakeIdempotencyTokenValue;}
+	void doOutgoingPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*outgoingPostProcess)(q, n);}
+	void doConfirmedPostProcess(Networking& n, Queue<Message>& mo, QueueNode<Message>& msg) {(*confirmedPostProcess)(n, mo, msg);}
 };
 
 
@@ -213,14 +226,29 @@ private:
 	bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyToken();
 
-	static bool removeFromQueue(Queue<Message>& fromQueue, QueueNode<Message>& node) {
+	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& msg) {
+		removeFromQueue(messagesOutQueue, msg);
+	}
+	static void removeFromQueue(Queue<Message>& fromQueue, QueueNode<Message>& node) {
 		delete fromQueue.remove(node);
-		return true;
 	}
 
-	static void connectionEstablished(Networking& n) { // Make this the callback function of handshake
+	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& msg) { // Make this the callback function of handshake
 		n.connected = true;
 		n.processHeartbeat = &Networking::checkHeartbeat;
+
+		//look through list of glEEpals to find match with msg.getSender()
+
+		//remove handshake from outgoing message queue
+		QueueNode<Message>* nextNode = messagesOutQueue.peek();
+		while(nextNode != nullptr) {
+			if(nextNode->getData()->getIdempotencyToken()->getValue() == n.glEEpalInfo->getHandshakeIdempotencyTokenValue()) {
+				delete messagesOutQueue.remove(*nextNode);
+				break;
+			}
+
+			nextNode = nextNode->getNode();
+		}
 	}
 public:
 	Networking(const unsigned long (*)(), void (*)(const char*), const long u);
@@ -253,7 +281,7 @@ Networking::~Networking() {
 
 
 void Networking::sendChatMessage(const char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, nullptr));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
 }
 
 
@@ -297,10 +325,9 @@ void Networking::sendChatMessage(const char* chat) {
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
-	const unsigned short handshakeValue = uuid + messagesSentCount;
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(handshakeValue, 0), nullptr, nullptr, &connectionEstablished));
-	glEEpalInfo = new glEEpal(connectToIP, handshakeValue);
-	//peerIPAddress = connectToIP;
+	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, 0), nullptr, nullptr, &connectionEstablished));
+	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
 }
 
 
@@ -409,8 +436,8 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
-			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this);
-			delete messagesOut.remove(*messageOutWithMatchingIdempotencyToken);
+			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg);
+			//delete messagesOut.remove(*messageOutWithMatchingIdempotencyToken);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 		}
@@ -438,9 +465,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-			connectionEstablished(*this);
-			//remove handshake from outgoing message queue
-			//messagesOut.remove()
+			connectionEstablished(*this, messagesOut, msg);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
 		}
@@ -496,10 +521,10 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 
 
 bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
-	packetSize = udp.parsePacket(); //destroys body of HTTPS responses
+	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
 		udp.read(messageBuffer, packetSize);
-		if(udp.remoteIP() == glEEpalInfo->getIPAddress()) {
+		if(*glEEpalInfo == udp.remoteIP()) { //look through list of glEEpals to find match with msg.getSender()
 			//decrypt message
 
 			messageReceivedCount += 1;
@@ -512,7 +537,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				return true;
 			}
 
-			intoQueue.enqueue(new Message(parsedDocument, nowMS()));
+			intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
 			/*if(!((this->*callback)(intoQueue, intoQueue.enqueue(new Message(parsedDocument, nowMS()))))) {
 				//log error?
 			}*/
@@ -577,7 +602,7 @@ void Networking::processNetwork() {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
 			//Maybe log error about process outgoing messages (specifically) being slow
-			if(connected && exceededMaxOutgoingTokenRetryCount()) {
+			if(connected && exceededMaxOutgoingTokenRetryCount()) { //this is not safe for group chat because connected will be true after the first glEEconnection
 				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
 				//drop connection
 			}

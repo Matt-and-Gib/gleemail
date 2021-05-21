@@ -604,13 +604,15 @@ void connectToPeer() { //Use PEER wait time to do asynchronousProcess
 	Serial.print(friendsIP);
 	Serial.println(F("..."));
 
+	network.connectToPeer(friendsIP);
+
 	/*if(!network.connectToPeer(friendsIP)) {
 		Serial.println(F("Unable to connect to gleepal :("));
 	} else {
 		Serial.println(F("Connected to gleepal!"));
 	}*/
 
-	delete[] ipAddressInputSubstringBuffer;
+	//delete[] ipAddressInputSubstringBuffer;
 	delete[] ipAddressInputBuffer;
 }
 
