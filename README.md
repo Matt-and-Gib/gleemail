@@ -98,6 +98,8 @@ Last updated: 5/18/2021
 |56|Time Sensitive Process Exceeded Allocated Time (Insignificant)||Low|
 |57|Unknown Incoming Message Type||High|
 |58|Confirmation No Match Found||Low|
+|59|Duplicate Handshake||Low|
+|60|Unexpected Handshake from Connected IP|Either received handshake after token removed from queue (expired) or handshake has unique idempotency token|Low|
 </details>
 
 <details>

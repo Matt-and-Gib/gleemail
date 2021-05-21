@@ -166,7 +166,6 @@ private:
 	glEEpal* glEEpalInfo;
 
 	bool connected = false;
-	//void connectionEstablished();
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //minimize in the future
@@ -240,24 +239,6 @@ private:
 		n.connected = true;
 		n.processHeartbeat = &Networking::checkHeartbeat;
 		n.listenToHeartbeat(n.nowMS());
-
-		//look through list of glEEpals to find match with msg.getSender()
-
-		/*QueueNode<Message>* nextNode = messagesOutQueue.peek();
-		while(nextNode != nullptr) {
-			if(nextNode->getData()->getIdempotencyToken()->getValue() == n.glEEpalInfo->getHandshakeIdempotencyTokenValue()) {
-				delete messagesOutQueue.remove(*nextNode);
-
-				Serial.println(F("Connected to peer!"));
-
-				n.connected = true;
-				n.processHeartbeat = &Networking::checkHeartbeat;
-				n.listenToHeartbeat(n.nowMS());
-				break;
-			}
-
-			nextNode = nextNode->getNode();
-		}*/
 	}
 public:
 	Networking(const unsigned long (*)(), void (*)(const char*), const long u);
@@ -266,7 +247,7 @@ public:
 	void processNetwork();
 	void sendChatMessage(const char*);
 
-	bool connectToPeer(IPAddress&); //FINISH OR REMOVE ME!
+	bool connectToPeer(IPAddress&);
 };
 
 
@@ -294,43 +275,6 @@ void Networking::sendChatMessage(const char* chat) {
 }
 
 
-//REWRITE ME
-/*bool Networking::connectToPeer(IPAddress& connectToIP) {
-	udp.begin(CONNECTION_PORT);
-
-	peerIPAddress = connectToIP;
-
-	udp.beginPacket(peerIPAddress, CONNECTION_PORT);
-	udp.write('$');
-	udp.endPacket();
-	sendHeartbeat();
-
-	char* receiveBuffer = new char[2];
-	while(true) {
-		if(udp.parsePacket()) {
-			packetSize = udp.read(receiveBuffer, 2);
-			receiveBuffer[packetSize] = '\0';
-
-			peerIPAddress = connectToIP;
-
-			udp.beginPacket(peerIPAddress, CONNECTION_PORT);
-			udp.write('$');
-			udp.endPacket();
-			sendHeartbeat();
-
-			return true;
-		}
-
-		delay(1000);
-	}
-
-	return true;
-
-	delete[] receiveBuffer;
-}*/
-//REWRITE ME
-
-
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
@@ -355,7 +299,6 @@ void Networking::removeExpiredIncomingIdempotencyToken() {
 
 
 bool Networking::exceededMaxOutgoingTokenRetryCount() {
-	//find first non-handshake message
 	if(messagesOut.peek()->getData()->getIdempotencyToken()->getRetryCount() >= MAX_OUTGOING_MESSAGE_RETRY_COUNT) {
 		return true;
 	} else {
@@ -379,9 +322,6 @@ void Networking::sendOutgoingMessage(Message& msg) {
 	serializeJson(doc, outputBuffer);
 	//encryptBuffer(outputBuffer, measureJson(doc) + 1);
 
-	//Serial.print("Sending: ");
-	//Serial.println(outputBuffer);
-
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 	udp.write(outputBuffer);
 	udp.endPacket();
@@ -395,7 +335,6 @@ bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, Qu
 	if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getTimestamp() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
 		sendOutgoingMessage(*(nextMessage->getData()));
 
-		//do callback? (delete confirmation message?)
 		nextMessage->getData()->doOutgoingPostProcess(messagesOut, *(nextMessage->getData()));
 		return true;
 	} else {
@@ -443,7 +382,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
-		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData()); //remove outgoing chat message
+		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
 			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg);
 		} else {
@@ -479,6 +418,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 			if(messageOutNode) {
 				connectionEstablished(*this, messagesOut, msg, *(messageOutNode->getData()));
 			} else {
+				DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_FROM_CONNECTED_IP);
 				//log error that we were not sending handshakes, but received one
 			}
 		} else {
