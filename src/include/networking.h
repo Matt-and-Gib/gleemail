@@ -291,7 +291,7 @@ Networking::~Networking() {
 void Networking::sendChatMessage(const char* chat) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
 
-	Serial.prinln(F("enqueue chat message"));
+	Serial.println(F("enqueue chat message"));
 }
 
 
