@@ -234,9 +234,16 @@ private:
 	}
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
+		delete messagesOutQueue.remove(messageOut);
+		Serial.println(F("Connected to peer!"));
+
+		n.connected = true;
+		n.processHeartbeat = &Networking::checkHeartbeat;
+		n.listenToHeartbeat(n.nowMS());
+
 		//look through list of glEEpals to find match with msg.getSender()
 
-		QueueNode<Message>* nextNode = messagesOutQueue.peek();
+		/*QueueNode<Message>* nextNode = messagesOutQueue.peek();
 		while(nextNode != nullptr) {
 			if(nextNode->getData()->getIdempotencyToken()->getValue() == n.glEEpalInfo->getHandshakeIdempotencyTokenValue()) {
 				delete messagesOutQueue.remove(*nextNode);
@@ -250,7 +257,7 @@ private:
 			}
 
 			nextNode = nextNode->getNode();
-		}
+		}*/
 	}
 public:
 	Networking(const unsigned long (*)(), void (*)(const char*), const long u);
@@ -459,7 +466,21 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-			connectionEstablished(*this, messagesOut, msg, *msg.getData());
+
+			QueueNode<Message>* messageOutNode = messagesOut.peek();
+			while(messageOutNode != nullptr) {
+				if(messageOutNode->getData()->getIdempotencyToken()->getValue() == glEEpalInfo->getHandshakeIdempotencyTokenValue()) {
+					break;
+				}
+
+				messageOutNode = messageOutNode->getNode();
+			}
+
+			if(messageOutNode) {
+				connectionEstablished(*this, messagesOut, msg, *(messageOutNode->getData()));
+			} else {
+				//log error that we were not sending handshakes, but received one
+			}
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
 		}
