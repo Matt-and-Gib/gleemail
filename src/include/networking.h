@@ -227,9 +227,11 @@ private:
 	void removeExpiredIncomingIdempotencyToken();
 
 	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& msg) {
+		Serial.println(F("removeFromQueue Wrapper"));
 		removeFromQueue(messagesOutQueue, msg);
 	}
 	static void removeFromQueue(Queue<Message>& fromQueue, QueueNode<Message>& node) {
+		Serial.println(F("removeFromQueue"));
 		delete fromQueue.remove(node);
 	}
 
@@ -240,6 +242,8 @@ private:
 		while(nextNode != nullptr) {
 			if(nextNode->getData()->getIdempotencyToken()->getValue() == n.glEEpalInfo->getHandshakeIdempotencyTokenValue()) {
 				delete messagesOutQueue.remove(*nextNode);
+
+				Serial.println(F("Connected to peer!"));
 
 				n.connected = true;
 				n.processHeartbeat = &Networking::checkHeartbeat;
@@ -436,6 +440,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
+			Serial.println(F("do confirmed post process"));
 			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg);
 			//delete messagesOut.remove(*messageOutWithMatchingIdempotencyToken);
 		} else {
@@ -456,7 +461,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-			(*chatMessageReceivedCallback)(msg.getData()->getChat());
+			(*chatMessageReceivedCallback)(msg.getData()->getChat()); //updateDisplay
 		}
 	break;
 
