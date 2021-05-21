@@ -74,6 +74,9 @@ public:
 };*/
 
 
+class Networking;
+
+
 class Message {
 private:
 	MESSAGE_TYPE messageType;
@@ -84,8 +87,8 @@ private:
 	static bool noOutgoingProcess(Queue<Message>& q, QueueNode<Message>& n) {return true;}
 	bool (*outgoingPostProcess)(Queue<Message>&, QueueNode<Message>&);
 
-	static void noConfirmedProcess() {return;}
-	void (*confirmedPostProcess)();
+	static void noConfirmedProcess(Networking& n) {return;}
+	void (*confirmedPostProcess)(Networking&);
 public:
 	Message() {
 
@@ -103,7 +106,7 @@ public:
 		outgoingPostProcess = &noOutgoingProcess;
 		confirmedPostProcess = &noConfirmedProcess;
 	}
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ bool (*op)(Queue<Message>&, QueueNode<Message>&), void (*cp)()) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ bool (*op)(Queue<Message>&, QueueNode<Message>&), void (*cp)(Networking&)) {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
@@ -124,7 +127,7 @@ public:
 	const char* getChat() {return chat;}
 	//MessageError* getError() {return error;}
 	bool doOutgoingPostProcess(Queue<Message>& q, QueueNode<Message>& n) {return (*outgoingPostProcess)(q, n);}
-	void doConfirmedPostProcess() {(*confirmedPostProcess)();}
+	void doConfirmedPostProcess(Networking& n) {(*confirmedPostProcess)(n);}
 };
 
 
@@ -150,7 +153,7 @@ private:
 	glEEpal* glEEpalInfo;
 
 	bool connected = false;
-	void connectionEstablished();
+	//void connectionEstablished();
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //minimize in the future
@@ -213,6 +216,11 @@ private:
 	static bool removeFromQueue(Queue<Message>& fromQueue, QueueNode<Message>& node) {
 		delete fromQueue.remove(node);
 		return true;
+	}
+
+	static void connectionEstablished(Networking& n) { // Make this the callback function of handshake
+		n.connected = true;
+		n.processHeartbeat = &Networking::checkHeartbeat;
 	}
 public:
 	Networking(const unsigned long (*)(), void (*)(const char*), const long u);
@@ -293,12 +301,6 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(handshakeValue, 0), nullptr, nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, handshakeValue);
 	//peerIPAddress = connectToIP;
-}
-
-
-void Networking::connectionEstablished() { // Make this the callback function of handshake
-	connected = true;
-	processHeartbeat = &Networking::checkHeartbeat;
 }
 
 
@@ -407,7 +409,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
-			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess();
+			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this);
 			delete messagesOut.remove(*messageOutWithMatchingIdempotencyToken);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
@@ -436,9 +438,9 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-			connectionEstablished();
+			connectionEstablished(*this);
 			//remove handshake from outgoing message queue
-			messagesOut.remove()
+			//messagesOut.remove()
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
 		}
