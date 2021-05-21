@@ -232,7 +232,11 @@ private:
 	}
 	static void removeFromQueue(Queue<Message>& fromQueue, QueueNode<Message>& node) {
 		Serial.println(F("removeFromQueue"));
-		delete fromQueue.remove(node);
+		QueueNode<Message>* temp = fromQueue.remove(node);
+		if(!temp) {
+			Serial.println(F("trying to delete nullptr"));
+		}
+		delete temp;
 	}
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& msg) {
@@ -286,6 +290,8 @@ Networking::~Networking() {
 
 void Networking::sendChatMessage(const char* chat) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
+
+	Serial.prinln(F("enqueue chat message"));
 }
 
 
