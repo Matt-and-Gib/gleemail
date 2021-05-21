@@ -231,6 +231,7 @@ private:
 		removeFromQueue(messagesOutQueue, messageOut);
 	}
 	static void removeFromQueue(Queue<Message>& fromQueue, Message& node) { //QueueNode<Message>& node) {
+		Serial.println(F("remove from queue"));
 		QueueNode<Message>* temp = fromQueue.remove(node);
 		if(!temp) {
 			Serial.println(F("trying to delete nullptr"));
