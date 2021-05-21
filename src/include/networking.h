@@ -227,16 +227,10 @@ private:
 	void removeExpiredIncomingIdempotencyToken();
 
 	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
-		Serial.println(F("removeFromQueue Wrapper"));
 		removeFromQueue(messagesOutQueue, messageOut);
 	}
-	static void removeFromQueue(Queue<Message>& fromQueue, Message& node) { //QueueNode<Message>& node) {
-		Serial.println(F("remove from queue"));
-		QueueNode<Message>* temp = fromQueue.remove(node);
-		if(!temp) {
-			Serial.println(F("trying to delete nullptr"));
-		}
-		delete temp;
+	static void removeFromQueue(Queue<Message>& fromQueue, Message& node) {
+		delete fromQueue.remove(node);
 	}
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
@@ -290,8 +284,6 @@ Networking::~Networking() {
 
 void Networking::sendChatMessage(const char* chat) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
-
-	Serial.println(F("enqueue chat message"));
 }
 
 
@@ -446,19 +438,10 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData()); //remove outgoing chat message
 		if(messageOutWithMatchingIdempotencyToken) {
-			Serial.println(F("do confirmed post process"));
 			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg);
-			//delete messagesOut.remove(*messageOutWithMatchingIdempotencyToken);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 		}
-
-
-		/*Message* confirmedMessage = messagesOutHead.removeByIdempotencyToken(msg.idempotencyToken);
-		if(confirmedMessage != nullptr) {
-			confirmedMessage->callback();
-			delete confirmatedMessage;
-		}*/
 	break;
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
@@ -467,7 +450,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-			(*chatMessageReceivedCallback)(msg.getData()->getChat()); //updateDisplay
+			(*chatMessageReceivedCallback)(msg.getData()->getChat());
 		}
 	break;
 
@@ -480,17 +463,6 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
 		}
-
-
-
-		/*messagesOutHead.removeByType(MESSAGETYPE::HANDSHAKE);
-		messagesOutHead.enqueue(new Message(MESSAGETYPE::CONFIRMATION, IdempotencyToken::generate()));
-		doConnected();
-		handshakeReceivedCount += 1;
-
-		if(handshareReceivedCount > MAX_HANDSHAKE_THRESHOLD) {
-			DebugLog::getLog().logError();
-		}*/
 	break;
 
 	default:
