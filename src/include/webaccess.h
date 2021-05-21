@@ -8,21 +8,22 @@ class WebAccess {
 private:
 	char* server;
 
-	static const constexpr short DATA_BUFFER_SIZE = 3040; //Buffer Index rouned power of 2 //3035; Buffer index //3072; Suggested size
+	static const constexpr short DATA_BUFFER_SIZE = 4096; //Arbitrary size of download data buffer (increase as needed)
 
 	static const constexpr char HEADER_END_STRING[] = "\r\n\r\n";
 	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
 
-	short findEndOfHeaderIndex(const char*, const unsigned short);
+	bool writeHeadersToServer(InternetAccess&, const char* const*);
 public:
 	bool connectToServer(InternetAccess& net, const char* address) {return net.connectToWeb(address);}
-	bool sendRequestToServer(InternetAccess&, const char* const*);
+	bool sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers);
+	char* downloadFromServer(InternetAccess&);
 
-	char* downloadFromServer(InternetAccess&, const char*, const char* const*);
+	static short findEndOfHeaderIndex(const char*, const unsigned short);
 };
 
 
-bool WebAccess::sendRequestToServer(InternetAccess& net, const char* const* headers) {
+bool WebAccess::writeHeadersToServer(InternetAccess& net, const char* const* headers) {
 	const char* headerLine = headers[0];
 	if(headerLine == nullptr) {
 		return false;
@@ -37,6 +38,26 @@ bool WebAccess::sendRequestToServer(InternetAccess& net, const char* const* head
 
 		net.writeHeaderLine(headerLine);
 		headerLine = headers[++headerIndex];
+	}
+
+	return true;
+}
+
+
+bool WebAccess::sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers) {
+	if(WiFi.status() != WL_CONNECTED) {
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
+		return false;
+	}
+
+	if(!net.connectToWeb(server)) {
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_SECURE_CONNECTION_TO_SERVER_FAILED);
+		return false;
+	}
+
+	if(!writeHeadersToServer(net, headers)) {
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_REQUEST_TO_SERVER_HEADER_INVALID);
+		return false;
 	}
 
 	return true;
@@ -66,22 +87,7 @@ short WebAccess::findEndOfHeaderIndex(const char* const rawData, const unsigned 
 }
 
 
-char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, const char* const* headers) {
-	if(WiFi.status() != WL_CONNECTED) {
-		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
-		return nullptr;
-	}
-
-	if(!net.connectToWeb(server)) {
-		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_SECURE_CONNECTION_TO_SERVER_FAILED);
-		return nullptr;
-	}
-
-	if(!sendRequestToServer(net, headers)) {
-		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_REQUEST_TO_SERVER_HEADER_INVALID);
-		return nullptr;
-	}
-
+char* WebAccess::downloadFromServer(InternetAccess& net) {
 	int bufferIndex = 0;
 	char* dataBuffer = new char[DATA_BUFFER_SIZE];
 	while(net.activeWebConnection()) {
@@ -90,19 +96,23 @@ char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, con
 				dataBuffer[bufferIndex++] = net.nextCharInWebResponse();
 			} else {
 				DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_OVERFLOW);
+				delete[] dataBuffer;
 				return nullptr;
 			}
 		}
 	}
 
+	dataBuffer[bufferIndex] = '\0';
+
 	if(bufferIndex < DATA_BUFFER_SIZE/2) {
 		DebugLog::getLog().logWarning(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED);
 	}
 
-	/*//Print full response
-	for(int i = 0; i < bufferIndex; i += 1) {
+	//Print full response
+	/*for(int i = 0; i < bufferIndex; i += 1) {
 		Serial.print(dataBuffer[i]);
-	}*/
+	}
+	Serial.println('\n');*/
 
 	/*//Print buffer utilization
 	Serial.print("Used ");
@@ -113,16 +123,21 @@ char* WebAccess::downloadFromServer(InternetAccess& net, const char* server, con
 	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
 	if(endOfHeaderIndex != -1) {
 		const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
-		char* jsonData = new char[LENGTH_OF_JSON_BODY];
+
+		//Serial.print(F("length of body: "));
+		//Serial.println(LENGTH_OF_JSON_BODY);
+
+		char* payloadData = new char[LENGTH_OF_JSON_BODY];
 		for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
-			jsonData[i] = dataBuffer[endOfHeaderIndex + i];
+			payloadData[i] = dataBuffer[endOfHeaderIndex + i];
 		}
-		jsonData[LENGTH_OF_JSON_BODY] = '\0';
+		payloadData[LENGTH_OF_JSON_BODY] = '\0';
 
 		delete[] dataBuffer;
-		return jsonData;
+		return payloadData;
 	}
 
+	delete[] dataBuffer;
 	return nullptr;
 }
 

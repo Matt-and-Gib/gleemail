@@ -494,7 +494,7 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 
 
 bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
-	packetSize = udp.parsePacket();
+	packetSize = udp.parsePacket(); //destroys body of HTTPS responses
 	if(packetSize > 0) {
 		udp.read(messageBuffer, packetSize);
 		if(udp.remoteIP() == glEEpalInfo->getIPAddress()) {
@@ -502,9 +502,10 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 			messageReceivedCount += 1;
 
-			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument;
+			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
 			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, JSON_DOCUMENT_SIZE);
 			if(parsingError) {
+				//write data to buffer to check in gleemail.ino(?) in case HTTP GET is stored in UDP buffer (for when MCCP version info is requested)
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			}

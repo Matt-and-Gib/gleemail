@@ -11,6 +11,7 @@ static const constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
 static const constexpr unsigned short DEBUG_LOG_MESSAGE_ERROR_OFFSET = 130;
 static const constexpr unsigned short DEBUG_LOG_INTERNET_ACCESS_OFFSET = 170;
 static const constexpr unsigned short DEBUG_LOG_WEB_ACCESS_OFFSET = 210;
+static const constexpr unsigned short DEBUG_LOG_STORAGE_OFFSET = 250;
 enum ERROR_CODE: short {
 	//Meta range: 0 - 9
 	NONE = 0,
@@ -27,6 +28,8 @@ enum ERROR_CODE: short {
 	INPUT_METHOD_MESSAGE_CONTAINS_PRECEDING_WHITESPACE = DEBUG_LOG_INPUT_METHOD_OFFSET + 5,
 	INPUT_METHOD_MESSAGE_CONTAINS_TRAILING_WHITESPACE = DEBUG_LOG_INPUT_METHOD_OFFSET + 6,
 	INPUT_METHOD_COMMIT_EMPTY_MESSAGE = DEBUG_LOG_INPUT_METHOD_OFFSET + 7,
+	INPUT_METHOD_VERSION_NUMBER_OVERFLOW = DEBUG_LOG_INPUT_METHOD_OFFSET + 8,
+	INPUT_METHOD_MORSE_CODE_CHAR_PAIRS_VERSION_MISMATCH = DEBUG_LOG_INPUT_METHOD_OFFSET + 9,
 
 	//Network range: 50 - 89
 	/*
@@ -50,8 +53,10 @@ enum ERROR_CODE: short {
 
 	//JSON range: 90 - 129
 	JSON_NULLPTR_PAYLOAD = DEBUG_LOG_JSON_OFFSET + 0,
-	JSON_DESERIALIZATION_ERROR = DEBUG_LOG_JSON_OFFSET + 1,
+	//JSON_DESERIALIZATION_ERROR = DEBUG_LOG_JSON_OFFSET + 1,
+	JSON_PREFS_DESERIALIZATION_ERROR = DEBUG_LOG_JSON_OFFSET + 1,
 	JSON_MESSAGE_DESERIALIZATION_ERROR = DEBUG_LOG_JSON_OFFSET + 2,
+	JSON_INPUT_DATA_DESERIALIZATION_ERROR = DEBUG_LOG_JSON_OFFSET + 3,
 
 	//MessageError range: 130 - 169
 	MESSAGE_ERROR_NONE = DEBUG_LOG_MESSAGE_ERROR_OFFSET + 0,
@@ -63,19 +68,46 @@ enum ERROR_CODE: short {
 	INTERNET_ACCESS_UNKNOWN_STATUS = DEBUG_LOG_INTERNET_ACCESS_OFFSET + 3,
 	INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED = DEBUG_LOG_INTERNET_ACCESS_OFFSET + 4,
 	INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED = DEBUG_LOG_INTERNET_ACCESS_OFFSET + 5,
+	INTERNET_ACCESS_DISCONNECTED_DURING_CONNECTION_ATTEMPT = DEBUG_LOG_INTERNET_ACCESS_OFFSET + 6,
 
-	//WebAccess range: 210 - 250
+	//WebAccess range: 210 - 249
 	WEB_ACCESS_HEADER_TERMINATION_OMITTED = DEBUG_LOG_WEB_ACCESS_OFFSET + 0,
 	WEB_ACCESS_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED = DEBUG_LOG_WEB_ACCESS_OFFSET + 1,
 	WEB_ACCESS_SECURE_CONNECTION_TO_SERVER_FAILED = DEBUG_LOG_WEB_ACCESS_OFFSET + 2,
 	WEB_ACCESS_REQUEST_TO_SERVER_HEADER_INVALID = DEBUG_LOG_WEB_ACCESS_OFFSET + 3,
 	WEB_ACCESS_DATA_BUFFER_OVERFLOW = DEBUG_LOG_WEB_ACCESS_OFFSET + 4,
-	WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED = DEBUG_LOG_WEB_ACCESS_OFFSET + 5
+	WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED = DEBUG_LOG_WEB_ACCESS_OFFSET + 5,
+
+	//Storage range: 250 - 289
+	STORAGE_PREFS_FILE_SIZE_GREATER_THAN_PREFS_DOCUMENT_SIZE = DEBUG_LOG_STORAGE_OFFSET + 0,
+	STORAGE_NOT_DETECTED = DEBUG_LOG_STORAGE_OFFSET + 1,
+	STORAGE_COULDNT_LOAD_PREFS = DEBUG_LOG_STORAGE_OFFSET + 2
 };
 
 
 //Remember: DebugLog is a singleton! DO NOT waste memory.
 class DebugLog {
+private:
+	DebugLog() {
+		errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
+		for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
+			errorCodes[i] = ERROR_CODE::NONE;
+		}
+	}
+	DebugLog(DebugLog const&) = delete;
+	void operator=(DebugLog const&) = delete;
+
+	void log(ERROR_CODE e, bool critical) {
+		if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
+			if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
+				errorCodes[errorCodesFirstOpenIndex++] = e;
+			}
+		}
+	}
+
+	static constexpr unsigned short MAX_ERROR_CODES = 16;
+	ERROR_CODE* errorCodes;
+	unsigned short errorCodesFirstOpenIndex = 0;
 public:
 	static DebugLog& getLog() {
 		static DebugLog log;
@@ -99,27 +131,6 @@ public:
 			return ERROR_CODE::NONE;
 		}
 	}
-private:
-	DebugLog() {
-		errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
-		for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
-			errorCodes[i] = ERROR_CODE::NONE;
-		}
-	}
-	DebugLog(DebugLog const&) = delete;
-	void operator=(DebugLog const&) = delete;
-
-	void log(ERROR_CODE e, bool critical) {
-		if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
-			if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
-				errorCodes[errorCodesFirstOpenIndex++] = e;
-			}
-		}
-	}
-
-	static constexpr unsigned short MAX_ERROR_CODES = 16;
-	ERROR_CODE* errorCodes;
-	unsigned short errorCodesFirstOpenIndex = 0;
 };
 
 

@@ -128,18 +128,23 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 		return false;
 	}
 
-	ArduinoJson::DynamicJsonDocument doc(CALCULATED_DOCUMENT_SIZE_IN_BYTES);
-	ArduinoJson::DeserializationError error = deserializeJson(doc, payload);
+	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
+	filter["size"] = true;
 
-	if (error) {
-		DebugLog::getLog().logError(JSON_DESERIALIZATION_ERROR);
-		//Serial.println(error.f_str());
-		return false;
+	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
+	deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
+	const unsigned short mccpSize = sizeDoc["size"];
+
+	DynamicJsonDocument mccpDoc(mccpSize);
+	DeserializationError error = deserializeJson(mccpDoc, payload);
+
+	if(error) {
+		Serial.println(error.f_str());
 	}
 
 	const char* letter;
 	const char* phrase;
-	for (ArduinoJson::JsonObject elem : doc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
+	for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
 		letter = elem["symbol"];
 		phrase = elem["phrase"];
 		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase)));

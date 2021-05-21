@@ -1,6 +1,8 @@
 #include "Arduino.h"
 #include "src/include/global.h"
+#include "src/include/preferences.h"
 
+#include "src/include/storage.h"
 #include "src/include/display.h"
 #include "src/include/morsecode.h"
 
@@ -14,11 +16,12 @@ void updateDisplayWithPeerChat(const char*);
 void updateDisplayWithUserChat(const char*);
 
 
-static Display& display = *new Display();
+static Storage storage;
+static Display display;
 
-static InternetAccess& internet = *new InternetAccess();
-static Networking& network = *new Networking(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0);
-static WebAccess& webAccess = *new WebAccess();
+static InternetAccess internet;
+static Networking network(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0);
+static WebAccess webAccess;
 
 static InputMethod* input;
 static unsigned short pinIndex = 0;
@@ -26,11 +29,174 @@ static char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
 static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
 bool pendingPeerMessage = false;
 
+/*static void noAsynchronousProcess() {}
+void (*doAsynchronousProcess)() = &noAsynchronousProcess;
+static unsigned short verifyInputMethodDataStep = 0;*/
 
 static long long cycleStartTime = 0;
 static long cycleDuration = 0;
 //static long greatestCycleDuration = 0;
 static unsigned short cycleLatencyCount = 0;
+
+
+/*int bufferIndex = 0;
+char* dataBuffer = new char[4096];
+bool mccpDownloadStarted = false;
+unsigned short mccpDownloadDataValue = 0;*/
+
+
+/*void checkMorseCodeCharPairsDownloadComplete() {
+
+}*/
+
+
+/*void verifyInputMethodData() {
+	//if(internet.activeWebConnection()) {
+		if(internet.responseAvailableFromWeb()) {
+			mccpDownloadStarted = true;
+			if(bufferIndex < 4096) {
+				dataBuffer[bufferIndex++] = internet.nextCharInWebResponse();
+			} else {
+				DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_OVERFLOW);
+				return;
+			}
+		//}
+	} else {
+		if(mccpDownloadStarted) {
+			dataBuffer[bufferIndex] = '\0';
+
+			if(bufferIndex < 4096/2) {
+				DebugLog::getLog().logWarning(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED);
+			}
+
+			//Print full response
+			for(int i = 0; i < bufferIndex; i += 1) {
+				Serial.print(dataBuffer[i]);
+			}
+			Serial.println('\n');
+
+
+			short endOfHeaderIndex = webAccess.findEndOfHeaderIndex(dataBuffer, bufferIndex);
+			if(endOfHeaderIndex != -1) {
+				const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
+
+				Serial.print(F("length of body: "));
+				Serial.println(LENGTH_OF_JSON_BODY);
+
+				char* payloadData = new char[LENGTH_OF_JSON_BODY];
+				for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
+					payloadData[i] = dataBuffer[endOfHeaderIndex + i];
+				}
+				payloadData[LENGTH_OF_JSON_BODY] = '\0';
+
+				mccpDownloadDataValue = atoi(payloadData);
+				delete[] payloadData;
+			}
+
+			delete[] dataBuffer;
+
+
+			Serial.print(F("v: "));
+			Serial.println(mccpDownloadDataValue);
+
+			if(mccpDownloadDataValue == Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
+				Serial.println(F("Versions match!"));
+				doAsynchronousProcess = &noAsynchronousProcess;
+			} else {
+				Serial.println(F("Morse Code Char Pairs version mismatch!"));
+				
+				if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders())) {
+					//this is a huge problem! sendRequestToServer can fail only if WiFi is not connected, the SSL certificate for raw.githubusercontent.com is invalid, or if too few or too many headers are sent.
+				}
+				
+				doAsynchronousProcess = &checkMorseCodeCharPairsDownloadComplete;
+			}
+		}
+	}*/
+
+
+	/*if(internet.activeWebConnection()) {
+		if(internet.responseAvailableFromWeb()) {
+			Serial.println(F("read byte"));
+			mccpVersionInfoDownloadStarted = true;
+			downloadBuffer[downloadBufferIndex++] = internet.nextCharInWebResponse();
+		}
+	} else {
+		if(mccpVersionInfoDownloadStarted == true) {
+			Serial.println(F("complete"));
+
+			Serial.println(downloadBuffer);
+
+			downloadBuffer[downloadBufferIndex] = '\0';
+
+			short endOfHeaderIndex = webAccess.findEndOfHeaderIndex(downloadBuffer, downloadBufferIndex);
+			if(endOfHeaderIndex != -1) {
+				const unsigned short LENGTH_OF_JSON_BODY = downloadBufferIndex - endOfHeaderIndex;
+
+				Serial.print(F("length of body: "));
+				Serial.println(LENGTH_OF_JSON_BODY);
+
+				char* payloadData = new char[LENGTH_OF_JSON_BODY];
+				for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
+					payloadData[i] = downloadBuffer[endOfHeaderIndex + i];
+				}
+				payloadData[LENGTH_OF_JSON_BODY] = '\0';
+
+				const unsigned short latestVersionNumber = atoi(payloadData);
+
+				Serial.print(F("latest version number: "));
+				Serial.println(latestVersionNumber);
+
+				if(latestVersionNumber == Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
+					Serial.println(F("Versions match!"));
+					doAsynchronousProcess = &noAsynchronousProcess;
+				} else {
+					Serial.println(F("Morse Code Char Pairs version mismatch!"));
+					
+					
+					//if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders())) {
+						//this is a huge problem! sendRequestToServer can fail only if WiFi is not connected, the SSL certificate for raw.githubusercontent.com is invalid, or if too few or too many headers are sent.
+					//}
+					
+					doAsynchronousProcess = &checkMorseCodeCharPairsDownloadComplete;
+				}
+			}
+		} else {
+			Serial.println(F("wait"));
+		}
+	}*/
+
+	/*Serial.println(F("verifying..."));
+	if(internet.responseAvailableFromWeb()) {
+		Serial.println(F("web connection inactive"));
+
+		char* rawValue = webAccess.downloadFromServer(internet);
+
+		Serial.print(F("raw value: "));
+		Serial.println(rawValue);
+
+		const unsigned short latestVersionNumber = atoi(rawValue);
+
+		delete[] rawValue;
+
+		Serial.print(F("latest version number: "));
+		Serial.println(latestVersionNumber);
+
+		if(latestVersionNumber == Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
+			Serial.println(F("Versions match!"));
+			doAsynchronousProcess = &noAsynchronousProcess;
+		} else {
+			Serial.println(F("Morse Code Char Pairs version mismatch!"));
+			
+			
+			if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders())) {
+				//this is a huge problem! sendRequestToServer can fail only if WiFi is not connected, the SSL certificate for raw.githubusercontent.com is invalid, or if too few or too many headers are sent.
+			}
+			
+			doAsynchronousProcess = &checkMorseCodeCharPairsDownloadComplete;
+		}
+	}*/
+//}
 
 
 void updateInputMethod() {
@@ -92,7 +258,6 @@ void sendChatMessage(char* chat) {
 
 
 void updateDisplayWithPeerChat(const char* messageBody) {
-	//Serial.print("Update display with peer chat: ");
 	//Serial.println(messageBody);
 	display.updateReading(messageBody);
 }
@@ -137,10 +302,10 @@ void updateDisplayWithPeerChat(const char* messageBody) {
 void printErrorCodes() {
 	ERROR_CODE e = DebugLog::getLog().getNextError();
 	while(e != ERROR_CODE::NONE) {
-		//if(!(OFFLINE_MODE && (e == NETWORK_HEARTBEAT_FLATLINE))) {
+		if(!(OFFLINE_MODE && (e == NETWORK_HEARTBEAT_FLATLINE))) {
 			Serial.print(F("\nError Code: "));
 			Serial.println(e);
-		//}
+		}
 
 		e = DebugLog::getLog().getNextError();
 	}
@@ -171,6 +336,7 @@ void loop() {
 	updateInputMethod();
 	updateNetwork();
 	//updateDisplay();
+	//doAsynchronousProcess();
 	printErrorCodes();
 
 	cycleDuration = millis() - cycleStartTime;
@@ -186,53 +352,111 @@ void loop() {
 }
 
 
-bool connectToWiFi() {
-	unsigned short inputLength = 0;
+bool prepareStorage() {
+	if(!storage.begin()) {
+		return false;
+	}
 
-	Serial.println(F("Enter WiFi SSID:"));
-	display.updateWriting("Enter SSID");
-	char userSSID[internet.getMaxSSIDLength() + 1];
-	while(true) {
+	const char* preferencesData = storage.readFile(prefsPath);
+	if(!preferencesData) {
+		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
+	} else {
+		Preferences::getPrefs().deserializePrefs(preferencesData, storage.lastReadFileLength());
+	}
+	delete[] preferencesData;
+
+	return true;
+}
+
+
+bool promptForNewWiFiCredentials() {
+	/*unsigned short USER_INPUT_TIMESPAN = 100; //Move this sad lonely variable to its home in the clouds
+	unsigned long timespan = millis() + USER_INPUT_TIMESPAN;
+	char userInput[1];
+
+	Serial.println(F("Would you like to use a new WiFi SSID & Password? (Y, N)"));
+	while(millis() < timespan) {
 		if(Serial.available() > 0) {
-			inputLength = Serial.readBytesUntil('\n', userSSID, internet.getMaxSSIDLength());
+			Serial.readBytesUntil('\n', userInput, 1);
 			break;
 		}
-
-		delay(250);
 	}
 
-	if(inputLength >= internet.getMaxSSIDLength()) {
-		DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
-	}
-	userSSID[inputLength] = '\0';
+	if(userInput[0] == 'Y' || userInput[0] == 'y') {
+		return true;
+	} else {
+		return false;
+	}*/
 
-	char userPassword[internet.getMaxPasswordLength() + 1];
-	Serial.print(F("Enter password for "));
-	Serial.print(userSSID);
-	Serial.println(F(":"));
-	display.updateWriting("Enter Password");
-	while(true) {
-		if(Serial.available() > 0) {
-			inputLength = Serial.readBytesUntil('\n', userPassword, internet.getMaxPasswordLength());
-			break;
+	return false;
+}
+
+
+bool connectToWiFi(bool forceManual = false) {
+	bool changedLoginInfo = forceManual;
+
+	if(forceManual || (!Preferences::getPrefs().getWiFiSSID() || !Preferences::getPrefs().getWiFiPassword())) {
+		char desiredSSID[internet.getMaxSSIDLength()];
+		char desiredPassword[internet.getMaxPasswordLength()];
+		unsigned short inputLength = 0;
+
+		Serial.println(F("Enter WiFi SSID:"));
+		display.updateWriting("Enter SSID");
+		while(true) {
+			if(Serial.available() > 0) {
+				inputLength = Serial.readBytesUntil('\n', desiredSSID, internet.getMaxSSIDLength());
+				break;
+			}
+
+			delay(250);
 		}
 
-		delay(250);
-	}
+		if(inputLength >= internet.getMaxSSIDLength()) {
+			DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
+		}
 
-	if(inputLength >= internet.getMaxPasswordLength()) {
-		DebugLog::getLog().logError(INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED);
+		Preferences::getPrefs().setWiFiSSID(copyAndTerminateString(desiredSSID, inputLength));
+
+		Serial.print(F("Enter password for "));
+		Serial.print(Preferences::getPrefs().getWiFiSSID());
+		Serial.println(F(":"));
+		display.updateWriting("Enter Password");
+		while(true) {
+			if(Serial.available() > 0) {
+				inputLength = Serial.readBytesUntil('\n', desiredPassword, internet.getMaxPasswordLength());
+				break;
+			}
+
+			delay(250);
+		}
+
+		if(inputLength >= internet.getMaxPasswordLength()) {
+			DebugLog::getLog().logError(INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED);
+		}
+
+		Preferences::getPrefs().setWiFiPassword(copyAndTerminateString(desiredPassword, inputLength));
+
+		changedLoginInfo = true;
+	} else {
+		changedLoginInfo = false;
 	}
-	userPassword[inputLength] = '\0';
 
 	Serial.println(F("Attempting connection..."));
 	display.updateWriting("Connecting...");
 
-	if(!internet.connectToNetwork(userSSID, userPassword)) {
-		Serial.print(F("Unable to connect to "));
+	if(!internet.connectToNetwork(Preferences::getPrefs().getWiFiSSID(), Preferences::getPrefs().getWiFiPassword())) {
 		display.updateWriting("Failed");
-		Serial.println(userSSID);
+		Serial.print(F("Unable to connect to "));
+		Serial.println(Preferences::getPrefs().getWiFiSSID());
+
 		return false;
+	}
+
+	if(changedLoginInfo) {
+		//storage.savePrefs();
+		const char* prefsData = Preferences::getPrefs().serializePrefs();
+		storage.writeFile(prefsData, prefsPath, false/*CHANGE TO TRUE WHEN ENCRYPTION IS READY, YO*/);
+		delete[] prefsData;
 	}
 
 	Serial.println(F("Connected!"));
@@ -241,22 +465,89 @@ bool connectToWiFi() {
 }
 
 
-bool setupInputMethod() {
-	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
-	Serial.println(F("Downloading Input Method data..."));
+const unsigned short getMorseCodeCharPairsVersion() {
+	const char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
+	const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
+		SERVER_REQUEST,
+		NETWORK_HEADER_USER_AGENT,
+		HOST,
+		NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
+		NETWORK_HEADER_CONNECTION_LIFETIME,
+		HEADER_TERMINATION,
+		nullptr
+	};
 
-	char *data = webAccess.downloadFromServer(internet, input->getServerAddress(), input->getRequestHeaders());
+	if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), REQUEST_HEADERS)) {
+		return 0;
+	}
+
+	const char* data = webAccess.downloadFromServer(internet);
+	if(!data) {
+		Serial.println(F("Unable to download version data!"));
+		delete[] data;
+		return 0;
+	}
+
+	const unsigned short downloadedMorseCodeCharPairsVersion = atoi(data);
+
+	//Serial.print(F("v: "));
+	//Serial.println(downloadedMorseCodeCharPairsVersion);
+
+	delete[] data;
+
+	return downloadedMorseCodeCharPairsVersion;
+}
+
+
+const char* getMorseCodeCharPairsData() {
+	if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders())) {
+		return nullptr;
+	}
+
+	const char* data = webAccess.downloadFromServer(internet);
 	if(!data) {
 		Serial.println(F("Unable to download data!"));
-		return false;
+		delete[] data;
+		return nullptr;
 	}
 
-	/*Serial.println("JSON Payload:\n");
-	unsigned short i = 0;
-	while(dat[i] != '\0') {
-		Serial.print(dat[i++]);
+	return data;
+}
+
+
+bool setupInputMethod() {
+	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
+
+	const unsigned short mccpVersion = getMorseCodeCharPairsVersion();
+	const char* data = storage.readFile(morseCodeCharPairsPath);
+	if(!data) {
+		Serial.println(F("Downloading Input Method data..."));
+
+		data = getMorseCodeCharPairsData();
+		storage.writeFile(data, morseCodeCharPairsPath);
+
+		Preferences::getPrefs().setMorseCodeCharPairsVersion(mccpVersion);
+		const char* prefsData = Preferences::getPrefs().serializePrefs();
+		storage.writeFile(prefsData, prefsPath);
+		delete[] prefsData;
+	} else {
+		//webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders()); //REQUEST_HEADERS);
+		//doAsynchronousProcess = &verifyInputMethodData;
+
+		if(Preferences::getPrefs().getMorseCodeCharPairsVersion() != mccpVersion) {
+			Serial.println(F("Morse Code Char Pairs Version Mismatch"));
+
+			delete[] data;
+
+			data = getMorseCodeCharPairsData();
+			storage.writeFile(data, morseCodeCharPairsPath);
+
+			Preferences::getPrefs().setMorseCodeCharPairsVersion(mccpVersion);
+			const char* prefsData = Preferences::getPrefs().serializePrefs();
+			storage.writeFile(prefsData, prefsPath);
+			delete[] prefsData;
+		}
 	}
-	Serial.println("\nDone");*/
 
 	bool dataParsed = input->setNetworkData(data);
 	delete[] data;
@@ -284,7 +575,7 @@ void setupPins() {
 }
 
 
-void connectToPeer() {
+void connectToPeer() { //Use PEER wait time to do asynchronousProcess
 	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
 	char* ipAddressInputSubstringBuffer;
 	uint8_t ipAddressParts[4];
@@ -334,11 +625,27 @@ void setup() {
 		Serial.read();
 	}
 
-	enum SETUP_LEVEL : short {WELCOME = 0, NETWORK = 1, INPUT_METHOD = 2, PINS = 3, PEER = 4, DONE = 5};
+//----------USED TO CLEAR THE SD CARD----------
+/*
+	storage.begin();
+	if(!storage.clearFile(prefsPath)) {
+		Serial.println(F("Unable to Prefs path"));
+	}
+	if(!storage.clearFile(morseCodeCharPairsPath)) {
+		Serial.println(F("Unable to delete MorseCodeCharPairs path"));
+	}
+
+	Serial.println(F("Files deleted successfully. Halting"));
+	abort();
+*/
+//----------USED TO CLEAR THE SD CARD----------
+
+	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
 	SETUP_LEVEL setupState = WELCOME;
 	bool setupComplete = false;
+	bool networkForceNewCredentials = false;
 
-	const unsigned short SETUP_STEP_DELAY = 1500;
+	const unsigned short SETUP_STEP_DELAY = 0;
 
 	do {
 		switch(setupState) {
@@ -353,11 +660,21 @@ void setup() {
 			}
 
 			display.updateReading("Hello, glEEmail!");
+			setupState = SETUP_LEVEL::STORAGE;
+		break;
+
+
+		case SETUP_LEVEL::STORAGE:
+			if(!prepareStorage()) {
+				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
+			}
+
 			setupState = SETUP_LEVEL::NETWORK;
 		break;
 
 
 		case SETUP_LEVEL::NETWORK:
+			Serial.println(F("Joining WiFi"));
 			display.updateWriting("Joining WiFi");
 			delay(SETUP_STEP_DELAY);
 
@@ -365,11 +682,20 @@ void setup() {
 			display.updateReading("Joining WiFi");
 			delay(SETUP_STEP_DELAY);
 
-			if(connectToWiFi()) {
+			if(connectToWiFi(networkForceNewCredentials)) {
 				setupState = SETUP_LEVEL::INPUT_METHOD;
+			} else {
+				networkForceNewCredentials = promptForNewWiFiCredentials();
 			}
 		break;
 
+/*
+~7.0 sec
+~2.5 sec
+~2.0 sec
+~1.7 sec
+~1.4 sec
+*/
 
 		case SETUP_LEVEL::INPUT_METHOD:
 			display.updateReading("Setting Up Input");
@@ -391,7 +717,7 @@ void setup() {
 		break;
 
 
-		case SETUP_LEVEL::PEER:
+		case SETUP_LEVEL::PEER: //Use PEER wait time to do asynchronousProcess
 			if(!OFFLINE_MODE) {
 				display.updateWriting("Wait for glEEpal");
 				connectToPeer();	

@@ -59,7 +59,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 4/13/2021
+Last updated: 5/18/2021
 <details>
 <summary>0 - 9: General</summary>
 
@@ -68,10 +68,11 @@ Last updated: 4/13/2021
 |0|None|No error was reported|N/A|
 |1|Debug Debug Log|Verified that debug log is functional|N/A|
 |2|Unknown Setup State|An unknown step was specified in setup|High|
+|3|Continuous Frame Latency|Lag may cause inaccuracies in input|High|
 </details>
 
 <details>
-<summary>10 - 49: Input</summary>
+<summary>10 - 49: Input Method</summary>
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
@@ -81,6 +82,7 @@ Last updated: 4/13/2021
 |14|Morse Message To Send Exceeded Max Message Length|Entered message has exceeded the maximum length and must be sent immediately without storing the provided character|High|
 |15|Message Contains Preceding Whitespace||Low|
 |16|Message Contains Trailing Whitespace||Low|
+|17|Commit Empty Message||High|
 </details>
 
 <details>
@@ -88,24 +90,14 @@ Last updated: 4/13/2021
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
-|50|Connection Failed||High|
-|51|Passed Invalid Parameter|Provided SSID or password were null pointers|High|
-|52|WiFi Connection Failed Retry Occurred||High|
-|53|Download Impossible Not Connected||High|
-|54|Secure Connection to Server Failed||High|
-|55|Request To Server Header Invalid||High|
-|56|Header Termination Omitted||High|
-|57|Data Buffer Overflow||High|
-|58|Data Buffer Underutilized|The calculated space for the data buffer was too large (likely data download was incomplete)|Low|
-|59|SSID Possibly Truncated|WiFi name provided exceeded maximum length (as defined by IEEE 802.11) and was truncated|High|
-|60|Password Possibly Truncated|WiFi password exceeded maximum length (as defined by IEEE 802.11) and was truncated|High|
-|61|Invalid Handshake Message||High|
-|62|Unexpected Handshake IP|Handshake received but not from user-entered IP address|Low|
-|63|Invalid Peer IP Address||High|
-|64|Unknown Status|Connection to WiFi router is neither FAILED nor CONNECTED|High|
-|65|Write Failed|Sending message to peer failed|High|
-|66|Peer Message Read Failed||High|
-|67|Unknown Message Type||High|
+|51|Unknown Message Sender||High|
+|52|Too Many Messages Received||High|
+|53|Heartbeat Flatline||High|
+|54|Outgoing Token Timestamp Elapsed||High|
+|55|Time Sensitive Process Exceeded Allocated Time (Significant)||High|
+|56|Time Sensitive Process Exceeded Allocated Time (Insignificant)||Low|
+|57|Unknown Incoming Message Type||High|
+|58|Confirmation No Match Found||Low|
 </details>
 
 <details>
@@ -114,7 +106,54 @@ Last updated: 4/13/2021
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
 |90|Nullptr Payload|No data provided to deserialize|High|
-|91|Deserialization Error|Unable to deserialize data into JSON objects|High|
+|91|Prefs Deserialization Error||High|
+|92|Message Deserialization Error||High|
+|93|Input Data Deserialization Error||High|
+</details>
+
+<details>
+<summary>130 - 169: MessageError</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|130|None|No message error|N/A|
+</details>
+
+<details>
+<summary>170 - 209: Internet Access</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|170|Passed Invalid Parameter|SSID or Password invalid|High|
+|171|Connection Failed||High|
+|172|WiFi Connection Failed Retry Occurred||High|
+|173|Unknown Status||High|
+|174|SSID Possibly Truncated|Characters after SSID max length may have been missed|High|
+|175|Password Possibly Truncated|Characters after Password max length may have been missed|High|
+|176|Disconnected During Connection Attempt||High|
+</details>
+
+<details>
+<summary>210 - 249: Web Access</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|210|Header Termination Omitted||High|
+|211|Download Impossible - Not Connected||High|
+|212|Secure Connection To Server Failed|SSL certificate may not be installed|High|
+|213|Request to Server Header Invalid||High|
+|214|Data Buffer Overflow||High|
+|215|Data Buffer Underutilized||Low|
+</details>
+
+<details>
+<summary>250 - 289: Storage</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|250|Prefs File Size Greater Than Prefs Document Size||High|
+|251|Storage Not Detected||High|
+|252|Couldn't Load Prefs||Low|
 </details>
 
 ___
@@ -136,13 +175,25 @@ Required Libraries
 
 Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
 
+<details>
+<summary>Steps to take after changing certain files</summary>
+
+- preferences.h
+	- Increment `PREFERENCES_VERSION` in `src/include/preferences.h`
+	- Re-Calculate `CALCULATED_PREFS_SIZE` in `src/include/preferences.h`
+
+- MorseCodeCharPairs.json (note: don't forget to update your `SERVER` and `SERVER_REQUEST` URLs to forked repo)
+	- Increment `morseCodeCharPairsVersion` in `data/MorseCodeCharPairsVersion`
+	- Re-Calculate `CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES` in `data/MorseCodeCharPairs.json`
+
+</details>
 ___
 
 ### <a name="instructions"></a>**Usage Instructions**
 
 Important!
 
-In order to use gleemail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses a binary tree populated with JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the WiFi Module).
+In order to use glEEmail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses a binary tree populated with JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the WiFi Module).
 
 ![Install Certificate Picture One.png](resources/InstallCertificatePictureOne.png)
 
