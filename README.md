@@ -1,4 +1,5 @@
-<img src="resources/gleemail_social_media_final.png" alt="glEEmail" width=640>
+![glEEmail](resources/gleemail_social_media_final.png)
+<!--<img src="resources/gleemail_social_media_final.png" alt="glEEmail" width=640>-->
 
 ## _Voted† 100% better than Discord!*_
 
