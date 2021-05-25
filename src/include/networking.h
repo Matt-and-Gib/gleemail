@@ -285,8 +285,8 @@ void Networking::clearAllQueues() {
 }
 
 
-void Networking::dropConnection() {
-	connected = false;
+void Networking::dropConnection() { //Baby, come back (to finish me)
+/*	connected = false;
 	processHeartbeat = &Networking::dontCheckHeartbeat;
 
 	IPAddress palIP = glEEpalInfo->getIPAddress();
@@ -295,7 +295,9 @@ void Networking::dropConnection() {
 
 	clearAllQueues();
 
-	connectToPeer(palIP);
+	connectToPeer(palIP);*/
+
+	abort();
 }
 
 
