@@ -20,11 +20,16 @@ private:
 
 	static constexpr uint32_t constant[CONSTANT_LENGTH] = {0x61707865, 0x3320646e, 0x79622d32, 0x6b206574}; // In ASCII (little-endian): "expand 32-byte k"
 	uint32_t key[KEY_LENGTH] = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000};
-	uint32_t initialBlockCounter[BLOCK_COUNTER_LENGTH] = {0x00000000};
-	uint32_t blockCounter[BLOCK_COUNTER_LENGTH] = {0x00000000};
-	uint32_t nonce[NONCE_LENGTH] = {0x00000000, 0x00000000, 0x00000000};
+//	uint32_t initialBlockCounter[BLOCK_COUNTER_LENGTH] = {0x00000000};
+	uint32_t initialBlockCounter = 0x00000000;
+//	uint32_t blockCounter[BLOCK_COUNTER_LENGTH] = {0x00000000};
+	uint32_t blockCounter = 0x00000000;
+	uint32_t fixedNonce = 0x00000000;
+//	uint32_t nonce[NONCE_LENGTH] = {0x00000000, 0x00000000, 0x00000000};
+	uint32_t nonceCounter[COUNTER_NONCE_LENGTH] = {0x00000000, 0x00000000};
 
-	uint32_t peerFixedNonce[FIXED_NONCE_LENGTH] = {0x00000000};
+//	uint32_t peerFixedNonce[FIXED_NONCE_LENGTH] = {0x00000000};
+	uint32_t peerFixedNonce = 0x00000000;
 
 	uint32_t startState[BLOCK_LENGTH];
 	uint32_t endState[BLOCK_LENGTH];
@@ -63,7 +68,7 @@ public:
 	unsigned long* getLastEndState() {return (unsigned long*)endState;}
 	char* getLastKeyStream() {return keyStream;}
 
-	unsigned long long getNonceCounter() {return (nonce[1] << 32) | nonce[2];}
+	unsigned long long getNonceCounter() {return (nonceCounter[0] << 32) | nonceCounter[1];}
 	void incrementNonceCounter(); // Should not typically be public!
 
 	void encryptMessage(char*, unsigned long long, unsigned long);
@@ -85,8 +90,8 @@ void ChaChaEncryption::buildEncryption(char* userKeyIn, char* userFixedNonceIn, 
 	for(unsigned short i = 0; i < KEY_LENGTH; i += 1) {
 		key[i] = (userKeyIn[(i*4) + 3] << 24) | (userKeyIn[(i*4) + 2] << 16) | (userKeyIn[(i*4) + 1] << 8) | userKeyIn[i*4];
 	}
-	nonce[0] = (userFixedNonceIn[3] << 24) | (userFixedNonceIn[2] << 16) | (userFixedNonceIn[1] << 8) | userFixedNonceIn[0];
-	peerFixedNonce[0] = (peerFixedNonceIn[3] << 24) | (peerFixedNonceIn[2] << 16) | (peerFixedNonceIn[1] << 8) | peerFixedNonceIn[0];
+	fixedNonce = (userFixedNonceIn[3] << 24) | (userFixedNonceIn[2] << 16) | (userFixedNonceIn[1] << 8) | userFixedNonceIn[0];
+	peerFixedNonce = (peerFixedNonceIn[3] << 24) | (peerFixedNonceIn[2] << 16) | (peerFixedNonceIn[1] << 8) | peerFixedNonceIn[0];
 
 	for(unsigned short i = 0; i < CONSTANT_LENGTH; i += 1) {
 		startState[i] = constant[i];
@@ -98,8 +103,8 @@ void ChaChaEncryption::buildEncryption(char* userKeyIn, char* userFixedNonceIn, 
 
 
 void ChaChaEncryption::initializeEncryption(unsigned long long bytes, unsigned long startBlock) { // Not generalized for BLOCK_COUNTER_LENGTH > 1.
-	initialBlockCounter[0] = (uint32_t)startBlock;
-	blockCounter[0] = initialBlockCounter[0];
+	initialBlockCounter = (uint32_t)startBlock;
+	blockCounter = initialBlockCounter;
 
 	encryptBytes = BLOCK_BYTES;
 	messageBlockCount = (bytes/(BLOCK_BYTES + 1)) + 1;
@@ -114,19 +119,19 @@ uint32_t ChaChaEncryption::rotL(uint32_t n, unsigned short c) {
 
 void ChaChaEncryption::updateStartState() {
 	for(unsigned short i = (KEY_LENGTH + CONSTANT_LENGTH); i < (BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH); i += 1) {
-		startState[i] = blockCounter[i - (KEY_LENGTH + CONSTANT_LENGTH)];
+		startState[i] = blockCounter;
 	}
 	if(!decrypt) {
 		for(unsigned short i = (BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH); i < (FIXED_NONCE_LENGTH + BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH); i += 1) {
-			startState[i] = nonce[i - (BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH)];
+			startState[i] = fixedNonce;
 		}
 	} else {
 		for(unsigned short i = (BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH); i < (FIXED_NONCE_LENGTH + BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH); i += 1) {
-			startState[i] = nonce[i - (BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH)];
+			startState[i] = fixedNonce;
 		}
 	}
 	for(unsigned short i = (FIXED_NONCE_LENGTH + BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH); i < BLOCK_LENGTH; i += 1) {
-		startState[i] = rotL((nonce[i - (BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH)]), 24);
+		startState[i] = rotL((nonceCounter[i - (FIXED_NONCE_LENGTH + BLOCK_COUNTER_LENGTH + KEY_LENGTH + CONSTANT_LENGTH)]), 24);
 	}
 }
 
@@ -173,7 +178,7 @@ void ChaChaEncryption::createKeyStream() { // Consider using different bitmasks 
 
 
 void ChaChaEncryption::createCipherText(char* message) { // Not generalized for BLOCK_COUNTER_LENGTH > 1.
-	blockIndexBytes = ((unsigned long)blockCounter[0] - (unsigned long)initialBlockCounter[0])*BLOCK_BYTES;
+	blockIndexBytes = ((unsigned long)blockCounter - (unsigned long)initialBlockCounter)*BLOCK_BYTES;
 
 	for(unsigned short i = 0; i < encryptBytes; i += 1) {
 		message[i + blockIndexBytes] ^= keyStream[i];
@@ -182,21 +187,21 @@ void ChaChaEncryption::createCipherText(char* message) { // Not generalized for 
 
 
 void ChaChaEncryption::incrementBlockCounter() { // Not generalized for BLOCK_COUNTER_LENGTH > 1.
-	if(blockCounter[0] == 0xffffffff) {
+	if(blockCounter == 0xffffffff) {
 		// Log an error here.
 	}
 
-	blockCounter[0] += 1;
+	blockCounter += 1;
 }
 
 
 void ChaChaEncryption::incrementNonceCounter() { // Not generalized for BLOCK_COUNTER_LENGTH > 1.
-	if(!(nonce[1] == 0xffffffff && nonce[2] == 0xffffffff)) {
-		if(nonce[2] == 0xffffffff) {
-			nonce[2] = 0x00000000;
-			nonce[1] += 1;
+	if(!(nonceCounter[0] == 0xffffffff && nonceCounter[1] == 0xffffffff)) {
+		if(nonceCounter[1] == 0xffffffff) {
+			nonceCounter[1] = 0x00000000;
+			nonceCounter[0] += 1;
 		} else {
-			nonce[2] += 1;
+			nonceCounter[1] += 1;
 		}
 	} else {
 		// Log an error here.
@@ -207,12 +212,12 @@ void ChaChaEncryption::incrementNonceCounter() { // Not generalized for BLOCK_CO
 
 // ----------Use carefully!----------
 void ChaChaEncryption::decrementNonceCounter() { // Not generalized for BLOCK_COUNTER_LENGTH > 1.
-	if(!(nonce[1] == 0x00000000 && nonce[2] == 0x00000000)) {
-		if(nonce[2] == 0x00000000) {
-			nonce[2] = 0xffffffff;
-			nonce[1] -= 1;
+	if(!(nonceCounter[0] == 0x00000000 && nonceCounter[1] == 0x00000000)) {
+		if(nonceCounter[1] == 0x00000000) {
+			nonceCounter[1] = 0xffffffff;
+			nonceCounter[0] -= 1;
 		} else {
-			nonce[2] -= 1;
+			nonceCounter[1] -= 1;
 		}
 	} else {
 		// Log a warning here.
@@ -220,6 +225,19 @@ void ChaChaEncryption::decrementNonceCounter() { // Not generalized for BLOCK_CO
 }
 // ----------Use carefully!----------
 
+/*
+	private void xcrypt(char* messageBody, unsigned long long messageBodyLength, ) {
+
+	}
+
+	public void encrypt() {
+		xcrypt();
+	}
+
+	public void decrypt() {
+		xcrypt();
+	}
+*/
 
 void ChaChaEncryption::encryptMessage(char* message, unsigned long long bytes, unsigned long startBlock = 0) {
 	if(bytes > 0) {
