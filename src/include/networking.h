@@ -68,6 +68,7 @@ public:
 };
 
 
+//MessageError will cause seg faults when deleted if dynamic memory has not been allocated (You can only delete what yo have new'd!) ☜(ﾟヮﾟ☜)
 /*class MessageError {
 private:
 	ERROR_CODE id;
@@ -77,7 +78,7 @@ private:
 public:
 	MessageError() {
 		id = ERROR_CODE::MESSAGE_ERROR_NONE;
-		attribute =  new char[MAX_ATTRIBUTE_SIZE];
+		attribute = new char[MAX_ATTRIBUTE_SIZE];
 		//attribute[0] = '\0';
 	}
 	MessageError(const ERROR_CODE c, const char* a) {
@@ -177,6 +178,7 @@ private:
 	const unsigned long (*nowMS)();
 	unsigned long approxCurrentTime;
 
+	void clearAllQueues();
 	void dropConnection();
 
 	Message* heartbeat;
@@ -272,12 +274,28 @@ Networking::~Networking() {
 }
 
 
+void Networking::clearAllQueues() {
+	delete messagesIn.peek();
+	delete messagesInIdempotencyTokens.peek();
+	delete messagesOut.peek();
+
+	queueStartNode = nullptr;
+	holdingNode = nullptr;
+	messageOutWithMatchingIdempotencyToken = nullptr;
+}
+
+
 void Networking::dropConnection() {
 	connected = false;
 	processHeartbeat = &Networking::dontCheckHeartbeat;
 
+	IPAddress palIP = glEEpalInfo->getIPAddress();
 	delete glEEpalInfo;
 	glEEpalInfo = nullptr;
+
+	clearAllQueues();
+
+	connectToPeer(palIP);
 }
 
 
