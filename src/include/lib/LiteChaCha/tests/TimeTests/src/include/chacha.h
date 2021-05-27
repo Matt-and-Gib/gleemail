@@ -54,10 +54,12 @@ private:
 
 	void incrementBlockCounter();
 
-	unsigned long long currentNonceCounter = 0;
-	unsigned long long nonceDelta = 0;
+	unsigned long long getPeerNonceCounter() {return (peerNonceCounter[0] << 32) | peerNonceCounter[1];}
+	unsigned long long currentPeerNonceCounter = 0;
+//	unsigned long long nonceDelta = 0;
 //	void incrementNonceCounter();
 //	void decrementNonceCounter(); // Use carefully (always follow-up with an incrementNonceCounter())!
+	void incrementPeerNonceCounter();
 
 	void encryptAndDecryptSubProcess(char*);
 	void encryptAndDecryptProcess(char*, unsigned long long, unsigned long);
@@ -224,6 +226,21 @@ void ChaChaEncryption::incrementNonceCounter() { // Not generalized for BLOCK_CO
 	}
 }
 
+
+void ChaChaEncryption::incrementPeerNonceCounter() { // Not generalized for BLOCK_COUNTER_LENGTH > 1.
+	if(!(peerNonceCounter[0] == 0xffffffff && peerNonceCounter[1] == 0xffffffff)) {
+		if(peerNonceCounter[1] == 0xffffffff) {
+			peerNonceCounter[1] = 0x00000000;
+			peerNonceCounter[0] += 1;
+		} else {
+			peerNonceCounter[1] += 1;
+		}
+	} else {
+		// Log an error here.
+		// Wait until new peer key and / or fixedNonce is chosen.
+	}
+}
+
 /*
 // ----------Use carefully!----------
 void ChaChaEncryption::decrementNonceCounter() { // Not generalized for BLOCK_COUNTER_LENGTH > 1.
@@ -274,20 +291,25 @@ void ChaChaEncryption::encryptMessage(char* message, unsigned long long bytes, u
 
 void ChaChaEncryption::decryptMessage(char* message, unsigned long long bytes, unsigned long long nonceCounter, unsigned long startBlock = 0) { // Not generalized for BLOCK_COUNTER_LENGTH > 1.
 	if(bytes > 0) {
-		for(unsigned short i = COUNTER_NONCE_LENGTH; i > 0; i -= 1) {
-			peerNonceCounter[i - 1] = nonceCounter >> (32*(i - 1));
+		currentPeerNonceCounter = getPeerNonceCounter();
+		if(nonceCounter != currentPeerNonceCounter) {
+			for(unsigned short i = 0; i < COUNTER_NONCE_LENGTH; i += 1) {
+				peerNonceCounter[i] = nonceCounter >> (32*((COUNTER_NONCE_LENGTH - 1) - i));
+			}
 		}
 		initializeEncryption(bytes, startBlock, peerFixedNonce, peerNonceCounter);
+		encryptAndDecryptProcess(message, bytes, startBlock);
+		incrementPeerNonceCounter();
 
 /*
 //		decrypt = true;
-		currentNonceCounter = getNonceCounter();
+		currentPeerNonceCounter = getNonceCounter();
 
-		if(nonceCounter == currentNonceCounter) { // Will end up incremented up 1 from start because incrementNonceCounter() is in encryptMessage().
+		if(nonceCounter == currentPeerNonceCounter) { // Will end up incremented up 1 from start because incrementNonceCounter() is in encryptMessage().
 			encryptMessage(message, bytes, startBlock);
 
-		} else if(nonceCounter > currentNonceCounter) { // Can sacrifice amount of messages which can be sent by skipping decrementNonceCounter() to save on processing time.
-			nonceDelta = nonceCounter - currentNonceCounter;
+		} else if(nonceCounter > currentPeerNonceCounter) { // Can sacrifice amount of messages which can be sent by skipping decrementNonceCounter() to save on processing time.
+			nonceDelta = nonceCounter - currentPeerNonceCounter;
 
 			for(unsigned short i = 0; i < nonceDelta; i += 1) {
 				incrementNonceCounter();
@@ -300,7 +322,7 @@ void ChaChaEncryption::decryptMessage(char* message, unsigned long long bytes, u
 			}
 
 		} else {
-			nonceDelta = currentNonceCounter - nonceCounter;
+			nonceDelta = currentPeerNonceCounter - nonceCounter;
 
 			for(unsigned short i = 0; i < nonceDelta; i += 1) {
 				decrementNonceCounter();
