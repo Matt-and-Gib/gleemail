@@ -104,10 +104,6 @@ void setup() {
 			Serial.print(duration);
 			Serial.println(" us");
 
-			for(unsigned short i = 0; i < 50; i += 1) { // Done to simulate something of a worst-case scenario.
-				cipher.incrementNonceCounter();
-			}
-
 			timeStamp = micros();
 			cipher.decryptMessage(message2, MESSAGE_2_BYTES, messageCount);
 			duration = micros() - timeStamp;
