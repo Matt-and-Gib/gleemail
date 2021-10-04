@@ -50,7 +50,9 @@ ___
 
 ### <a name="diagram"></a>**Wiring Diagram**
 
-[View Online Wiring Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2Fwiring%20diagram.drawio)
+[View Interactive Online Wiring Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2Fwiring%20diagram.drawio)
+
+![Wiring Diagram 5-3-2021](https://github.com/Matt-and-Gib/gleemail/raw/main/resources/Wiring%20Diagram%205-3-21.png)
 
 For more information about wiring the LCD HD44780, we recommend [this tutorial from Ada Fruit](https://learn.adafruit.com/character-lcds/wiring-a-character-lcd)
 
