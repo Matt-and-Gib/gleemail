@@ -27,7 +27,7 @@ public:
 	CipherManagement();
 	~CipherManagement();
 
-	unsigned short getTagBytes() {return TAG_BYTES;}
+	static const constexpr unsigned short getTagBytes() {return TAG_BYTES;}
 
 	void initialize(char[KEY_BYTES], char[FIXED_NONCE_BYTES], char[FIXED_NONCE_BYTES]);
 

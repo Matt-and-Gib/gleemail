@@ -10,6 +10,9 @@
 #include "src/include/networking.h"
 #include "src/include/webaccess.h"
 
+#include "src/include/lib/LiteChaCha/keyinfrastructure.h"
+#include "src/include/lib/LiteChaCha/authenticatedencrypt.h"
+
 
 const unsigned long getCurrentTimeMS();
 void updateDisplayWithPeerChat(const char*);
@@ -22,6 +25,13 @@ static Display display;
 static InternetAccess internet;
 static Networking network(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0);
 static WebAccess webAccess;
+
+//These probably belong in the Networking object
+static CipherManagement ae;
+const constexpr size_t tagBytes = ae.getTagBytes();
+unsigned long long messageCount; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
+char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
+
 
 static InputMethod* input;
 static unsigned short pinIndex = 0;
@@ -50,6 +60,7 @@ unsigned short mccpDownloadDataValue = 0;*/
 }*/
 
 
+//Commented out due at least in part to shared network buffer (i.e. cannot asychronously download MorseCodeCharPairs)
 /*void verifyInputMethodData() {
 	//if(internet.activeWebConnection()) {
 		if(internet.responseAvailableFromWeb()) {
@@ -572,6 +583,43 @@ void setupPins() {
 		pinMode(currentPin->pinLocation, currentPin->mode);
 		currentPin = pins[++i];
 	}
+}
+
+
+void setupEncryption() {
+	KeyManagement pki;
+
+	const size_t keyBytes = pki.getKeyBytes();
+	const size_t signatureBytes = pki.getSignatureBytes();
+	const size_t IDBytes = pki.getIDBytes();
+
+	char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
+	char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
+	char peerDSAPubKey[keyBytes];
+	bool generateNewDSAKeys = true;
+
+	char userEphemeralPubKey[keyBytes];
+	char peerEphemeralPubKey[keyBytes];
+
+	char userSignature[signatureBytes];
+	char peerSignature[signatureBytes];
+
+	char userID[IDBytes]; // IDs are used for a fixed portion of a nonce.
+	char peerID[IDBytes];
+
+
+	//									32				32					64				4							= 264
+	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, generateNewDSAKeys);
+
+//	Exchange DSA public keys, ephemeral public keys, signatures, and IDs unencrypted.
+
+	if((pki.IDUnique(userID, peerID)) && (pki.signatureValid(peerDSAPubKey, peerEphemeralPubKey, peerSignature))) {
+		pki.createSessionKey(peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
+	}
+
+//	Ensure that the shared private session key has never been used by you before!
+
+	ae.initialize(peerEphemeralPubKey, userID, peerID);
 }
 
 
