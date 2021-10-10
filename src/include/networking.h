@@ -171,12 +171,18 @@ private:
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //minimize in the future
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
+	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator
 
 	unsigned long uuid;
 	unsigned short messagesSentCount = 0;
 
 	const unsigned long (*nowMS)();
 	unsigned long approxCurrentTime;
+
+	static CipherManagement ae;
+	const size_t tagBytes = ae.getTagBytes();
+	unsigned long long messageCount; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
+	char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
 
 	void clearAllQueues();
 	void dropConnection();
@@ -303,6 +309,43 @@ void Networking::dropConnection() { //Baby, come back (to finish me)
 
 void Networking::sendChatMessage(const char* chat) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
+}
+
+
+void setupEncryption() {
+	KeyManagement pki;
+
+	const size_t keyBytes = pki.getKeyBytes();
+	const size_t signatureBytes = pki.getSignatureBytes();
+	const size_t IDBytes = pki.getIDBytes();
+
+	char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
+	char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
+	char peerDSAPubKey[keyBytes];
+	bool generateNewDSAKeys = true;
+
+	char userEphemeralPubKey[keyBytes];
+	char peerEphemeralPubKey[keyBytes];
+
+	char userSignature[signatureBytes];
+	char peerSignature[signatureBytes];
+
+	char userID[IDBytes]; // IDs are used for a fixed portion of a nonce.
+	char peerID[IDBytes];
+
+
+	//									32				32					64				4							= 264
+	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, generateNewDSAKeys);
+
+//	Exchange DSA public keys, ephemeral public keys, signatures, and IDs unencrypted.
+
+	if((pki.IDUnique(userID, peerID)) && (pki.signatureValid(peerDSAPubKey, peerEphemeralPubKey, peerSignature))) {
+		pki.createSessionKey(peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
+	}
+
+//	Ensure that the shared private session key has never been used by you before!
+
+	ae.initialize(peerEphemeralPubKey, userID, peerID);
 }
 
 

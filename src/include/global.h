@@ -34,7 +34,7 @@ static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEAD
 enum class MESSAGE_TYPE : unsigned short {ERROR = 0, HEARTBEAT = 1, CONFIRMATION = 2, CHAT = 3, HANDSHAKE = 4, NONE = 5};
 static const constexpr MESSAGE_TYPE START_MESSAGE_TYPE = static_cast<MESSAGE_TYPE>(0);
 
-static const constexpr unsigned short MAX_MESSAGE_LENGTH = 280; // WE'RE GOING OFF THE BEATEN TRAIL HERE!
+static const constexpr unsigned short MAX_MESSAGE_LENGTH = 280; // WE'RE GOING OFF THE BEATEN TRAIL HERE! The proper values are commented out below.
 
 static const constexpr unsigned short JSON_DOCUMENT_SIZE = 512; // Michael: remember why this is what it is!
 
