@@ -1,5 +1,5 @@
 #ifndef CHACHA_H
-#define CHACAH_H
+#define CHACHA_H
 
 #include <stdint.h>
 
@@ -37,6 +37,9 @@ private:
 	unsigned short messageRemainder = 0;
 	unsigned long long blockIndexBytes = 0;
 
+	static const constexpr unsigned long long EMPTY_BYTES = 1;
+	static const constexpr unsigned long ZERO_START_BLOCK = 0;
+
 	void initializeEncryption(unsigned long long, unsigned long, uint32_t, uint32_t*);
 
 	uint32_t rotL(uint32_t, unsigned short);
@@ -50,23 +53,21 @@ private:
 	void incrementNonceCounter();
 
 	void incrementPeerNonceCounter();
-	unsigned long long getPeerNonceCounter() {return (peerNonceCounter[0] << 32) | peerNonceCounter[1];}
+	unsigned long long getPeerNonceCounter() {return (((unsigned long long)peerNonceCounter[0]) << 32) | peerNonceCounter[1];}
 	unsigned long long currentPeerNonceCounter = 0;
 
 	void encryptAndDecryptSubProcess(char*);
-	void encryptAndDecryptProcess(char*, unsigned long long, unsigned long);
+	void encryptAndDecryptProcess(char*);
 public:
 	ChaChaEncryption();
 	~ChaChaEncryption();
 
-	const unsigned short getNonceCounterBytes() {return COUNTER_NONCE_LENGTH*4;} // Used to specify the length of the prepended Counter Nonce variable.
-
 	void buildEncryption(char*, char*, char*);
 
-	unsigned long long getNonceCounter() {return (nonceCounter[0] << 32) | nonceCounter[1];}
+	unsigned long long getNonceCounter() {return (((unsigned long long)nonceCounter[0]) << 32) | nonceCounter[1];}
 
-//	unsigned long* getLastEndState() {return (unsigned long*)endState;}
-//	char* getLastKeyStream() {return keyStream;}
+	uint32_t* generateEndState();
+	uint32_t* generatePeerEndState(unsigned long long);
 
 	void encryptMessage(char*, unsigned long long, unsigned long);
 	void decryptMessage(char*, unsigned long long, unsigned long long, unsigned long);
@@ -111,7 +112,7 @@ void ChaChaEncryption::initializeEncryption(unsigned long long bytes, unsigned l
 	}
 
 	encryptBytes = BLOCK_BYTES;
-	messageBlockCount = (bytes/(BLOCK_BYTES + 1)) + 1;
+	messageBlockCount = ((bytes - 1)/BLOCK_BYTES) + 1;
 	messageRemainder = bytes % BLOCK_BYTES;
 }
 
@@ -156,7 +157,7 @@ void ChaChaEncryption::createEndState() { // Not generalized for BLOCK_COUNTER_L
 }
 
 
-void ChaChaEncryption::createKeyStream() { // Consider using different bitmasks for each index as opposed to shifting endState[i] each time (might save on processing time).
+void ChaChaEncryption::createKeyStream() {
 	for(unsigned short i = 0; i < BLOCK_LENGTH; i += 1) {
 		keyStream[(i*4)] = endState[i] & BITMASK;
 		keyStream[(i*4) + 1] = (endState[i] >> 8) & BITMASK;
@@ -221,8 +222,8 @@ void ChaChaEncryption::encryptAndDecryptSubProcess(char* message) {
 }
 
 
-void ChaChaEncryption::encryptAndDecryptProcess(char* message, unsigned long long bytes, unsigned long startBlock = 0) {
-	for(unsigned short i = 0; i < (messageBlockCount - 1); i += 1) {
+void ChaChaEncryption::encryptAndDecryptProcess(char* message) {
+	for(unsigned long long i = 0; i < (messageBlockCount - 1); i += 1) {
 		encryptAndDecryptSubProcess(message);
 		incrementBlockCounter();
 	}
@@ -235,10 +236,32 @@ void ChaChaEncryption::encryptAndDecryptProcess(char* message, unsigned long lon
 }
 
 
+uint32_t* ChaChaEncryption::generateEndState() {
+	initializeEncryption(EMPTY_BYTES, ZERO_START_BLOCK, fixedNonce, nonceCounter);
+	createEndState();
+
+	return endState;
+}
+
+
+uint32_t* ChaChaEncryption::generatePeerEndState(unsigned long long nonceCounter) {
+	currentPeerNonceCounter = getPeerNonceCounter();
+	if(nonceCounter != currentPeerNonceCounter) {
+		for(unsigned short i = 0; i < COUNTER_NONCE_LENGTH; i += 1) {
+			peerNonceCounter[i] = nonceCounter >> (32*((COUNTER_NONCE_LENGTH - 1) - i));
+		}
+	}
+	initializeEncryption(EMPTY_BYTES, ZERO_START_BLOCK, peerFixedNonce, peerNonceCounter);
+	createEndState();
+
+	return endState;
+}
+
+
 void ChaChaEncryption::encryptMessage(char* message, unsigned long long bytes, unsigned long startBlock = 0) {
 	if(bytes > 0) {
 		initializeEncryption(bytes, startBlock, fixedNonce, nonceCounter);
-		encryptAndDecryptProcess(message, bytes, startBlock);
+		encryptAndDecryptProcess(message);
 		incrementNonceCounter();
 	}
 }
@@ -253,7 +276,7 @@ void ChaChaEncryption::decryptMessage(char* message, unsigned long long bytes, u
 			}
 		}
 		initializeEncryption(bytes, startBlock, peerFixedNonce, peerNonceCounter);
-		encryptAndDecryptProcess(message, bytes, startBlock);
+		encryptAndDecryptProcess(message);
 		incrementPeerNonceCounter();
 	}
 }
