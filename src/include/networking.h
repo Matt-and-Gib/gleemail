@@ -7,6 +7,9 @@
 #include "global.h"
 #include "queue.h"
 
+#include "lib/LiteChaCha/keyinfrastructure.h"
+#include "lib/LiteChaCha/authenticatedencrypt.h"
+
 
 // To use in the future to map IP addresses (or uuids)
 class glEEpal {
@@ -184,6 +187,30 @@ private:
 	unsigned long long messageCount; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
 	char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
 
+//	MOVE ME!
+	static KeyManagement pki; // What is this doing here, I mean, really?
+
+	const size_t keyBytes = pki.getKeyBytes();
+	const size_t signatureBytes = pki.getSignatureBytes();
+	const size_t IDBytes = pki.getIDBytes();
+
+	char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
+	char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
+	char peerDSAPubKey[keyBytes];
+	bool generateNewDSAKeys = true;
+
+	char userEphemeralPubKey[keyBytes];
+	char peerEphemeralPubKey[keyBytes];
+
+	char userSignature[signatureBytes];
+	char peerSignature[signatureBytes];
+
+	char userID[IDBytes]; // IDs are used for a fixed portion of a nonce.
+	char peerID[IDBytes];
+//	MOVE ME!
+
+	void createEncryptionInfoPayload(char*, char*, char*, char*, char*); // REMOVE ME?
+
 	void clearAllQueues();
 	void dropConnection();
 
@@ -312,48 +339,33 @@ void Networking::sendChatMessage(const char* chat) {
 }
 
 
-void setupEncryption() {
-	KeyManagement pki;
-
-	const size_t keyBytes = pki.getKeyBytes();
-	const size_t signatureBytes = pki.getSignatureBytes();
-	const size_t IDBytes = pki.getIDBytes();
-
-	char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
-	char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
-	char peerDSAPubKey[keyBytes];
-	bool generateNewDSAKeys = true;
-
-	char userEphemeralPubKey[keyBytes];
-	char peerEphemeralPubKey[keyBytes];
-
-	char userSignature[signatureBytes];
-	char peerSignature[signatureBytes];
-
-	char userID[IDBytes]; // IDs are used for a fixed portion of a nonce.
-	char peerID[IDBytes];
-
-
-	//									32				32					64				4							= 264
-	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, generateNewDSAKeys);
-
-//	Exchange DSA public keys, ephemeral public keys, signatures, and IDs unencrypted.
-
-	if((pki.IDUnique(userID, peerID)) && (pki.signatureValid(peerDSAPubKey, peerEphemeralPubKey, peerSignature))) {
-		pki.createSessionKey(peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
+void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, char* DSAPubKey, char* ephemeralPubKey, char* signature, char* ID) {
+	for(unsigned short i = 0; i < keyBytes; i += 1) {
+		encryptionInfoOut[i] = DSAPubKey[i];
+		encryptionInfoOut[i + keyBytes] = ephemeralPubKey[i];
 	}
 
-//	Ensure that the shared private session key has never been used by you before!
+	for(unsigned short i = 0; i < signatureBytes; i += 1) {
+		encryptionInfoOut[i + (keyBytes*2)] = signature[i];
+	}
 
-	ae.initialize(peerEphemeralPubKey, userID, peerID);
+	for(unsigned short i = 0; i < IDBytes; i += 1) {
+		encryptionInfoOut[i + (keyBytes*2) + signatureBytes] = ID[i];
+	}
 }
 
 
 bool Networking::connectToPeer(IPAddress& connectToIP) {
+	char encryptionInfo[SIZE_OF_ENCRYPTION_INFO_PAYLOAD];
+	//									32				32					64				4							= 264
+	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, generateNewDSAKeys);
+	createEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
+
 	udp.begin(CONNECTION_PORT);
 
 	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), nullptr /*send encryption data*/, nullptr, &connectionEstablished));
+//	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), nullptr /*send encryption data*/, nullptr, &connectionEstablished));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH) /*will this work? Who knows!*/, nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
 }
 
