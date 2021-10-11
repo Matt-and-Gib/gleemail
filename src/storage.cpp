@@ -41,14 +41,12 @@ bool Storage::writeFile(const char* data, const char* filePath, const bool encry
 		saveToFile.close();
 		return true;
 	} else {
-		saveToFile.close();
 		return false;
 	}
 }
 
 
-//REMEMBER TO DELETE! This is on the heap
-const char* Storage::readFile(const char* filePath, const bool decrypt) {
+const char* Storage::readFile(const char* filePath, const bool decrypt) { //REMEMBER TO DELETE! This is on the heap
 	dataLength = 0;
 	File readFromFile = SD.open(filePath, FILE_READ);
 	if(readFromFile) {
@@ -67,7 +65,6 @@ const char* Storage::readFile(const char* filePath, const bool decrypt) {
 			return data;
 		}
 	} else {
-		readFromFile.close();
 		return nullptr;
 	}
 }

@@ -515,7 +515,7 @@ const char* getMorseCodeCharPairsData() {
 }
 
 
-bool setupInputMethod() {
+bool setupInputMethod(const bool storageAvailable) {
 	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
 
 	const unsigned short mccpVersion = getMorseCodeCharPairsVersion();
@@ -524,12 +524,14 @@ bool setupInputMethod() {
 		Serial.println(F("Downloading Input Method data..."));
 
 		data = getMorseCodeCharPairsData();
-		storage.writeFile(data, morseCodeCharPairsPath);
+		if(storageAvailable) {
+			storage.writeFile(data, morseCodeCharPairsPath);
 
-		Preferences::getPrefs().setMorseCodeCharPairsVersion(mccpVersion);
-		const char* prefsData = Preferences::getPrefs().serializePrefs();
-		storage.writeFile(prefsData, prefsPath);
-		delete[] prefsData;
+			Preferences::getPrefs().setMorseCodeCharPairsVersion(mccpVersion);
+			const char* prefsData = Preferences::getPrefs().serializePrefs();
+			storage.writeFile(prefsData, prefsPath);
+			delete[] prefsData;
+		}
 	} else {
 		//webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders()); //REQUEST_HEADERS);
 		//doAsynchronousProcess = &verifyInputMethodData;
@@ -646,6 +648,7 @@ void setup() {
 	SETUP_LEVEL setupState = WELCOME;
 	bool setupComplete = false;
 	bool networkForceNewCredentials = false;
+	bool storageAvailable = false;
 
 	const unsigned short SETUP_STEP_DELAY = 0;
 
@@ -667,7 +670,8 @@ void setup() {
 
 
 		case SETUP_LEVEL::STORAGE:
-			if(!prepareStorage()) {
+			storageAvailable = prepareStorage();
+			if(!storageAvailable) {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 			}
 
@@ -691,18 +695,11 @@ void setup() {
 			}
 		break;
 
-/*
-~7.0 sec
-~2.5 sec
-~2.0 sec
-~1.7 sec
-~1.4 sec
-*/
 
 		case SETUP_LEVEL::INPUT_METHOD:
 			display.updateReading("Setting Up Input");
 			display.updateWriting("Downloading Data");
-			if(setupInputMethod()) {
+			if(setupInputMethod(storageAvailable)) {
 				for(unsigned short i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
 					userMessage[i] = '\0';
 					peerMessage[i] = '\0';
