@@ -340,18 +340,22 @@ void Networking::sendChatMessage(const char* chat) {
 
 
 void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, char* DSAPubKey, char* ephemeralPubKey, char* signature, char* ID) {
-	for(unsigned short i = 0; i < keyBytes; i += 1) {
-		encryptionInfoOut[i] = DSAPubKey[i];
-		encryptionInfoOut[i + keyBytes] = ephemeralPubKey[i];
+/*	for(unsigned short i = 0; i < keyBytes; i += 1) {
+		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
+		encryptionInfoOut[(i*2) + 1] = DSAPubKey[i] & 0x0f;
+		encryptionInfoOut[(i*2) + (keyBytes*2)] = ephemeralPubKey[i] >> 4;
+		encryptionInfoOut[(i*2) + (keyBytes*2) + 1] = ephemeralPubKey[i] & 0x0f;
 	}
 
 	for(unsigned short i = 0; i < signatureBytes; i += 1) {
-		encryptionInfoOut[i + (keyBytes*2)] = signature[i];
+		encryptionInfoOut[(i) + (keyBytes*4)] = signature[i];
 	}
 
 	for(unsigned short i = 0; i < IDBytes; i += 1) {
 		encryptionInfoOut[i + (keyBytes*2) + signatureBytes] = ID[i];
-	}
+	}*/
+
+
 }
 
 
