@@ -182,17 +182,18 @@ private:
 	const unsigned long (*nowMS)();
 	unsigned long approxCurrentTime;
 
-	static CipherManagement ae;
-	const size_t tagBytes = ae.getTagBytes();
+	CipherManagement ae;
+	static const constexpr size_t tagBytes = 16; //CipherManagement::getTagBytes();
 	unsigned long long messageCount; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
 	char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
+	//char* tag;
 
 //	MOVE ME!
-	static KeyManagement pki; // What is this doing here, I mean, really?
+	KeyManagement pki; // What is this doing here, I mean, really?
 
-	const size_t keyBytes = pki.getKeyBytes();
-	const size_t signatureBytes = pki.getSignatureBytes();
-	const size_t IDBytes = pki.getIDBytes();
+	static const constexpr size_t keyBytes = 32; //pki.getKeyBytes();
+	static const constexpr size_t signatureBytes = 64; //pki.getSignatureBytes();
+	static const constexpr size_t IDBytes = 4; //pki.getIDBytes();
 
 	char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
 	char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
@@ -207,6 +208,7 @@ private:
 
 	char userID[IDBytes]; // IDs are used for a fixed portion of a nonce.
 	char peerID[IDBytes];
+
 //	MOVE ME!
 
 	void createEncryptionInfoPayload(char*, char*, char*, char*, char*); // REMOVE ME?
@@ -300,6 +302,8 @@ Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(
 	for(int i = 0; i < JSON_DOCUMENT_SIZE; i += 1) {
 		messageBuffer[i] = '\0';
 	}
+
+	//tag = new char[tagBytes];
 }
 
 
