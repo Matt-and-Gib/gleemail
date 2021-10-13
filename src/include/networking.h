@@ -117,10 +117,10 @@ private:
 	//MessageError* error;
 
 	static void noOutgoingProcess(Queue<Message>& q, Message& n) {}
-	void (*outgoingPostProcess)(Queue<Message>&, Message&);
+	void (*outgoingPostProcess)(Queue<Message>&, Message&); //Used for removing confirmation messages once sent
 
 	static void noConfirmedProcess(Networking& n, Queue<Message>& messagesOut, QueueNode<Message>& messageIn, Message& messageOut) {}
-	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&);
+	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&); //Used for establishing connection and 
 public:
 	Message() {}
 	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) {
@@ -266,6 +266,7 @@ private:
 	bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyToken();
 
+	//These two functions are use from doConfirmedPostProcess()
 	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
 		removeFromQueue(messagesOutQueue, messageOut);
 	}
@@ -274,7 +275,7 @@ private:
 	}
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
-		delete messagesOutQueue.remove(messageOut);
+		delete messagesOutQueue.remove(messageOut); //removes outgoing handshake from queue
 		Serial.println(F("Connected to peer!"));
 
 		n.connected = true;
@@ -406,7 +407,7 @@ void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemera
 
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	char encryptionInfo[SIZE_OF_ENCRYPTION_INFO_PAYLOAD];
-	//									32				32					64				4							= 264
+	//									32				32					64				4			= 264
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, generateNewDSAKeys);
 	createEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
@@ -519,7 +520,8 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	case MESSAGE_TYPE::CONFIRMATION:
 		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 		if(messageOutWithMatchingIdempotencyToken) {
-			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg);
+			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat message, this is removeFromQueue()
+
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 		}
@@ -536,7 +538,16 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
+
+
+		convertEncryptionInfoPayload(peerDSAPubKey, peerEphemeralPubKey, peerSignature, peerID, msg.getData()->getChat());
+
+		//Move to connectionEstablished()
+		/*if((pki.IDUnique(userID, peerID)) && (pki.signatureValid(peerDSAPubKey, peerEphemeralPubKey, peerSignature))) {
+			pki.createSessionKey(peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
+		}*/
+
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), /*	!!!	send our encryption payload	!!!	*/ /*nullptr*/, /*nullptr,*/ &removeFromQueue, nullptr));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
