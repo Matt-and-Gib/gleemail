@@ -210,6 +210,8 @@ private:
 //	MOVE ME!
 
 	void createEncryptionInfoPayload(char*, char*, char*, char*, char*); // REMOVE ME?
+	void stringToHex(char*, char*, unsigned short, unsigned short); // REMOVE ME?
+	void convertEncryptionInfoPayload(char*, char*, char*, char*, char*); // REMOVE ME?
 
 	void clearAllQueues();
 	void dropConnection();
@@ -340,22 +342,61 @@ void Networking::sendChatMessage(const char* chat) {
 
 
 void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, char* DSAPubKey, char* ephemeralPubKey, char* signature, char* ID) {
-/*	for(unsigned short i = 0; i < keyBytes; i += 1) {
+	for(unsigned short i = 0; i < keyBytes; i += 1) {
 		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
 		encryptionInfoOut[(i*2) + 1] = DSAPubKey[i] & 0x0f;
+
 		encryptionInfoOut[(i*2) + (keyBytes*2)] = ephemeralPubKey[i] >> 4;
 		encryptionInfoOut[(i*2) + (keyBytes*2) + 1] = ephemeralPubKey[i] & 0x0f;
 	}
 
 	for(unsigned short i = 0; i < signatureBytes; i += 1) {
-		encryptionInfoOut[(i) + (keyBytes*4)] = signature[i];
+		encryptionInfoOut[(i*2) + (keyBytes*4)] = signature[i] >> 4;
+		encryptionInfoOut[(i*2) + (keyBytes*4) + 1] = signature[i] & 0x0f;
 	}
 
 	for(unsigned short i = 0; i < IDBytes; i += 1) {
-		encryptionInfoOut[i + (keyBytes*2) + signatureBytes] = ID[i];
-	}*/
+		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2)] = ID[i] >> 4;
+		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2) + 1] = ID[i] & 0x0f;
+	}
+
+	for(unsigned short i = 0; i < (SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1); i += 1) {
+		if(encryptionInfoOut[i] < 0x0a) {
+			encryptionInfoOut[i] += 48;
+		} else {
+			encryptionInfoOut[i] += 87;
+		}
+	}
+
+	encryptionInfoOut[SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1] = '\n';
+}
 
 
+void Networking::stringToHex(char* out, char* s, unsigned short start, unsigned short length) {
+	for(unsigned short i = 0; i < length; i += 1) {
+		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
+			s[(i*2) + start] -= 48;
+		} else {
+			s[(i*2) + start] -= 87;
+		}
+		out[i] = s[(i*2) + start];
+		out[i] <<= 4;
+
+		if(48 <= s[(i*2) + start + 1] && s[(i*2) + start + 1] <= 57) {
+			s[(i*2) + start + 1] -= 48;
+		} else {
+			s[(i*2) + start + 1] -= 87;
+		}
+		out[i] |= s[(i*2) + start + 1];
+	}
+}
+
+
+void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemeralPubKeyOut, char* signatureOut, char* IDOut, char* encryptionInfo) {
+	stringToHex(DSAPubKeyOut, encryptionInfo, 0, keyBytes);
+	stringToHex(ephemeralPubKeyOut, encryptionInfo, (keyBytes*2), keyBytes);
+	stringToHex(signatureOut, encryptionInfo, (keyBytes*4), signatureBytes);
+	stringToHex(IDOut, encryptionInfo, ((keyBytes*4) + (signatureBytes*2)), IDBytes);
 }
 
 
