@@ -356,7 +356,7 @@ void Networking::dropConnection() { //Baby, come back (to finish me)
 
 	Serial.println(F("Drop Connection!!!!!!!"));
 
-	abort();
+	//abort();
 }
 
 
