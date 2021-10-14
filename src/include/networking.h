@@ -281,6 +281,9 @@ private:
 
 		if((n.pki.IDUnique(n.userID, n.peerID)) && (n.pki.signatureValid(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature))) {
 			n.pki.createSessionKey(n.peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
+			Serial.println(F("authenticated!"));
+		} else {
+			Serial.println(F("auth failed!"));
 		}
 
 		n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
@@ -421,8 +424,9 @@ void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemera
 
 
 bool Networking::connectToPeer(IPAddress& connectToIP) {
+	const bool GENERATE_NEW_KEY = true;
 	//									32				32					64				4			= 264
-	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, true);
+	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, GENERATE_NEW_KEY);
 	createEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
 	udp.begin(CONNECTION_PORT);
