@@ -199,7 +199,6 @@ private:
 	char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
 	char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
 	char peerDSAPubKey[keyBytes];
-	bool generateNewDSAKeys = true;
 
 	char userEphemeralPubKey[keyBytes];
 	char peerEphemeralPubKey[keyBytes];
@@ -280,9 +279,12 @@ private:
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
 		n.convertEncryptionInfoPayload(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature, n.peerID, messageIn.getData()->getChat());
 
-		/*if((pki.IDUnique(userID, peerID)) && (pki.signatureValid(peerDSAPubKey, peerEphemeralPubKey, peerSignature))) {
-			pki.createSessionKey(peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
-		}*/
+		if((n.pki.IDUnique(n.userID, n.peerID)) && (n.pki.signatureValid(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature))) {
+			n.pki.createSessionKey(n.peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
+		}
+
+		n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
+		//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
 
 		delete messagesOutQueue.remove(messageOut); //removes outgoing handshake from queue
 		Serial.println(F("Connected to peer!"));
@@ -356,7 +358,8 @@ void Networking::sendChatMessage(const char* chat) {
 
 
 void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char* DSAPubKey, const char* ephemeralPubKey, const char* signature, const char* ID) {
-	for(unsigned short i = 0; i < keyBytes; i += 1) {
+	unsigned short i = 0;
+	for(i = 0; i < keyBytes; i += 1) {
 		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
 		encryptionInfoOut[(i*2) + 1] = DSAPubKey[i] & 0x0f;
 
@@ -364,17 +367,18 @@ void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char
 		encryptionInfoOut[(i*2) + (keyBytes*2) + 1] = ephemeralPubKey[i] & 0x0f;
 	}
 
-	for(unsigned short i = 0; i < signatureBytes; i += 1) {
+	for(i = 0; i < signatureBytes; i += 1) {
 		encryptionInfoOut[(i*2) + (keyBytes*4)] = signature[i] >> 4;
 		encryptionInfoOut[(i*2) + (keyBytes*4) + 1] = signature[i] & 0x0f;
 	}
 
-	for(unsigned short i = 0; i < IDBytes; i += 1) {
+	for(i = 0; i < IDBytes; i += 1) {
 		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2)] = ID[i] >> 4;
 		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2) + 1] = ID[i] & 0x0f;
 	}
 
-	for(unsigned short i = 0; i < (SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1); i += 1) {
+	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
+	for(i = 0; i < (SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1); i += 1) {
 		if(encryptionInfoOut[i] < 0x0a) {
 			encryptionInfoOut[i] += 48;
 		} else {
@@ -386,6 +390,7 @@ void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char
 }
 
 
+//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
 void Networking::stringToHex(char* out, char* s, const unsigned short start, const unsigned short length) {
 	for(unsigned short i = 0; i < length; i += 1) {
 		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
@@ -406,6 +411,7 @@ void Networking::stringToHex(char* out, char* s, const unsigned short start, con
 }
 
 
+//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
 void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemeralPubKeyOut, char* signatureOut, char* IDOut, char* encryptionInfo) {
 	stringToHex(DSAPubKeyOut, encryptionInfo, 0, keyBytes);
 	stringToHex(ephemeralPubKeyOut, encryptionInfo, (keyBytes*2), keyBytes);
@@ -416,7 +422,7 @@ void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemera
 
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	//									32				32					64				4			= 264
-	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, generateNewDSAKeys);
+	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, true);
 	createEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
 	udp.begin(CONNECTION_PORT);
