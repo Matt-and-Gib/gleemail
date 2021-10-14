@@ -172,7 +172,7 @@ private:
 	bool connected = false;
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
-	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 10000; //minimize in the future to 500. When increased to 10000, crash was more consistent.
+	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500;
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
 	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator //Don't forget to move me if the rest of encryption is moved
 
@@ -296,7 +296,7 @@ private:
 		Serial.println(F("Connected to peer!"));
 
 		n.connected = true;
-		n.processHeartbeat = &Networking::checkHeartbeat;
+		n.processHeartbeat = &Networking::checkHeartbeat; //MOVE THIS SOMEWHERE ELSE! Maybe set processHeartbeat here to a new function pointer pointing to a "waiting for first heartbeat" function which will (when called) set the processHeartbeat variable to checkHeartbeat.
 		n.listenToHeartbeat(n.nowMS());
 	}
 public:
@@ -342,6 +342,7 @@ void Networking::clearAllQueues() {
 }
 
 
+//Connection is being dropped due to heartbeat flatline before other party has finished processing authentication
 void Networking::dropConnection() { //Baby, come back (to finish me)
 /*	connected = false;
 	processHeartbeat = &Networking::dontCheckHeartbeat;
