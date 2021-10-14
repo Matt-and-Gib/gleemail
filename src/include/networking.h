@@ -113,7 +113,7 @@ private:
 
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
-	const char* chat;
+	char* chat; //MAKE ME CONSTANT AGAIN!
 	//MessageError* error;
 
 	static void noOutgoingProcess(Queue<Message>& q, Message& n) {}
@@ -157,7 +157,7 @@ public:
 	const glEEpal& getSender() const {return sender;}
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
-	const char* getChat() {return chat;}
+	char* getChat() {return chat;} //MAKE ME CONSTANT AGAIN!
 	//MessageError* getError() {return error;}
 	void doOutgoingPostProcess(Queue<Message>& q, Message& n) {return (*outgoingPostProcess)(q, n);}
 	void doConfirmedPostProcess(Networking& n, Queue<Message>& mo, QueueNode<Message>& messageIn) {(*confirmedPostProcess)(n, mo, messageIn, *this);}
@@ -174,7 +174,7 @@ private:
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500; //minimize in the future
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
-	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator
+	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator //Don't forget to move me if the rest of encryption is moved
 
 	unsigned long uuid;
 	unsigned short messagesSentCount = 0;
@@ -187,6 +187,7 @@ private:
 	unsigned long long messageCount; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
 	char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
 	//char* tag;
+
 
 //	MOVE ME!
 	KeyManagement pki; // What is this doing here, I mean, really?
@@ -209,10 +210,12 @@ private:
 	char userID[IDBytes]; // IDs are used for a fixed portion of a nonce.
 	char peerID[IDBytes];
 
+	char encryptionInfo[SIZE_OF_ENCRYPTION_INFO_PAYLOAD];
 //	MOVE ME!
 
-	void createEncryptionInfoPayload(char*, char*, char*, char*, char*); // REMOVE ME?
-	void stringToHex(char*, char*, unsigned short, unsigned short); // REMOVE ME?
+
+	void createEncryptionInfoPayload(char*, const char*, const char*, const char*, const char*); // REMOVE ME?
+	void stringToHex(char*, char*, const unsigned short, const unsigned short); // REMOVE ME?
 	void convertEncryptionInfoPayload(char*, char*, char*, char*, char*); // REMOVE ME?
 
 	void clearAllQueues();
@@ -275,6 +278,12 @@ private:
 	}
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
+		n.convertEncryptionInfoPayload(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature, n.peerID, messageIn.getData()->getChat());
+
+		/*if((pki.IDUnique(userID, peerID)) && (pki.signatureValid(peerDSAPubKey, peerEphemeralPubKey, peerSignature))) {
+			pki.createSessionKey(peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
+		}*/
+
 		delete messagesOutQueue.remove(messageOut); //removes outgoing handshake from queue
 		Serial.println(F("Connected to peer!"));
 
@@ -346,7 +355,7 @@ void Networking::sendChatMessage(const char* chat) {
 }
 
 
-void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, char* DSAPubKey, char* ephemeralPubKey, char* signature, char* ID) {
+void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char* DSAPubKey, const char* ephemeralPubKey, const char* signature, const char* ID) {
 	for(unsigned short i = 0; i < keyBytes; i += 1) {
 		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
 		encryptionInfoOut[(i*2) + 1] = DSAPubKey[i] & 0x0f;
@@ -377,7 +386,7 @@ void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, char* DSAP
 }
 
 
-void Networking::stringToHex(char* out, char* s, unsigned short start, unsigned short length) {
+void Networking::stringToHex(char* out, char* s, const unsigned short start, const unsigned short length) {
 	for(unsigned short i = 0; i < length; i += 1) {
 		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
 			s[(i*2) + start] -= 48;
@@ -406,7 +415,6 @@ void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemera
 
 
 bool Networking::connectToPeer(IPAddress& connectToIP) {
-	char encryptionInfo[SIZE_OF_ENCRYPTION_INFO_PAYLOAD];
 	//									32				32					64				4			= 264
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, generateNewDSAKeys);
 	createEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
@@ -538,16 +546,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
-
-
-		convertEncryptionInfoPayload(peerDSAPubKey, peerEphemeralPubKey, peerSignature, peerID, msg.getData()->getChat());
-
-		//Move to connectionEstablished()
-		/*if((pki.IDUnique(userID, peerID)) && (pki.signatureValid(peerDSAPubKey, peerEphemeralPubKey, peerSignature))) {
-			pki.createSessionKey(peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
-		}*/
-
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), /*	!!!	send our encryption payload	!!!	*/ /*nullptr*/, /*nullptr,*/ &removeFromQueue, nullptr));
+		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr));
 
 		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
