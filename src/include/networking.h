@@ -278,6 +278,7 @@ private:
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
 		Serial.println(F("beginning auth"));
+		Serial.flush();
 
 		n.convertEncryptionInfoPayload(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature, n.peerID, messageIn.getData()->getChat());
 
@@ -352,6 +353,8 @@ void Networking::dropConnection() { //Baby, come back (to finish me)
 	clearAllQueues();
 
 	connectToPeer(palIP);*/
+
+	Serial.println(F("Drop Connection!!!!!!!"));
 
 	abort();
 }
