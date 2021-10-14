@@ -166,6 +166,8 @@ public:
 
 class Networking {
 private:
+	bool& shutdownFlag;
+
 	WiFiUDP udp;
 	glEEpal* glEEpalInfo;
 
@@ -300,7 +302,7 @@ private:
 		n.listenToHeartbeat(n.nowMS());
 	}
 public:
-	Networking(const unsigned long (*)(), void (*)(const char*), const long u);
+	Networking(const unsigned long (*)(), void (*)(const char*), const long u, bool& quit);
 	~Networking();
 
 	void processNetwork();
@@ -310,7 +312,7 @@ public:
 };
 
 
-Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(const char*), const long u) {
+Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(const char*), const long u, bool& quit) : shutdownFlag{quit} {
 	nowMS = millis;
 	uuid = u + nowMS(); //CHANGE ME!
 	chatMessageReceivedCallback = chatMsgCallback;
@@ -356,6 +358,8 @@ void Networking::dropConnection() { //Baby, come back (to finish me)
 	connectToPeer(palIP);*/
 
 	Serial.println(F("Drop Connection!!!!!!!"));
+
+	shutdownFlag = true;
 
 	//abort();
 }

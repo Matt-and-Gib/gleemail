@@ -1,3 +1,4 @@
+#define ARDUINO_MAIN
 #include "Arduino.h"
 #include "src/include/global.h"
 #include "src/include/preferences.h"
@@ -13,17 +14,28 @@
 #include "src/include/lib/LiteChaCha/keyinfrastructure.h"
 #include "src/include/lib/LiteChaCha/authenticatedencrypt.h"
 
+//Weak empty variant initialization function.
+//May be redefined by variant files.
+void initVariant() __attribute__((weak));
+void initVariant() { }
+
+extern USBDeviceClass USBDevice;
+
+extern "C" void __libc_init_array(void);
+
 
 const unsigned long getCurrentTimeMS();
 void updateDisplayWithPeerChat(const char*);
 void updateDisplayWithUserChat(const char*);
+
+bool quit = false;
 
 
 static Storage storage;
 static Display display;
 
 static InternetAccess internet;
-static Networking network(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0);
+static Networking network(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0, quit);
 static WebAccess webAccess;
 
 
@@ -313,46 +325,6 @@ void printErrorCodes() {
 		}
 
 		e = DebugLog::getLog().getNextError();
-	}
-}
-
-/*
-	Estimated max time for single message processing: 4ms
-
-	Debounce time: 25ms
-	Dot/Dash Threshold: 265ms
-
-
-	180ms: totally unusable
-	90ms: completely unusalbe
-	45ms: unusable
-	25ms: okay
-	30ms: fine
-	35ms: fine
-	40ms: fine
-	44ms: mostly unusable
-	43ms: not really usable
-	* 42ms: alright *
-*/
-
-void loop() {
-	cycleStartTime = millis();
-
-	updateInputMethod();
-	updateNetwork();
-	//updateDisplay();
-	//doAsynchronousProcess();
-	printErrorCodes();
-
-	cycleDuration = millis() - cycleStartTime;
-	if(cycleDuration > MAX_FRAME_DURATION_MS) {
-		cycleLatencyCount += 1;
-		if(cycleLatencyCount > FRAME_LATENCY_COUNT_ERROR_THRESHOLD) {
-			DebugLog::getLog().logError(CONTINUOUS_FRAME_LATENCY);
-			cycleLatencyCount = 0; //Reset to help latency by eliminating guaranteed error code print
-		}
-	} else {
-		cycleLatencyCount = 0;
 	}
 }
 
@@ -753,4 +725,65 @@ void setup() {
 	} while (!setupComplete);
 
 	display.clearAll();
+}
+
+
+int main(void) {
+	init();
+	__libc_init_array();
+	initVariant();
+
+	delay(1);
+#if defined(USBCON)
+	USBDevice.init();
+	USBDevice.attach();
+#endif
+
+	setup();
+
+/*
+Estimated max time for single message processing: 4ms
+
+	Debounce time: 25ms
+	Dot/Dash Threshold: 265ms
+
+
+	180ms: totally unusable
+	90ms: completely unusalbe
+	45ms: unusable
+	25ms: okay
+	30ms: fine
+	35ms: fine
+	40ms: fine
+	44ms: mostly unusable
+	43ms: not really usable
+	* 42ms: alright *
+*/
+
+	while(!quit) {
+		cycleStartTime = millis();
+
+		updateInputMethod();
+		updateNetwork();
+		//updateDisplay();
+		//doAsynchronousProcess();
+		printErrorCodes();
+
+		cycleDuration = millis() - cycleStartTime;
+		if(cycleDuration > MAX_FRAME_DURATION_MS) {
+			cycleLatencyCount += 1;
+			if(cycleLatencyCount > FRAME_LATENCY_COUNT_ERROR_THRESHOLD) {
+				DebugLog::getLog().logError(CONTINUOUS_FRAME_LATENCY);
+				cycleLatencyCount = 0; //Reset to help latency by eliminating guaranteed error code print
+			}
+		} else {
+			cycleLatencyCount = 0;
+		}
+
+		if(arduino::serialEventRun) {
+			arduino::serialEventRun();
+		}
+	}
+
+  return 0;
 }
