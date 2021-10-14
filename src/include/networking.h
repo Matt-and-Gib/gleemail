@@ -172,7 +172,7 @@ private:
 	bool connected = false;
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
-	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 10000; //minimize in the future
+	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 10000; //minimize in the future to 500
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
 	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator //Don't forget to move me if the rest of encryption is moved
 
@@ -668,6 +668,7 @@ bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessEl
 	processElapsedTime = nowMS() - processStartTime; 
 	if(processElapsedTime > MAX_PROCESSING_TIME) {
 		if(processElapsedTime > 2 * MAX_PROCESSING_TIME) {
+			Serial.println(processElapsedTime);
 			DebugLog::getLog().logError(NETWORK_TIME_SENSITIVE_PROCESS_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_TIME_SENSITIVE_PROCESS_EXCEEDED_ALLOCATED_TIME_INSIGNFICANT);
