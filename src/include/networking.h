@@ -405,7 +405,7 @@ void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char
 
 //Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
 void Networking::stringToHex(char* out, char* s, const unsigned short start, const unsigned short length) {
-	for(unsigned short i = 0; i < length; i += 1) {
+/*	for(unsigned short i = 0; i < length; i += 1) {
 		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
 			s[(i*2) + start] -= 48;
 		} else {
@@ -420,6 +420,20 @@ void Networking::stringToHex(char* out, char* s, const unsigned short start, con
 			s[(i*2) + start + 1] -= 87;
 		}
 		out[i] |= s[(i*2) + start + 1];
+	}*/
+
+	for(unsigned short i = 0; i < length; i += 1) {
+		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
+			out[i] = (s[(i*2) + start] - 48) << 4;
+		} else {
+			out[i] = (s[(i*2) + start] - 87) << 4;
+		}
+
+		if(48 <= s[(i*2) + start + 1] && s[(i*2) + start + 1] <= 57) {
+			out[i] |= (s[(i*2) + start + 1] - 48);
+		} else {
+			out[i] |= (s[(i*2) + start + 1] - 87);
+		}
 	}
 }
 
