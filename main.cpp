@@ -577,11 +577,13 @@ void connectToPeer() { //Use PEER wait time to do asynchronousProcess
 
 	IPAddress friendsIP(ipAddressParts[0], ipAddressParts[1], ipAddressParts[2], ipAddressParts[3]);
 
+	Serial.println(F("Initializing Authentication..."));
+
+	network.connectToPeer(friendsIP);
+
 	Serial.print(F("Waiting for gleepal at "));
 	Serial.print(friendsIP);
 	Serial.println(F("..."));
-
-	network.connectToPeer(friendsIP);
 
 	/*if(!network.connectToPeer(friendsIP)) {
 		Serial.println(F("Unable to connect to gleepal :("));

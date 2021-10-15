@@ -113,7 +113,7 @@ private:
 
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
-	char* chat; //MAKE ME CONSTANT AGAIN!
+	const char* chat;
 	//MessageError* error;
 
 	static void noOutgoingProcess(Queue<Message>& q, Message& n) {}
@@ -157,7 +157,7 @@ public:
 	const glEEpal& getSender() const {return sender;}
 	const MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
-	char* getChat() {return chat;} //MAKE ME CONSTANT AGAIN!
+	const char* getChat() {return chat;}
 	//MessageError* getError() {return error;}
 	void doOutgoingPostProcess(Queue<Message>& q, Message& n) {return (*outgoingPostProcess)(q, n);}
 	void doConfirmedPostProcess(Networking& n, Queue<Message>& mo, QueueNode<Message>& messageIn) {(*confirmedPostProcess)(n, mo, messageIn, *this);}
@@ -216,8 +216,8 @@ private:
 
 
 	void createEncryptionInfoPayload(char*, const char*, const char*, const char*, const char*); // REMOVE ME?
-	void stringToHex(char*, char*, const unsigned short, const unsigned short); // REMOVE ME?
-	void convertEncryptionInfoPayload(char*, char*, char*, char*, char*); // REMOVE ME?
+	void stringToHex(char*, const char*, const unsigned short, const unsigned short); // REMOVE ME?
+	void convertEncryptionInfoPayload(char*, char*, char*, char*, const char*); // REMOVE ME?
 
 	void clearAllQueues();
 	void dropConnection();
@@ -404,7 +404,7 @@ void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char
 
 
 //Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
-void Networking::stringToHex(char* out, char* s, const unsigned short start, const unsigned short length) {
+void Networking::stringToHex(char* out, const char* s, const unsigned short start, const unsigned short length) {
 /*	for(unsigned short i = 0; i < length; i += 1) {
 		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
 			s[(i*2) + start] -= 48;
@@ -439,7 +439,7 @@ void Networking::stringToHex(char* out, char* s, const unsigned short start, con
 
 
 //Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
-void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemeralPubKeyOut, char* signatureOut, char* IDOut, char* encryptionInfo) {
+void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemeralPubKeyOut, char* signatureOut, char* IDOut, const char* encryptionInfo) {
 	stringToHex(DSAPubKeyOut, encryptionInfo, 0, keyBytes);
 	stringToHex(ephemeralPubKeyOut, encryptionInfo, (keyBytes*2), keyBytes);
 	stringToHex(signatureOut, encryptionInfo, (keyBytes*4), signatureBytes);
@@ -448,8 +448,6 @@ void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemera
 
 
 bool Networking::connectToPeer(IPAddress& connectToIP) {
-	Serial.println(F("connectToPeer"));
-
 	const bool GENERATE_NEW_KEY = true;
 	//									32				32					64				4			= 264
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, GENERATE_NEW_KEY);
@@ -461,6 +459,8 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 //	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), nullptr /*send encryption data*/, nullptr, &connectionEstablished));
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH) /*will this work? Who knows!*/, nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
+
+	//shouldn't this return something?
 }
 
 
