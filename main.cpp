@@ -787,5 +787,5 @@ Estimated max time for single message processing: 4ms
 		}
 	}
 
-  return 0;
+	return 0;
 }

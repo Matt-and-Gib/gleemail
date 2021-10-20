@@ -252,6 +252,12 @@ private:
 	bool processQueue(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 	bool processIncomingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
 	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
+
+	void processIncomingError(QueueNode<Message>& msg);
+	void processIncomingHeartbeat(QueueNode<Message>& msg);
+	void processIncomingConfirmation(QueueNode<Message>& msg);
+	void processIncomingChat(QueueNode<Message>& msg);
+	void processIncomingHandshake(QueueNode<Message>& msg);
 	
 	void (*chatMessageReceivedCallback)(const char*);
 
@@ -346,6 +352,7 @@ void Networking::clearAllQueues() {
 
 //Connection is being dropped due to heartbeat flatline before other party has finished processing authentication
 void Networking::dropConnection() { //Baby, come back (to finish me)
+// A lot of this is not necessary if we're going to shut down anyway.
 /*	connected = false;
 	processHeartbeat = &Networking::dontCheckHeartbeat;
 
@@ -357,7 +364,7 @@ void Networking::dropConnection() { //Baby, come back (to finish me)
 
 	connectToPeer(palIP);*/
 
-	Serial.println(F("Drop Connection!!!!!!!"));
+	Serial.println(F("Connection dropped due!"));
 
 	shutdownFlag = true;
 
@@ -449,18 +456,16 @@ void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemera
 
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	const bool GENERATE_NEW_KEY = true;
-	//									32				32					64				4			= 264
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, GENERATE_NEW_KEY);
 	createEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
 	udp.begin(CONNECTION_PORT);
 
 	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
-//	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), nullptr /*send encryption data*/, nullptr, &connectionEstablished));
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH) /*will this work? Who knows!*/, nullptr, &connectionEstablished));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
 
-	//shouldn't this return something?
+	return true;
 }
 
 
@@ -495,6 +500,7 @@ void Networking::sendOutgoingMessage(Message& msg) {
 	doc["I"] = msg.getIdempotencyToken()->getValue();
 	doc["C"] = msg.getChat();
 
+	//For sending error subobjects
 	/*JsonObject E = doc.createNestedObject("E");
 	E["D"] = static_cast<unsigned short>(msg.getError()->getID());
 	E["A"] = msg.getError()->getAttribute();*/
@@ -549,67 +555,92 @@ void Networking::listenToHeartbeat(const unsigned long time) {
 }
 
 
+void Networking::processIncomingError(QueueNode<Message>& msg) {
+	//check for unique idempotency token
+	messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+	//DebugLog::getLog().logWarning(msg.getData()->getError()->getID());
+}
+
+
+void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
+	listenToHeartbeat(nowMS());
+}
+
+
+void Networking::processIncomingConfirmation(QueueNode<Message>& msg) {
+	Serial.println(F("got confirmation of something"));
+	
+	messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
+	if(messageOutWithMatchingIdempotencyToken) {
+		messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat message, this is removeFromQueue()
+
+	} else {
+		DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
+	}
+}
+
+
+//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
+void Networking::processIncomingChat(QueueNode<Message>& msg) {
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
+
+	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
+		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+		(*chatMessageReceivedCallback)(msg.getData()->getChat());
+	}
+}
+
+
+void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
+	Serial.println(F("got handshake"));
+
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr));
+
+	Serial.println(F("conf to handsh enqued"));
+
+	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
+		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+
+		QueueNode<Message>* messageOutNode = messagesOut.peek();
+		while(messageOutNode != nullptr) {
+			if(messageOutNode->getData()->getIdempotencyToken()->getValue() == glEEpalInfo->getHandshakeIdempotencyTokenValue()) {
+				break;
+			}
+
+			messageOutNode = messageOutNode->getNode();
+		}
+
+		if(messageOutNode) {
+			connectionEstablished(*this, messagesOut, msg, *(messageOutNode->getData()));
+		} else {
+			DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_FROM_CONNECTED_IP);
+		}
+	} else {
+		DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
+	}
+}
+
+
 void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	switch(msg.getData()->getMessageType()) {
 	case MESSAGE_TYPE::ERROR:
-		//check for unique idempotency token
-		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-		//DebugLog::getLog().logWarning(msg.getData()->getError()->getID());
+		processIncomingError(msg);
 	break;
 
 	case MESSAGE_TYPE::HEARTBEAT:
-		listenToHeartbeat(nowMS());
+		processIncomingHeartbeat(msg);
 	break;
 
 	case MESSAGE_TYPE::CONFIRMATION:
-		Serial.println(F("got confirmation of something"));
-		
-		messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
-		if(messageOutWithMatchingIdempotencyToken) {
-			messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat message, this is removeFromQueue()
-
-		} else {
-			DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
-		}
+		processIncomingConfirmation(msg);
 	break;
-
-	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
+	
 	case MESSAGE_TYPE::CHAT:
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
-
-		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
-			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-			(*chatMessageReceivedCallback)(msg.getData()->getChat());
-		}
+		processIncomingChat(msg);
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
-		Serial.println(F("got handshake"));
-
-		messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr));
-
-		Serial.println(F("conf to handsh enqued"));
-
-		if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
-			messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-
-			QueueNode<Message>* messageOutNode = messagesOut.peek();
-			while(messageOutNode != nullptr) {
-				if(messageOutNode->getData()->getIdempotencyToken()->getValue() == glEEpalInfo->getHandshakeIdempotencyTokenValue()) {
-					break;
-				}
-
-				messageOutNode = messageOutNode->getNode();
-			}
-
-			if(messageOutNode) {
-				connectionEstablished(*this, messagesOut, msg, *(messageOutNode->getData()));
-			} else {
-				DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_UNEXPECTED_HANDSHAKE_FROM_CONNECTED_IP);
-			}
-		} else {
-			DebugLog::getLog().logWarning(NETWORK_DUPLICATE_HANDSHAKE);
-		}
+		processIncomingHandshake(msg);
 	break;
 
 	default:
