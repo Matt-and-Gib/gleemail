@@ -231,7 +231,7 @@ private:
 	void listenToHeartbeat(const unsigned long);
 	void checkHeartbeat();
 	void dontCheckHeartbeat() {}
-	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on successful connection
+	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on first heartbeat received
 
 	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
@@ -304,8 +304,6 @@ private:
 		Serial.println(F("Connected to peer!"));
 
 		n.connected = true;
-		n.processHeartbeat = &Networking::checkHeartbeat; //MOVE THIS SOMEWHERE ELSE! Maybe set processHeartbeat here to a new function pointer pointing to a "waiting for first heartbeat" function which will (when called) set the processHeartbeat variable to checkHeartbeat.
-		n.listenToHeartbeat(n.nowMS());
 	}
 public:
 	Networking(const unsigned long (*)(), void (*)(const char*), const long u, bool& quit);
@@ -367,8 +365,6 @@ void Networking::dropConnection() { //Baby, come back (to finish me)
 	Serial.println(F("Connection dropped due!"));
 
 	shutdownFlag = true;
-
-	//abort();
 }
 
 
@@ -563,6 +559,10 @@ void Networking::processIncomingError(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
+	if(processHeartbeat == &Networking::dontCheckHeartbeat) {
+		processHeartbeat = &Networking::checkHeartbeat;
+	}
+
 	listenToHeartbeat(nowMS());
 }
 
