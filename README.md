@@ -101,6 +101,7 @@ Last updated: 5/18/2021
 |58|Confirmation No Match Found||Low|
 |59|Duplicate Handshake||Low|
 |60|Unexpected Handshake from Connected IP|Either received handshake after token removed from queue (expired) or handshake has unique idempotency token|Low|
+|61|Heartbeat Stillborn|Heartbeat never received|High|
 </details>
 
 <details>

@@ -24,7 +24,7 @@ extern USBDeviceClass USBDevice;
 extern "C" void __libc_init_array(void);
 
 
-const unsigned long getCurrentTimeMS();
+const unsigned long getCurrentTimeMS(); //KILL ME... KILL ME!
 void updateDisplayWithPeerChat(const char*);
 void updateDisplayWithUserChat(const char*);
 
@@ -36,6 +36,7 @@ static Display display;
 
 static InternetAccess internet;
 static Networking network(&getCurrentTimeMS, &updateDisplayWithPeerChat, 0, quit);
+//static Networking network(&millis, &updateDisplayWithPeerChat, 0, quit); // DO THIS INSTEAD!
 static WebAccess webAccess;
 
 
@@ -243,7 +244,7 @@ void updateInputMethod() {
 }
 
 
-const unsigned long getCurrentTimeMS() {
+const unsigned long getCurrentTimeMS() { //KILL ME... KILL ME! PLEASE!
 	return millis();
 }
 

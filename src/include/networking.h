@@ -172,6 +172,7 @@ private:
 	glEEpal* glEEpalInfo;
 
 	bool connected = false;
+	unsigned long connectedMS;
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500;
@@ -225,11 +226,13 @@ private:
 	Message* heartbeat;
 	unsigned long lastHeartbeatSentMS = 0;
 	unsigned long lastHeartbeatReceivedMS = 0;
-	static const constexpr unsigned short HEARTBEAT_RESEND_THRESHOLD_MS = 1000;
+	static const constexpr unsigned short HEARTBEAT_RESEND_THRESHOLD_MS = 500;
 	static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 4 * HEARTBEAT_RESEND_THRESHOLD_MS;
+	static const constexpr unsigned short HEARTBEAT_STILLBORN_THRESHOLD_MS = 15 * FLATLINE_THRESHOLD_MS;
 	void sendHeartbeat();
 	void listenToHeartbeat(const unsigned long);
 	void checkHeartbeat();
+	void checkHeartbeatStillborn();
 	void dontCheckHeartbeat() {}
 	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on first heartbeat received
 
@@ -302,6 +305,9 @@ private:
 
 		delete messagesOutQueue.remove(messageOut); //removes outgoing handshake from queue
 		Serial.println(F("Connected to peer!"));
+
+		n.connectedMS = n.nowMS();
+		n.processHeartbeat = &Networking::checkHeartbeatStillborn;
 
 		n.connected = true;
 	}
@@ -527,6 +533,16 @@ bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, Qu
 
 void Networking::sendHeartbeat() {
 	sendOutgoingMessage(*heartbeat);
+}
+
+
+void Networking::checkHeartbeatStillborn() {
+	approxCurrentTime = nowMS();
+
+	if(approxCurrentTime - connectedMS > HEARTBEAT_STILLBORN_THRESHOLD_MS) {
+		DebugLog::getLog().logError(NETWORK_HEARTBEAT_STILLBORN);
+		dropConnection();
+	}
 }
 
 
