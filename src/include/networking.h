@@ -289,28 +289,32 @@ private:
 	}
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
-		Serial.println(F("beginning auth"));
-		Serial.flush();
+		if(n.connected == false) {
+			Serial.println(F("beginning auth"));
+			Serial.flush();
 
-		n.convertEncryptionInfoPayload(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature, n.peerID, messageIn.getData()->getChat());
+			n.convertEncryptionInfoPayload(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature, n.peerID, messageIn.getData()->getChat());
 
-		if((n.pki.IDUnique(n.userID, n.peerID)) && (n.pki.signatureValid(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature))) {
-			n.pki.createSessionKey(n.peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
-			Serial.println(F("authenticated!"));
+			if((n.pki.IDUnique(n.userID, n.peerID)) && (n.pki.signatureValid(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature))) {
+				n.pki.createSessionKey(n.peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
+				Serial.println(F("authenticated!"));
+			} else {
+				Serial.println(F("auth failed!"));
+			}
+
+			n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
+			//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
+
+			delete messagesOutQueue.remove(messageOut); //removes outgoing handshake from queue
+			Serial.println(F("Connected to peer!"));
+
+			n.connectedMS = n.nowMS();
+			n.processHeartbeat = &Networking::checkHeartbeat;
+
+			n.connected = true;
 		} else {
-			Serial.println(F("auth failed!"));
+			DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_CONNECTION_ATTEMPT_WHILE_CONNECTED);
 		}
-
-		n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
-		//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
-
-		delete messagesOutQueue.remove(messageOut); //removes outgoing handshake from queue
-		Serial.println(F("Connected to peer!"));
-
-		n.connectedMS = n.nowMS();
-		n.processHeartbeat = &Networking::checkHeartbeat;
-
-		n.connected = true;
 	}
 public:
 	Networking(const unsigned long (*)(), void (*)(const char*), const long u, bool& quit);
@@ -465,6 +469,9 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
 	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
+	Serial.print(F("connectToPeer: outgoing handshake idempotency token value: "));
+	Serial.println(outgoingPeerUniqueHandshakeValue);
+
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
 
@@ -536,7 +543,6 @@ bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, Qu
 
 void Networking::sendHeartbeat() {
 	sendOutgoingMessage(*heartbeat);
-	Serial.println(F("sent heartbeat"));
 }
 
 
@@ -579,19 +585,21 @@ void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
 		checkHeartbeatThreshold = &Networking::checkHeartbeatFlatline;
 	}
 
-	Serial.println(F("received heartbeat"));
 	lastHeartbeatReceivedMS = nowMS();
 }
 
 
 void Networking::processIncomingConfirmation(QueueNode<Message>& msg) {
 	Serial.println(F("got confirmation of something"));
-	
+
 	messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 	if(messageOutWithMatchingIdempotencyToken) {
 		messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat message, this is removeFromQueue()
 
 	} else {
+		Serial.print(F("confirmation no match found idempotency token: "));
+		Serial.println(msg.getData()->getIdempotencyToken()->getValue());
+
 		DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 	}
 }
@@ -611,7 +619,9 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
 	//messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr));
 
-	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //This is ugly
+	Serial.println(F("Received handshake"));
+
+	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Not is not immediately logical
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));

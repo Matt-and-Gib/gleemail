@@ -95,7 +95,7 @@ Last updated: 5/18/2021
 |52|Too Many Messages Received||High|
 |53|Heartbeat Flatline||High|
 |54|Outgoing Token Timestamp Elapsed||High|
-|55|Time Sensitive Process Exceeded Allocated Time (Significant)||High|
+|55|Time Sensitive Process Exceeded Allocated Time (Significant)|Will occur during initial peer authentication|High|
 |56|Time Sensitive Process Exceeded Allocated Time (Insignificant)||Low|
 |57|Unknown Incoming Message Type||High|
 |58|Confirmation No Match Found||Low|
