@@ -273,7 +273,7 @@ private:
 	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
 
-	void sendOutgoingMessage(Message&);
+	Message& sendOutgoingMessage(Message&);
 
 	void processIncomingMessage(QueueNode<Message>&);
 
@@ -495,7 +495,7 @@ bool Networking::exceededMaxOutgoingTokenRetryCount() {
 }
 
 
-void Networking::sendOutgoingMessage(Message& msg) {
+Message& Networking::sendOutgoingMessage(Message& msg) {
 	char outputBuffer[JSON_DOCUMENT_SIZE];
 	StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
 
@@ -517,6 +517,8 @@ void Networking::sendOutgoingMessage(Message& msg) {
 
 	msg.getIdempotencyToken()->incrementRetryCount();
 	messagesSentCount += 1;
+
+	return msg;
 }
 
 
@@ -607,11 +609,9 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
-	Serial.println(F("got handshake"));
+	//messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr));
 
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr));
-
-	Serial.println(F("conf to handsh enqued"));
+	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //This is ugly
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
