@@ -230,7 +230,6 @@ private:
 	static const constexpr unsigned short FLATLINE_THRESHOLD_MS = 4 * HEARTBEAT_RESEND_THRESHOLD_MS;
 	static const constexpr unsigned short HEARTBEAT_STILLBORN_THRESHOLD_MS = 15 * FLATLINE_THRESHOLD_MS;
 	void sendHeartbeat();
-	void listenToHeartbeat(const unsigned long);
 	void checkHeartbeat();
 	void checkHeartbeatStillborn();
 	void checkHeartbeatFlatline();
@@ -535,6 +534,7 @@ bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, Qu
 
 void Networking::sendHeartbeat() {
 	sendOutgoingMessage(*heartbeat);
+	Serial.println(F("sent heartbeat"));
 }
 
 
@@ -565,11 +565,6 @@ void Networking::checkHeartbeat() {
 }
 
 
-void Networking::listenToHeartbeat(const unsigned long time) {
-	lastHeartbeatReceivedMS = time;
-}
-
-
 void Networking::processIncomingError(QueueNode<Message>& msg) {
 	//check for unique idempotency token
 	messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
@@ -582,7 +577,8 @@ void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
 		checkHeartbeatThreshold = &Networking::checkHeartbeatFlatline;
 	}
 
-	listenToHeartbeat(nowMS());
+	Serial.println(F("received heartbeat"));
+	lastHeartbeatReceivedMS = nowMS();
 }
 
 
