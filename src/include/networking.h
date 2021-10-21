@@ -119,6 +119,7 @@ private:
 	
 	void (*chatMessageReceivedCallback)(const char*);
 
+	const unsigned long messageResendTime(QueueNode<Message>& msg);
 	bool processOutgoingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
 	static const constexpr unsigned short MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
@@ -145,15 +146,13 @@ private:
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
 		if(n.connected == false) {
 			Serial.println(F("beginning auth"));
-			Serial.flush();
 
 			n.convertEncryptionInfoPayload(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature, n.peerID, messageIn.getData()->getChat());
 
 			if((n.pki.IDUnique(n.userID, n.peerID)) && (n.pki.signatureValid(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature))) {
 				n.pki.createSessionKey(n.peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
-				Serial.println(F("authenticated!"));
 			} else {
-				Serial.println(F("auth failed!"));
+				DebugLog::getLog().logError(ERROR_CODE::NETWORK_AUTHENTICATION_FAILED);
 			}
 
 			n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
@@ -456,8 +455,13 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 }
 
 
+const unsigned long Networking::messageResendTime(QueueNode<Message>& msg) {
+	return msg.getData()->getIdempotencyToken()->getTimestamp() + (msg.getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS);
+}
+
+
 bool Networking::processOutgoingMessageQueueNode(Queue<Message>& messagesOut, QueueNode<Message>* nextMessage) {
-	if(nowMS() > nextMessage->getData()->getIdempotencyToken()->getTimestamp() + (nextMessage->getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS)) {
+	if(nowMS() > messageResendTime(*nextMessage)) { //Probably shouldn't dereference here, I think QueueNode<Message> should be passed in as a reference instead. However, some refactoring will be necessary because probably all of the parameters should be references- catch a nullptr early and treat everything else as a ref.
 		sendOutgoingMessage(*(nextMessage->getData()));
 
 		nextMessage->getData()->doOutgoingPostProcess(messagesOut, *(nextMessage->getData()));
@@ -544,11 +548,11 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
-	//messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr));
+	//messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Send immediately instead of enqueuing message for timing
 
 	Serial.println(F("Received handshake"));
 
-	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Not is not immediately logical
+	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Not immediately logical
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));

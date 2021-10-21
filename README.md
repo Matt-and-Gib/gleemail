@@ -102,6 +102,7 @@ Last updated: 5/18/2021
 |59|Duplicate Handshake||Low|
 |60|Unexpected Handshake from Connected IP|Either received handshake after token removed from queue (expired) or handshake has unique idempotency token|Low|
 |61|Heartbeat Stillborn|Heartbeat never received|High|
+|62|Authentication Failed|UserIP and PeerID not unique or peer signature invalid|High|
 </details>
 
 <details>
