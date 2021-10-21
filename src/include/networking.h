@@ -522,7 +522,52 @@ bool Networking::exceededMaxOutgoingTokenRetryCount() {
 
 
 void Networking::createMessagePayload(char* message, const size_t length) {// Good morning bucko!
+	unsigned short i = 0;
+	for(i = 0; i < sizeof(messageCount); i += 1) { // Should we maybe have a standalone variable for sizeof(messageCount)?
+		message[i*2] = (messageCount >> (60 - (i*8))) & 0x0f;
+		message[(i*2) + 1] = (messageCount >> 56 - (i*8)) & 0x0f;
+	}
 
+	for(i = 0; i < tagBytes; i += 1) {
+		message[(i*2) + (sizeof(messageCount)*2)] = tag[i] >> 4;
+		message[(i*2) + (sizeof(messageCount)*2) + 1] = tag[i] & 0x0f;
+	}
+
+	for(i = 0; i < length; i += 1) {
+		//Uh-oh! We are overwriting message!!!
+	}
+
+/*
+	unsigned short i = 0;
+	for(i = 0; i < keyBytes; i += 1) {
+		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
+		encryptionInfoOut[(i*2) + 1] = DSAPubKey[i] & 0x0f;
+
+		encryptionInfoOut[(i*2) + (keyBytes*2)] = ephemeralPubKey[i] >> 4;
+		encryptionInfoOut[(i*2) + (keyBytes*2) + 1] = ephemeralPubKey[i] & 0x0f;
+	}
+
+	for(i = 0; i < signatureBytes; i += 1) {
+		encryptionInfoOut[(i*2) + (keyBytes*4)] = signature[i] >> 4;
+		encryptionInfoOut[(i*2) + (keyBytes*4) + 1] = signature[i] & 0x0f;
+	}
+
+	for(i = 0; i < IDBytes; i += 1) {
+		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2)] = ID[i] >> 4;
+		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2) + 1] = ID[i] & 0x0f;
+	}
+
+	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
+	for(i = 0; i < (SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1); i += 1) {
+		if(encryptionInfoOut[i] < 0x0a) {
+			encryptionInfoOut[i] += 48;
+		} else {
+			encryptionInfoOut[i] += 87;
+		}
+	}
+
+	encryptionInfoOut[SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1] = '\n';
+*/
 }
 
 
@@ -534,7 +579,8 @@ void Networking::encryptBufferAndPreparePayload(char* outputBuffer, const size_t
 
 
 Message& Networking::sendOutgoingMessage(Message& msg) {
-	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1];
+//	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
+	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
 	StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
 
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
@@ -550,7 +596,8 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
 
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
-	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
+//	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
+	udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 	udp.endPacket();
 
 	msg.getIdempotencyToken()->incrementRetryCount();
