@@ -233,7 +233,9 @@ private:
 	void listenToHeartbeat(const unsigned long);
 	void checkHeartbeat();
 	void checkHeartbeatStillborn();
+	void checkHeartbeatFlatline();
 	void dontCheckHeartbeat() {}
+	void (Networking::*checkHeartbeatThreshold)() = &Networking::checkHeartbeatStillborn;
 	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on first heartbeat received
 
 	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
@@ -307,7 +309,7 @@ private:
 		Serial.println(F("Connected to peer!"));
 
 		n.connectedMS = n.nowMS();
-		n.processHeartbeat = &Networking::checkHeartbeatStillborn;
+		n.processHeartbeat = &Networking::checkHeartbeat;
 
 		n.connected = true;
 	}
@@ -537,8 +539,6 @@ void Networking::sendHeartbeat() {
 
 
 void Networking::checkHeartbeatStillborn() {
-	approxCurrentTime = nowMS();
-
 	if(approxCurrentTime - connectedMS > HEARTBEAT_STILLBORN_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_STILLBORN);
 		dropConnection();
@@ -546,14 +546,17 @@ void Networking::checkHeartbeatStillborn() {
 }
 
 
-void Networking::checkHeartbeat() {
-	approxCurrentTime = nowMS();
-
+void Networking::checkHeartbeatFlatline() {
 	if(approxCurrentTime - lastHeartbeatReceivedMS > FLATLINE_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_FLATLINE);
 		dropConnection();
-		return;
 	}
+}
+
+
+void Networking::checkHeartbeat() {
+	approxCurrentTime = nowMS();
+	(this->*checkHeartbeatThreshold)();
 
 	if(approxCurrentTime - lastHeartbeatSentMS > HEARTBEAT_RESEND_THRESHOLD_MS) {
 		sendHeartbeat();
@@ -575,8 +578,8 @@ void Networking::processIncomingError(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
-	if(processHeartbeat == &Networking::dontCheckHeartbeat) {
-		processHeartbeat = &Networking::checkHeartbeat;
+	if(checkHeartbeatThreshold == &Networking::checkHeartbeatStillborn) {
+		checkHeartbeatThreshold = &Networking::checkHeartbeatFlatline;
 	}
 
 	listenToHeartbeat(nowMS());
