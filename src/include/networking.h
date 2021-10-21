@@ -2,6 +2,8 @@
 #define NETWORKING_H
 
 #include <WiFiUdp.h>
+
+#define ARDUINOJSON_USE_LONG_LONG 1 //necessary for idempotency token size (based on UUID): https://arduinojson.org/v6/api/config/use_long_long/
 #include <ArduinoJson.hpp>
 
 #include "global.h"
@@ -39,7 +41,7 @@ glEEpal* glEEself = new glEEpal();
 
 class IdempotencyToken {
 private:
-	unsigned short value;
+	unsigned long value;
 	unsigned long timestamp;
 	unsigned short retryCount;
 public:
@@ -64,7 +66,7 @@ public:
 
 	bool operator==(const IdempotencyToken& o) {return value == o.getValue();}
 
-	const unsigned short getValue() const {return value;}
+	const unsigned long getValue() const {return value;}
 	const unsigned long getTimestamp() const {return timestamp;}
 	const unsigned short getRetryCount() const {return retryCount;}
 	void incrementRetryCount() {retryCount += 1;}
@@ -246,6 +248,9 @@ private:
 	Queue<Message> messagesOut;
 	MESSAGE_TYPE searchMessageType;
 
+	void createMessagePayload(char*, const size_t);
+	void encryptBufferAndPreparePayload(char*, const size_t);
+
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
 
@@ -386,6 +391,13 @@ void Networking::sendChatMessage(const char* chat) {
 
 
 void Networking::createuuid(char* userID) {
+	Serial.print(F("userID:"));
+	for(unsigned short i = 0; i < IDBytes; i += 1) {
+		Serial.print(' ');
+		Serial.print(userID[i], HEX);
+	}
+	Serial.println();
+
 	uuid = userID[0] << 24;
 	uuid |= userID[1] << 16;
 	uuid |= userID[2] << 8;
@@ -512,8 +524,22 @@ bool Networking::exceededMaxOutgoingTokenRetryCount() {
 }
 
 
+void Networking::createMessagePayload(char* message, const size_t length) {// Good morning bucko!
+
+}
+
+
+void Networking::encryptBufferAndPreparePayload(char* outputBuffer, const size_t length) {
+	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length);
+
+	createMessagePayload(outputBuffer, length);
+}
+
+
 Message& Networking::sendOutgoingMessage(Message& msg) {
-	char outputBuffer[JSON_DOCUMENT_SIZE];
+	Serial.print(F("sizeof(messageCount) SHOULD BE 8:"));
+	Serial.println(sizeof(messageCount));
+	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1];
 	StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
 
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
@@ -526,10 +552,10 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	E["A"] = msg.getError()->getAttribute();*/
 
 	serializeJson(doc, outputBuffer);
-	//encryptBuffer(outputBuffer, measureJson(doc) + 1);
+	encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
 
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
-	udp.write(outputBuffer);
+	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
 	udp.endPacket();
 
 	msg.getIdempotencyToken()->incrementRetryCount();
@@ -721,7 +747,9 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 	if(packetSize > 0) {
 		udp.read(messageBuffer, packetSize);
 		if(*glEEpalInfo == udp.remoteIP()) { //look through list of glEEpals to find match with msg.getSender()
-			//decrypt message
+
+
+			//decrypt message !!
 
 			messageReceivedCount += 1;
 
