@@ -180,6 +180,7 @@ private:
 	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator //Don't forget to move me if the rest of encryption is moved
 
 	unsigned long uuid;
+	void createuuid(char*);
 	unsigned short messagesSentCount = 0;
 
 	const unsigned long (*nowMS)();
@@ -384,6 +385,14 @@ void Networking::sendChatMessage(const char* chat) {
 }
 
 
+void Networking::createuuid(char* userID) {
+	uuid = userID[0] << 24;
+	uuid |= userID[1] << 16;
+	uuid |= userID[2] << 8;
+	uuid |= userID[3];
+}
+
+
 void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char* DSAPubKey, const char* ephemeralPubKey, const char* signature, const char* ID) {
 	unsigned short i = 0;
 	for(i = 0; i < keyBytes; i += 1) {
@@ -464,6 +473,7 @@ void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemera
 bool Networking::connectToPeer(IPAddress& connectToIP) {
 	const bool GENERATE_NEW_KEY = true;
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, GENERATE_NEW_KEY);
+	createuuid(userID);
 	createEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
 	udp.begin(CONNECTION_PORT);
