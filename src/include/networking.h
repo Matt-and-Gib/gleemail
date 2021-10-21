@@ -240,7 +240,8 @@ private:
 	void (Networking::*checkHeartbeatThreshold)() = &Networking::checkHeartbeatStillborn;
 	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on first heartbeat received
 
-	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
+	char messageBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1];
+//	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
 
 	Queue<Message> messagesIn;
@@ -350,7 +351,7 @@ Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(
 
 Networking::~Networking() {
 	delete glEEpalInfo;
-	delete[] messageBuffer;
+	//delete[] messageBuffer;
 }
 
 
