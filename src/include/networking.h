@@ -2,8 +2,6 @@
 #define NETWORKING_H
 
 #include <WiFiUdp.h>
-
-#define ARDUINOJSON_USE_LONG_LONG 1 //necessary for idempotency token size (based on UUID): https://arduinojson.org/v6/api/config/use_long_long/
 #include <ArduinoJson.hpp>
 
 #include "global.h"
@@ -41,7 +39,7 @@ glEEpal* glEEself = new glEEpal();
 
 class IdempotencyToken {
 private:
-	unsigned long value;
+	unsigned short value;
 	unsigned long timestamp;
 	unsigned short retryCount;
 public:
@@ -66,7 +64,7 @@ public:
 
 	bool operator==(const IdempotencyToken& o) {return value == o.getValue();}
 
-	const unsigned long getValue() const {return value;}
+	const unsigned short getValue() const {return value;}
 	const unsigned long getTimestamp() const {return timestamp;}
 	const unsigned short getRetryCount() const {return retryCount;}
 	void incrementRetryCount() {retryCount += 1;}
@@ -181,7 +179,7 @@ private:
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
 	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator //Don't forget to move me if the rest of encryption is moved
 
-	unsigned long uuid;
+	unsigned short uuid;
 	void createuuid(char*);
 	unsigned short messagesSentCount = 0;
 
@@ -399,10 +397,8 @@ void Networking::createuuid(char* userID) {
 	}
 	Serial.println();
 
-	uuid = userID[0] << 24;
-	uuid |= userID[1] << 16;
-	uuid |= userID[2] << 8;
-	uuid |= userID[3];
+	uuid |= userID[0] << 8;
+	uuid |= userID[1];
 }
 
 
@@ -491,7 +487,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 
 	udp.begin(CONNECTION_PORT);
 
-	const unsigned long outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
+	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
 	Serial.print(F("connectToPeer: outgoing handshake idempotency token value: "));
 	Serial.println(outgoingPeerUniqueHandshakeValue);
 
@@ -755,6 +751,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
 			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, JSON_DOCUMENT_SIZE);
 			if(parsingError) {
+				Serial.println(parsingError.c_str());
 				//write data to buffer to check in gleemail.ino(?) in case HTTP GET is stored in UDP buffer (for when MCCP version info is requested)
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
