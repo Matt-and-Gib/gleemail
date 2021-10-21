@@ -490,7 +490,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 
 	udp.begin(CONNECTION_PORT);
 
-	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
+	const unsigned long outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
 	Serial.print(F("connectToPeer: outgoing handshake idempotency token value: "));
 	Serial.println(outgoingPeerUniqueHandshakeValue);
 
@@ -537,8 +537,6 @@ void Networking::encryptBufferAndPreparePayload(char* outputBuffer, const size_t
 
 
 Message& Networking::sendOutgoingMessage(Message& msg) {
-	Serial.print(F("sizeof(messageCount) SHOULD BE 8:"));
-	Serial.println(sizeof(messageCount));
 	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1];
 	StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
 
