@@ -445,8 +445,13 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
-	udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
+	const unsigned short wroteLength = udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 	udp.endPacket();
+
+	Serial.print(F("Wrote: "));
+	Serial.println(wroteLength);
+	Serial.print(F("Max size of array: "));
+	Serial.println(((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 
 	msg.getIdempotencyToken()->incrementRetryCount();
 	messagesSentCount += 1;
@@ -641,8 +646,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
 		udp.read(messageBuffer, packetSize);
-		if(*glEEpalInfo == udp.remoteIP()) { //look through list of glEEpals to find match with msg.getSender()
-
+		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
 
 			//decrypt message !!
 
