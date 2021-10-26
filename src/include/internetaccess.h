@@ -30,6 +30,8 @@ public:
 	bool activeWebConnection() {return client.connected();}
 	bool responseAvailableFromWeb() {return client.available();}
 	char nextCharInWebResponse() {return client.read();}
+
+	IPAddress getLocalIP();
 };
 
 
@@ -90,5 +92,15 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 void InternetAccess::disconnectFromNetwork() {
 	WiFi.disconnect();
 }
+
+
+IPAddress InternetAccess::getLocalIP() {
+	if(WiFi.status() != WL_CONNECTED) {
+		return nullptr;
+	} else {
+		return WiFi.localIP();
+	}
+}
+
 
 #endif

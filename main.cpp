@@ -665,6 +665,8 @@ void setup() {
 			delay(SETUP_STEP_DELAY);
 
 			if(connectToWiFi(networkForceNewCredentials)) {
+				Serial.print(F("LocalIP: "));
+				Serial.println(internet.getLocalIP());
 				setupState = SETUP_LEVEL::INPUT_METHOD;
 			} else {
 				networkForceNewCredentials = promptForNewWiFiCredentials();
