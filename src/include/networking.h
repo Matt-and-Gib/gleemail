@@ -32,7 +32,7 @@ private:
 	void createuuid(char*);
 	unsigned short messagesSentCount = 0;
 
-	const unsigned long (*nowMS)();
+	unsigned long (*nowMS)();
 	unsigned long approxCurrentTime;
 
 	CipherManagement ae;
@@ -170,7 +170,7 @@ private:
 		}
 	}
 public:
-	Networking(const unsigned long (*)(), void (*)(const char*), const long u, bool& quit);
+	Networking(unsigned long (*)(), void (*)(const char*), const long u, bool& quit);
 	~Networking();
 
 	void processNetwork();
@@ -180,7 +180,7 @@ public:
 };
 
 
-Networking::Networking(const unsigned long (*millis)(), void (*chatMsgCallback)(const char*), const long u, bool& quit) : shutdownFlag{quit} {
+Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(const char*), const long u, bool& quit) : shutdownFlag{quit} {
 	nowMS = millis;
 	uuid = u + nowMS(); //CHANGE ME!
 	chatMessageReceivedCallback = chatMsgCallback;
