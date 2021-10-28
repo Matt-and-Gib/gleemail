@@ -226,7 +226,7 @@ void Networking::dropConnection() { //Baby, come back (to finish me)
 
 	connectToPeer(palIP);*/
 
-	Serial.println(F("Connection dropped due!"));
+	Serial.println(F("Connection dropped!"));
 
 	shutdownFlag = true;
 }
