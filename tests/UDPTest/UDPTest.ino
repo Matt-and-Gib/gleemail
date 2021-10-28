@@ -38,6 +38,8 @@ void sendMessageGOBLIN(const IPAddress sendToIP) {
 	Udp.beginPacket(sendToIP, 29453);
 	Udp.write(sendMessage, SENDLEN);
 	Udp.endPacket();
+
+	Serial.println(F("sent!"));
 }
 
 
@@ -81,6 +83,10 @@ void setup() {
 }
 
 void loop() {
+	if(millis() % 1000 == 0) {
+		sendMessageGOBLIN(Udp.remoteIP());
+	}
+	
   // if there's data available, read a packet
   int packetSize = Udp.parsePacket();
   if (packetSize) {
