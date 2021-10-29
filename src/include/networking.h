@@ -428,9 +428,10 @@ void Networking::encryptBufferAndPreparePayload(char* outputBuffer, const size_t
 
 Message& Networking::sendOutgoingMessage(Message& msg) {
 //	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
-	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
-	StaticJsonDocument<JSON_DOCUMENT_SIZE> doc;
-
+//	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
+	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + 8 /*sizeof(messageCount))*/ * 2) + 1]; // OOF. PLEASE KILL ME!
+	StaticJsonDocument<OUTGOING_JSON_DOCUMENT_SIZE> doc;
+// So it is + tagBytes (16 bytes) + sizeof(messageCount) I do want to confirm that it is indeed 8, but we don't need to do that right now.
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
 	doc["I"] = msg.getIdempotencyToken()->getValue();
 	doc["C"] = msg.getChat();

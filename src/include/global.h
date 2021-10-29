@@ -34,10 +34,12 @@ static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEAD
 enum class MESSAGE_TYPE : unsigned short {ERROR = 0, HEARTBEAT = 1, CONFIRMATION = 2, CHAT = 3, HANDSHAKE = 4, NONE = 5};
 static const constexpr MESSAGE_TYPE START_MESSAGE_TYPE = static_cast<MESSAGE_TYPE>(0);
 
-static const constexpr unsigned short MAX_MESSAGE_LENGTH = 280; // WE'RE GOING OFF THE BEATEN TRAIL HERE! The proper values are commented out below.
-
-static const constexpr unsigned short JSON_DOCUMENT_SIZE = 512; // Michael: remember why this is what it is!
-
+static const constexpr unsigned short MAX_MESSAGE_LENGTH = 265; //This is the maximum size of an encryption info payload. Used for length of "chat" in Message object.
+static const constexpr unsigned short OUTGOING_JSON_DOCUMENT_SIZE = 384; //Value calculated by ArduinoJSON Assistant based on the following parameters: Data structures 48, Strings 266, Total (minimum) 314, Total (recommended) 384 for the following object: {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"} This object emulates a handshake which contains an encryption info payload. 10/28/2021 @ 20:34
+static const constexpr unsigned short INCOMING_JSON_DOCUMENT_SIZE = 48; //Value calculated by ArduinoJSON Assistant based on the following parameters: Data structures 48, Strings 0, Total (minimum) 48, Total (recommended) 48 for the following object: {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"} This object emulates a handshake which contains an encryption info payload. 10/28/2021 @ 20:33
+static const constexpr unsigned short PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE = 289; //The value was calculated by the measureJson() function based on a worst-case message object (handshake): {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+static const constexpr unsigned short POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE = PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE + 16 /*tagBytes length*/ + 8 /*sizeof(messageCount)*/;
+// We should make a new variable for 16 + 8, but let's do that later. I'm gonna head out for the night.
 /*
 static const constexpr unsigned short MAX_MESSAGE_LENGTH = 140; // This value is dependent upon JSON_DOCUMENT_SIZE = 256.
 

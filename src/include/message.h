@@ -25,12 +25,15 @@ private:
 	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&); //Used for establishing connection and 
 public:
 	Message() {}
-	Message(const StaticJsonDocument<JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) {
+	
+	//Incoming Message Constructor
+	Message(const StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) {
 		const unsigned short tempMessageType = parsedDocument["T"];
 		messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
 
 		unsigned short tempIdempVal = parsedDocument["I"];
 		idempotencyToken = new IdempotencyToken(tempIdempVal, currentTimeMS);
+
 		const char* tempChat = parsedDocument["C"];
 		chat = copyString(tempChat, MAX_MESSAGE_LENGTH);
 		//error = new MessageError(parsedDocument);
@@ -40,6 +43,8 @@ public:
 
 		sender = from;
 	}
+
+	//Outgoing Message Constructor
 	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) {
 		messageType = t;
 		idempotencyToken = i;

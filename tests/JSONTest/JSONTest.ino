@@ -154,6 +154,22 @@ ms = "120054";
 }
 
 
+void testSerializeWorstCaseObjectSize() {
+	char output[512];
+
+	StaticJsonDocument<384> doc;
+
+	doc["T"] = 4;
+	doc["I"] = 65535;
+	doc["C"] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+	serializeJson(doc, output);
+
+	Serial.print(F("size: "));
+	Serial.println(measureJson(doc));
+}
+
+
 void setup() {
 	Serial.begin(9600);
 	while(!Serial) {
@@ -161,7 +177,8 @@ void setup() {
 	}
 
 	Serial.println("Start");
-	testParseMissingData();
+	//testParseMissingData();
+	testSerializeWorstCaseObjectSize();
 	Serial.println("Done");
 }
 
