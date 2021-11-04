@@ -103,7 +103,7 @@ private:
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
 
-	bool doTimeSensetiveProcess(const unsigned short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
+	short doTimeSensetiveProcess(const unsigned short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
@@ -452,10 +452,10 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	const unsigned short wroteLength = udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 	udp.endPacket();
 
-	/*Serial.print(F("Wrote: "));
+	Serial.print(F("Wrote: "));
 	Serial.println(wroteLength);
 	Serial.print(F("Max size of array: "));
-	Serial.println(((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);*/
+	Serial.println(((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 
 	msg.getIdempotencyToken()->incrementRetryCount();
 	messagesSentCount += 1;
@@ -624,7 +624,8 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 
 
 bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& fromQueue) {
-	while(queueStartNode) {
+	queueStartNode = fromQueue.dequeue();
+	do {
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
 			holdingNode = queueStartNode->getNode();
 			if((this->*processMessage)(fromQueue, queueStartNode)) {
@@ -634,7 +635,7 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 		}
 
 		queueStartNode = queueStartNode->getNode();
-	}
+	} while (queueStartNode != nullptr);
 
 	queueStartNode = fromQueue.peek();
 	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
@@ -677,16 +678,17 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 }
 
 
-bool Networking::doTimeSensetiveProcess(const unsigned short previousProcessElapsedTime, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
+short Networking::doTimeSensetiveProcess(const unsigned short processTimeModifier, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
 	processStartTime = nowMS();
-	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + (MAX_PROCESSING_TIME - previousProcessElapsedTime)) {
+	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + processTimeModifier) {
 		if(!(this->*doProcess)(passProcess, onQueue)) {
 			break;
 		}
 	}
 
-	processElapsedTime = nowMS() - processStartTime; 
-	if(processElapsedTime > MAX_PROCESSING_TIME) {
+	return MAX_PROCESSING_TIME - (nowMS() - processStartTime);
+	//processElapsedTime = nowMS() - processStartTime;
+	/*if(processElapsedTime > MAX_PROCESSING_TIME) {
 		if(processElapsedTime > 2 * MAX_PROCESSING_TIME) {
 			Serial.println(processElapsedTime);
 			DebugLog::getLog().logError(NETWORK_TIME_SENSITIVE_PROCESS_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
@@ -696,12 +698,12 @@ bool Networking::doTimeSensetiveProcess(const unsigned short previousProcessElap
 		return false;
 	} else {
 		return true;
-	}
+	}*/
 }
 
 
 void Networking::processNetwork() {
-	if(!doTimeSensetiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
+	if(processElapsedTime = doTimeSensetiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn) < 0) {
 		//Maybe log error about get messages (specifically) being slow
 
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
@@ -713,20 +715,20 @@ void Networking::processNetwork() {
 	}
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
-	queueStartNode = messagesIn.peek();
-	if(queueStartNode) {
+	//queueStartNode = messagesIn.peek();
+	if(!messagesIn.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
-		if(!doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
+		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn) < 0) {
 			//Maybe log error about process incoming messages (specifically) being slow
 		}
 	}
 
 	(this->*processHeartbeat)();
 
-	queueStartNode = messagesOut.peek();
-	if(queueStartNode) {
+	//queueStartNode = messagesOut.peek();
+	if(!messagesOut.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
-		if(!doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
+		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut) < 0) {
 			//Maybe log error about process outgoing messages (specifically) being slow
 			if(connected && exceededMaxOutgoingTokenRetryCount()) { //this is not safe for group chat because connected will be true after the first glEEconnection
 				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);

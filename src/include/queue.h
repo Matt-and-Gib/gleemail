@@ -60,6 +60,10 @@ public:
 	//QueueNode<T>* remove(T&, QueueNode<T>*);
 	QueueNode<T>* remove(T&);
 	QueueNode<T>* remove(QueueNode<T>&);
+
+	bool empty() {
+		return root == nullptr;
+	}
 };
 
 
