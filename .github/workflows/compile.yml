@@ -1,4 +1,5 @@
 - name: Compile Arduino Sketches
+on: [push]
   uses: arduino/compile-sketches@v1.0.0
   with:
     fqbn: 'arduino:samd:nano33IoT'
