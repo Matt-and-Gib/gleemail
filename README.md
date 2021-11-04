@@ -95,14 +95,19 @@ Last updated: 5/18/2021
 |52|Too Many Messages Received||High|
 |53|Heartbeat Flatline||High|
 |54|Outgoing Token Timestamp Elapsed||High|
-|55|Time Sensitive Process Exceeded Allocated Time (Significant)|Will occur during initial peer authentication|High|
-|56|Time Sensitive Process Exceeded Allocated Time (Insignificant)||Low|
 |57|Unknown Incoming Message Type||High|
 |58|Confirmation No Match Found||Low|
 |59|Duplicate Handshake||Low|
 |60|Unexpected Handshake from Connected IP|Either received handshake after token removed from queue (expired) or handshake has unique idempotency token|Low|
 |61|Heartbeat Stillborn|Heartbeat never received|High|
-|62|Authentication Failed|UserIP and PeerID not unique or peer signature invalid|High|
+|62|Connection Attempt while Connected||Low|
+|63|Authentication Failed|UserIP and PeerID not unique or peer signature invalid|High|
+|64|Getting Messages Took Significantly Longer than Allocated||High|
+|65|Getting Messages Took Insignificantly Longer than Allocated||Low|
+|66|Processing Incoming Messages Took Significantly Longer than Allocated||High|
+|67|Processing Incoming Messages Took Insignificantly Longer than Allocated||Low|
+|68|Sending Messages Took Significantly Longer than Allocated||High|
+|69|Sending Messages Took Insignificantly Longer than Allocated||Low|
 </details>
 
 <details>

@@ -452,10 +452,10 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	const unsigned short wroteLength = udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 	udp.endPacket();
 
-	Serial.print(F("Wrote: "));
+	/*Serial.print(F("Wrote: "));
 	Serial.println(wroteLength);
 	Serial.print(F("Max size of array: "));
-	Serial.println(((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
+	Serial.println(((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);*/
 
 	msg.getIdempotencyToken()->incrementRetryCount();
 	messagesSentCount += 1;
@@ -687,24 +687,16 @@ short Networking::doTimeSensetiveProcess(const unsigned short processTimeModifie
 	}
 
 	return MAX_PROCESSING_TIME - (nowMS() - processStartTime);
-	//processElapsedTime = nowMS() - processStartTime;
-	/*if(processElapsedTime > MAX_PROCESSING_TIME) {
-		if(processElapsedTime > 2 * MAX_PROCESSING_TIME) {
-			Serial.println(processElapsedTime);
-			DebugLog::getLog().logError(NETWORK_TIME_SENSITIVE_PROCESS_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
-		} else {
-			DebugLog::getLog().logWarning(NETWORK_TIME_SENSITIVE_PROCESS_EXCEEDED_ALLOCATED_TIME_INSIGNIFICANT);
-		}
-		return false;
-	} else {
-		return true;
-	}*/
 }
 
 
 void Networking::processNetwork() {
 	if(processElapsedTime = doTimeSensetiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn) < 0) {
-		//Maybe log error about get messages (specifically) being slow
+		if(abs(processElapsedTime) > 2 * MAX_GET_MESSAGES_PROCESS_DURATION_MS) {
+			DebugLog::getLog().logError(NETWORK_GET_MESSAGES_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
+		} else {
+			DebugLog::getLog().logWarning(NETWORK_GET_MESSAGES_EXCEEDED_ALLOCATED_TIME_INSIGNIFICANT);
+		}
 
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
@@ -718,7 +710,11 @@ void Networking::processNetwork() {
 	if(!messagesIn.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn) < 0) {
-			//Maybe log error about process incoming messages (specifically) being slow
+			if(abs(processElapsedTime) > 2 * MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS) {
+				DebugLog::getLog().logError(NETWORK_MESSAGES_IN_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
+			} else {
+				DebugLog::getLog().logWarning(NETWORK_MESSAGES_IN_EXCEEDED_ALLOCATED_TIME_INSIGNIFICANT);
+			}
 		}
 	}
 
@@ -727,7 +723,12 @@ void Networking::processNetwork() {
 	if(!messagesOut.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut) < 0) {
-			//Maybe log error about process outgoing messages (specifically) being slow
+			if(abs(processElapsedTime) > 2 * MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS) {
+				DebugLog::getLog().logError(NETWORK_MESSAGES_OUT_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
+			} else {
+				DebugLog::getLog().logWarning(NETWORK_MESSAGES_OUT_EXCEEDED_ALLOCATED_TIME_INSIGNIFICANT);
+			}
+
 			if(connected && exceededMaxOutgoingTokenRetryCount()) { //this is not safe for group chat because connected will be true after the first glEEconnection
 				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
 				dropConnection();
