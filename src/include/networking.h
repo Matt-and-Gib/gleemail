@@ -624,7 +624,7 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 
 
 bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& fromQueue) {
-	queueStartNode = fromQueue.dequeue();
+	queueStartNode = fromQueue.peek();
 	do {
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
 			holdingNode = queueStartNode->getNode();
@@ -637,7 +637,7 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 		queueStartNode = queueStartNode->getNode();
 	} while (queueStartNode != nullptr);
 
-	queueStartNode = fromQueue.peek();
+	//queueStartNode = fromQueue.peek();
 	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
 	if(searchMessageType == MESSAGE_TYPE::NONE) {
 		return false;
@@ -715,7 +715,6 @@ void Networking::processNetwork() {
 	}
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
-	//queueStartNode = messagesIn.peek();
 	if(!messagesIn.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn) < 0) {
@@ -725,7 +724,6 @@ void Networking::processNetwork() {
 
 	(this->*processHeartbeat)();
 
-	//queueStartNode = messagesOut.peek();
 	if(!messagesOut.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut) < 0) {
