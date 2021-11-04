@@ -436,7 +436,7 @@ bool connectToWiFi(bool forceManual = false) {
 }
 
 
-const unsigned short getMorseCodeCharPairsVersion() {
+unsigned short getMorseCodeCharPairsVersion() {
 	const char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
 	const char* REQUEST_HEADERS[REQUEST_HEADERS_LENGTH] = {
 		SERVER_REQUEST,

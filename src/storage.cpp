@@ -19,6 +19,8 @@ bool Storage::begin() {
 	if(!SD.exists(rootPath)) {
 		SD.mkdir(rootPath);
 	}
+
+	return true;
 }
 
 

@@ -120,7 +120,7 @@ private:
 	
 	void (*chatMessageReceivedCallback)(const char*);
 
-	const unsigned long messageResendTime(QueueNode<Message>& msg);
+	unsigned long messageResendTime(QueueNode<Message>& msg);
 	bool processOutgoingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
 	static const constexpr unsigned short MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
@@ -449,7 +449,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
-	const unsigned short wroteLength = udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
+	/*const unsigned short wroteLength =*/ udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 	udp.endPacket();
 
 	/*Serial.print(F("Wrote: "));
@@ -464,7 +464,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 }
 
 
-const unsigned long Networking::messageResendTime(QueueNode<Message>& msg) {
+unsigned long Networking::messageResendTime(QueueNode<Message>& msg) {
 	return msg.getData()->getIdempotencyToken()->getTimestamp() + (msg.getData()->getIdempotencyToken()->getRetryCount() * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS);
 }
 

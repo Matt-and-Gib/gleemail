@@ -22,7 +22,7 @@ public:
 	}
 
 	const IPAddress getIPAddress() const {return palIPAddress;}
-	const unsigned short getHandshakeIdempotencyTokenValue() const {return outgoingHandshakeIdempotencyTokenValue;}
+	unsigned short getHandshakeIdempotencyTokenValue() const {return outgoingHandshakeIdempotencyTokenValue;}
 };
 glEEpal* glEEself = new glEEpal();
 

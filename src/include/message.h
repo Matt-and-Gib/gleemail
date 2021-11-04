@@ -62,7 +62,7 @@ public:
 	bool operator==(Message& o) {return (*idempotencyToken == *o.getIdempotencyToken());}
 
 	const glEEpal& getSender() const {return sender;}
-	const MESSAGE_TYPE getMessageType() const {return messageType;}
+	MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
 	//MessageError* getError() {return error;}
