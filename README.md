@@ -1,6 +1,6 @@
+![Latest Build Status](https://github.com/Matt-and-Gib/gleemail/actions/workflows/compile.yml/badge.svg?branch=implement-encryption)
+
 ![glEEmail Banner](resources/glEEmail_social_media_final.png)
-<!--![glEEmail](https://github.com/Matt-and-Gib/gleemail/raw/main/resources/glEEmail_social_media_final.png)-->
-<!--<img src="resources/gleemail_social_media_final.png" alt="glEEmail" width=640>-->
 
 ## _Voted† 100% better than Discord!*_
 
