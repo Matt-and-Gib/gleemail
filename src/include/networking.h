@@ -9,8 +9,8 @@
 
 #include "message.h"
 
-#include "lib/LiteChaCha/keyinfrastructure.h"
-#include "lib/LiteChaCha/authenticatedencrypt.h"
+#include "LiteChaCha/keyinfrastructure.h"
+#include "LiteChaCha/authenticatedencrypt.h"
 
 
 class Networking {

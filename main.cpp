@@ -11,8 +11,8 @@
 #include "src/include/networking.h"
 #include "src/include/webaccess.h"
 
-#include "src/include/lib/LiteChaCha/keyinfrastructure.h"
-#include "src/include/lib/LiteChaCha/authenticatedencrypt.h"
+#include "src/include/LiteChaCha/keyinfrastructure.h"
+#include "src/include/LiteChaCha/authenticatedencrypt.h"
 
 //Weak empty variant initialization function.
 //May be redefined by variant files.
