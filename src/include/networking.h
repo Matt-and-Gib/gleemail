@@ -87,7 +87,8 @@ private:
 	void (Networking::*checkHeartbeatThreshold)() = &Networking::checkHeartbeatStillborn;
 	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on first heartbeat received
 
-	char messageBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1];
+#warning "This is probably too big for most messages. Maybe create second buffer for handshakes?"
+	char messageBuffer[POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE/*JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1*/];
 //	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
 
@@ -187,7 +188,8 @@ Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(const 
 
 	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(0, 0), nullptr, /*nullptr,*/ nullptr, nullptr);
 
-	for(int i = 0; i < JSON_DOCUMENT_SIZE; i += 1) {
+#warning "Use correct buffer size here. POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE is probably too big. Maybe create second buffer for handshakes?"
+	for(int i = 0; i < POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE/*JSON_DOCUMENT_SIZE*/; i += 1) {
 		messageBuffer[i] = '\0';
 	}
 
@@ -429,7 +431,8 @@ void Networking::encryptBufferAndPreparePayload(char* outputBuffer, const size_t
 Message& Networking::sendOutgoingMessage(Message& msg) {
 //	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
 //	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
-	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + 8 /*sizeof(messageCount))*/ * 2) + 1]; // OOF. PLEASE KILL ME!
+#warning "This is probably too big! Use correctly sized buffer (or make buffer a member variable of the Networking class?"
+	char outputBuffer[POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE]; // OOF. PLEASE KILL ME!
 	StaticJsonDocument<OUTGOING_JSON_DOCUMENT_SIZE> doc;
 // So it is + tagBytes (16 bytes) + sizeof(messageCount) I do want to confirm that it is indeed 8, but we don't need to do that right now.
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
@@ -653,8 +656,8 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 			messageReceivedCount += 1;
 
-			StaticJsonDocument<JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
-			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, JSON_DOCUMENT_SIZE);
+			StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
+			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, INCOMING_JSON_DOCUMENT_SIZE);
 			if(parsingError) {
 				Serial.println(parsingError.c_str());
 				//write data to buffer to check in gleemail.ino(?) in case HTTP GET is stored in UDP buffer (for when MCCP version info is requested)
