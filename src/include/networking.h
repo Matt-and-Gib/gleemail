@@ -445,7 +445,9 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	E["A"] = msg.getError()->getAttribute();*/
 
 	serializeJson(doc, outputBuffer);
-	encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
+	if(msg.getMessageType() != MESSAGE_TYPE::HANDSHAKE) {
+		encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
+	}
 
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
@@ -660,6 +662,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
 			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, INCOMING_JSON_DOCUMENT_SIZE);
 			if(parsingError) {
+				Serial.print(F("getMessages: parse error: "));
 				Serial.println(parsingError.c_str());
 				//write data to buffer to check in gleemail.ino(?) in case HTTP GET is stored in UDP buffer (for when MCCP version info is requested)
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
