@@ -90,8 +90,8 @@ private:
 	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on first heartbeat received
 
 #warning "This is probably too big for most messages. Maybe create second buffer for handshakes?"
-	char messageBuffer[POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE/*JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1*/];
-//	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
+	char messageFromUDPBuffer[POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE/*JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1*/] = {0};
+//	char* messageFromUDPBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
 
 	Queue<Message> messagesIn;
@@ -190,10 +190,10 @@ Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(const 
 
 	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(0, 0), nullptr, /*nullptr,*/ nullptr, nullptr);
 
-#warning "Use correct buffer size here. POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE is probably too big. Maybe create second buffer for handshakes?"
-	for(int i = 0; i < POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE/*JSON_DOCUMENT_SIZE*/; i += 1) {
-		messageBuffer[i] = '\0';
-	}
+//#warning "Use correct buffer size here. POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE is probably too big. Maybe create second buffer for handshakes?"
+	/*for(int i = 0; i < POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE; i += 1) {
+		messageFromUDPBuffer[i] = '\0';
+	}*/
 
 	//tag = new char[tagBytes];
 }
@@ -201,7 +201,7 @@ Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(const 
 
 Networking::~Networking() {
 	delete glEEpalInfo;
-	//delete[] messageBuffer;
+	//delete[] messageFromUDPBuffer;
 }
 
 
@@ -668,18 +668,18 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
 	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
-		udp.read(messageBuffer, packetSize);
+		udp.read(messageFromUDPBuffer, packetSize);
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
 
 			//decrypt message !!
 
 			Serial.println(F("Receiving:"));
-			Serial.println(messageBuffer);
+			Serial.println(messageFromUDPBuffer);
 
 			messageReceivedCount += 1;
 
 			StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
-			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer);
+			DeserializationError parsingError = deserializeJson(parsedDocument, messageFromUDPBuffer);
 			if(parsingError) {
 				Serial.print(F("getMessages: parse error: "));
 				Serial.println(parsingError.c_str());
