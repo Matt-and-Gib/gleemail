@@ -450,7 +450,8 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	E["A"] = msg.getError()->getAttribute();*/
 
 	serializeJson(doc, outputBuffer);
-	if(msg.getMessageType() != MESSAGE_TYPE::HANDSHAKE) {
+	//if(msg.getMessageType() != MESSAGE_TYPE::HANDSHAKE) {
+	if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
 		encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
 	}
 
@@ -573,6 +574,7 @@ void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
 
 	Serial.println(F("Received handshake"));
 
+#warning "Any subsequent confirmation of a handshake after the first will be encrypted because connected is set to true after this"
 	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Not immediately logical
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
