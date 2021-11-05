@@ -33,12 +33,12 @@ public:
 	QueueNode<T>* enqueue(T* o) {
 		Serial.println(F("inside queuenode enqueue"));
 
-		if(!node) {
+		if(node == nullptr) {
 			Serial.println(F("queuenode enqueue: node is nullptr"));
 			node = new QueueNode<T>(o);
 			return node;
 		} else {
-			Serial.println(F("inside queuenode: doesn't have child node"));
+			Serial.println(F("inside queuenode: node is not nullptr"));
 			return node->enqueue(o);
 		}
 	}
@@ -67,7 +67,7 @@ public:
 	QueueNode<T>* remove(T&);
 	QueueNode<T>* remove(QueueNode<T>&);
 
-	//bool empty() {return root == nullptr;}
+	bool empty() {return root == nullptr;}
 };
 
 
@@ -77,7 +77,7 @@ QueueNode<T>* Queue<T>::enqueue(T* o) {
 
 	Serial.println(root == nullptr ? "root == nullptr" : "root != nullptr");
 
-	if(!root) {
+	if(root == nullptr) {
 		Serial.println(F("root == nullptr"));
 		root = new QueueNode<T>(o);
 		Serial.println(F("created new node"));
@@ -91,7 +91,7 @@ QueueNode<T>* Queue<T>::enqueue(T* o) {
 
 template <class T>
 QueueNode<T>* Queue<T>::dequeue() {
-	if(!root) {
+	if(root == nullptr) {
 		return nullptr;
 	}
 
@@ -110,10 +110,6 @@ QueueNode<T>* Queue<T>::dequeue() {
 
 template <class T>
 QueueNode<T>* Queue<T>::peek() {
-	if(!root) {
-		return nullptr;
-	}
-
 	return root;
 }
 
