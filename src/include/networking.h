@@ -449,6 +449,9 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 		encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
 	}
 
+	Serial.println(F("Sending:"));
+	Serial.println(outputBuffer);
+
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
 	/*const unsigned short wroteLength =*/ udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
@@ -656,6 +659,9 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
 
 			//decrypt message !!
+
+			Serial.println(F("Receiving:"));
+			Serial.println(messageBuffer);
 
 			messageReceivedCount += 1;
 
