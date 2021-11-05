@@ -94,9 +94,9 @@ private:
 //	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
 
-	Queue<Message> messagesIn = Queue<Message>();
-	Queue<IdempotencyToken> messagesInIdempotencyTokens = Queue<IdempotencyToken>();
-	Queue<Message> messagesOut = Queue<Message>();
+	Queue<Message> messagesIn;
+	Queue<IdempotencyToken> messagesInIdempotencyTokens;
+	Queue<Message> messagesOut;
 	MESSAGE_TYPE searchMessageType;
 
 	void createMessagePayload(char*, const size_t);
@@ -711,7 +711,19 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			Message* createdMessageFromUDP = new Message(parsedDocument, nowMS(), *glEEpalInfo);
 			Serial.println(F("Created message from deserialized object"));
 
-			intoQueue.enqueue(createdMessageFromUDP);
+			Serial.println(F("values from newly created Message"));
+
+			Serial.println(F("Does intoQueue have a root?"));
+			Serial.println(intoQueue.empty() == true ? "Yes" : "No");
+
+			QueueNode<Message>* enqueuedQueueNode = intoQueue.enqueue(createdMessageFromUDP);
+
+			if(enqueuedQueueNode->getData() != createdMessageFromUDP) {
+				Serial.println(F("created node data != created data"));
+			} else {
+				Serial.println(F("objs are the same"));
+			}
+
 			Serial.println(F("enqueued new message"));
 
 			DebugLog::getLog().logWarning(ALL_FUNCTIONS_SUCCEEDED);
