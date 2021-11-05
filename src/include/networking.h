@@ -706,8 +706,10 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			Serial.print(F("T: "));
 			Serial.println(glEEpalInfo->getHandshakeIdempotencyTokenValue());
 
-			intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
+			Message* createdMessageFromUDP = new Message(parsedDocument, nowMS(), *glEEpalInfo);
+			Serial.println(F("Created message from deserialized object"));
 
+			intoQueue.enqueue(createdMessageFromUDP);
 			Serial.println(F("enqueued new message"));
 
 			DebugLog::getLog().logWarning(ALL_FUNCTIONS_SUCCEEDED);
