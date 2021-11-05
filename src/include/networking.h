@@ -15,6 +15,8 @@
 
 class Networking {
 private:
+	unsigned short messageReceivedCount = 0; //TESTING ONLY! Put me back by the function definition for getMessages()
+
 	bool& shutdownFlag;
 
 	WiFiUDP udp;
@@ -93,8 +95,8 @@ private:
 	unsigned short packetSize = 0;
 
 	Queue<Message> messagesIn = Queue<Message>();
-	Queue<IdempotencyToken> messagesInIdempotencyTokens;
-	Queue<Message> messagesOut;
+	Queue<IdempotencyToken> messagesInIdempotencyTokens = Queue<IdempotencyToken>();
+	Queue<Message> messagesOut = Queue<Message>();
 	MESSAGE_TYPE searchMessageType;
 
 	void createMessagePayload(char*, const size_t);
@@ -126,7 +128,7 @@ private:
 
 	bool getMessages(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
-	unsigned short messageReceivedCount = 0;
+	//unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
 
 	Message& sendOutgoingMessage(Message&);
@@ -756,8 +758,6 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	//Serial.println(F("after getMessages()"));
-
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	if(!messagesIn.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
@@ -769,8 +769,6 @@ void Networking::processNetwork() {
 			}
 		}
 	}
-
-	//Serial.println(F("after processIncomingMessages()"));
 
 	(this->*processHeartbeat)();
 

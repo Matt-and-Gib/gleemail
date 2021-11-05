@@ -7,8 +7,8 @@
 template <class T>
 class QueueNode {
 private:
-	QueueNode<T>* node;
-	T* data;
+	QueueNode<T>* node = nullptr;
+	T* data = nullptr;
 public:
 	QueueNode(T* d) {
 		data = d;
@@ -29,7 +29,7 @@ public:
 	T* getData() {return data;}
 
 	QueueNode<T>* enqueue(T* o) {
-		if(!node) {
+		if(node == nullptr) {
 			node = new QueueNode<T>(o);
 			return node;
 		} else {
@@ -42,7 +42,7 @@ public:
 template <class T>
 class Queue {
 private:
-	QueueNode<T>* root;
+	QueueNode<T>* root = nullptr;
 public:
 	Queue() {
 		root = nullptr;
