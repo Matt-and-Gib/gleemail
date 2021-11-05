@@ -722,7 +722,9 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			Serial.println(F("Does intoQueue have a root?"));
 			Serial.println(intoQueue.empty() == true ? "Yes" : "No");
 
-			QueueNode<Message>* enqueuedQueueNode = intoQueue.enqueue(createdMessageFromUDP);
+			QueueNode<Message>* enqueuedQueueNode = nullptr;
+
+			enqueuedQueueNode = intoQueue.enqueue(createdMessageFromUDP);
 			Serial.println(F("enqueued new message"));
 
 			if(enqueuedQueueNode->getData() != createdMessageFromUDP) {

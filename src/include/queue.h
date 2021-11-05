@@ -31,10 +31,14 @@ public:
 	T* getData() {return data;}
 
 	QueueNode<T>* enqueue(T* o) {
+		Serial.println(F("inside queuenode enqueue"));
+
 		if(node == nullptr) {
+			Serial.println(F("queuenode enqueue: node is nullptr"));
 			node = new QueueNode<T>(o);
 			return node;
 		} else {
+			Serial.println(F("inside queuenode: doesn't have child node"));
 			return node->enqueue(o);
 		}
 	}
@@ -70,6 +74,8 @@ public:
 template <class T>
 QueueNode<T>* Queue<T>::enqueue(T* o) {
 	Serial.println(F("inside enqueue"));
+
+	Serial.println(empty() == true ? "empty() says no root" : "empty() says ROOT");
 
 	if(root == nullptr) {
 		Serial.println(F("root == nullptr"));
