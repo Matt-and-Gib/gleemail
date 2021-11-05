@@ -103,7 +103,7 @@ private:
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
 
-	short doTimeSensetiveProcess(const unsigned short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
+	short doTimeSensetiveProcess(const short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
@@ -678,7 +678,8 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 }
 
 
-short Networking::doTimeSensetiveProcess(const unsigned short processTimeModifier, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
+#warning "Review processTimeModifier to ensure both negative and positive values work"
+short Networking::doTimeSensetiveProcess(const short processTimeModifier, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
 	processStartTime = nowMS();
 	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + processTimeModifier) {
 		if(!(this->*doProcess)(passProcess, onQueue)) {
