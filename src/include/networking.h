@@ -674,8 +674,20 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			} else {
-				Serial.println(F("Successfully parsed error"));
+				Serial.println(F("Successfully parsed message"));
 			}
+
+			const unsigned short goblinTypeAndClassXPBonus = parsedDocument["T"];
+			const unsigned short idemPOTencyTOKEN = parsedDocument["I"];
+			const char* hearMyWords = parsedDocument["C"];
+
+			Serial.println(F("Parts:"));
+			Serial.print(F("Type: "));
+			Serial.println(goblinTypeAndClassXPBonus);
+			Serial.print(F("Idempotency: "));
+			Serial.println(idemPOTencyTOKEN);
+			Serial.print(F("Body: "));
+			Serial.println(hearMyWords);
 
 			intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
 
