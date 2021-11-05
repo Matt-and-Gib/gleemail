@@ -711,7 +711,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			Message* createdMessageFromUDP = new Message(parsedDocument, nowMS(), *glEEpalInfo);
 			Serial.println(F("Created message from deserialized object"));
 
-			Serial.println(F("values from newly created Message"));
+			//Serial.println(F("values from newly created Message"));
 
 			if(&intoQueue != &messagesIn) {
 				Serial.println(F("intoQueue != messagesIn"));
@@ -723,14 +723,13 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			Serial.println(intoQueue.empty() == true ? "Yes" : "No");
 
 			QueueNode<Message>* enqueuedQueueNode = intoQueue.enqueue(createdMessageFromUDP);
+			Serial.println(F("enqueued new message"));
 
 			if(enqueuedQueueNode->getData() != createdMessageFromUDP) {
 				Serial.println(F("created node data != created data"));
 			} else {
 				Serial.println(F("objs are the same"));
 			}
-
-			Serial.println(F("enqueued new message"));
 
 			DebugLog::getLog().logWarning(ALL_FUNCTIONS_SUCCEEDED);
 		} else {
