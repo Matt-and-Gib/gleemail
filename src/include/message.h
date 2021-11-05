@@ -13,7 +13,7 @@ class Networking;
 
 class Message {
 private:
-	glEEpal& sender = *glEEself;
+	const glEEpal& sender;
 
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
@@ -26,10 +26,10 @@ private:
 	static void noConfirmedProcess(Networking& n, Queue<Message>& messagesOut, QueueNode<Message>& messageIn, Message& messageOut) {}
 	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&); //Used for establishing connection and 
 public:
-	Message() {}
+	Message() : sender{*glEEself} {}
 	
 	//Incoming Message Constructor
-	Message(const StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) {
+	Message(const StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) : sender{from} {
 		Serial.println(F("1"));
 
 		const unsigned short tempMessageType = parsedDocument["T"];
@@ -53,13 +53,13 @@ public:
 
 		Serial.println(F("5"));
 
-		sender = from;
+		//sender = from;
 
 		Serial.println(F("6"));
 	}
 
 	//Outgoing Message Constructor
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) : sender{*glEEself} {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
