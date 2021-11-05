@@ -17,7 +17,7 @@
 
 class Networking {
 private:
-	unsigned short messageReceivedCount = 0; //TESTING ONLY! Put me back by the function definition for getMessages()
+	//unsigned short messageReceivedCount = 0; //TESTING ONLY! Put me back by the function definition for getMessages()
 
 	bool& shutdownFlag;
 
@@ -130,7 +130,7 @@ private:
 
 	bool getMessages(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
-	//unsigned short messageReceivedCount = 0;
+	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
 
 	Message& sendOutgoingMessage(Message&);
