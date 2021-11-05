@@ -11,8 +11,10 @@ private:
 	T* data = nullptr;
 public:
 	QueueNode(T* d) {
+		Serial.println(F("inside queuenode constructor"));
 		data = d;
 		node = nullptr;
+		Serial.println(F("queuenode constructor done"));
 	}
 
 	~QueueNode() {
@@ -67,10 +69,15 @@ public:
 
 template <class T>
 QueueNode<T>* Queue<T>::enqueue(T* o) {
+	Serial.println(F("inside enqueue"));
+
 	if(root == nullptr) {
+		Serial.println(F("root == nullptr"));
 		root = new QueueNode<T>(o);
+		Serial.println(F("created new node"));
 		return root;
 	} else {
+		Serial.println(F("root exists, enqueue into child"));
 		return root->enqueue(o);
 	}
 }
