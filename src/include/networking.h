@@ -764,7 +764,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 #warning "Review processTimeModifier to ensure both negative and positive values work"
 short Networking::doTimeSensetiveProcess(const short processTimeModifier, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
 	processStartTime = nowMS();
-	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + processTimeModifier) {
+	while(nowMS() - processStartTime < processTimeModifier + MAX_PROCESSING_TIME) {
 		if(!(this->*doProcess)(passProcess, onQueue)) {
 			break;
 		}
@@ -775,7 +775,7 @@ short Networking::doTimeSensetiveProcess(const short processTimeModifier, const 
 
 
 void Networking::processNetwork() {
-	if(processElapsedTime = doTimeSensetiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn) < 0) {
+	if((processElapsedTime = doTimeSensetiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) < 0) {
 		if(abs(processElapsedTime) > 2 * MAX_GET_MESSAGES_PROCESS_DURATION_MS) {
 			DebugLog::getLog().logError(NETWORK_GET_MESSAGES_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
 		} else {
@@ -796,7 +796,7 @@ void Networking::processNetwork() {
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	if(messagesIn.peek() != nullptr) {
 		searchMessageType = START_MESSAGE_TYPE;
-		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn) < 0) {
+		if((processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) < 0) {
 			if(abs(processElapsedTime) > 2 * MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS) {
 				DebugLog::getLog().logError(NETWORK_MESSAGES_IN_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
 			} else {
@@ -809,7 +809,7 @@ void Networking::processNetwork() {
 
 	if(messagesOut.peek() != nullptr) {
 		searchMessageType = START_MESSAGE_TYPE;
-		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut) < 0) {
+		if((processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) < 0) {
 			if(abs(processElapsedTime) > 2 * MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS) {
 				DebugLog::getLog().logError(NETWORK_MESSAGES_OUT_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
 			} else {
