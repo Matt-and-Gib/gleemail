@@ -713,6 +713,12 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 			Serial.println(F("values from newly created Message"));
 
+			if(&intoQueue != &messagesIn) {
+				Serial.println(F("intoQueue != messagesIn"));
+			} else {
+				Serial.println(F("intoQueue is the same as messagesIn"));
+			}
+
 			Serial.println(F("Does intoQueue have a root?"));
 			Serial.println(intoQueue.empty() == true ? "Yes" : "No");
 
