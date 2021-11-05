@@ -673,9 +673,15 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				//write data to buffer to check in gleemail.ino(?) in case HTTP GET is stored in UDP buffer (for when MCCP version info is requested)
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
+			} else {
+				Serial.println(F("Successfully parsed error"));
 			}
 
 			intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
+
+			Serial.println(F("enqueued new message"));
+
+			DebugLog::logWarning(ALL_FUNCTIONS_SUCCEEDED);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_UNKNOWN_MESSAGE_SENDER);
 		}
