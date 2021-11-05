@@ -666,7 +666,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			messageReceivedCount += 1;
 
 			StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
-			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer, INCOMING_JSON_DOCUMENT_SIZE);
+			DeserializationError parsingError = deserializeJson(parsedDocument, messageBuffer);
 			if(parsingError) {
 				Serial.print(F("getMessages: parse error: "));
 				Serial.println(parsingError.c_str());
