@@ -7,8 +7,8 @@
 template <class T>
 class QueueNode {
 private:
-	QueueNode<T>* node = nullptr;
-	T* data = nullptr;
+	QueueNode<T>* node;
+	T* data;
 public:
 	QueueNode(T* d) {
 		Serial.println(F("inside queuenode constructor"));
@@ -33,7 +33,7 @@ public:
 	QueueNode<T>* enqueue(T* o) {
 		Serial.println(F("inside queuenode enqueue"));
 
-		if(node == nullptr) {
+		if(!node) {
 			Serial.println(F("queuenode enqueue: node is nullptr"));
 			node = new QueueNode<T>(o);
 			return node;
@@ -48,7 +48,7 @@ public:
 template <class T>
 class Queue {
 private:
-	QueueNode<T>* root = nullptr;
+	QueueNode<T>* root;
 public:
 	Queue() {
 		root = nullptr;
@@ -67,7 +67,7 @@ public:
 	QueueNode<T>* remove(T&);
 	QueueNode<T>* remove(QueueNode<T>&);
 
-	bool empty() {return root == nullptr;}
+	//bool empty() {return root == nullptr;}
 };
 
 
@@ -77,7 +77,7 @@ QueueNode<T>* Queue<T>::enqueue(T* o) {
 
 	Serial.println(empty() == true ? "empty() says no root" : "empty() says ROOT does exist!");
 
-	if(root == nullptr) {
+	if(!root) {
 		Serial.println(F("root == nullptr"));
 		root = new QueueNode<T>(o);
 		Serial.println(F("created new node"));
@@ -110,10 +110,10 @@ QueueNode<T>* Queue<T>::dequeue() {
 
 template <class T>
 QueueNode<T>* Queue<T>::peek() {
-	/*if(!root) {
+	if(!root) {
 		return nullptr;
-	}*/
-// Above code redundant?
+	}
+
 	return root;
 }
 

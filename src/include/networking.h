@@ -721,17 +721,19 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				Serial.println(F("intoQueue is the same as messagesIn"));
 			}
 
-			Serial.println(F("Does intoQueue have a root?"));
-			Serial.println(intoQueue.empty() == true ? "Yes" : "No");
+			{
+				Serial.println(F("Does intoQueue have a root?"));
+				Serial.println(intoQueue.empty() == true ? "Yes" : "No");
 
-			Serial.println(F("Does intoQueue have a root?"));
-			Serial.println(intoQueue.empty() == true ? "Yes" : "No");
+				Serial.println(F("Does intoQueue have a root?"));
+				Serial.println(intoQueue.empty() == true ? "Yes" : "No");
 
-			Serial.println(F("Does intoQueue have a root?"));
-			Serial.println(intoQueue.empty() == true ? "Yes" : "No");
+				Serial.println(F("Does intoQueue have a root?"));
+				Serial.println(intoQueue.empty() == true ? "Yes" : "No");
 
-			Serial.println(F("Does intoQueue have a root?"));
-			Serial.println(intoQueue.empty() == true ? "Yes" : "No");
+				Serial.println(F("Does intoQueue have a root?"));
+				Serial.println(intoQueue.empty() == true ? "Yes" : "No");
+			}
 
 			/*
 				NOTE: maybe test making the queues simply pointers. Also consider testing ring buffer instead of queue.
