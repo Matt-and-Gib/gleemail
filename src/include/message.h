@@ -52,10 +52,6 @@ public:
 		confirmedPostProcess = &noConfirmedProcess;
 
 		Serial.println(F("5"));
-
-		//sender = from;
-
-		Serial.println(F("6"));
 	}
 
 	//Outgoing Message Constructor

@@ -499,6 +499,7 @@ void Networking::sendHeartbeat() {
 void Networking::checkHeartbeatStillborn() {
 	if(approxCurrentTime - connectedMS > HEARTBEAT_STILLBORN_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_STILLBORN);
+		Serial.println(F("heartbeat stillborn"));
 		dropConnection();
 	}
 }
@@ -507,6 +508,7 @@ void Networking::checkHeartbeatStillborn() {
 void Networking::checkHeartbeatFlatline() {
 	if(approxCurrentTime - lastHeartbeatReceivedMS > FLATLINE_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_FLATLINE);
+		Serial.println(F("oopsies beeeeeeeeeeeeep"));
 		dropConnection();
 	}
 }
@@ -739,6 +741,7 @@ void Networking::processNetwork() {
 
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
+			Serial.println(F("wow sombodys popular"));
 			dropConnection();
 		}
 	} else {
@@ -770,6 +773,7 @@ void Networking::processNetwork() {
 
 			if(connected && exceededMaxOutgoingTokenRetryCount()) { //this is not safe for group chat because connected will be true after the first glEEconnection
 				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
+				Serial.println(F("exceededMaxOutgoingTokenRetryCount"));
 				dropConnection();
 			}
 		}
