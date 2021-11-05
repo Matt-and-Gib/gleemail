@@ -619,7 +619,9 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
+		Serial.println(F("before process incoming handshake"));
 		processIncomingHandshake(msg);
+		Serial.println(F("after process incoming handshake"));
 	break;
 
 	default:
@@ -750,7 +752,7 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	Serial.println(F("after getMessages()"));
+	//Serial.println(F("after getMessages()"));
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	if(!messagesIn.empty()) {
@@ -764,7 +766,7 @@ void Networking::processNetwork() {
 		}
 	}
 
-	Serial.println(F("after processIncomingMessages()"));
+	//Serial.println(F("after processIncomingMessages()"));
 
 	(this->*processHeartbeat)();
 
