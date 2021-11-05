@@ -92,7 +92,7 @@ private:
 //	char* messageBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
 
-	Queue<Message> messagesIn;
+	Queue<Message> messagesIn = Queue<Message>();
 	Queue<IdempotencyToken> messagesInIdempotencyTokens;
 	Queue<Message> messagesOut;
 	MESSAGE_TYPE searchMessageType;
