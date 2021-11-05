@@ -344,6 +344,11 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
 
+	Serial.print(F("glEEpal IP: "));
+	Serial.println(glEEpalInfo->getIPAddress());
+	Serial.print(F("glEEpal Token: "));
+	Serial.println(glEEpalInfo->getHandshakeIdempotencyTokenValue());
+
 	return true;
 }
 
@@ -688,6 +693,12 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			Serial.println(idemPOTencyTOKEN);
 			Serial.print(F("Body: "));
 			Serial.println(hearMyWords);
+
+			Serial.println(F("glEEpal info:"));
+			Serial.print(F("IP: "));
+			Serial.println(glEEpalInfo->getIPAddress());
+			Serial.print(F("T: "));
+			Serial.println(glEEpalInfo->getHandshakeIdempotencyTokenValue());
 
 			intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
 
