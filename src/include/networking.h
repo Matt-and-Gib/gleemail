@@ -1,6 +1,8 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
+#include "Arduino.h"
+
 #include <WiFiUdp.h>
 #include <ArduinoJson.hpp>
 
