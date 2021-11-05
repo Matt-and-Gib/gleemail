@@ -750,6 +750,8 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
+	Serial.println(F("after getMessages()"));
+
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	if(!messagesIn.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
@@ -761,6 +763,8 @@ void Networking::processNetwork() {
 			}
 		}
 	}
+
+	Serial.println(F("after processIncomingMessages()"));
 
 	(this->*processHeartbeat)();
 
