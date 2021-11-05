@@ -61,15 +61,13 @@ public:
 	QueueNode<T>* remove(T&);
 	QueueNode<T>* remove(QueueNode<T>&);
 
-	bool empty() {
-		return root == nullptr;
-	}
+	bool empty() {return root == nullptr;}
 };
 
 
 template <class T>
 QueueNode<T>* Queue<T>::enqueue(T* o) {
-	if(!root) {
+	if(root == nullptr) {
 		root = new QueueNode<T>(o);
 		return root;
 	} else {
@@ -99,10 +97,10 @@ QueueNode<T>* Queue<T>::dequeue() {
 
 template <class T>
 QueueNode<T>* Queue<T>::peek() {
-	if(!root) {
+	/*if(!root) {
 		return nullptr;
-	}
-
+	}*/
+// Above code redundant?
 	return root;
 }
 
