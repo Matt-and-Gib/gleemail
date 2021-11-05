@@ -794,7 +794,7 @@ void Networking::processNetwork() {
 	}
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
-	if(messagesIn.peek() == nullptr) {
+	if(messagesIn.peek() != nullptr) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn) < 0) {
 			if(abs(processElapsedTime) > 2 * MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS) {
@@ -807,7 +807,7 @@ void Networking::processNetwork() {
 
 	(this->*processHeartbeat)();
 
-	if(messagesOut.peek() == nullptr) {
+	if(messagesOut.peek() != nullptr) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if(processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut) < 0) {
 			if(abs(processElapsedTime) > 2 * MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS) {
