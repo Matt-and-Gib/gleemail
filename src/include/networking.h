@@ -281,7 +281,7 @@ void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char
 		}
 	}
 
-	encryptionInfoOut[SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1] = '\n';
+	encryptionInfoOut[SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1] = '\0';
 }
 
 
