@@ -681,7 +681,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 			Serial.println(F("enqueued new message"));
 
-			DebugLog::logWarning(ALL_FUNCTIONS_SUCCEEDED);
+			DebugLog::getLog().logWarning(ALL_FUNCTIONS_SUCCEEDED);
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_UNKNOWN_MESSAGE_SENDER);
 		}
