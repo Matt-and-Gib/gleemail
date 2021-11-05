@@ -746,6 +746,8 @@ void Networking::processNetwork() {
 		}
 
 		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
+			Serial.print(F("count of messages received: "));
+			Serial.println(messagesReceivedCount);
 			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
 			Serial.println(F("wow sombodys popular"));
 			dropConnection();
