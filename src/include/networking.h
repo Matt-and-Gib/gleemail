@@ -496,18 +496,25 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
 	/*const unsigned short wroteLength =*/ //udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
+
+	Serial.print(F("Outgoing message type: "));
+	Serial.println(doc["T"]);
+
 	if(connected) {
 		char itoaBuffer[9];
 		itoa(messageCount, itoaBuffer, 10);
 
 		udp.write(itoaBuffer);
-		Serial.print(itoaBuffer);
+		Serial.print(F("Outgoing itoaBuffer: "));
+		Serial.println(itoaBuffer);
 
 		udp.write(tag);
-		Serial.print(tag);
+		Serial.print(F("Outgoing tag: "));
+		Serial.println(tag, HEX);
 	}
 
 	udp.write(outputBuffer, measureJson(doc) + 1); // Just curious, does udp.write simply write the entire outputBuffer? If so, encrypted messages might pose a problem, as there is no simple way to determine when they terminate besides possibly sending the message length.
+	Serial.print(F("Outgoing ciphertext(only goblins from here on out): "));
 	for(unsigned short i = 0; i < (measureJson(doc) + 1); i += 1) {
 		Serial.print(outputBuffer[i], HEX);
 	}
@@ -731,6 +738,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			for(int i = 0; i < packetSize; i += 1) {
 				Serial.print(messageFromUDPBuffer[i], HEX);
 			}
+			Serial.println();
 
 			//decrypt message !!
 			if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
