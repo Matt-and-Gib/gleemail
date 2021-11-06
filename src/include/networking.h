@@ -468,6 +468,82 @@ void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const
 }
 
 
+
+/*char SpiDrv::spiTransfer(volatile char data)
+{
+    char result = SPIWIFI.transfer(data);
+    DELAY_TRANSFER();
+
+    return result;                    // return the received byte
+}
+
+
+
+void SpiDrv::sendBuffer(uint8_t* param, uint16_t param_len, uint8_t lastParam)
+{
+    uint16_t i = 0;
+
+    // Send Spi paramLen
+    sendParamLen16(param_len);
+
+    // Send Spi param data
+    for (i=0; i<param_len; ++i)
+    {
+        spiTransfer(param[i]);
+    }
+
+    // if lastParam==1 Send Spi END CMD
+    if (lastParam == 1)
+        spiTransfer(END_CMD);
+}
+
+
+
+bool ServerDrv::insertDataBuf(uint8_t sock, const uint8_t *data, uint16_t _len)
+{
+	WAIT_FOR_SLAVE_SELECT();
+    // Send Command
+    SpiDrv::sendCmd(INSERT_DATABUF_CMD, PARAM_NUMS_2);
+    SpiDrv::sendBuffer(&sock, sizeof(sock));
+    SpiDrv::sendBuffer((uint8_t *)data, _len, LAST_PARAM);
+
+    // pad to multiple of 4
+    int commandSize = 9 + _len;
+    while (commandSize % 4) {
+        SpiDrv::readChar();
+        commandSize++;
+    }
+
+    SpiDrv::spiSlaveDeselect();
+    //Wait the reply elaboration
+    SpiDrv::waitForSlaveReady();
+    SpiDrv::spiSlaveSelect();
+
+    // Wait for reply
+    uint8_t _data = 0;
+    uint8_t _dataLen = 0;
+    if (!SpiDrv::waitResponseData8(INSERT_DATABUF_CMD, &_data, &_dataLen))
+    {
+        WARN("error waitResponse");
+    }
+    SpiDrv::spiSlaveDeselect();
+    if (_dataLen!=0)
+    {
+        return (_data == 1);
+    }
+    return false;
+}
+
+
+size_t WiFiUDP::write(const uint8_t *buffer, size_t size)
+{
+	ServerDrv::insertDataBuf(_sock, buffer, size);
+	return size;
+}*/
+
+
+
+
 Message& Networking::sendOutgoingMessage(Message& msg) {
 //	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
 //	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
@@ -724,6 +800,124 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 		return true;
 	}
 }
+
+
+/*
+uint8_t SERCOM::transferDataSPI(uint8_t data)
+{
+  sercom->SPI.DATA.bit.DATA = data; // Writing data into Data register
+
+  while( sercom->SPI.INTFLAG.bit.RXC == 0 )
+  {
+    // Waiting Complete Reception
+  }
+
+  return sercom->SPI.DATA.bit.DATA;  // Reading data
+}
+
+
+
+byte SPIClass::transfer(uint8_t data)
+{
+  return _p_sercom->transferDataSPI(data);
+}
+
+
+
+char SpiDrv::spiTransfer(volatile char data)
+{
+    char result = SPIWIFI.transfer(data);
+    DELAY_TRANSFER();
+
+    return result;                    // return the received byte
+}	
+
+
+
+void SpiDrv::getParam(uint8_t* param)
+{
+    // Get Params data
+    *param = spiTransfer(DUMMY_DATA);
+    DELAY_TRANSFER();
+}
+
+
+
+int SpiDrv::waitResponseCmd(uint8_t cmd, uint8_t numParam, uint8_t* param, uint8_t* param_len)
+{
+    char _data = 0;
+    int ii = 0;
+
+    IF_CHECK_START_CMD(_data)
+    {
+        CHECK_DATA(cmd | REPLY_FLAG, _data){};
+
+        CHECK_DATA(numParam, _data)
+        {
+            readParamLen8(param_len);
+            for (ii=0; ii<(*param_len); ++ii)
+            {
+                // Get Params data
+                //param[ii] = spiTransfer(DUMMY_DATA);
+                getParam(&param[ii]);
+            } 
+        }         
+
+        readAndCheckChar(END_CMD, &_data);
+    }     
+    
+    return 1;
+}
+
+
+
+uint16_t ServerDrv::availData(uint8_t sock)
+{
+    if (!SpiDrv::available()) {
+        return 0;
+    }
+
+	WAIT_FOR_SLAVE_SELECT();
+    // Send Command
+    SpiDrv::sendCmd(AVAIL_DATA_TCP_CMD, PARAM_NUMS_1);
+    SpiDrv::sendParam(&sock, sizeof(sock), LAST_PARAM);
+
+    // pad to multiple of 4
+    SpiDrv::readChar();
+    SpiDrv::readChar();
+
+    SpiDrv::spiSlaveDeselect();
+    //Wait the reply elaboration
+    SpiDrv::waitForSlaveReady();
+    SpiDrv::spiSlaveSelect();
+
+    // Wait for reply
+    uint8_t _dataLen = 0;
+	uint16_t len = 0;
+
+    SpiDrv::waitResponseCmd(AVAIL_DATA_TCP_CMD, PARAM_NUMS_1, (uint8_t*)&len,  &_dataLen);
+
+    SpiDrv::spiSlaveDeselect();
+
+    return len;
+}
+
+
+int WiFiUDP::parsePacket()
+{
+	while (_parsed--)
+	{
+	  // discard previously parsed packet data
+	  uint8_t b;
+
+	  WiFiSocketBuffer.read(_sock, &b, sizeof(b));
+	}
+
+	_parsed = ServerDrv::availData(_sock);
+
+	return _parsed;
+}
+*/
 
 
 bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
