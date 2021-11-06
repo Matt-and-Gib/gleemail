@@ -498,7 +498,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	/*const unsigned short wroteLength =*/ //udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 
 	Serial.print(F("Outgoing message type: "));
-	Serial.println(doc["T"]);
+	Serial.println(static_cast<unsigned short>(msg.getMessageType()));
 
 	if(connected) {
 		char itoaBuffer[9];
@@ -510,7 +510,10 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 
 		udp.write(tag);
 		Serial.print(F("Outgoing tag: "));
-		Serial.println(tag, HEX);
+		for(unsigned short i = 0; i < tagBytes; i += 1) {
+			Serial.print(tag[i], HEX);
+		}
+		Serial.println();
 	}
 
 	udp.write(outputBuffer, measureJson(doc) + 1); // Just curious, does udp.write simply write the entire outputBuffer? If so, encrypted messages might pose a problem, as there is no simple way to determine when they terminate besides possibly sending the message length.
