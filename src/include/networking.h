@@ -672,6 +672,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
 		udp.read(messageFromUDPBuffer, packetSize);
+		messageFromUDPBuffer[packetSize++] = '\0';
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
 
 			//decrypt message !!
