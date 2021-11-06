@@ -102,6 +102,7 @@ private:
 	MESSAGE_TYPE searchMessageType;
 
 	void createMessagePayload(char*, const size_t);
+	void decryptBuffer(char*, const size_t);
 	void encryptBufferAndPrepareMessagePayload(char*, const size_t);
 
 	unsigned long long processStartTime = 0;
@@ -453,6 +454,11 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Op
 }
 
 
+void Networking::decryptBuffer(char* inputBuffer, const size_t length) {
+
+}
+
+
 void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) {
 	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length);
 
@@ -699,6 +705,10 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
 
 			//decrypt message !!
+			if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
+				decryptBuffer(messageFromUDPBuffer, packetSize);
+				//encryptBufferAndPrepareMessagePayload(outputBuffer, measureJson(doc) + 1);	//DualJustice added one to PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE in global.h because we are adding one here.
+			}
 
 			//Serial.println(F("Receiving:"));
 			//Serial.println(messageFromUDPBuffer);
