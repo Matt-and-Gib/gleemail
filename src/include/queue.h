@@ -11,12 +11,11 @@ private:
 	T* data;
 public:
 	QueueNode(T* d) {
-		Serial.println(F("inside queuenode constructor"));
 		data = d;
 		node = nullptr;
-		Serial.println(F("queuenode constructor done"));
 	}
 
+#warning "deleting child node may lead to a cascading delete that empties the queue just like TacoBell does to your bowels"
 	~QueueNode() {
 		//Serial.println("QueueNode destructor: Deleting data...");
 		delete data;
@@ -31,14 +30,10 @@ public:
 	T* getData() {return data;}
 
 	QueueNode<T>* enqueue(T* o) {
-		Serial.println(F("inside queuenode enqueue"));
-
 		if(node == nullptr) {
-			Serial.println(F("queuenode enqueue: node is nullptr"));
 			node = new QueueNode<T>(o);
 			return node;
 		} else {
-			Serial.println(F("inside queuenode: node is not nullptr"));
 			return node->enqueue(o);
 		}
 	}
@@ -73,18 +68,10 @@ public:
 
 template <class T>
 QueueNode<T>* Queue<T>::enqueue(T* o) {
-	Serial.println(F("inside enqueue"));
-
-	Serial.print(F("Outside condition root check?: "));
-	Serial.println(root == nullptr ? "root == nullptr" : "root != nullptr");
-
 	if(root == nullptr) {
-		Serial.println(F("root == nullptr"));
 		root = new QueueNode<T>(o);
-		Serial.println(F("created new node"));
 		return root;
 	} else {
-		Serial.println(F("root exists, enqueue into child"));
 		return root->enqueue(o);
 	}
 }

@@ -461,8 +461,8 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 		encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
 	}*/
 
-	Serial.println(F("Sending:"));
-	Serial.println(outputBuffer);
+//	Serial.println(F("Sending:"));
+//	Serial.println(outputBuffer);
 
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
@@ -550,15 +550,15 @@ void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingConfirmation(QueueNode<Message>& msg) {
-	Serial.println(F("got confirmation of something"));
+//	Serial.println(F("got confirmation of something"));
 
 	messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 	if(messageOutWithMatchingIdempotencyToken) {
 		messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat message, this is removeFromQueue()
 
 	} else {
-		Serial.print(F("confirmation no match found idempotency token: "));
-		Serial.println(msg.getData()->getIdempotencyToken()->getValue());
+//		Serial.print(F("confirmation no match found idempotency token: "));
+//		Serial.println(msg.getData()->getIdempotencyToken()->getValue());
 
 		DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 	}
@@ -579,7 +579,7 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
 	//messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Send immediately instead of enqueuing message for timing
 
-	Serial.println(F("Received handshake"));
+//	Serial.println(F("Received handshake"));
 
 #warning "Any subsequent confirmation of a handshake after the first will be encrypted because connected is set to true after this"
 	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Not immediately logical
@@ -626,9 +626,9 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
-		Serial.println(F("before process incoming handshake"));
+//		Serial.println(F("before process incoming handshake"));
 		processIncomingHandshake(msg);
-		Serial.println(F("after process incoming handshake"));
+//		Serial.println(F("after process incoming handshake"));
 	break;
 
 	default:
@@ -642,34 +642,12 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 	messagesIn.remove(*nextMessage);
 	processIncomingMessage(*nextMessage);
 	delete nextMessage;
-	Serial.println(F("Deleted processed message node"));
+//	Serial.println(F("Deleted processed message node"));
 	return true;
 }
 
 
 bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& fromQueue) {
-	/*
-	queueStartNode = fromQueue.peek();
-	do {
-		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
-			holdingNode = queueStartNode->getNode();
-			if((this->*processMessage)(fromQueue, queueStartNode)) {
-				queueStartNode = holdingNode;
-				return true;
-			}
-		}
-
-		queueStartNode = queueStartNode->getNode();
-	} while (queueStartNode != nullptr);
-
-	//queueStartNode = fromQueue.peek();
-	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
-	if(searchMessageType == MESSAGE_TYPE::NONE) {
-		return false;
-	} else {
-		return true;
-	}*/
-
 	while(queueStartNode) {
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
 			holdingNode = queueStartNode->getNode();
@@ -701,8 +679,8 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 			//decrypt message !!
 
-			Serial.println(F("Receiving:"));
-			Serial.println(messageFromUDPBuffer);
+			//Serial.println(F("Receiving:"));
+			//Serial.println(messageFromUDPBuffer);
 
 			messageReceivedCount += 1;
 
@@ -714,68 +692,9 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				//write data to buffer to check in gleemail.ino(?) in case HTTP GET is stored in UDP buffer (for when MCCP version info is requested)
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
-			} else {
-				Serial.println(F("Successfully parsed message"));
 			}
 
-			const unsigned short goblinTypeAndClassXPBonus = parsedDocument["T"];
-			const unsigned short idemPOTencyTOKEN = parsedDocument["I"];
-			const char* hearMyWords = parsedDocument["C"];
-
-			Serial.println(F("Parts:"));
-			Serial.print(F("Type: "));
-			Serial.println(goblinTypeAndClassXPBonus);
-			Serial.print(F("Idempotency: "));
-			Serial.println(idemPOTencyTOKEN);
-			Serial.print(F("Body: "));
-			Serial.println(hearMyWords);
-
-			Serial.println(F("glEEpal info:"));
-			Serial.print(F("IP: "));
-			Serial.println(glEEpalInfo->getIPAddress());
-			Serial.print(F("T: "));
-			Serial.println(glEEpalInfo->getHandshakeIdempotencyTokenValue());
-
-			Message* createdMessageFromUDP = new Message(parsedDocument, nowMS(), *glEEpalInfo);
-			Serial.println(F("Created message from deserialized object"));
-
-			//Serial.println(F("values from newly created Message"));
-
-			if(&intoQueue != &messagesIn) {
-				Serial.println(F("intoQueue != messagesIn"));
-			} else {
-				Serial.println(F("intoQueue is the same as messagesIn"));
-			}
-
-			{
-				Serial.println(F("Does intoQueue have a root?"));
-				Serial.println(intoQueue.peek() != nullptr ? "Yes" : "No");
-
-				Serial.println(F("Does intoQueue have a root?"));
-				Serial.println(intoQueue.peek() != nullptr ? "Yes" : "No");
-
-				Serial.println(F("Does intoQueue have a root?"));
-				Serial.println(intoQueue.peek() != nullptr ? "Yes" : "No");
-
-				Serial.println(F("Does intoQueue have a root?"));
-				Serial.println(intoQueue.peek() != nullptr ? "Yes" : "No");
-			}
-
-			/*
-				NOTE: maybe test making the queues simply pointers. Also consider testing ring buffer instead of queue.
-			*/
-
-			QueueNode<Message>* enqueuedQueueNode = intoQueue.enqueue(createdMessageFromUDP);
-
-			Serial.println(F("enqueued new message"));
-
-			if(enqueuedQueueNode->getData() != createdMessageFromUDP) {
-				Serial.println(F("created node data != created data"));
-			} else {
-				Serial.println(F("objs are the same"));
-			}
-
-			DebugLog::getLog().logWarning(ALL_FUNCTIONS_SUCCEEDED);
+			QueueNode<Message>* enqueuedQueueNode = intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_UNKNOWN_MESSAGE_SENDER);
 		}
@@ -785,19 +704,6 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 		return false;
 	}
 }
-
-
-/*#warning "Review processTimeModifier to ensure both negative and positive values work"
-short Networking::doTimeSensetiveProcess(const short processTimeModifier, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
-	processStartTime = nowMS();
-	while(nowMS() - processStartTime < processTimeModifier + MAX_PROCESSING_TIME) {
-		if(!(this->*doProcess)(passProcess, onQueue)) {
-			break;
-		}
-	}
-
-	return MAX_PROCESSING_TIME - (nowMS() - processStartTime);
-}*/
 
 
 unsigned short Networking::doTimeSensitiveProcess(const unsigned short previousProcessElapsedTime, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {

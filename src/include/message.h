@@ -30,28 +30,19 @@ public:
 	
 	//Incoming Message Constructor
 	Message(const StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) : sender{from} {
-		Serial.println(F("1"));
 
 		const unsigned short tempMessageType = parsedDocument["T"];
 		messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
 
-		Serial.println(F("2"));
-
 		unsigned short tempIdempVal = parsedDocument["I"];
 		idempotencyToken = new IdempotencyToken(tempIdempVal, currentTimeMS);
-
-		Serial.println(F("3"));
 
 		const char* tempChat = parsedDocument["C"];
 		chat = copyString(tempChat, MAX_MESSAGE_LENGTH);
 		//error = new MessageError(parsedDocument);
 
-		Serial.println(F("4"));
-
 		outgoingPostProcess = &noOutgoingProcess;
 		confirmedPostProcess = &noConfirmedProcess;
-
-		Serial.println(F("5"));
 	}
 
 	//Outgoing Message Constructor
