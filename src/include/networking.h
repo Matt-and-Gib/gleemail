@@ -724,16 +724,16 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 			{
 				Serial.println(F("Does intoQueue have a root?"));
-				Serial.println(intoQueue.peek() == nullptr ? "Yes" : "No");
+				Serial.println(intoQueue.peek() != nullptr ? "Yes" : "No");
 
 				Serial.println(F("Does intoQueue have a root?"));
-				Serial.println(intoQueue.peek() == nullptr ? "Yes" : "No");
+				Serial.println(intoQueue.peek() != nullptr ? "Yes" : "No");
 
 				Serial.println(F("Does intoQueue have a root?"));
-				Serial.println(intoQueue.peek() == nullptr ? "Yes" : "No");
+				Serial.println(intoQueue.peek() != nullptr ? "Yes" : "No");
 
 				Serial.println(F("Does intoQueue have a root?"));
-				Serial.println(intoQueue.peek() == nullptr ? "Yes" : "No");
+				Serial.println(intoQueue.peek() != nullptr ? "Yes" : "No");
 			}
 
 			/*
