@@ -102,7 +102,7 @@ private:
 	MESSAGE_TYPE searchMessageType;
 
 	void createMessagePayload(char*, const size_t);
-	void encryptBufferAndPreparePayload(char*, const size_t);
+	void encryptBufferAndPrepareMessagePayload(char*, const size_t);
 
 	unsigned long long processStartTime = 0;
 	unsigned short processElapsedTime = 0;
@@ -382,8 +382,29 @@ bool Networking::exceededMaxOutgoingTokenRetryCount() {
 }
 
 
-void Networking::createMessagePayload(char* message, const size_t length) {// Good morning bucko!
-	unsigned short i = 0;
+void Networking::createMessagePayload(char* message, const size_t length) {// Optimize me!?
+	unsigned short i;
+	char tempMessageBuffer[length]; // Really don't want to have to do this!
+
+	for(i = 0; i < length; i += 1) {
+		tempMessageBuffer[i] = message[i];
+	}
+
+	for(i = 0; i < 8; i += 1) {
+		message[i] = messageCount >> ((7 - i)*8); // I think this will work...
+	}
+
+	for(i = 0; i < tagBytes; i += 1) {
+		message[i + 8] = tag[i];
+	}
+
+	for(i = 0; i < length; i += 1) {
+		message[i + 8 + tagBytes] = tempMessageBuffer[i];
+	}
+
+	message[8 + tagBytes + length] = '\0'; // This terminator should terminate the udp buffer, I believe.
+
+/*	unsigned short i = 0;
 	for(i = 0; i < sizeof(messageCount); i += 1) { // Should we maybe have a standalone variable for sizeof(messageCount)?
 		message[i*2] = (messageCount >> (60 - (i*8))) & 0x0f;
 		message[(i*2) + 1] = (messageCount >> 56 - (i*8)) & 0x0f;
@@ -397,7 +418,7 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Go
 	for(i = 0; i < length; i += 1) {
 		//Uh-oh! We are overwriting message!!!
 	}
-
+*/
 /*
 	unsigned short i = 0;
 	for(i = 0; i < keyBytes; i += 1) {
@@ -432,7 +453,7 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Go
 }
 
 
-void Networking::encryptBufferAndPreparePayload(char* outputBuffer, const size_t length) {
+void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) {
 	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length);
 
 	createMessagePayload(outputBuffer, length);
@@ -457,9 +478,9 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 
 	serializeJson(doc, outputBuffer);
 	//if(msg.getMessageType() != MESSAGE_TYPE::HANDSHAKE) {
-	/*if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
-		encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
-	}*/
+	if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
+		encryptBufferAndPrepareMessagePayload(outputBuffer, measureJson(doc) + 1);	//DualJustice added one to PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE in global.h because we are adding one here.
+	}
 
 //	Serial.println(F("Sending:"));
 //	Serial.println(outputBuffer);
@@ -467,7 +488,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
 	/*const unsigned short wroteLength =*/ //udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
-	udp.write(outputBuffer);
+	udp.write(outputBuffer); // Just curious, does udp.write simply write the entire outputBuffer? If so, encrypted messages might pose a problem, as there is no simple way to determine when they terminate besides possibly sending the message length.
 	udp.endPacket();
 
 	/*Serial.print(F("Wrote: "));
@@ -673,8 +694,8 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
 	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
-		udp.read(messageFromUDPBuffer, packetSize);
-		messageFromUDPBuffer[packetSize++] = '\0';
+		udp.read(messageFromUDPBuffer, packetSize); // Depending on what packetSize is, the length of the ciphertext may need to be sent with the messagePayload!
+		messageFromUDPBuffer[packetSize++] = '\0'; // Is this writing a null terminator somewhere it shouldn't with handshakes? Also, shouldn't a null terminator be put at the end of every packet by us anyways?
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
 
 			//decrypt message !!
