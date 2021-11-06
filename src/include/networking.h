@@ -640,6 +640,7 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 	messagesIn.remove(*nextMessage);
 	processIncomingMessage(*nextMessage);
 	delete nextMessage;
+	Serial.println(F("Deleted processed message node"));
 	return true;
 }
 
@@ -648,7 +649,7 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 	queueStartNode = fromQueue.peek();
 	do {
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
-			holdingNode = queueStartNode->getNode();
+			holdingNode/*child of queueStartNode*/ = queueStartNode->getNode();
 			if((this->*processMessage)(fromQueue, queueStartNode)) {
 				queueStartNode = holdingNode;
 				return true;
@@ -796,7 +797,7 @@ void Networking::processNetwork() {
 	}
 
 	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
-	if(messagesIn.peek() != nullptr) {
+	if(!messagesIn.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if((processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) < 0) {
 			if(abs(processElapsedTime) > 2 * MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS) {
@@ -809,7 +810,7 @@ void Networking::processNetwork() {
 
 	(this->*processHeartbeat)();
 
-	if(messagesOut.peek() != nullptr) {
+	if(!messagesOut.empty()) {
 		searchMessageType = START_MESSAGE_TYPE;
 		if((processElapsedTime = doTimeSensetiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) < 0) {
 			if(abs(processElapsedTime) > 2 * MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS) {

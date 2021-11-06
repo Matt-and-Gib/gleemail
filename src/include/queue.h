@@ -21,7 +21,7 @@ public:
 		//Serial.println("QueueNode destructor: Deleting data...");
 		delete data;
 		//Serial.println("QueueNode destructor: Deleting node...");
-		delete node;
+//		delete node;
 		//Serial.println("QueueNode destructor: Done!");
 	}
 
