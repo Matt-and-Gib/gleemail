@@ -14,6 +14,8 @@
 #include "LiteChaCha/keyinfrastructure.h"
 #include "LiteChaCha/authenticatedencrypt.h"
 
+#include <stdlib.h> //for itoa()
+
 
 class Networking {
 private:
@@ -462,7 +464,7 @@ void Networking::decryptBuffer(char* inputBuffer, const size_t length) {
 void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) {
 	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length);
 
-	createMessagePayload(outputBuffer, length);
+//	createMessagePayload(outputBuffer, length);
 }
 
 
@@ -494,8 +496,25 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
 	/*const unsigned short wroteLength =*/ //udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
-	udp.write(outputBuffer); // Just curious, does udp.write simply write the entire outputBuffer? If so, encrypted messages might pose a problem, as there is no simple way to determine when they terminate besides possibly sending the message length.
+	if(connected) {
+		char itoaBuffer[9];
+		itoa(messageCount, itoaBuffer, 10);
+
+		udp.write(itoaBuffer);
+		Serial.print(itoaBuffer);
+
+		udp.write(tag);
+		Serial.print(tag);
+	}
+
+	udp.write(outputBuffer, measureJson(doc) + 1); // Just curious, does udp.write simply write the entire outputBuffer? If so, encrypted messages might pose a problem, as there is no simple way to determine when they terminate besides possibly sending the message length.
+	for(unsigned short i = 0; i < (measureJson(doc) + 1); i += 1) {
+		Serial.print(outputBuffer[i], HEX);
+	}
+	Serial.println();
+
 	udp.endPacket();
+
 
 	/*Serial.print(F("Wrote: "));
 	Serial.println(wroteLength);
@@ -701,17 +720,23 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
 		udp.read(messageFromUDPBuffer, packetSize); // Depending on what packetSize is, the length of the ciphertext may need to be sent with the messagePayload!
+#warning "remove this terminator once we can send a message based on length instead of \0"
 		messageFromUDPBuffer[packetSize++] = '\0'; // Is this writing a null terminator somewhere it shouldn't with handshakes? Also, shouldn't a null terminator be put at the end of every packet by us anyways?
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
+
+			Serial.print(F("Packet size: "));
+			Serial.println(packetSize);
+
+			Serial.println(F("Receiving:"));
+			for(int i = 0; i < packetSize; i += 1) {
+				Serial.print(messageFromUDPBuffer[i], HEX);
+			}
 
 			//decrypt message !!
 			if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
 				decryptBuffer(messageFromUDPBuffer, packetSize);
 				//encryptBufferAndPrepareMessagePayload(outputBuffer, measureJson(doc) + 1);	//DualJustice added one to PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE in global.h because we are adding one here.
 			}
-
-			//Serial.println(F("Receiving:"));
-			//Serial.println(messageFromUDPBuffer);
 
 			messageReceivedCount += 1;
 
