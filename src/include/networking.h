@@ -455,16 +455,17 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 
 	serializeJson(doc, outputBuffer);
 	//if(msg.getMessageType() != MESSAGE_TYPE::HANDSHAKE) {
-	if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
+	/*if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
 		encryptBufferAndPreparePayload(outputBuffer, measureJson(doc) + 1);
-	}
+	}*/
 
 	Serial.println(F("Sending:"));
 	Serial.println(outputBuffer);
 
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
-	/*const unsigned short wroteLength =*/ udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
+	/*const unsigned short wroteLength =*/ //udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
+	udp.write(outputBuffer);
 	udp.endPacket();
 
 	/*Serial.print(F("Wrote: "));
