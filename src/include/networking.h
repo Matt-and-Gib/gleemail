@@ -554,7 +554,7 @@ void Networking::processIncomingConfirmation(QueueNode<Message>& msg) {
 
 	messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 	if(messageOutWithMatchingIdempotencyToken) {
-		messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat message, this is removeFromQueue()
+		messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat or confirmation, this is removeFromQueue()
 
 	} else {
 //		Serial.print(F("confirmation no match found idempotency token: "));
@@ -582,7 +582,7 @@ void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
 //	Serial.println(F("Received handshake"));
 
 #warning "Any subsequent confirmation of a handshake after the first will be encrypted because connected is set to true after this"
-	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Not immediately logical
+	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));

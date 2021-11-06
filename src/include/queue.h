@@ -15,13 +15,9 @@ public:
 		node = nullptr;
 	}
 
-#warning "deleting child node may lead to a cascading delete that empties the queue just like TacoBell does to your bowels"
 	~QueueNode() {
-		//Serial.println("QueueNode destructor: Deleting data...");
 		delete data;
-		//Serial.println("QueueNode destructor: Deleting node...");
-		delete node;
-		//Serial.println("QueueNode destructor: Done!");
+		delete node; //Note: This will cascade-delete all children if called on a node with children. Always use in tandem with remove()
 	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak
