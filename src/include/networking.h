@@ -107,7 +107,9 @@ private:
 	unsigned long long processStartTime = 0;
 	short processElapsedTime = 0;
 
-	short doTimeSensetiveProcess(const short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
+	bool doTimeSensesitiveProcess(const unsigned short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
+
+	//short doTimeSensetiveProcess(const short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
@@ -646,10 +648,11 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 
 
 bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& fromQueue) {
+	/*
 	queueStartNode = fromQueue.peek();
 	do {
 		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
-			holdingNode/*child of queueStartNode*/ = queueStartNode->getNode();
+			holdingNode = queueStartNode->getNode();
 			if((this->*processMessage)(fromQueue, queueStartNode)) {
 				queueStartNode = holdingNode;
 				return true;
@@ -660,6 +663,26 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 	} while (queueStartNode != nullptr);
 
 	//queueStartNode = fromQueue.peek();
+	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
+	if(searchMessageType == MESSAGE_TYPE::NONE) {
+		return false;
+	} else {
+		return true;
+	}*/
+
+	while(queueStartNode) {
+		if(queueStartNode->getData()->getMessageType() == searchMessageType) {
+			holdingNode = queueStartNode->getNode();
+			if((this->*processMessage)(fromQueue, queueStartNode)) {
+				queueStartNode = holdingNode;
+				return true;
+			}
+		}
+
+		queueStartNode = queueStartNode->getNode();
+	}
+
+	queueStartNode = fromQueue.peek();
 	searchMessageType = static_cast<MESSAGE_TYPE>(static_cast<short>(searchMessageType) + 1);
 	if(searchMessageType == MESSAGE_TYPE::NONE) {
 		return false;
@@ -764,7 +787,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 }
 
 
-#warning "Review processTimeModifier to ensure both negative and positive values work"
+/*#warning "Review processTimeModifier to ensure both negative and positive values work"
 short Networking::doTimeSensetiveProcess(const short processTimeModifier, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
 	processStartTime = nowMS();
 	while(nowMS() - processStartTime < processTimeModifier + MAX_PROCESSING_TIME) {
@@ -774,10 +797,32 @@ short Networking::doTimeSensetiveProcess(const short processTimeModifier, const 
 	}
 
 	return MAX_PROCESSING_TIME - (nowMS() - processStartTime);
+}*/
+
+
+bool Networking::doTimeSensesitiveProcess(const unsigned short previousProcessElapsedTime, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
+	processStartTime = nowMS();
+	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + (MAX_PROCESSING_TIME - previousProcessElapsedTime)) {
+		if(!(this->*doProcess)(passProcess, onQueue)) {
+			break;
+		}
+	}
+
+	processElapsedTime = nowMS() - processStartTime; 
+	if(processElapsedTime > MAX_PROCESSING_TIME) {
+		if(processElapsedTime > 2 * MAX_PROCESSING_TIME) {
+			DebugLog::getLog().logError(ERROR_CODE::NETWORK_TIME_SENSITIVE_PROCESS_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
+		} else {
+			DebugLog::getLog().logWarning(ERROR_CODE::NETWORK_TIME_SENSITIVE_PROCESS_EXCEEDED_ALLOCATED_TIME_INSIGNIFICANT);
+		}
+		return false;
+	} else {
+		return true;
+	}
 }
 
 
-void Networking::processNetwork() {
+/*void Networking::processNetwork() {
 	if((processElapsedTime = doTimeSensetiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) < 0) {
 		if(abs(processElapsedTime) > 2 * MAX_GET_MESSAGES_PROCESS_DURATION_MS) {
 			DebugLog::getLog().logError(NETWORK_GET_MESSAGES_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);
@@ -822,6 +867,45 @@ void Networking::processNetwork() {
 			if(connected && exceededMaxOutgoingTokenRetryCount()) { //this is not safe for group chat because connected will be true after the first glEEconnection
 				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
 				Serial.println(F("exceededMaxOutgoingTokenRetryCount"));
+				dropConnection();
+			}
+		}
+	}
+
+	removeExpiredIncomingIdempotencyToken();
+}*/
+
+
+void Networking::processNetwork() {
+	if(!doTimeSensesitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn)) {
+		//Maybe log error about get messages (specifically) being slow
+
+		if(messageReceivedCount > MAX_MESSAGE_RECEIVED_COUNT) {
+			DebugLog::getLog().logError(NETWORK_TOO_MANY_MESSAGES_RECEIVED);
+			dropConnection();
+		}
+	} else {
+		messageReceivedCount = 0;
+	}
+
+	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
+	queueStartNode = messagesIn.peek();
+	if(queueStartNode) {
+		searchMessageType = START_MESSAGE_TYPE;
+		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processIncomingMessageQueueNode, messagesIn)) {
+			//Maybe log error about process incoming messages (specifically) being slow
+		}
+	}
+
+	(this->*processHeartbeat)();
+
+	queueStartNode = messagesOut.peek();
+	if(queueStartNode) {
+		searchMessageType = START_MESSAGE_TYPE;
+		if(!doTimeSensesitiveProcess(processElapsedTime, MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS, &Networking::processQueue, &Networking::processOutgoingMessageQueueNode, messagesOut)) {
+			//Maybe log error about process outgoing messages (specifically) being slow
+			if(connected && exceededMaxOutgoingTokenRetryCount()) { //this is not safe for group chat because connected will be true after the first glEEconnection
+				DebugLog::getLog().logError(NETWORK_OUTGOING_TOKEN_TIMESTAMP_ELAPSED);
 				dropConnection();
 			}
 		}
