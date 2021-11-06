@@ -75,6 +75,7 @@ template <class T>
 QueueNode<T>* Queue<T>::enqueue(T* o) {
 	Serial.println(F("inside enqueue"));
 
+	Serial.print(F("Outside condition root check?: "));
 	Serial.println(root == nullptr ? "root == nullptr" : "root != nullptr");
 
 	if(root == nullptr) {
