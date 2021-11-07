@@ -72,10 +72,28 @@ public:
 	const char* getChat() {return chat;}
 	unsigned short getChatLength() {
 		if(chatLength < 0) {
-			while(*chat++) {
-				chatLength += 1;
+			unsigned short i = 0;
+			while(chat[i] != '\0') {
+				i += 1;
 			}
+			chatLength = i;
+
+			//while(chat[++chatLength] != '\0') {}
+
+			/*while(*chat++) {
+				chatLength += 1;
+			}*/
 		}
+
+		Serial.print(F("chat length: "));
+		Serial.println(chatLength);
+
+		Serial.print(F("chat over chat length:"));
+		for(unsigned short i = 0; i < chatLength; i += 1) {
+			Serial.print(' ');
+			Serial.print(chat[i], HEX);
+		}
+		Serial.println();
 
 		return chatLength;
 	}

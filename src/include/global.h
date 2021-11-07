@@ -75,9 +75,9 @@ static char* copyAndTerminateString(const char* original, const unsigned short L
 }
 
 
-static void overwriteString(const char* originalString, const unsigned short originalLength, char* modifibleString) {
+static void overwriteString(const char* originalString, const unsigned short originalLength, char* modifiableString) {
 	for(unsigned short i = 0; i < originalLength; i += 1) {
-		modifibleString[i] = originalString[i];
+		modifiableString[i] = originalString[i];
 	}
 }
 

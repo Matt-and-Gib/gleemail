@@ -617,7 +617,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 		overwriteString(msg.getChat(), msg.getChatLength(), encryptedChat);
 		ae.encryptAndTagMessage(messageCount, tag, encryptedChat, msg.getChatLength());
 		preparedEncryptedChat = prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
-		
+
 		Serial.print(F("preparedEncryptedChat: '"));
 		for(int i = 0; i < msg.getChatLength() * 2 + 1; i += 1) {
 			Serial.print(' ');
@@ -652,11 +652,14 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	msg.getIdempotencyToken()->incrementRetryCount();
 	messagesSentCount += 1;
 
-	delete preparedEncryptedChat;
-	delete authenticationPayload;
-	delete encryptedChat;
+	delete[] preparedEncryptedChat;
+	delete[] authenticationPayload;
+	delete[] encryptedChat;
 
-	Serial.println(F("After delete"));
+	Serial.println(F("After deleting goblin memry waste"));
+
+	Serial.print(F("Chat body: "));
+	Serial.println(msg.getChat());
 
 	return msg;
 }
