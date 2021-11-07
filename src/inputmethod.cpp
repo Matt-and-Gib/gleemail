@@ -51,18 +51,18 @@ void InputMethod::pushCharacterToMessage(const char c) {
 		//messageChanged = true;
 		//messageComplete = false;
 
-		if(userMessageFirstEmptyIndex < MAX_MESSAGE_LENGTH) {
+		if(userMessageFirstEmptyIndex < CHAT_COMPLETE_THRESHOLD) {
 			userMessage[userMessageFirstEmptyIndex] = c;
 			userMessageFirstEmptyIndex += 1;
 
 			messageChanged(userMessage);
 
-			if(userMessageFirstEmptyIndex == MAX_MESSAGE_LENGTH) {
-				DebugLog::getLog().logWarning(MORSE_MESSAGE_TO_SEND_REACHED_MAX_MESSAGE_LENGTH);
+			if(userMessageFirstEmptyIndex == CHAT_COMPLETE_THRESHOLD) {
+				DebugLog::getLog().logWarning(MORSE_MESSAGE_TO_SEND_REACHED_CHAT_COMPLETE_THRESHOLD);
 				commitMessage();
 			}
 		} else {
-			DebugLog::getLog().logError(MORSE_MESSAGE_TO_SEND_EXCEEDED_MAX_MESSAGE_LENGTH);
+			DebugLog::getLog().logError(MORSE_MESSAGE_TO_SEND_EXCEEDED_CHAT_COMPLETE_THRESHOLD);
 			commitMessage();
 		}
 	}

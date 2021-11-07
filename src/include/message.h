@@ -18,6 +18,7 @@ private:
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
 	const char* chat;
+	short chatLength = -1;
 	//MessageError* error;
 
 	static void noOutgoingProcess(Queue<Message>& q, Message& n) {}
@@ -66,6 +67,16 @@ public:
 	MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
+	unsigned short getChatLength() {
+		if(chatLength < 0) {
+			while(*chat++) {
+				chatLength += 1;
+			}
+		}
+
+		return chatLength;
+	}
+
 	//MessageError* getError() {return error;}
 	void doOutgoingPostProcess(Queue<Message>& q, Message& n) {return (*outgoingPostProcess)(q, n);}
 	void doConfirmedPostProcess(Networking& n, Queue<Message>& mo, QueueNode<Message>& messageIn) {(*confirmedPostProcess)(n, mo, messageIn, *this);}

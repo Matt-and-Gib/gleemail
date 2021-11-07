@@ -34,17 +34,20 @@ static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEAD
 enum class MESSAGE_TYPE : unsigned short {ERROR = 0, HEARTBEAT = 1, CONFIRMATION = 2, CHAT = 3, HANDSHAKE = 4, NONE = 5};
 static const constexpr MESSAGE_TYPE START_MESSAGE_TYPE = static_cast<MESSAGE_TYPE>(0);
 
+static const constexpr unsigned short CHAT_COMPLETE_THRESHOLD = 16; //This is determined by the display width, and is only used in inputmethod.cpp. The maximum this could ever currently be is 132, which is half of MAX_MESSAGE_LENGTH, minus the null terminator. It is half because sending encrypted data requires doubling the chat length because WiFiNINA cannot send raw hex (so each hex char has to be converted into two ASCII chars)
 static const constexpr unsigned short MAX_MESSAGE_LENGTH = 265; //This is the maximum size of an encryption info payload. Used for length of "chat" in Message object.
-static const constexpr unsigned short OUTGOING_JSON_DOCUMENT_SIZE = 384; //Value calculated by ArduinoJSON Assistant based on the following parameters: Data structures 48, Strings 266, Total (minimum) 314, Total (recommended) 384 for the following object: {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"} This object emulates a handshake which contains an encryption info payload. 10/28/2021 @ 20:34
-static const constexpr unsigned short INCOMING_JSON_DOCUMENT_SIZE = 48; //Value calculated by ArduinoJSON Assistant based on the following parameters: Data structures 48, Strings 0, Total (minimum) 48, Total (recommended) 48 for the following object: {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"} This object emulates a handshake which contains an encryption info payload. 10/28/2021 @ 20:33
-static const constexpr unsigned short PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE = 289 + 1; //The value was calculated by the measureJson() function based on a worst-case message object (handshake): {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
-static const constexpr unsigned char ENCRYPTION_TAG_BYTES_AND_MESSAGE_COUNT_SIZE = 16 + 8;
-static const constexpr unsigned short POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE = PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE + ENCRYPTION_TAG_BYTES_AND_MESSAGE_COUNT_SIZE + 1;
+static const constexpr unsigned short OUTGOING_JSON_DOCUMENT_SIZE = 380; //Value calculated by ArduinoJSON Assistant based on the following JSON object: {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","G": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} Note that the chat length ["C"] is equal to MAX_MESSAGE_LENGTH.
+static const constexpr unsigned short INCOMING_JSON_DOCUMENT_SIZE = 64; //Value calculated by ArduinoJSON Assistant based on the following JSON object: {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","G": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"} Note that the chat length ["C"] is equal to MAX_MESSAGE_LENGTH.
+//static const constexpr unsigned short PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE = 289 + 1; //The value was calculated by the measureJson() function based on a worst-case message object (handshake): {"T": 4,"I": 65535,"C": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+//static const constexpr unsigned char ENCRYPTION_TAG_BYTES_AND_MESSAGE_COUNT_SIZE = 16 + 8;
+//static const constexpr unsigned short POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE = PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE + ENCRYPTION_TAG_BYTES_AND_MESSAGE_COUNT_SIZE + 1;
 /*
 static const constexpr unsigned short MAX_MESSAGE_LENGTH = 140; // This value is dependent upon JSON_DOCUMENT_SIZE = 256.
 
 static const constexpr unsigned short JSON_DOCUMENT_SIZE = 256; // This is the end of the line, the ultimate determiner of the size of the packets we cand send (bytes)!
 */
+
+static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 345 + 1; //Calculated with worst-case JSON object, plus 1 for null terminator
 
 static const constexpr unsigned short JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES = 32;
 
@@ -69,6 +72,13 @@ static char* copyAndTerminateString(const char* original, const unsigned short L
 	duplicate[LEN] = '\0';
 	
 	return duplicate;
+}
+
+
+static void overwriteString(const char* originalString, const unsigned short originalLength, char* modifibleString) {
+	for(unsigned short i = 0; i < originalLength; i += 1) {
+		modifibleString[i] = originalString[i];
+	}
 }
 
 

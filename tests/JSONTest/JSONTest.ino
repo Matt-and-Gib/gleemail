@@ -157,11 +157,12 @@ ms = "120054";
 void testSerializeWorstCaseObjectSize() {
 	char output[512];
 
-	StaticJsonDocument<384> doc;
+	StaticJsonDocument<512> doc;
 
 	doc["T"] = 4;
 	doc["I"] = 65535;
 	doc["C"] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+	doc["G"] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 	serializeJson(doc, output);
 

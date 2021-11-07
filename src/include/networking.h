@@ -94,7 +94,7 @@ private:
 	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on first heartbeat received
 
 #warning "This is probably too big for most messages. Maybe create second buffer for handshakes?"
-	char messageFromUDPBuffer[POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE/*JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1*/] = {0};
+	char messageFromUDPBuffer[MESSAGE_BUFFER_SIZE] = {0};
 //	char* messageFromUDPBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
 
@@ -138,6 +138,9 @@ private:
 	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
 
+	char* createAuthenticationPayload();
+	char* prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes);
+	char outgoingMessageBuffer[MESSAGE_BUFFER_SIZE] = {0};
 	Message& sendOutgoingMessage(Message&);
 
 	void processIncomingMessage(QueueNode<Message>&);
@@ -542,9 +545,111 @@ size_t WiFiUDP::write(const uint8_t *buffer, size_t size)
 }*/
 
 
+char* Networking::createAuthenticationPayload() {
+	unsigned short i;
+	char* authenticationPayload = new char[49];
+
+	for(i = 0; i < 16; i += 1) {
+		authenticationPayload[i] = (messageCount >> ((15 - i)*4)) & 0x0f;
+		authenticationPayload[(i*2) + 16] = tag[i] >> 4;
+		authenticationPayload[(i*2) + 16 + 1] = tag[i] & 0x0f;
+	}
+
+	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
+	for(i = 0; i < 48; i += 1) {
+		if(authenticationPayload[i] < 0x0a) {
+			authenticationPayload[i] += 48;
+		} else {
+			authenticationPayload[i] += 87;
+		}
+	}
+
+	authenticationPayload[48] = '\0';
+
+	return authenticationPayload;
+}
+
+
+char* Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes) {
+	unsigned short i;
+	char* preparedOutgoingEncryptedChat = new char[(chatBytes*2) + 1];
+
+	for(i = 0; i < chatBytes; i += 1) {
+		preparedOutgoingEncryptedChat[i*2] = cipherText[i] >> 4;
+		preparedOutgoingEncryptedChat[(i*2) + 1] = cipherText[i] & 0x0f;
+	}
+
+	preparedOutgoingEncryptedChat[chatBytes*2] = '\0';
+
+	return preparedOutgoingEncryptedChat;
+}
+
+
+/*char* Networking::tahCdetpyrcnEgniogtuOeraperp(char* stringBody, const unsigned short stringLength, const unsigned short stringSize) {
+	unsigned short readIndex = stringLength - 1;
+	unsigned short writeIndex = stringSize - 1;
+
+	for(; readIndex > 0; readIndex -= 1) {
+		stringBody[writeIndex--] = stringBody[readIndex] >> 4;
+		stringBody[writeIndex--] = stringBody[readIndex] & 0x0f;
+	}
+
+	return stringBody;
+}*/
 
 
 Message& Networking::sendOutgoingMessage(Message& msg) {
+//	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
+//	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
+	//char outputBuffer[POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE]; // OOF. PLEASE KILL ME!
+	StaticJsonDocument<OUTGOING_JSON_DOCUMENT_SIZE> doc; //maybe make me a member of the class instead!
+// So it is + tagBytes (16 bytes) + sizeof(messageCount) I do want to confirm that it is indeed 8, but we don't need to do that right now.
+	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
+	doc["I"] = msg.getIdempotencyToken()->getValue();
+
+	char* encryptedChat = nullptr;
+	char* authenticationPayload = nullptr;
+	char* preparedEncryptedChat = nullptr;
+	if((msg.getMessageType() == MESSAGE_TYPE::CHAT) && connected) { //the && connected might be redundant.
+		encryptedChat = new char[(2 * msg.getChatLength()) + 1];
+		overwriteString(msg.getChat(), msg.getChatLength(), encryptedChat);
+		ae.encryptAndTagMessage(messageCount, tag, encryptedChat, msg.getChatLength());
+		preparedEncryptedChat = prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
+		doc["C"] = preparedEncryptedChat;
+
+		authenticationPayload = createAuthenticationPayload();
+		doc["G"] = authenticationPayload; // This is messageCount (16 bytes) and tag (32 bytes), as equivalent string values, and a null terminator.
+	} else {
+		doc["C"] = msg.getChat();
+	}
+
+
+
+	//For sending error subobjects
+	/*JsonObject E = doc.createNestedObject("E");
+	E["D"] = static_cast<unsigned short>(msg.getError()->getID());
+	E["A"] = msg.getError()->getAttribute();*/
+
+	serializeJson(doc, outgoingMessageBuffer);
+
+	Serial.println(F("Sending:"));
+	Serial.println(outgoingMessageBuffer);
+
+	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
+	udp.write(outgoingMessageBuffer); // Just curious, does udp.write simply write the entire outputBuffer? If so, encrypted messages might pose a problem, as there is no simple way to determine when they terminate besides possibly sending the message length.
+	udp.endPacket();
+
+	msg.getIdempotencyToken()->incrementRetryCount();
+	messagesSentCount += 1;
+
+	delete preparedEncryptedChat;
+	delete authenticationPayload;
+	delete encryptedChat;
+	return msg;
+}
+
+
+/*Message& Networking::sendOutgoingMessage(Message& msg) {
 //	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
 //	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
 #warning "This is probably too big! Use correctly sized buffer (or make buffer a member variable of the Networking class?"
@@ -556,9 +661,9 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	doc["C"] = msg.getChat();
 
 	//For sending error subobjects
-	/*JsonObject E = doc.createNestedObject("E");
-	E["D"] = static_cast<unsigned short>(msg.getError()->getID());
-	E["A"] = msg.getError()->getAttribute();*/
+	//JsonObject E = doc.createNestedObject("E");
+	//E["D"] = static_cast<unsigned short>(msg.getError()->getID());
+	//E["A"] = msg.getError()->getAttribute();
 
 	serializeJson(doc, outputBuffer);
 	//if(msg.getMessageType() != MESSAGE_TYPE::HANDSHAKE) {
@@ -571,7 +676,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
 //	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
-	/*const unsigned short wroteLength =*/ //udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
+	//const unsigned short wroteLength = //udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 
 	Serial.print(F("Outgoing message type: "));
 	Serial.println(static_cast<unsigned short>(msg.getMessageType()));
@@ -602,16 +707,16 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	udp.endPacket();
 
 
-	/*Serial.print(F("Wrote: "));
-	Serial.println(wroteLength);
-	Serial.print(F("Max size of array: "));
-	Serial.println(((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);*/
+	//Serial.print(F("Wrote: "));
+	//Serial.println(wroteLength);
+	//Serial.print(F("Max size of array: "));
+	//Serial.println(((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
 
 	msg.getIdempotencyToken()->incrementRetryCount();
 	messagesSentCount += 1;
 
 	return msg;
-}
+}*/
 
 
 unsigned long Networking::messageResendTime(QueueNode<Message>& msg) {
@@ -703,6 +808,9 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
+		//decrypt chat message!
+		Serial.print(F("Chat body received: "));
+		Serial.println(msg.getData()->getChat());
 		(*chatMessageReceivedCallback)(msg.getData()->getChat());
 	}
 }
@@ -927,22 +1035,6 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 #warning "remove this terminator once we can send a message based on length instead of \0"
 		messageFromUDPBuffer[packetSize++] = '\0'; // Is this writing a null terminator somewhere it shouldn't with handshakes? Also, shouldn't a null terminator be put at the end of every packet by us anyways?
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
-
-			Serial.print(F("Packet size: "));
-			Serial.println(packetSize);
-
-			Serial.println(F("Receiving:"));
-			for(int i = 0; i < packetSize; i += 1) {
-				Serial.print(messageFromUDPBuffer[i], HEX);
-			}
-			Serial.println();
-
-			//decrypt message !!
-			if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
-				decryptBuffer(messageFromUDPBuffer, packetSize);
-				//encryptBufferAndPrepareMessagePayload(outputBuffer, measureJson(doc) + 1);	//DualJustice added one to PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE in global.h because we are adding one here.
-			}
-
 			messageReceivedCount += 1;
 
 			StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
