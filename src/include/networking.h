@@ -633,8 +633,6 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 		doc["C"] = msg.getChat();
 	}
 
-
-
 	//For sending error subobjects
 	/*JsonObject E = doc.createNestedObject("E");
 	E["D"] = static_cast<unsigned short>(msg.getError()->getID());
