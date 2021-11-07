@@ -72,7 +72,7 @@ private:
 //	MOVE ME!
 
 
-	void createEncryptionInfoPayload(char*, const char*, const char*, const char*, const char*); // REMOVE ME?
+	void buildEncryptionInfoPayload(char*, const char*, const char*, const char*, const char*); // REMOVE ME?
 	void stringToHex(char*, const char*, const unsigned short, const unsigned short); // REMOVE ME?
 	void convertEncryptionInfoPayload(char*, char*, char*, char*, const char*); // REMOVE ME?
 
@@ -138,8 +138,8 @@ private:
 	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
 
-	char* createAuthenticationPayload();
-	char* prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes);
+	void buildAuthenticationPayload(char*);
+	void prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes);
 	char outgoingMessageBuffer[MESSAGE_BUFFER_SIZE] = {0};
 	Message& sendOutgoingMessage(Message&);
 
@@ -266,7 +266,7 @@ void Networking::createuuid(char* userID) {
 }
 
 
-void Networking::createEncryptionInfoPayload(char* encryptionInfoOut, const char* DSAPubKey, const char* ephemeralPubKey, const char* signature, const char* ID) {
+void Networking::buildEncryptionInfoPayload(char* encryptionInfoOut, const char* DSAPubKey, const char* ephemeralPubKey, const char* signature, const char* ID) {
 	unsigned short i = 0;
 	for(i = 0; i < keyBytes; i += 1) {
 		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
@@ -347,7 +347,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	const bool GENERATE_NEW_KEY = true;
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, GENERATE_NEW_KEY);
 	createuuid(userID);
-	createEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
+	buildEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
 	udp.begin(CONNECTION_PORT);
 
@@ -547,33 +547,30 @@ size_t WiFiUDP::write(const uint8_t *buffer, size_t size)
 }*/
 
 
-char* Networking::createAuthenticationPayload() {
+void Networking::buildAuthenticationPayload(char* authPayload) {
 	unsigned short i;
-	char* authenticationPayload = new char[49];
 
 	for(i = 0; i < 16; i += 1) {
-		authenticationPayload[i] = (messageCount >> ((15 - i)*4)) & 0x0f;
-		authenticationPayload[(i*2) + 16] = tag[i] >> 4;
-		authenticationPayload[(i*2) + 16 + 1] = tag[i] & 0x0f;
+		authPayload[i] = (messageCount >> ((15 - i)*4)) & 0x0f;
+		authPayload[(i*2) + 16] = tag[i] >> 4;
+		authPayload[(i*2) + 16 + 1] = tag[i] & 0x0f;
 	}
 
 	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
 	for(i = 0; i < 48; i += 1) {
-		if(authenticationPayload[i] < 0x0a) {
-			authenticationPayload[i] += 48;
+		if(authPayload[i] < 0x0a) {
+			authPayload[i] += 48;
 		} else {
-			authenticationPayload[i] += 87;
+			authPayload[i] += 87;
 		}
 	}
 
-	authenticationPayload[48] = '\0';
-
-	return authenticationPayload;
+	authPayload[48] = '\0';
 }
 
 
-char* Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes) {
-	unsigned short i;
+void Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes) {
+/*	unsigned short i;
 	char* preparedOutgoingEncryptedChat = new char[(chatBytes*2) + 1];
 
 	for(i = 0; i < chatBytes; i += 1) {
@@ -583,7 +580,25 @@ char* Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short 
 
 	preparedOutgoingEncryptedChat[chatBytes*2] = '\0';
 
-	return preparedOutgoingEncryptedChat;
+	return preparedOutgoingEncryptedChat;*/
+
+	unsigned short i;
+
+	for(i = 0; i < chatBytes; i += 1) {
+		cipherText[((chatBytes*2) - 1) - (i*2)] = cipherText[((chatBytes - i) - 1)] & 0x0f;
+		cipherText[((chatBytes*2) - 2) - (i*2)] = cipherText[((chatBytes - i) - 1)] >> 4;
+	}
+
+	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
+	for(i = 0; i < ((chatBytes*2) - 1); i += 1) {
+		if(cipherText[i] < 0x0a) {
+			cipherText[i] += 48;
+		} else {
+			cipherText[i] += 87;
+		}
+	}
+
+	cipherText[chatBytes*2] = '\0';
 }
 
 
@@ -609,25 +624,26 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
 	doc["I"] = msg.getIdempotencyToken()->getValue();
 
-	char* encryptedChat = nullptr;
-	char* authenticationPayload = nullptr;
-	char* preparedEncryptedChat = nullptr;
+	char* encryptedChat = nullptr; //Is this necessary?
+	char* authenticationPayload = nullptr; //Is this necessary?
+//	char* preparedEncryptedChat = nullptr;
 	if((msg.getMessageType() == MESSAGE_TYPE::CHAT) && connected) { //the && connected might be redundant.
 		encryptedChat = new char[(2 * msg.getChatLength()) + 1];
 		overwriteString(msg.getChat(), msg.getChatLength(), encryptedChat);
 		ae.encryptAndTagMessage(messageCount, tag, encryptedChat, msg.getChatLength());
-		preparedEncryptedChat = prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
+		prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
 
-		Serial.print(F("preparedEncryptedChat: '"));
+		Serial.print(F("prepared encryptedChat: '"));
 		for(int i = 0; i < msg.getChatLength() * 2 + 1; i += 1) {
 			Serial.print(' ');
-			Serial.print(preparedEncryptedChat[i], HEX);
+			Serial.print(encryptedChat[i], HEX);
 		}
 		Serial.println(F("'"));
 
-		doc["C"] = preparedEncryptedChat;
+		doc["C"] = encryptedChat;
 
-		authenticationPayload = createAuthenticationPayload();
+		authenticationPayload = new char[49];
+		buildAuthenticationPayload(authenticationPayload);
 		doc["G"] = authenticationPayload; // This is messageCount (16 bytes) and tag (32 bytes), as equivalent string values, and a null terminator.
 	} else {
 		doc["C"] = msg.getChat();
@@ -650,7 +666,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	msg.getIdempotencyToken()->incrementRetryCount();
 	messagesSentCount += 1;
 
-	delete[] preparedEncryptedChat;
+//	delete[] preparedEncryptedChat;
 	delete[] authenticationPayload;
 	delete[] encryptedChat;
 
