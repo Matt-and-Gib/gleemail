@@ -56,8 +56,11 @@ public:
 		confirmedPostProcess = !cp ? &noConfirmedProcess : cp; //Remove conditional check by relocating noIncomingProcess?
 	}
 	~Message() {
+		Serial.println(F("before delete idempotency token"));
 		delete idempotencyToken;
+		Serial.println(F("before delete chat"));
 		delete[] chat;
+		Serial.println(F("after delete chat"));
 		//delete error;
 	}
 

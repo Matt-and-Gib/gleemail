@@ -153,7 +153,9 @@ private:
 		removeFromQueue(messagesOutQueue, messageOut);
 	}
 	static void removeFromQueue(Queue<Message>& fromQueue, Message& node) {
+		Serial.println(F("before remove from queue"));
 		delete fromQueue.remove(node);
+		Serial.println(F("after remove from queue"));
 	}
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
@@ -615,6 +617,14 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 		overwriteString(msg.getChat(), msg.getChatLength(), encryptedChat);
 		ae.encryptAndTagMessage(messageCount, tag, encryptedChat, msg.getChatLength());
 		preparedEncryptedChat = prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
+		
+		Serial.print(F("preparedEncryptedChat: '"));
+		for(int i = 0; i < msg.getChatLength() * 2 + 1; i += 1) {
+			Serial.print(' ');
+			Serial.print(preparedEncryptedChat[i], HEX);
+		}
+		Serial.println(F("'"));
+
 		doc["C"] = preparedEncryptedChat;
 
 		authenticationPayload = createAuthenticationPayload();
@@ -645,6 +655,9 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	delete preparedEncryptedChat;
 	delete authenticationPayload;
 	delete encryptedChat;
+
+	Serial.println(F("After delete"));
+
 	return msg;
 }
 
@@ -1046,6 +1059,9 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			}
+
+			Serial.print(F("Message received of type: "));
+			Serial.println(static_cast<unsigned short>(parsedDocument["T"]));
 
 			QueueNode<Message>* enqueuedQueueNode = intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
 		} else {
