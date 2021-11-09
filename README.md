@@ -85,6 +85,9 @@ Last updated: 11/06/2021
 |15|Message Contains Preceding Whitespace||Low|
 |16|Message Contains Trailing Whitespace||Low|
 |17|Commit Empty Message||High|
+|18|Version Number Overflow||High|
+|19|Morse Code Char Pairs Version Mismatch||Low|
+|20|Message Only Whitespace||Low|
 </details>
 
 <details>

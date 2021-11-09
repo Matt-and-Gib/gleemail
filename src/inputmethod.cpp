@@ -73,6 +73,7 @@ void InputMethod::commitMessage() {
 	//messageComplete = true;
 
 	if(userMessageFirstEmptyIndex > 0) {
+		/*//This should never happen, so I commented it out to save a little processing time.
 		for(unsigned short i = 0; i < userMessageFirstEmptyIndex; i += 1) {
 			if(userMessage[i] > ' ') {
 				if(i != 0) {
@@ -83,16 +84,20 @@ void InputMethod::commitMessage() {
 				}
 				break;
 			}
-		}
+		}*/
 
 		for(unsigned short i = userMessageFirstEmptyIndex - 1; i > 0; i -= 1) {
-			if(userMessage[i] > ' ') {
-				if(i < userMessageFirstEmptyIndex - 1) {
-					DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_TRAILING_WHITESPACE); //Maybe change to past-tense: CONTAINED_TRAILING_WHITESPACE
-					userMessage[i + 1] = '\0';
-				}
+			if(userMessage[i] == ' ') {
+				DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINED_TRAILING_WHITESPACE);
+				userMessage[i] = '\0';
+			} else {
 				break;
 			}
+		}
+
+		if(userMessage[0] == '\0') {
+			DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_ONLY_WHITESPACE);
+			return;
 		}
 
 		//Serial.print("Commiting: "); //DEBUG
