@@ -18,7 +18,7 @@ private:
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
 	const char* chat;
-	short chatLength = -1;
+	unsigned short chatLength = 0;
 	//MessageError* error;
 
 	static void noOutgoingProcess(Queue<Message>& q, Message& n) {}
@@ -71,18 +71,11 @@ public:
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
 	unsigned short getChatLength() {
-		if(chatLength < 0) {
-			unsigned short i = 0;
-			while(chat[i] != '\0') {
-				i += 1;
-			}
-			chatLength = i;
-
-			//while(chat[++chatLength] != '\0') {}
-
-			/*while(*chat++) {
+		if(chatLength == 0) {
+			const char* ptr = chat;
+			while(*ptr++) {
 				chatLength += 1;
-			}*/
+			}
 		}
 
 		Serial.print(F("chat length: "));
