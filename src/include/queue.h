@@ -16,11 +16,8 @@ public:
 	}
 
 	~QueueNode() {
-		Serial.println(F("before delete data"));
 		delete data;
-		Serial.println(F("before delete node"));
 		delete node; //Note: This will cascade-delete all children if called on a node with children. Always use in tandem with remove()
-		Serial.println(F("after delete node"));
 	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak

@@ -153,9 +153,7 @@ private:
 		removeFromQueue(messagesOutQueue, messageOut);
 	}
 	static void removeFromQueue(Queue<Message>& fromQueue, Message& node) {
-		Serial.println(F("before remove from queue"));
 		delete fromQueue.remove(node);
-		Serial.println(F("after remove from queue"));
 	}
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
@@ -669,8 +667,6 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 //	delete[] preparedEncryptedChat;
 	delete[] authenticationPayload;
 	delete[] encryptedChat;
-
-	Serial.println(F("After deleting goblin memry waste"));
 
 	Serial.print(F("Chat body: "));
 	Serial.println(msg.getChat());
