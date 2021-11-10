@@ -61,7 +61,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 11/06/2021
+Last updated: 11/10/2021
 <details>
 <summary>0 - 9: General</summary>
 
@@ -82,8 +82,6 @@ Last updated: 11/06/2021
 |12|Morse Code Lookup Failed|The entered combination of dots and dashes does not match any Morse Code pattern|Low|
 |13|Morse Message To Send Reached Chat Complete Threshold|Entered message has reached the maximum length and must be sent immediately|Low|
 |14|Morse Message To Send Exceeded Chat Complete Threshold|Entered message has exceeded the maximum length and must be sent immediately without storing the provided character|High|
-|15|Message Contains Preceding Whitespace||Low|
-|16|Message Contains Trailing Whitespace||Low|
 |17|Commit Empty Message||High|
 |18|Version Number Overflow||High|
 |19|Morse Code Char Pairs Version Mismatch||Low|

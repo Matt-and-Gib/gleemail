@@ -88,7 +88,7 @@ void InputMethod::commitMessage() {
 
 		for(unsigned short i = userMessageFirstEmptyIndex - 1; i > 0; i -= 1) {
 			if(userMessage[i] == ' ') {
-				DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINED_TRAILING_WHITESPACE);
+				//DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINED_TRAILING_WHITESPACE);
 				userMessage[i] = '\0';
 			} else {
 				break;
