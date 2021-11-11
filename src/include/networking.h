@@ -152,7 +152,7 @@ private:
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
 		if(n.connected == false) {
-			Serial.println(F("Authenticating Peer"));
+			Serial.println(F("Authenticating Peer..."));
 
 			n.convertEncryptionInfoPayload(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature, n.peerID, messageIn.getData()->getChat());
 
