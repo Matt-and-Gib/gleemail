@@ -24,6 +24,7 @@ private:
 
 	bool connected = false;
 	unsigned long connectedMS;
+	void (*connectedToPeerClearDisplay)();
 
 	static const constexpr unsigned short MAX_OUTGOING_MESSAGE_RETRY_COUNT = 10;
 	static const constexpr unsigned short RESEND_OUTGOING_MESSAGE_THRESHOLD_MS = 500;
@@ -168,7 +169,12 @@ private:
 			if(VERBOSE_DEBUG_LOG) {
 				Serial.print(F("Peer DSA Public Key: "));
 				for(unsigned short i = 0; i < keyBytes; i += 1) {
-					Serial.print(n.peerDSAPubKey[i], HEX);
+					if(n.peerDSAPubKey[i] > 0x0f) {
+						Serial.print(n.peerDSAPubKey[i], HEX);
+					} else {
+						Serial.print(F('0'));
+						Serial.print(n.peerDSAPubKey[i], HEX);
+					}
 				}
 				Serial.println();
 			}
@@ -184,7 +190,7 @@ private:
 		}
 	}
 public:
-	Networking(unsigned long (*)(), void (*)(char*), const long u, bool& quit);
+	Networking(unsigned long (*)(), void (*)(char*), void (*)(), const long u, bool& quit);
 	~Networking();
 
 	void processNetwork();
@@ -194,10 +200,11 @@ public:
 };
 
 
-Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(char*), const long u, bool& quit) : shutdownFlag{quit} {
+Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(char*), void (*connectedUpdateDisplay)(), const long u, bool& quit) : shutdownFlag{quit} {
 	nowMS = millis;
 	uuid = u + nowMS(); //CHANGE ME!
 	chatMessageReceivedCallback = chatMsgCallback;
+	connectedToPeerClearDisplay = connectedUpdateDisplay;
 
 	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(0, 0), nullptr, /*nullptr,*/ nullptr, nullptr);
 }
@@ -304,7 +311,12 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	if(VERBOSE_DEBUG_LOG) {
 		Serial.print(F("User DSA Public Key: "));
 		for(unsigned short i = 0; i < keyBytes; i += 1) {
-			Serial.print(userDSAPubKey[i], HEX);
+			if(userDSAPubKey[i] > 0x0f) {
+				Serial.print(userDSAPubKey[i], HEX);
+			} else {
+				Serial.print(F('0'));
+				Serial.print(userDSAPubKey[i], HEX);
+			}
 		}
 	}
 	Serial.println();
@@ -517,6 +529,7 @@ void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
 	if(checkHeartbeatThreshold == &Networking::checkHeartbeatStillborn) {
 		checkHeartbeatThreshold = &Networking::checkHeartbeatFlatline;
 		Serial.println(F("Connected to Peer!"));
+		(*connectedToPeerClearDisplay)();
 	}
 
 	lastHeartbeatReceivedMS = nowMS();

@@ -24,6 +24,7 @@ extern USBDeviceClass USBDevice;
 extern "C" void __libc_init_array(void);
 
 
+void connectedToPeerClearDisplay();
 void updateDisplayWithPeerChat(char*);
 void updateDisplayWithUserChat(const char*);
 
@@ -36,7 +37,7 @@ static Display display;
 char* messageToPrint = nullptr;
 
 static InternetAccess internet;
-static Networking network(&millis, &updateDisplayWithPeerChat, 0, quit);
+static Networking network(&millis, &updateDisplayWithPeerChat, &connectedToPeerClearDisplay, 0, quit);
 static WebAccess webAccess;
 
 
@@ -215,6 +216,11 @@ unsigned short mccpDownloadDataValue = 0;*/
 		}
 	}*/
 //}
+
+
+void connectedToPeerClearDisplay() {
+	display.clearAll();
+}
 
 
 void updateInputMethod() {
@@ -717,9 +723,8 @@ void setup() {
 
 
 		case SETUP_LEVEL::DONE:
-			Serial.println("Running");
-			display.updateReading("Running");
 			display.clearWriting();
+			display.updateReading("Wait for glEEpal");
 
 			setupComplete = true;
 		break;
@@ -734,7 +739,7 @@ void setup() {
 		delay(SETUP_STEP_DELAY);
 	} while (!setupComplete);
 
-	display.clearAll();
+	//display.clearAll();
 }
 
 
