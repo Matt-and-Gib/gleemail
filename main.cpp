@@ -803,7 +803,7 @@ Estimated max time for single message processing: 4ms
 	display.updateReading("glEEbye!");
 	display.clearWriting();
 
-	Serial.println(F("Lost connection to glEEpal."));
+	Serial.println(F("Lost connection to glEEpal"));
 	if(arduino::serialEventRun) {
 		arduino::serialEventRun();
 	}
