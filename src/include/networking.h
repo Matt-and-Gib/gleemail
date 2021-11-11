@@ -588,7 +588,7 @@ void Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short c
 	}
 
 	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
-	for(i = 0; i < ((chatBytes*2) - 1); i += 1) {
+	for(i = 0; i < chatBytes*2; i += 1) {
 		if(cipherText[i] < 0x0a) {
 			cipherText[i] += 48;
 		} else {
@@ -600,19 +600,6 @@ void Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short c
 }
 
 
-/*char* Networking::tahCdetpyrcnEgniogtuOeraperp(char* stringBody, const unsigned short stringLength, const unsigned short stringSize) {
-	unsigned short readIndex = stringLength - 1;
-	unsigned short writeIndex = stringSize - 1;
-
-	for(; readIndex > 0; readIndex -= 1) {
-		stringBody[writeIndex--] = stringBody[readIndex] >> 4;
-		stringBody[writeIndex--] = stringBody[readIndex] & 0x0f;
-	}
-
-	return stringBody;
-}*/
-
-
 Message& Networking::sendOutgoingMessage(Message& msg) {
 //	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
 //	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
@@ -622,9 +609,8 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
 	doc["I"] = msg.getIdempotencyToken()->getValue();
 
-	char* encryptedChat = nullptr; //Is this necessary?
-	char* authenticationPayload = nullptr; //Is this necessary?
-//	char* preparedEncryptedChat = nullptr;
+	char* encryptedChat = nullptr;
+	char* authenticationPayload = nullptr;
 	if((msg.getMessageType() == MESSAGE_TYPE::CHAT) && connected) { //the && connected might be redundant.
 		encryptedChat = new char[(2 * msg.getChatLength()) + 1];
 		overwriteString(msg.getChat(), msg.getChatLength(), encryptedChat);
