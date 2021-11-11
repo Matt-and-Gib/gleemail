@@ -167,8 +167,9 @@ private:
 			//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
 
 			if(VERBOSE_DEBUG_LOG) {
-				Serial.print(F("Peer DSA Public Key: "));
+				Serial.print(F("Peer DSA Public Key:"));
 				for(unsigned short i = 0; i < keyBytes; i += 1) {
+					Serial.print(F(' '));
 					if(n.peerDSAPubKey[i] > 0x0f) {
 						Serial.print(n.peerDSAPubKey[i], HEX);
 					} else {
@@ -309,8 +310,9 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	buildEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
 	if(VERBOSE_DEBUG_LOG) {
-		Serial.print(F("User DSA Public Key: "));
+		Serial.print(F("User DSA Public Key:"));
 		for(unsigned short i = 0; i < keyBytes; i += 1) {
+			Serial.print(F(' '));
 			if(userDSAPubKey[i] > 0x0f) {
 				Serial.print(userDSAPubKey[i], HEX);
 			} else {
