@@ -808,5 +808,7 @@ Estimated max time for single message processing: 4ms
 		arduino::serialEventRun();
 	}
 
+	delay(5000);
+	display.clearAll();
 	return 0;
 }
