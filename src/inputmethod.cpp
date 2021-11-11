@@ -51,18 +51,18 @@ void InputMethod::pushCharacterToMessage(const char c) {
 		//messageChanged = true;
 		//messageComplete = false;
 
-		if(userMessageFirstEmptyIndex < MAX_MESSAGE_LENGTH) {
+		if(userMessageFirstEmptyIndex < CHAT_COMPLETE_THRESHOLD) {
 			userMessage[userMessageFirstEmptyIndex] = c;
 			userMessageFirstEmptyIndex += 1;
 
 			messageChanged(userMessage);
 
-			if(userMessageFirstEmptyIndex == MAX_MESSAGE_LENGTH) {
-				DebugLog::getLog().logWarning(MORSE_MESSAGE_TO_SEND_REACHED_MAX_MESSAGE_LENGTH);
+			if(userMessageFirstEmptyIndex == CHAT_COMPLETE_THRESHOLD) {
+				DebugLog::getLog().logWarning(MORSE_MESSAGE_TO_SEND_REACHED_CHAT_COMPLETE_THRESHOLD);
 				commitMessage();
 			}
 		} else {
-			DebugLog::getLog().logError(MORSE_MESSAGE_TO_SEND_EXCEEDED_MAX_MESSAGE_LENGTH);
+			DebugLog::getLog().logError(MORSE_MESSAGE_TO_SEND_EXCEEDED_CHAT_COMPLETE_THRESHOLD);
 			commitMessage();
 		}
 	}
@@ -73,6 +73,7 @@ void InputMethod::commitMessage() {
 	//messageComplete = true;
 
 	if(userMessageFirstEmptyIndex > 0) {
+		/*//This should never happen, so I commented it out to save a little processing time.
 		for(unsigned short i = 0; i < userMessageFirstEmptyIndex; i += 1) {
 			if(userMessage[i] > ' ') {
 				if(i != 0) {
@@ -83,16 +84,20 @@ void InputMethod::commitMessage() {
 				}
 				break;
 			}
-		}
+		}*/
 
 		for(unsigned short i = userMessageFirstEmptyIndex - 1; i > 0; i -= 1) {
-			if(userMessage[i] > ' ') {
-				if(i < userMessageFirstEmptyIndex - 1) {
-					DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINS_TRAILING_WHITESPACE); //Maybe change to past-tense: CONTAINED_TRAILING_WHITESPACE
-					userMessage[i + 1] = '\0';
-				}
+			if(userMessage[i] == ' ') {
+				//DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_CONTAINED_TRAILING_WHITESPACE);
+				userMessage[i] = '\0';
+			} else {
 				break;
 			}
+		}
+
+		if(userMessage[0] == '\0') {
+			DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_ONLY_WHITESPACE);
+			return;
 		}
 
 		//Serial.print("Commiting: "); //DEBUG

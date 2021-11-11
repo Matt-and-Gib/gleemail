@@ -1,8 +1,6 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-//#include "HardwareSerial.h"
-
 
 template <class T>
 class QueueNode {
@@ -16,11 +14,8 @@ public:
 	}
 
 	~QueueNode() {
-		//Serial.println("QueueNode destructor: Deleting data...");
 		delete data;
-		//Serial.println("QueueNode destructor: Deleting node...");
-		delete node;
-		//Serial.println("QueueNode destructor: Done!");
+		delete node; //Note: This will cascade-delete all children if called on a node with children. Always use in tandem with remove()
 	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak
@@ -29,7 +24,7 @@ public:
 	T* getData() {return data;}
 
 	QueueNode<T>* enqueue(T* o) {
-		if(!node) {
+		if(node == nullptr) {
 			node = new QueueNode<T>(o);
 			return node;
 		} else {
@@ -60,12 +55,14 @@ public:
 	//QueueNode<T>* remove(T&, QueueNode<T>*);
 	QueueNode<T>* remove(T&);
 	QueueNode<T>* remove(QueueNode<T>&);
+
+	bool empty() {return root == nullptr;}
 };
 
 
 template <class T>
 QueueNode<T>* Queue<T>::enqueue(T* o) {
-	if(!root) {
+	if(root == nullptr) {
 		root = new QueueNode<T>(o);
 		return root;
 	} else {
@@ -76,7 +73,7 @@ QueueNode<T>* Queue<T>::enqueue(T* o) {
 
 template <class T>
 QueueNode<T>* Queue<T>::dequeue() {
-	if(!root) {
+	if(root == nullptr) {
 		return nullptr;
 	}
 
@@ -95,10 +92,6 @@ QueueNode<T>* Queue<T>::dequeue() {
 
 template <class T>
 QueueNode<T>* Queue<T>::peek() {
-	if(!root) {
-		return nullptr;
-	}
-
 	return root;
 }
 

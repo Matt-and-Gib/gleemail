@@ -34,7 +34,7 @@ public:
 	const char* getWiFiPassword() const {return wifiPassword;}
 	void setWiFiPassword(char* p) {wifiPassword = p;}
 
-	const unsigned short getMorseCodeCharPairsVersion() {return morseCodeCharPairsVersion;}
+	unsigned short getMorseCodeCharPairsVersion() {return morseCodeCharPairsVersion;}
 	void setMorseCodeCharPairsVersion(const unsigned short v) {morseCodeCharPairsVersion = v;}
 
 	const char* serializePrefs() const {
@@ -70,9 +70,6 @@ public:
 			//DebugLog::getLog().logWarning(PREFERENCES_SIZE_MISMATCH);
 		}
 
-
-
-
 		DynamicJsonDocument doc(size);
 		DeserializationError error = deserializeJson(doc, input, length);
 
@@ -88,7 +85,6 @@ public:
 			//DebugLog::getLog().logWarning(PREFERENCES_FILE_VERSION_MISMATCH);
 		}
 
-
 		morseCodeCharPairsVersion = doc["Morse Code Char Pairs Version"];
 		//Serial.print(F("MCCP Version: "));
 		//Serial.println(morseCodeCharPairsVersion);
@@ -98,6 +94,8 @@ public:
 
 		const char* tempPassword = doc["WiFiPassword"];
 		wifiPassword = copyAndTerminateString(tempPassword, strlen(tempPassword));
+
+		return true;
 	}
 };
 

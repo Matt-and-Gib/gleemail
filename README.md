@@ -1,5 +1,6 @@
-![glEEmail](https://github.com/Matt-and-Gib/gleemail/raw/main/resources/glEEmail_social_media_final.png)
-<!--<img src="resources/gleemail_social_media_final.png" alt="glEEmail" width=640>-->
+![Latest Build Status](https://github.com/Matt-and-Gib/gleemail/actions/workflows/compile.yml/badge.svg?branch=implement-encryption)
+
+![glEEmail Banner](resources/glEEmail_social_media_final.png)
 
 ## _Voted† 100% better than Discord!*_
 
@@ -60,7 +61,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 5/18/2021
+Last updated: 11/10/2021
 <details>
 <summary>0 - 9: General</summary>
 
@@ -79,11 +80,12 @@ Last updated: 5/18/2021
 |----|-----|-----|--------|
 |10|Morse Phrase Imminent Overflow|The Morse phrase is at capacity and must be committed without storing the provided dot/dash|High|
 |12|Morse Code Lookup Failed|The entered combination of dots and dashes does not match any Morse Code pattern|Low|
-|13|Morse Message To Send Reached Max Message Length|Entered message has reached the maximum length and must be sent immediately|Low|
-|14|Morse Message To Send Exceeded Max Message Length|Entered message has exceeded the maximum length and must be sent immediately without storing the provided character|High|
-|15|Message Contains Preceding Whitespace||Low|
-|16|Message Contains Trailing Whitespace||Low|
+|13|Morse Message To Send Reached Chat Complete Threshold|Entered message has reached the maximum length and must be sent immediately|Low|
+|14|Morse Message To Send Exceeded Chat Complete Threshold|Entered message has exceeded the maximum length and must be sent immediately without storing the provided character|High|
 |17|Commit Empty Message||High|
+|18|Version Number Overflow||High|
+|19|Morse Code Char Pairs Version Mismatch||Low|
+|20|Message Only Whitespace||Low|
 </details>
 
 <details>
@@ -95,12 +97,19 @@ Last updated: 5/18/2021
 |52|Too Many Messages Received||High|
 |53|Heartbeat Flatline||High|
 |54|Outgoing Token Timestamp Elapsed||High|
-|55|Time Sensitive Process Exceeded Allocated Time (Significant)||High|
-|56|Time Sensitive Process Exceeded Allocated Time (Insignificant)||Low|
 |57|Unknown Incoming Message Type||High|
 |58|Confirmation No Match Found||Low|
 |59|Duplicate Handshake||Low|
 |60|Unexpected Handshake from Connected IP|Either received handshake after token removed from queue (expired) or handshake has unique idempotency token|Low|
+|61|Heartbeat Stillborn|Heartbeat never received|High|
+|62|Connection Attempt while Connected||Low|
+|63|Authentication Failed|UserIP and PeerID not unique or peer signature invalid|High|
+|64|Getting Messages Took Significantly Longer than Allocated||High|
+|65|Getting Messages Took Insignificantly Longer than Allocated||Low|
+|66|Processing Incoming Messages Took Significantly Longer than Allocated||High|
+|67|Processing Incoming Messages Took Insignificantly Longer than Allocated||Low|
+|68|Sending Messages Took Significantly Longer than Allocated||High|
+|69|Sending Messages Took Insignificantly Longer than Allocated||Low|
 </details>
 
 <details>

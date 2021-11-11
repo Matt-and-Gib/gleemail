@@ -1,0 +1,22 @@
+name: Compile
+
+on: [push, pull_request]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "compile"
+  compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: arduino/compile-sketches@v1.0.0
+        with:
+          fqbn: 'arduino:samd:nano_33_iot'
+          libraries: |
+            - name: ArduinoJson
+            - name: WiFiNINA
+            - name: SD
+            - name: hd44780
+          sketch-paths: 'gleemail.ino'

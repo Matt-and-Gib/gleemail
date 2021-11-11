@@ -26,9 +26,9 @@ public:
 	KeyManagement();
 	~KeyManagement();
 
-	unsigned short getKeyBytes() {return KEY_BYTES;}
-	unsigned short getSignatureBytes() {return SIGNATURE_BYTES;}
-	unsigned short getIDBytes() {return ID_BYTES;}
+	static constexpr unsigned short getKeyBytes() {return KEY_BYTES;}
+	static constexpr unsigned short getSignatureBytes() {return SIGNATURE_BYTES;}
+	static constexpr unsigned short getIDBytes() {return ID_BYTES;}
 
 	void initialize(char[KEY_BYTES], char[KEY_BYTES], char[KEY_BYTES], char[SIGNATURE_BYTES], char[ID_BYTES], bool);
 
