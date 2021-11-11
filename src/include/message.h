@@ -18,6 +18,7 @@ private:
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
 	const char* chat;
+	const char* authentication;
 	unsigned short chatLength = 0;
 	//MessageError* error;
 
@@ -40,6 +41,10 @@ public:
 
 		const char* tempChat = parsedDocument["C"];
 		chat = copyString(tempChat, MAX_MESSAGE_LENGTH);
+
+		const char* tempAuthentication = parsedDocument["G"];
+		authentication = copyString(tempAuthentication, AUTHENTICATION_PAYLOAD_SIZE);
+
 		//error = new MessageError(parsedDocument);
 
 		outgoingPostProcess = &noOutgoingProcess;
@@ -51,16 +56,15 @@ public:
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
+		authentication = nullptr;
 		//error = e;
 		outgoingPostProcess = !op ? &noOutgoingProcess : op; //Remove conditional check by relocating noOutgoingProcess?
 		confirmedPostProcess = !cp ? &noConfirmedProcess : cp; //Remove conditional check by relocating noIncomingProcess?
 	}
 	~Message() {
-		Serial.println(F("before delete idempotency token"));
 		delete idempotencyToken;
-		Serial.println(F("before delete chat"));
+		delete[] authentication;
 		delete[] chat;
-		Serial.println(F("after delete chat"));
 		//delete error;
 	}
 
@@ -70,6 +74,7 @@ public:
 	MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
 	const char* getChat() {return chat;}
+	const char* getAuthentication() {return authentication;}
 	unsigned short getChatLength() {
 		if(chatLength == 0) {
 			const char* ptr = chat;
@@ -77,17 +82,6 @@ public:
 				chatLength += 1;
 			}
 		}
-
-		Serial.print(F("chat length: "));
-		Serial.println(chatLength);
-
-		Serial.print(F("chat over chat length:"));
-		for(unsigned short i = 0; i < chatLength; i += 1) {
-			Serial.print(' ');
-			Serial.print(chat[i], HEX);
-		}
-		Serial.println();
-
 		return chatLength;
 	}
 

@@ -626,7 +626,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 
 		doc["C"] = encryptedChat;
 
-		authenticationPayload = new char[49];
+		authenticationPayload = new char[AUTHENTICATION_PAYLOAD_SIZE];
 		buildAuthenticationPayload(authenticationPayload);
 		doc["G"] = authenticationPayload; // This is messageCount (16 bytes) and tag (32 bytes), as equivalent string values, and a null terminator.
 	} else {
