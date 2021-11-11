@@ -24,7 +24,7 @@ extern USBDeviceClass USBDevice;
 extern "C" void __libc_init_array(void);
 
 
-void updateDisplayWithPeerChat(const char*);
+void updateDisplayWithPeerChat(char*);
 void updateDisplayWithUserChat(const char*);
 
 bool quit = false;
@@ -32,6 +32,8 @@ bool quit = false;
 
 static Storage storage;
 static Display display;
+
+char* messageToPrint = nullptr;
 
 static InternetAccess internet;
 static Networking network(&millis, &updateDisplayWithPeerChat, 0, quit);
@@ -268,9 +270,19 @@ void sendChatMessage(char* chat) {
 }
 
 
-void updateDisplayWithPeerChat(const char* messageBody) {
+void updateDisplayWithPeerChat(char* messageBody) {
 	//Serial.println(messageBody);
-	display.updateReading(messageBody);
+	//display.updateReading(messageBody);
+	messageToPrint = messageBody;
+}
+
+
+void updateDisplay() {
+	if(messageToPrint != nullptr) {
+		display.updateReading(messageToPrint);
+		delete[] messageToPrint;
+		messageToPrint = nullptr;
+	}
 }
 
 
@@ -353,7 +365,7 @@ bool promptForNewWiFiCredentials() {
 		}
 	}
 
-	if(userInput[0] == 'Y' || userInput[0] == 'y') {
+	if(userInput[0] == 'y' || userInput[0] == 'Y') {
 		return true;
 	} else {
 		return false;
@@ -763,7 +775,7 @@ Estimated max time for single message processing: 4ms
 
 		updateInputMethod();
 		updateNetwork();
-		//updateDisplay();
+		updateDisplay();
 		//doAsynchronousProcess();
 		printErrorCodes();
 
