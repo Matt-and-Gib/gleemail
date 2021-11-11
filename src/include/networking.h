@@ -14,13 +14,9 @@
 #include "LiteChaCha/keyinfrastructure.h"
 #include "LiteChaCha/authenticatedencrypt.h"
 
-//#include <stdlib.h> //for itoa()
-
 
 class Networking {
 private:
-	//unsigned short messageReceivedCount = 0; //TESTING ONLY! Put me back by the function definition for getMessages()
-
 	bool& shutdownFlag;
 
 	WiFiUDP udp;
@@ -96,7 +92,6 @@ private:
 
 #warning "This is probably too big for most messages. Maybe create second buffer for handshakes?"
 	char messageFromUDPBuffer[MESSAGE_BUFFER_SIZE] = {0};
-//	char* messageFromUDPBuffer = new char[JSON_DOCUMENT_SIZE];
 	unsigned short packetSize = 0;
 
 	Queue<Message> messagesIn;
@@ -105,15 +100,12 @@ private:
 	MESSAGE_TYPE searchMessageType;
 
 	void createMessagePayload(char*, const size_t);
-	//void decryptBuffer(char*, const size_t);
 	void encryptBufferAndPrepareMessagePayload(char*, const size_t);
 
 	unsigned long long processStartTime = 0;
 	unsigned short processElapsedTime = 0;
 
 	unsigned short doTimeSensitiveProcess(const unsigned short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
-
-	//short doTimeSensetiveProcess(const short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
@@ -160,7 +152,7 @@ private:
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
 		if(n.connected == false) {
-			Serial.println(F("beginning auth"));
+			Serial.println(F("Authenticating Peer"));
 
 			n.convertEncryptionInfoPayload(n.peerDSAPubKey, n.peerEphemeralPubKey, n.peerSignature, n.peerID, messageIn.getData()->getChat());
 
@@ -173,8 +165,15 @@ private:
 			n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
 			//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
 
+			if(VERBOSE_DEBUG_LOG) {
+				Serial.print(F("Peer DSA Public Key: "));
+				for(unsigned short i = 0; i < keyBytes; i += 1) {
+					Serial.print(n.peerDSAPubKey[i], HEX);
+				}
+				Serial.println();
+			}
+
 			delete messagesOutQueue.remove(messageOut); //removes outgoing handshake from queue
-			Serial.println(F("Connected to peer!"));
 
 			n.connectedMS = n.nowMS();
 			n.processHeartbeat = &Networking::checkHeartbeat;
@@ -201,19 +200,11 @@ Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(char*)
 	chatMessageReceivedCallback = chatMsgCallback;
 
 	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(0, 0), nullptr, /*nullptr,*/ nullptr, nullptr);
-
-//#warning "Use correct buffer size here. POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE is probably too big. Maybe create second buffer for handshakes?"
-	/*for(int i = 0; i < POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE; i += 1) {
-		messageFromUDPBuffer[i] = '\0';
-	}*/
-
-	//tag = new char[tagBytes];
 }
 
 
 Networking::~Networking() {
 	delete glEEpalInfo;
-	//delete[] messageFromUDPBuffer;
 }
 
 
@@ -228,22 +219,7 @@ void Networking::clearAllQueues() {
 }
 
 
-//Connection is being dropped due to heartbeat flatline before other party has finished processing authentication
-void Networking::dropConnection() { //Baby, come back (to finish me)
-// A lot of this is not necessary if we're going to shut down anyway.
-/*	connected = false;
-	processHeartbeat = &Networking::dontCheckHeartbeat;
-
-	IPAddress palIP = glEEpalInfo->getIPAddress();
-	delete glEEpalInfo;
-	glEEpalInfo = nullptr;
-
-	clearAllQueues();
-
-	connectToPeer(palIP);*/
-
-	Serial.println(F("Connection dropped!"));
-
+void Networking::dropConnection() {
 	shutdownFlag = true;
 }
 
@@ -254,13 +230,6 @@ void Networking::sendChatMessage(const char* chat) {
 
 
 void Networking::createuuid(char* userID) {
-	Serial.print(F("userID:"));
-	for(unsigned short i = 0; i < IDBytes; i += 1) {
-		Serial.print(' ');
-		Serial.print(userID[i], HEX);
-	}
-	Serial.println();
-
 	uuid |= userID[0] << 8;
 	uuid |= userID[1];
 }
@@ -301,23 +270,6 @@ void Networking::buildEncryptionInfoPayload(char* encryptionInfoOut, const char*
 
 //Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
 void Networking::stringToHex(char* out, const char* s, const unsigned short start, const unsigned short length) {
-/*	for(unsigned short i = 0; i < length; i += 1) {
-		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
-			s[(i*2) + start] -= 48;
-		} else {
-			s[(i*2) + start] -= 87;
-		}
-		out[i] = s[(i*2) + start];
-		out[i] <<= 4;
-
-		if(48 <= s[(i*2) + start + 1] && s[(i*2) + start + 1] <= 57) {
-			s[(i*2) + start + 1] -= 48;
-		} else {
-			s[(i*2) + start + 1] -= 87;
-		}
-		out[i] |= s[(i*2) + start + 1];
-	}*/
-
 	for(unsigned short i = 0; i < length; i += 1) {
 		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
 			out[i] = (s[(i*2) + start] - 48) << 4;
@@ -349,19 +301,19 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	createuuid(userID);
 	buildEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
+	if(VERBOSE_DEBUG_LOG) {
+		Serial.print(F("User DSA Public Key: "));
+		for(unsigned short i = 0; i < keyBytes; i += 1) {
+			Serial.print(userDSAPubKey[i], HEX);
+		}
+	}
+	Serial.println();
+
 	udp.begin(CONNECTION_PORT);
 
 	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
-	Serial.print(F("connectToPeer: outgoing handshake idempotency token value: "));
-	Serial.println(outgoingPeerUniqueHandshakeValue);
-
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
-
-	Serial.print(F("glEEpal IP: "));
-	Serial.println(glEEpalInfo->getIPAddress());
-	Serial.print(F("glEEpal Token: "));
-	Serial.println(glEEpalInfo->getHandshakeIdempotencyTokenValue());
 
 	return true;
 }
@@ -399,7 +351,7 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Op
 	}
 
 	for(i = 0; i < 8; i += 1) {
-		message[i] = messageCount >> ((7 - i)*8); // I think this will work...
+		message[i] = messageCount >> ((7 - i)*8);
 	}
 
 	for(i = 0; i < tagBytes; i += 1) {
@@ -410,141 +362,13 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Op
 		message[i + 8 + tagBytes] = tempMessageBuffer[i];
 	}
 
-	message[8 + tagBytes + length] = '\0'; // This terminator should terminate the udp buffer, I believe.
-
-/*	unsigned short i = 0;
-	for(i = 0; i < sizeof(messageCount); i += 1) { // Should we maybe have a standalone variable for sizeof(messageCount)?
-		message[i*2] = (messageCount >> (60 - (i*8))) & 0x0f;
-		message[(i*2) + 1] = (messageCount >> 56 - (i*8)) & 0x0f;
-	}
-
-	for(i = 0; i < tagBytes; i += 1) {
-		message[(i*2) + (sizeof(messageCount)*2)] = tag[i] >> 4;
-		message[(i*2) + (sizeof(messageCount)*2) + 1] = tag[i] & 0x0f;
-	}
-
-	for(i = 0; i < length; i += 1) {
-		//Uh-oh! We are overwriting message!!!
-	}
-*/
-/*
-	unsigned short i = 0;
-	for(i = 0; i < keyBytes; i += 1) {
-		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
-		encryptionInfoOut[(i*2) + 1] = DSAPubKey[i] & 0x0f;
-
-		encryptionInfoOut[(i*2) + (keyBytes*2)] = ephemeralPubKey[i] >> 4;
-		encryptionInfoOut[(i*2) + (keyBytes*2) + 1] = ephemeralPubKey[i] & 0x0f;
-	}
-
-	for(i = 0; i < signatureBytes; i += 1) {
-		encryptionInfoOut[(i*2) + (keyBytes*4)] = signature[i] >> 4;
-		encryptionInfoOut[(i*2) + (keyBytes*4) + 1] = signature[i] & 0x0f;
-	}
-
-	for(i = 0; i < IDBytes; i += 1) {
-		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2)] = ID[i] >> 4;
-		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2) + 1] = ID[i] & 0x0f;
-	}
-
-	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
-	for(i = 0; i < (SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1); i += 1) {
-		if(encryptionInfoOut[i] < 0x0a) {
-			encryptionInfoOut[i] += 48;
-		} else {
-			encryptionInfoOut[i] += 87;
-		}
-	}
-
-	encryptionInfoOut[SIZE_OF_ENCRYPTION_INFO_PAYLOAD - 1] = '\n';
-*/
+	message[8 + tagBytes + length] = '\0';
 }
-
-
-/*void Networking::decryptBuffer(char* inputBuffer, const size_t length) {
-
-}*/
 
 
 void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) {
 	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length);
-
-//	createMessagePayload(outputBuffer, length);
 }
-
-
-
-/*char SpiDrv::spiTransfer(volatile char data)
-{
-    char result = SPIWIFI.transfer(data);
-    DELAY_TRANSFER();
-
-    return result;                    // return the received byte
-}
-
-
-
-void SpiDrv::sendBuffer(uint8_t* param, uint16_t param_len, uint8_t lastParam)
-{
-    uint16_t i = 0;
-
-    // Send Spi paramLen
-    sendParamLen16(param_len);
-
-    // Send Spi param data
-    for (i=0; i<param_len; ++i)
-    {
-        spiTransfer(param[i]);
-    }
-
-    // if lastParam==1 Send Spi END CMD
-    if (lastParam == 1)
-        spiTransfer(END_CMD);
-}
-
-
-
-bool ServerDrv::insertDataBuf(uint8_t sock, const uint8_t *data, uint16_t _len)
-{
-	WAIT_FOR_SLAVE_SELECT();
-    // Send Command
-    SpiDrv::sendCmd(INSERT_DATABUF_CMD, PARAM_NUMS_2);
-    SpiDrv::sendBuffer(&sock, sizeof(sock));
-    SpiDrv::sendBuffer((uint8_t *)data, _len, LAST_PARAM);
-
-    // pad to multiple of 4
-    int commandSize = 9 + _len;
-    while (commandSize % 4) {
-        SpiDrv::readChar();
-        commandSize++;
-    }
-
-    SpiDrv::spiSlaveDeselect();
-    //Wait the reply elaboration
-    SpiDrv::waitForSlaveReady();
-    SpiDrv::spiSlaveSelect();
-
-    // Wait for reply
-    uint8_t _data = 0;
-    uint8_t _dataLen = 0;
-    if (!SpiDrv::waitResponseData8(INSERT_DATABUF_CMD, &_data, &_dataLen))
-    {
-        WARN("error waitResponse");
-    }
-    SpiDrv::spiSlaveDeselect();
-    if (_dataLen!=0)
-    {
-        return (_data == 1);
-    }
-    return false;
-}
-
-
-size_t WiFiUDP::write(const uint8_t *buffer, size_t size)
-{
-	ServerDrv::insertDataBuf(_sock, buffer, size);
-	return size;
-}*/
 
 
 void Networking::buildAuthenticationPayload(char* authPayload) {
@@ -570,18 +394,6 @@ void Networking::buildAuthenticationPayload(char* authPayload) {
 
 
 void Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes) {
-/*	unsigned short i;
-	char* preparedOutgoingEncryptedChat = new char[(chatBytes*2) + 1];
-
-	for(i = 0; i < chatBytes; i += 1) {
-		preparedOutgoingEncryptedChat[i*2] = cipherText[i] >> 4;
-		preparedOutgoingEncryptedChat[(i*2) + 1] = cipherText[i] & 0x0f;
-	}
-
-	preparedOutgoingEncryptedChat[chatBytes*2] = '\0';
-
-	return preparedOutgoingEncryptedChat;*/
-
 	unsigned short i;
 
 	for(i = 0; i < chatBytes; i += 1) {
@@ -603,11 +415,7 @@ void Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short c
 
 
 Message& Networking::sendOutgoingMessage(Message& msg) {
-//	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
-//	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
-	//char outputBuffer[POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE]; // OOF. PLEASE KILL ME!
 	StaticJsonDocument<OUTGOING_JSON_DOCUMENT_SIZE> doc; //maybe make me a member of the class instead!
-// So it is + tagBytes (16 bytes) + sizeof(messageCount) I do want to confirm that it is indeed 8, but we don't need to do that right now.
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
 	doc["I"] = msg.getIdempotencyToken()->getValue();
 
@@ -618,13 +426,6 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 		overwriteString(msg.getChat(), msg.getChatLength(), encryptedChat);
 		ae.encryptAndTagMessage(messageCount, tag, encryptedChat, msg.getChatLength());
 		prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
-
-		Serial.print(F("prepared encryptedChat: '"));
-		for(int i = 0; i < msg.getChatLength() * 2 + 1; i += 1) {
-			Serial.print(' ');
-			Serial.print(encryptedChat[i], HEX);
-		}
-		Serial.println(F("'"));
 
 		doc["C"] = encryptedChat;
 
@@ -642,95 +443,18 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 
 	serializeJson(doc, outgoingMessageBuffer);
 
-	Serial.println(F("Sending:"));
-	Serial.println(outgoingMessageBuffer);
-
 	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
-	udp.write(outgoingMessageBuffer); // Just curious, does udp.write simply write the entire outputBuffer? If so, encrypted messages might pose a problem, as there is no simple way to determine when they terminate besides possibly sending the message length.
+	udp.write(outgoingMessageBuffer);
 	udp.endPacket();
 
 	msg.getIdempotencyToken()->incrementRetryCount();
 	messagesSentCount += 1;
 
-//	delete[] preparedEncryptedChat;
 	delete[] authenticationPayload;
 	delete[] encryptedChat;
 
-	Serial.print(F("Chat body: "));
-	Serial.println(msg.getChat());
-
 	return msg;
 }
-
-
-/*Message& Networking::sendOutgoingMessage(Message& msg) {
-//	char outputBuffer[JSON_DOCUMENT_SIZE + tagBytes + sizeof(messageCount) + 1]; // Does this need to be 1 longer to match udp.write size?
-//	char outputBuffer[((JSON_DOCUMENT_SIZE + 1 + tagBytes + sizeof(messageCount)) * 2) + 1]; // OOF. PLEASE KILL ME!
-#warning "This is probably too big! Use correctly sized buffer (or make buffer a member variable of the Networking class?"
-	char outputBuffer[POST_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE]; // OOF. PLEASE KILL ME!
-	StaticJsonDocument<OUTGOING_JSON_DOCUMENT_SIZE> doc;
-// So it is + tagBytes (16 bytes) + sizeof(messageCount) I do want to confirm that it is indeed 8, but we don't need to do that right now.
-	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
-	doc["I"] = msg.getIdempotencyToken()->getValue();
-	doc["C"] = msg.getChat();
-
-	//For sending error subobjects
-	//JsonObject E = doc.createNestedObject("E");
-	//E["D"] = static_cast<unsigned short>(msg.getError()->getID());
-	//E["A"] = msg.getError()->getAttribute();
-
-	serializeJson(doc, outputBuffer);
-	//if(msg.getMessageType() != MESSAGE_TYPE::HANDSHAKE) {
-	if(connected) { //This is only slightly dissapointing because its less clear than checking for message type (only want to send handshakes and confirmations of handshakes unencrypted)
-		encryptBufferAndPrepareMessagePayload(outputBuffer, measureJson(doc) + 1);	//DualJustice added one to PRE_ENCRYPTED_MESSAGE_INFO_MAX_MESSAGE_BUFFER_SIZE in global.h because we are adding one here.
-	}
-
-//	Serial.println(F("Sending:"));
-//	Serial.println(outputBuffer);
-
-	udp.beginPacket(glEEpalInfo->getIPAddress(), CONNECTION_PORT);
-//	udp.write(outputBuffer, measureJson(doc) + 1 + tagBytes + sizeof(messageCount) + 1);
-	//const unsigned short wroteLength = //udp.write(outputBuffer, ((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
-
-	Serial.print(F("Outgoing message type: "));
-	Serial.println(static_cast<unsigned short>(msg.getMessageType()));
-
-	if(connected) {
-		char itoaBuffer[9];
-		itoa(messageCount, itoaBuffer, 10);
-
-		udp.write(itoaBuffer);
-		Serial.print(F("Outgoing itoaBuffer: "));
-		Serial.println(itoaBuffer);
-
-		udp.write(tag);
-		Serial.print(F("Outgoing tag: "));
-		for(unsigned short i = 0; i < tagBytes; i += 1) {
-			Serial.print(tag[i], HEX);
-		}
-		Serial.println();
-	}
-
-	udp.write(outputBuffer, measureJson(doc) + 1); // Just curious, does udp.write simply write the entire outputBuffer? If so, encrypted messages might pose a problem, as there is no simple way to determine when they terminate besides possibly sending the message length.
-	Serial.print(F("Outgoing ciphertext(only goblins from here on out): "));
-	for(unsigned short i = 0; i < (measureJson(doc) + 1); i += 1) {
-		Serial.print(outputBuffer[i], HEX);
-	}
-	Serial.println();
-
-	udp.endPacket();
-
-
-	//Serial.print(F("Wrote: "));
-	//Serial.println(wroteLength);
-	//Serial.print(F("Max size of array: "));
-	//Serial.println(((measureJson(doc) + 1 + tagBytes + sizeof(messageCount)) * 2) + 1);
-
-	msg.getIdempotencyToken()->incrementRetryCount();
-	messagesSentCount += 1;
-
-	return msg;
-}*/
 
 
 unsigned long Networking::messageResendTime(QueueNode<Message>& msg) {
@@ -758,7 +482,6 @@ void Networking::sendHeartbeat() {
 void Networking::checkHeartbeatStillborn() {
 	if(approxCurrentTime - connectedMS > HEARTBEAT_STILLBORN_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_STILLBORN);
-		Serial.println(F("heartbeat stillborn"));
 		dropConnection();
 	}
 }
@@ -767,7 +490,6 @@ void Networking::checkHeartbeatStillborn() {
 void Networking::checkHeartbeatFlatline() {
 	if(approxCurrentTime - lastHeartbeatReceivedMS > FLATLINE_THRESHOLD_MS) {
 		DebugLog::getLog().logError(NETWORK_HEARTBEAT_FLATLINE);
-		Serial.println(F("oopsies beeeeeeeeeeeeep"));
 		dropConnection();
 	}
 }
@@ -794,6 +516,7 @@ void Networking::processIncomingError(QueueNode<Message>& msg) {
 void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
 	if(checkHeartbeatThreshold == &Networking::checkHeartbeatStillborn) {
 		checkHeartbeatThreshold = &Networking::checkHeartbeatFlatline;
+		Serial.println(F("Connected to Peer!"));
 	}
 
 	lastHeartbeatReceivedMS = nowMS();
@@ -801,16 +524,10 @@ void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingConfirmation(QueueNode<Message>& msg) {
-//	Serial.println(F("got confirmation of something"));
-
 	messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
 	if(messageOutWithMatchingIdempotencyToken) {
 		messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat or confirmation, this is removeFromQueue()
-
 	} else {
-//		Serial.print(F("confirmation no match found idempotency token: "));
-//		Serial.println(msg.getData()->getIdempotencyToken()->getValue());
-
 		DebugLog::getLog().logWarning(NETWORK_CONFIRMATION_NO_MATCH_FOUND);
 	}
 }
@@ -839,7 +556,7 @@ char* Networking::decryptChat(Message& msg) {
 	if(ae.messageAuthentic(chatDecryptionBuffer, decryptedMessageLength, messageCount, tag)) { // Authenticates the message with the MAC tag.
 		ae.decryptAuthenticatedMessage(chatDecryptionBuffer, decryptedMessageLength, messageCount); // Decrypts message, overwriting it with the plaintext.
 	} else {
-		Serial.println("NOT AUTHENTIC!");
+		DebugLog::getLog().logError(ERROR_CODE::NETWORK_RECEIVED_UNAUTHENTIC_MESSAGE);
 		chatDecryptionBuffer[0] = '\0';
 	}
 
@@ -847,14 +564,11 @@ char* Networking::decryptChat(Message& msg) {
 }
 
 
-//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 void Networking::processIncomingChat(QueueNode<Message>& msg) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-		//Serial.print(F("Chat body received: "));
-		//Serial.println(msg.getData()->getChat());
 		char* tempDecryptedChat = decryptChat(*msg.getData()); //once decryption is verified, use the function as the parameter for the chat callback and don't create this pointer.
 		(*chatMessageReceivedCallback)(tempDecryptedChat);
 	}
@@ -862,11 +576,6 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
-	//messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ &removeFromQueue, nullptr)); //Send immediately instead of enqueuing message for timing
-
-//	Serial.println(F("Received handshake"));
-
-#warning "Any subsequent confirmation of a handshake after the first will be encrypted because connected is set to true after this"
 	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
@@ -911,9 +620,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	case MESSAGE_TYPE::HANDSHAKE:
-//		Serial.println(F("before process incoming handshake"));
 		processIncomingHandshake(msg);
-//		Serial.println(F("after process incoming handshake"));
 	break;
 
 	default:
@@ -927,7 +634,6 @@ bool Networking::processIncomingMessageQueueNode(Queue<Message>& messagesIn, Que
 	messagesIn.remove(*nextMessage);
 	processIncomingMessage(*nextMessage);
 	delete nextMessage;
-//	Serial.println(F("Deleted processed message node"));
 	return true;
 }
 
@@ -955,128 +661,10 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 }
 
 
-/*
-uint8_t SERCOM::transferDataSPI(uint8_t data)
-{
-  sercom->SPI.DATA.bit.DATA = data; // Writing data into Data register
-
-  while( sercom->SPI.INTFLAG.bit.RXC == 0 )
-  {
-    // Waiting Complete Reception
-  }
-
-  return sercom->SPI.DATA.bit.DATA;  // Reading data
-}
-
-
-
-byte SPIClass::transfer(uint8_t data)
-{
-  return _p_sercom->transferDataSPI(data);
-}
-
-
-
-char SpiDrv::spiTransfer(volatile char data)
-{
-    char result = SPIWIFI.transfer(data);
-    DELAY_TRANSFER();
-
-    return result;                    // return the received byte
-}	
-
-
-
-void SpiDrv::getParam(uint8_t* param)
-{
-    // Get Params data
-    *param = spiTransfer(DUMMY_DATA);
-    DELAY_TRANSFER();
-}
-
-
-
-int SpiDrv::waitResponseCmd(uint8_t cmd, uint8_t numParam, uint8_t* param, uint8_t* param_len)
-{
-    char _data = 0;
-    int ii = 0;
-
-    IF_CHECK_START_CMD(_data)
-    {
-        CHECK_DATA(cmd | REPLY_FLAG, _data){};
-
-        CHECK_DATA(numParam, _data)
-        {
-            readParamLen8(param_len);
-            for (ii=0; ii<(*param_len); ++ii)
-            {
-                // Get Params data
-                //param[ii] = spiTransfer(DUMMY_DATA);
-                getParam(&param[ii]);
-            } 
-        }         
-
-        readAndCheckChar(END_CMD, &_data);
-    }     
-    
-    return 1;
-}
-
-
-
-uint16_t ServerDrv::availData(uint8_t sock)
-{
-    if (!SpiDrv::available()) {
-        return 0;
-    }
-
-	WAIT_FOR_SLAVE_SELECT();
-    // Send Command
-    SpiDrv::sendCmd(AVAIL_DATA_TCP_CMD, PARAM_NUMS_1);
-    SpiDrv::sendParam(&sock, sizeof(sock), LAST_PARAM);
-
-    // pad to multiple of 4
-    SpiDrv::readChar();
-    SpiDrv::readChar();
-
-    SpiDrv::spiSlaveDeselect();
-    //Wait the reply elaboration
-    SpiDrv::waitForSlaveReady();
-    SpiDrv::spiSlaveSelect();
-
-    // Wait for reply
-    uint8_t _dataLen = 0;
-	uint16_t len = 0;
-
-    SpiDrv::waitResponseCmd(AVAIL_DATA_TCP_CMD, PARAM_NUMS_1, (uint8_t*)&len,  &_dataLen);
-
-    SpiDrv::spiSlaveDeselect();
-
-    return len;
-}
-
-
-int WiFiUDP::parsePacket()
-{
-	while (_parsed--)
-	{
-	  // discard previously parsed packet data
-	  uint8_t b;
-
-	  WiFiSocketBuffer.read(_sock, &b, sizeof(b));
-	}
-
-	_parsed = ServerDrv::availData(_sock);
-
-	return _parsed;
-}
-*/
-
-
 bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
 	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
-		udp.read(messageFromUDPBuffer, packetSize); // Depending on what packetSize is, the length of the ciphertext may need to be sent with the messagePayload!
+		udp.read(messageFromUDPBuffer, packetSize);
 #warning "remove this terminator once we can send a message based on length instead of \0"
 		messageFromUDPBuffer[packetSize++] = '\0'; // Is this writing a null terminator somewhere it shouldn't with handshakes? Also, shouldn't a null terminator be put at the end of every packet by us anyways?
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
@@ -1085,15 +673,12 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 			StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE> parsedDocument; //Maybe this could be a private member (reused) instead of constructing and destructing every time
 			DeserializationError parsingError = deserializeJson(parsedDocument, messageFromUDPBuffer);
 			if(parsingError) {
-				Serial.print(F("getMessages: parse error: "));
-				Serial.println(parsingError.c_str());
+				//Serial.print(F("getMessages: parse error: "));
+				//Serial.println(parsingError.c_str());
 				//write data to buffer to check in gleemail.ino(?) in case HTTP GET is stored in UDP buffer (for when MCCP version info is requested)
 				DebugLog::getLog().logError(JSON_MESSAGE_DESERIALIZATION_ERROR);
 				return true;
 			}
-
-			Serial.print(F("Message received of type: "));
-			Serial.println(static_cast<unsigned short>(parsedDocument["T"]));
 
 			QueueNode<Message>* enqueuedQueueNode = intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
 		} else {
@@ -1136,7 +721,6 @@ void Networking::processNetwork() {
 		messageReceivedCount = 0;
 	}
 
-	//NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 	queueStartNode = messagesIn.peek();
 	if(queueStartNode) {
 		searchMessageType = START_MESSAGE_TYPE;
