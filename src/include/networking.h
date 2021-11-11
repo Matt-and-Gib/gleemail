@@ -169,11 +169,11 @@ private:
 			if(VERBOSE_DEBUG_LOG) {
 				Serial.print(F("Peer DSA Public Key:"));
 				for(unsigned short i = 0; i < keyBytes; i += 1) {
-					Serial.print(F(' '));
+					Serial.print(' ');
 					if(n.peerDSAPubKey[i] > 0x0f) {
 						Serial.print(n.peerDSAPubKey[i], HEX);
 					} else {
-						Serial.print(F('0'));
+						Serial.print('0');
 						Serial.print(n.peerDSAPubKey[i], HEX);
 					}
 				}
@@ -312,11 +312,11 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	if(VERBOSE_DEBUG_LOG) {
 		Serial.print(F("User DSA Public Key:"));
 		for(unsigned short i = 0; i < keyBytes; i += 1) {
-			Serial.print(F(' '));
+			Serial.print(' ');
 			if(userDSAPubKey[i] > 0x0f) {
 				Serial.print(userDSAPubKey[i], HEX);
 			} else {
-				Serial.print(F('0'));
+				Serial.print('0');
 				Serial.print(userDSAPubKey[i], HEX);
 			}
 		}
