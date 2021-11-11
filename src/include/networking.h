@@ -14,7 +14,7 @@
 #include "LiteChaCha/keyinfrastructure.h"
 #include "LiteChaCha/authenticatedencrypt.h"
 
-#include <stdlib.h> //for itoa()
+//#include <stdlib.h> //for itoa()
 
 
 class Networking {
@@ -75,6 +75,7 @@ private:
 	void buildEncryptionInfoPayload(char*, const char*, const char*, const char*, const char*); // REMOVE ME?
 	void stringToHex(char*, const char*, const unsigned short, const unsigned short); // REMOVE ME?
 	void convertEncryptionInfoPayload(char*, char*, char*, char*, const char*); // REMOVE ME?
+	void stringToULL();
 
 	void clearAllQueues();
 	void dropConnection();
@@ -104,7 +105,7 @@ private:
 	MESSAGE_TYPE searchMessageType;
 
 	void createMessagePayload(char*, const size_t);
-	void decryptBuffer(char*, const size_t);
+	//void decryptBuffer(char*, const size_t);
 	void encryptBufferAndPrepareMessagePayload(char*, const size_t);
 
 	unsigned long long processStartTime = 0;
@@ -124,10 +125,13 @@ private:
 	void processIncomingError(QueueNode<Message>& msg);
 	void processIncomingHeartbeat(QueueNode<Message>& msg);
 	void processIncomingConfirmation(QueueNode<Message>& msg);
+	char* decryptChat(Message& msg);
 	void processIncomingChat(QueueNode<Message>& msg);
 	void processIncomingHandshake(QueueNode<Message>& msg);
+
+	void processIncomingMessage(QueueNode<Message>&);
 	
-	void (*chatMessageReceivedCallback)(const char*);
+	void (*chatMessageReceivedCallback)(char*);
 
 	unsigned long messageResendTime(QueueNode<Message>& msg);
 	bool processOutgoingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
@@ -142,8 +146,6 @@ private:
 	void prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes);
 	char outgoingMessageBuffer[MESSAGE_BUFFER_SIZE] = {0};
 	Message& sendOutgoingMessage(Message&);
-
-	void processIncomingMessage(QueueNode<Message>&);
 
 	bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyToken();
@@ -183,7 +185,7 @@ private:
 		}
 	}
 public:
-	Networking(unsigned long (*)(), void (*)(const char*), const long u, bool& quit);
+	Networking(unsigned long (*)(), void (*)(char*), const long u, bool& quit);
 	~Networking();
 
 	void processNetwork();
@@ -193,7 +195,7 @@ public:
 };
 
 
-Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(const char*), const long u, bool& quit) : shutdownFlag{quit} {
+Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(char*), const long u, bool& quit) : shutdownFlag{quit} {
 	nowMS = millis;
 	uuid = u + nowMS(); //CHANGE ME!
 	chatMessageReceivedCallback = chatMsgCallback;
@@ -459,9 +461,9 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Op
 }
 
 
-void Networking::decryptBuffer(char* inputBuffer, const size_t length) {
+/*void Networking::decryptBuffer(char* inputBuffer, const size_t length) {
 
-}
+}*/
 
 
 void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) {
@@ -814,16 +816,47 @@ void Networking::processIncomingConfirmation(QueueNode<Message>& msg) {
 }
 
 
+void Networking::stringToULL() {
+	messageCount = 0;
+
+	for(unsigned short i = 0; i < SIZE_OF_UNSIGNED_LONG_LONG; i += 1) {
+		messageCount |= tag[i] << ((SIZE_OF_UNSIGNED_LONG_LONG - i) - 1)*BITS_PER_BYTE;
+	}
+}
+
+
+char* Networking::decryptChat(Message& msg) {
+	stringToHex(tag, msg.getAuthentication(), 0, SIZE_OF_UNSIGNED_LONG_LONG);
+	stringToULL();
+	stringToHex(tag, msg.getAuthentication(), (SIZE_OF_UNSIGNED_LONG_LONG*2), tagBytes);
+
+	unsigned short decryptedMessageLength = msg.getChatLength() / 2;
+
+	char* chatDecryptionBuffer = new char[msg.getChatLength() + 1]; //delete[]'ed by updateDispaly() in main
+	stringToHex(chatDecryptionBuffer, msg.getChat(), 0, msg.getChatLength());
+	chatDecryptionBuffer[decryptedMessageLength] = '\0';
+
+	if(ae.messageAuthentic(chatDecryptionBuffer, decryptedMessageLength, messageCount, tag)) { // Authenticates the message with the MAC tag.
+		ae.decryptAuthenticatedMessage(chatDecryptionBuffer, decryptedMessageLength, messageCount); // Decrypts message, overwriting it with the plaintext.
+	} else {
+		Serial.println("NOT AUTHENTIC!");
+		chatDecryptionBuffer[0] = '\0';
+	}
+
+	return chatDecryptionBuffer;
+}
+
+
 //NOTE: ProcessIncomingMessageQueueNode will call Display function if message type is CHAT, adding ~1ms processing time
 void Networking::processIncomingChat(QueueNode<Message>& msg) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
 
 	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-		//decrypt chat message!
-		Serial.print(F("Chat body received: "));
-		Serial.println(msg.getData()->getChat());
-		(*chatMessageReceivedCallback)(msg.getData()->getChat());
+		//Serial.print(F("Chat body received: "));
+		//Serial.println(msg.getData()->getChat());
+		char* tempDecryptedChat = decryptChat(*msg.getData()); //once decryption is verified, use the function as the parameter for the chat callback and don't create this pointer.
+		(*chatMessageReceivedCallback)(tempDecryptedChat);
 	}
 }
 
