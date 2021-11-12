@@ -23,7 +23,7 @@ ___
 
 What is glEEmail? Welcome to the future, kid. glEEmail is like sending your uncle a telegram, except it doesn't cost 25 cents per character. It's easy, and fun (some assembly required).
 
-glEEmail allows you to send messages to (predefined) clients over the Internet via that old Morse Code switch that you have installed next to your computer terminal. Just hook it up and get flyin'!
+glEEmail allows you to securely‡ send messages to peers over the Internet via that old Morse Code switch that you have installed next to your computer terminal. Just hook it up and get flyin'!
 
 Okay, for real, glEEmail is a side project while we're waiting for 200 SMD LEDs to arrive from China. The project allows you to test input and output from your Arduino, and to send messages to an Arduino at a different IP address as long as both can connect to the Internet.
 ___
@@ -61,7 +61,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 11/10/2021
+Last updated: 11/11/2021
 <details>
 <summary>0 - 9: General</summary>
 
@@ -71,6 +71,7 @@ Last updated: 11/10/2021
 |1|Debug Debug Log|Verified that debug log is functional|N/A|
 |2|Unknown Setup State|An unknown step was specified in setup|High|
 |3|Continuous Frame Latency|Lag may cause inaccuracies in input|High|
+|4|All Functions Succeeded||N/A|
 </details>
 
 <details>
@@ -95,7 +96,7 @@ Last updated: 11/10/2021
 |----|-----|-----|--------|
 |51|Unknown Message Sender||High|
 |52|Too Many Messages Received||High|
-|53|Heartbeat Flatline||High|
+|53|Heartbeat Flatline|Too many consecutive heartbeats missing|High|
 |54|Outgoing Token Timestamp Elapsed||High|
 |57|Unknown Incoming Message Type||High|
 |58|Confirmation No Match Found||Low|
@@ -106,10 +107,11 @@ Last updated: 11/10/2021
 |63|Authentication Failed|UserIP and PeerID not unique or peer signature invalid|High|
 |64|Getting Messages Took Significantly Longer than Allocated||High|
 |65|Getting Messages Took Insignificantly Longer than Allocated||Low|
-|66|Processing Incoming Messages Took Significantly Longer than Allocated||High|
+|66|Processing Incoming Messages Took Significantly Longer than Allocated|Note: this will occur once when first authenticating peer and can be safely ignored|High|
 |67|Processing Incoming Messages Took Insignificantly Longer than Allocated||Low|
 |68|Sending Messages Took Significantly Longer than Allocated||High|
 |69|Sending Messages Took Insignificantly Longer than Allocated||Low|
+|70|Received Unauthentic Message|Decryption of chat message revealed it may have been tampered with (message will be discarded)|High|
 </details>
 
 <details>
@@ -118,9 +120,9 @@ Last updated: 11/10/2021
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
 |90|Nullptr Payload|No data provided to deserialize|High|
-|91|Prefs Deserialization Error||High|
-|92|Message Deserialization Error||High|
-|93|Input Data Deserialization Error||High|
+|91|Prefs Deserialization Error|Could not read prefs file|High|
+|92|Message Deserialization Error|Could not read message|High|
+|93|Input Data Deserialization Error|Could not read downloaded data|High|
 </details>
 
 <details>
@@ -137,7 +139,7 @@ Last updated: 11/10/2021
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
 |170|Passed Invalid Parameter|SSID or Password invalid|High|
-|171|Connection Failed||High|
+|171|Connection Failed|May attempt retry|High|
 |172|WiFi Connection Failed Retry Occurred||High|
 |173|Unknown Status||High|
 |174|SSID Possibly Truncated|Characters after SSID max length may have been missed|High|
@@ -151,7 +153,7 @@ Last updated: 11/10/2021
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
 |210|Header Termination Omitted||High|
-|211|Download Impossible - Not Connected||High|
+|211|Download Impossible: Not Connected||High|
 |212|Secure Connection To Server Failed|SSL certificate may not be installed|High|
 |213|Request to Server Header Invalid||High|
 |214|Data Buffer Overflow||High|
@@ -163,9 +165,9 @@ Last updated: 11/10/2021
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
-|250|Prefs File Size Greater Than Prefs Document Size||High|
-|251|Storage Not Detected||High|
-|252|Couldn't Load Prefs||Low|
+|250|Prefs File Size Greater Than Prefs Document Size|Unable to read full prefs file from SD|High|
+|251|Storage Not Detected|Verify that SD card is inserted correctly|High|
+|252|Couldn't Load Prefs|Preferences file not found|Low|
 </details>
 
 ___
@@ -252,3 +254,5 @@ glEEmail is Open Source with no promise of support! Please feel free to contribu
 `*in terms of hardware** support`
 
 `**Arduino`
+
+`‡use at your own risk`
