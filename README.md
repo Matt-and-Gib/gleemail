@@ -221,13 +221,21 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 • How to connect with your friend
 
-- To Do
+If you've configured the hardware correctly, simply upload the code to your Arduino, open the serial monitor, and follow the prompts on screen (the LCD and serial monitor). If you haven't yet wired the hardware, refer to the [Wiring Diagram](#diagram).
 
 • Features
 
+- 57 ~~flavors~~ morse code characters
 - You can hold down the switch to pause input
+- DDoS protection built-in!
+- Encrypted chat so you can't be spied upon‡
+- Necessary downloads are cached to reduce network impact
+- Learn Morse Code
+- Easily send SOS when necessary‡
+- Be social
+- Be a glEEpal
 
-***IMPORTANT NOTE:*** You are limited to sending no more than ~32,768 messages per sitting due to the size of the idempotency token (unsigned short) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glee-ware every once in a while.
+***IMPORTANT NOTE:*** You are limited to sending no more than ~32,768 messages per session due to the size of the idempotency token (unsigned short- i.e. 2 bytes) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glee-ware every once in a while.
 ___
 
 ### <a name="plans"></a>**Future Plans**
