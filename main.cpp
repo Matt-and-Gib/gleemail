@@ -11,13 +11,13 @@
 #include "src/include/networking.h"
 #include "src/include/webaccess.h"
 
-#include "src/include/LiteChaCha/keyinfrastructure.h"
-#include "src/include/LiteChaCha/authenticatedencrypt.h"
+//#include "src/include/LiteChaCha/keyinfrastructure.h"
+//#include "src/include/LiteChaCha/authenticatedencrypt.h"
 
 //Weak empty variant initialization function.
 //May be redefined by variant files.
 void initVariant() __attribute__((weak));
-void initVariant() { }
+void initVariant() {}
 
 extern USBDeviceClass USBDevice;
 
