@@ -104,7 +104,7 @@ Last updated: 11/11/2021
 |60|Unexpected Handshake from Connected IP|Either received handshake after token removed from queue (expired) or handshake has unique idempotency token|Low|
 |61|Heartbeat Stillborn|Heartbeat never received|High|
 |62|Connection Attempt while Connected||Low|
-|63|Authentication Failed|UserIP and PeerID not unique or peer signature invalid|High|
+|63|Authentication Failed|UserID and PeerID not unique or peer signature invalid|High|
 |64|Getting Messages Took Significantly Longer than Allocated||High|
 |65|Getting Messages Took Insignificantly Longer than Allocated||Low|
 |66|Processing Incoming Messages Took Significantly Longer than Allocated|Note: this will occur once when first authenticating peer and can be safely ignored|High|
