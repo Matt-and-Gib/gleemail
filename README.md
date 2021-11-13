@@ -154,7 +154,7 @@ Last updated: 11/11/2021
 |----|-----|-----|--------|
 |210|Header Termination Omitted||High|
 |211|Download Impossible: Not Connected||High|
-|212|Secure Connection To Server Failed|SSL certificate may not be installed|High|
+|212|Secure Connection To Server Failed|SSL certificate may not be installed (see [Usage Instructions](#instructions))|High|
 |213|Request to Server Header Invalid||High|
 |214|Data Buffer Overflow||High|
 |215|Data Buffer Underutilized||Low|
@@ -219,11 +219,11 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 ![Install Certificate Picture Four.png](resources/InstallCertificatePictureFour.png)
 
-• How to connect with your friend
+#### How to connect with your friend
 
 If you've configured the hardware correctly, simply upload the code to your Arduino, open the serial monitor, and follow the prompts on screen (the LCD and serial monitor). If you haven't yet wired the hardware, refer to the [Wiring Diagram](#diagram).
 
-• Features
+Features:
 
 - 57 ~~flavors~~ morse code characters
 - You can hold down the switch to pause input
