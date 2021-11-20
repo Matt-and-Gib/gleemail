@@ -433,20 +433,11 @@ void setup() {
 		Serial.read();
 	}
 
-//----------USED TO CLEAR THE SD CARD----------
-
-	storage.begin();
-	if(!storage.clearFile(prefsPath)) {
-		Serial.println(F("Unable to Prefs path"));
+	if(RESET_STORAGE) {
+		storage.begin();
+		storage.eraseAll(133769);
+		Serial.println(F("Files deleted successfully"));
 	}
-	if(!storage.clearFile(morseCodeCharPairsPath)) {
-		Serial.println(F("Unable to delete MorseCodeCharPairs path"));
-	}
-
-	Serial.println(F("Files deleted successfully. Halting"));
-	abort();
-
-//----------USED TO CLEAR THE SD CARD----------
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
 	SETUP_LEVEL setupState = WELCOME;

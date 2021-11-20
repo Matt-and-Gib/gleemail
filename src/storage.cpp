@@ -1,4 +1,6 @@
 #include "include/storage.h"
+#include "include/global.h"
+#include <SD.h>
 
 
 Storage::Storage() {
@@ -59,4 +61,18 @@ const char* Storage::readFile(const char* filePath) { //REMEMBER TO DELETE! This
 	} else {
 		return nullptr;
 	}
+}
+
+
+bool Storage::eraseAll(const unsigned int confirmationCode) {
+	//If you're looking for the confirmation code, make sure that you understand this fuction will erase everything on the SD card.
+	if(confirmationCode != 133769) {
+		return false;
+	}
+
+	//TODO: recursively search and destory from gleemail root instead of listing specific files.
+	clearFile(prefsPath);
+	clearFile(morseCodeCharPairsPath);
+
+	return true;
 }
