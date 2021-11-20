@@ -24,7 +24,7 @@ private:
 	char* wifiPassword;
 public:
 	static Preferences& getPrefs() {
-		static Preferences prefs;
+		static Preferences prefs; //wrong for singleton pattern!
 		return prefs;
 	}
 

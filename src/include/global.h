@@ -73,7 +73,7 @@ static char* copyAndTerminateString(const char* original, const unsigned short L
 		duplicate[i] = original[i];
 	}
 	duplicate[LEN] = '\0';
-	
+
 	return duplicate;
 }
 

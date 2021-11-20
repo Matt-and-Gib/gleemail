@@ -24,7 +24,7 @@ bool quit = false;
 
 static Storage storage;
 
-static InputMethod* input;
+static InputMethod* input = nullptr;
 static unsigned short pinIndex = 0;
 static char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
 static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
@@ -154,16 +154,48 @@ bool promptForNewWiFiCredentials() {
 
 
 bool connectToWiFi(bool forceManual = false) {
+	/*
+		goal: successfully connect to wifi
+
+		step 1: check if ssid & password exist in preferences
+			no: ask for input
+
+		step 2: attempt connection
+
+		if(connection was successful && asked for new input) {
+			set preferences to new input
+		}
+
+		if(connection was successful && did not ask for new input) {
+			good to go!
+		}
+
+		if(connection failed && asked for new input) {
+			ask for input again (go back to top)
+			aka, return false
+		}
+
+		if(connection failed && did not ask for new input) {
+			clear preferences and
+			return false
+		}
+	
+		step 3: return connection successful?
+	*/
+}
+
+
+bool connectToWiFi(bool forceManual = false) {
 	bool changedLoginInfo = forceManual;
 
-	char* desiredSSID = nullptr;
-	char* desiredPassword = nullptr;
-	unsigned short ssidInputLength = 0;
-	unsigned short passwordInputLength = 0;
+	unsigned short ssidInputLength = strlen(Preferences::getPrefs().getWiFiSSID());
+	unsigned short passwordInputLength = strlen(Preferences::getPrefs().getWiFiPassword());
+	char* desiredSSID = copyAndTerminateString(Preferences::getPrefs().getWiFiSSID(), ssidInputLength);
+	char* desiredPassword = copyAndTerminateString(Preferences::getPrefs().getWiFiPassword(), passwordInputLength);
 
-	if(forceManual || !Preferences::getPrefs().getWiFiSSID() || !Preferences::getPrefs().getWiFiPassword()) {
-		desiredSSID = new char[InternetAccess::getMaxSSIDLength()];
-		desiredPassword = new char[InternetAccess::getMaxPasswordLength()];
+	if(forceManual || ssidInputLength == 0 || passwordInputLength == 0) {
+		//desiredSSID = new char[InternetAccess::getMaxSSIDLength()];
+		//desiredPassword = new char[InternetAccess::getMaxPasswordLength()];
 
 		Serial.println(F("Enter WiFi SSID:"));
 		display.updateWriting("Enter SSID");
@@ -175,13 +207,14 @@ bool connectToWiFi(bool forceManual = false) {
 
 			delay(250);
 		}
+		desiredSSID[ssidInputLength++] = '\0'; //may overflow if SSID is too long
 
 		if(ssidInputLength >= InternetAccess::getMaxSSIDLength()) { //NOTE: if user enters a value equal to or in excess of max ssid length, we don't know if the ssid was truncated or just max-length
 			DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
 		}
 
 		Serial.print(F("Enter password for "));
-		Serial.print(Preferences::getPrefs().getWiFiSSID());
+		Serial.print(desiredSSID);
 		Serial.println(F(":"));
 		display.updateWriting("Enter Password");
 		while(true) {
@@ -205,13 +238,15 @@ bool connectToWiFi(bool forceManual = false) {
 	Serial.println(F("Attempting connection..."));
 	display.updateWriting("Connecting...");
 
-	if(!internet.connectToNetwork(Preferences::getPrefs().getWiFiSSID(), Preferences::getPrefs().getWiFiPassword())) {
+	if(!internet.connectToNetwork(desiredSSID, desiredPassword)) {
 		display.updateWriting("Failed");
 		Serial.print(F("Unable to connect to "));
 		Serial.println(Preferences::getPrefs().getWiFiSSID());
 
-		delete[] desiredSSID;
-		delete[] desiredPassword;
+		if(changedLoginInfo) {
+			delete[] desiredSSID;
+			delete[] desiredPassword;
+		}
 
 		return false;
 	}
@@ -284,8 +319,8 @@ const char* getMorseCodeCharPairsData() {
 }
 
 
-bool setupInputMethod() {
-	input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
+bool setupMorseCodeInputMethod() {
+	display.updateWriting("Downloading Data");
 
 	const unsigned short mccpVersion = getMorseCodeCharPairsVersion();
 	const char* data = storage.readFile(morseCodeCharPairsPath);
@@ -399,7 +434,7 @@ void setup() {
 	}
 
 //----------USED TO CLEAR THE SD CARD----------
-/*
+
 	storage.begin();
 	if(!storage.clearFile(prefsPath)) {
 		Serial.println(F("Unable to Prefs path"));
@@ -410,7 +445,7 @@ void setup() {
 
 	Serial.println(F("Files deleted successfully. Halting"));
 	abort();
-*/
+
 //----------USED TO CLEAR THE SD CARD----------
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
@@ -464,18 +499,14 @@ void setup() {
 			}
 		break;
 
-/*
-~7.0 sec
-~2.5 sec
-~2.0 sec
-~1.7 sec
-~1.4 sec
-*/
 
 		case SETUP_LEVEL::INPUT_METHOD:
 			display.updateReading("Setting Up Input");
-			display.updateWriting("Downloading Data");
-			if(setupInputMethod()) {
+			if(input == nullptr) {
+				input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
+			}
+
+			if(setupMorseCodeInputMethod()) {
 				for(unsigned short i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
 					userMessage[i] = '\0';
 					peerMessage[i] = '\0';
