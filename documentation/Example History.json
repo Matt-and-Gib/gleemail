@@ -1,0 +1,58 @@
+//NOTE: if we choose to store history as JSON, we may have to (probably) read the full file into memory before we can write to it. We may prefer to have a parent JSON file with meta info, then write each session as a new JSON file
+
+{
+	"History Version": 1,
+	"Last Session ID": 2,
+	"Sessions": [
+		{ //NOTE: this is possible version 1 (detailed, more data)
+			"Session": 1,
+			"Total Messages": 3,
+			"Log": [
+				{
+					"Sender": "U", //U for User, P for Peer (we could just write User or Peer, too)
+					"Message": "HELLW", //Up to 16, I guess
+					"Relative Time": 55432 //Up to 4294967295 for unsigned long
+				},
+				{
+					"Sender": "P",
+					"Message": "SOS",
+					"Relative Time": 55856
+				},
+				{
+					"Sender": "U",
+					"Message": "OM",
+					"Relative Time": 56311
+				}
+			]
+		},
+		{ //NOTE: this is possible version 2 (simplier, less data)
+			"Session": 2,
+			"Total Messages": 5, //In this version, Total Messages could probably be excluded to save on space
+			"Log": [
+				"USER: HELLW",
+				"USER: HE LLW",
+				"USER: HTLLO",
+				"USER: HELLO",
+				"PEER: HI"
+			]
+		}
+	]
+}
+
+{ //NOTE: this is possible version 3 (barebones, fastest and least space + least work?). This would replace all of the JSON above. If we're going to take this path, lets consider simply writing to a txt file instead so that we don't have to parse this and construct JSON objects
+	[
+		{
+			[
+				"USER: HI",
+				"PEER: SOS"
+			]
+		},
+		{
+			[
+				"PEER: ME FIRST",
+				"USER: YOURE FAST",
+				"PEER: YEP"
+			]
+		}
+	]
+}
