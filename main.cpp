@@ -46,7 +46,7 @@ static unsigned short cycleLatencyCount = 0;
 
 void clearSerialInputBuffer() {
 	while(Serial.available() > 0) {
-		char garbage = Serial.read();
+		Serial.read();
 	}
 }
 
@@ -156,6 +156,12 @@ bool preparePreferences() {
 
 
 void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword) {
+	delete[] *desiredWiFiSSID;
+	delete[] *desiredWiFiPassword;
+
+	*desiredWiFiSSID = new char[InternetAccess::getMaxSSIDLength() + 1]; //The + 1 is for the null terminator added in enterNewWiFiCredentials().
+	*desiredWiFiPassword = new char[InternetAccess::getMaxPasswordLength() + 1]; //The + 1 is for the null terminator added in enterNewWiFiCredentials().
+
 	Serial.println(F("Enter WiFi SSID:"));
 	display.updateWriting("Enter SSID");
 
@@ -168,7 +174,8 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 
 		delay(250);
 	}
-	*desiredWiFiSSID[ssidInputLength] = '\0';
+
+	(*desiredWiFiSSID)[ssidInputLength] = '\0';
 
 	if(ssidInputLength >= InternetAccess::getMaxSSIDLength()) { //NOTE: if user enters a value equal to or in excess of max ssid length, we don't know if the ssid was truncated or just max-length
 		DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
@@ -190,7 +197,7 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 
 		delay(250);
 	}
-	*desiredWiFiPassword[passwordInputLength] = '\0';
+	(*desiredWiFiPassword)[passwordInputLength] = '\0';
 
 	if(passwordInputLength >= InternetAccess::getMaxPasswordLength()) { //NOTE: if user enters a value equal to or in excess of max password length, we don't know if the password was truncated or just max-length
 		DebugLog::getLog().logError(INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED);
@@ -214,13 +221,14 @@ bool promptForNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassw
 			}
 		}
 
+		clearSerialInputBuffer();
+
 		if(!(promptForNewWiFiCredentialsUserInput[0] == 'y' || promptForNewWiFiCredentialsUserInput[0] == 'Y')) {
 			return false;
 		}
 	}
 	
 	enterNewWiFiCredentials(desiredWiFiSSID, desiredWiFiPassword);
-
 	return true;
 }
 
@@ -502,8 +510,9 @@ void setup() {
 
 	char* desiredWiFiSSID = nullptr;
 	char* desiredWiFiPassword = nullptr;
-	bool networkForceNewCredentials = false;
+	bool networkPromptForNewCredentials = false;
 	bool networkCredentialsChanged = false;
+	bool networkCredentialsExist = false;
 
 	const unsigned short SETUP_STEP_DELAY = 0;
 
@@ -546,15 +555,9 @@ void setup() {
 			display.updateReading("Joining WiFi");
 			delay(SETUP_STEP_DELAY);
 
-			if(!desiredWiFiSSID || !desiredWiFiPassword || networkForceNewCredentials) {
-				delete[] desiredWiFiSSID;
-				delete[] desiredWiFiPassword;
-
-				desiredWiFiSSID = new char[InternetAccess::getMaxSSIDLength() + 1]; //The + 1 is for the null terminator added in enterNewWiFiCredentials().
-				desiredWiFiPassword = new char[InternetAccess::getMaxPasswordLength() + 1]; //The + 1 is for the null terminator added in enterNewWiFiCredentials().
-
-				promptForNewWiFiCredentials(&desiredWiFiSSID, &desiredWiFiPassword, true);
-				networkCredentialsChanged = true;
+			networkCredentialsExist = desiredWiFiSSID && desiredWiFiPassword;
+			if(!networkCredentialsExist || networkPromptForNewCredentials) {
+				networkCredentialsChanged = promptForNewWiFiCredentials(&desiredWiFiSSID, &desiredWiFiPassword, !networkCredentialsExist);
 			}
 
 			if(connectToWiFi(desiredWiFiSSID, desiredWiFiPassword)) {
@@ -572,7 +575,7 @@ void setup() {
 
 				setupState = SETUP_LEVEL::INPUT_METHOD;
 			} else {
-				networkForceNewCredentials = true;
+				networkPromptForNewCredentials = true;
 			}
 		break;
 
