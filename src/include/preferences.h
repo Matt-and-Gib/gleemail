@@ -20,8 +20,8 @@ private:
 	const static unsigned short CALCULATED_PREFS_SIZE = 384; //This value represents the size of the current (most up-to-date) version of the preferences file, possibly different than what is on the SD
 
 	unsigned short morseCodeCharPairsVersion = 0;
-	char* wifiSSID;
-	char* wifiPassword;
+	char* wifiSSID = nullptr;
+	char* wifiPassword = nullptr;
 public:
 	static Preferences& getPrefs() {
 		static Preferences prefs; //wrong for singleton pattern!
@@ -29,10 +29,24 @@ public:
 	}
 
 	const char* getWiFiSSID() const {return wifiSSID;}
-	void setWiFiSSID(char* s) {wifiSSID = s;}
+	void setWiFiSSID(char* s) {
+		if(!s || s[0] == '\0') {
+			wifiSSID = nullptr;
+			delete[] s;	//REMEMBER: Provided ssid pointer will be deleted if invalid!
+		} else {
+			wifiSSID = s;
+		}
+	}
 
 	const char* getWiFiPassword() const {return wifiPassword;}
-	void setWiFiPassword(char* p) {wifiPassword = p;}
+	void setWiFiPassword(char* p) {
+		if(!p || p[0] == '\0') {
+			wifiPassword = nullptr;
+			delete[] p; //REMEMBER: Provided password pointer will be deleted if invalid!
+		} else {
+			wifiPassword = p;
+		}
+	}
 
 	unsigned short getMorseCodeCharPairsVersion() {return morseCodeCharPairsVersion;}
 	void setMorseCodeCharPairsVersion(const unsigned short v) {morseCodeCharPairsVersion = v;}
@@ -43,13 +57,9 @@ public:
 		doc["Size"] = CALCULATED_PREFS_SIZE;
 		doc["Preferences Version"] = PREFERENCES_VERSION;
 		doc["Morse Code Char Pairs Version"] = morseCodeCharPairsVersion;
-		if(wifiSSID) {
-			doc["WiFiSSID"] = wifiSSID;
-		}
 
-		if(wifiPassword) {
-			doc["WiFiPassword"] = wifiPassword;;
-		}
+		doc["WiFiSSID"] = wifiSSID;
+		doc["WiFiPassword"] = wifiPassword;
 
 		const unsigned short outputSize = measureJson(doc);
 		char output[outputSize];
@@ -90,10 +100,10 @@ public:
 		//Serial.println(morseCodeCharPairsVersion);
 
 		const char* tempSSID = doc["WiFiSSID"];
-		wifiSSID = copyAndTerminateString(tempSSID, strlen(tempSSID));
+		setWiFiSSID(copyAndTerminateString(tempSSID, strlen(tempSSID)));
 
 		const char* tempPassword = doc["WiFiPassword"];
-		wifiPassword = copyAndTerminateString(tempPassword, strlen(tempPassword));
+		setWiFiPassword(copyAndTerminateString(tempPassword, strlen(tempPassword)));
 
 		return true;
 	}
