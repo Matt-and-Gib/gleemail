@@ -560,10 +560,17 @@ void setup() {
 				networkCredentialsChanged = promptForNewWiFiCredentials(&desiredWiFiSSID, &desiredWiFiPassword, !networkCredentialsExist);
 			}
 
-			Serial.print(F("SSID Length: "));
+			Serial.print(F("SSID length: "));
 			Serial.println(strlen(desiredWiFiSSID));
-			Serial.print(F("Password Length: "));
+			Serial.print(F("SSID: '"));
+			Serial.print(desiredWiFiSSID);
+			Serial.println("'");
+
+			Serial.print(F("Password length: "));
 			Serial.println(strlen(desiredWiFiPassword));
+			Serial.print(F("Password: '"));
+			Serial.println(desiredWiFiPassword);
+			Serial.println("'");
 
 			if(connectToWiFi(desiredWiFiSSID, desiredWiFiPassword)) {
 				Serial.print(F("LocalIP: "));
