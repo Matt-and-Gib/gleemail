@@ -3,19 +3,14 @@
 
 #include "binarysearchtree.h"
 
-/*	**	DELETE ME WHEN TESTING IS COMPLETE	**	*/
-//#include "Arduino.h"
-//#include "HardwareSerial.h"
-/*	**	DELETE ME WHEN TESTING IS COMPLETE	**	*/
-
 /*
 	#Definitions
 	____________
 
 	MORSE_CHAR : dot/dash/nothing
 
-	MAX_MORSE_PHRASE_LENGTH: : maximum number of MORSE_CHARs that make up a Morse phrase
 	morsePhrase : array of MORSE_CHAR
+	MAX_MORSE_PHRASE_LENGTH: : maximum number of MORSE_CHARs that make up a Morse phrase
 
 	message : string formed of chars
 	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
