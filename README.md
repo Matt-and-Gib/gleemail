@@ -124,6 +124,7 @@ Last updated: 12/13/2021
 |92|Message Deserialization Error|Could not read message|High|
 |93|Input Data Deserialization Error|Could not read downloaded data|High|
 |94|MorseCode Network Data Deserialization Error|Failed parsing downloaded MorseCodeCharPairs|High|
+|95|Prefs Filtered Deserialization Error|Failed parsing filtered prefs file|High|
 </details>
 
 <details>
@@ -166,9 +167,10 @@ Last updated: 12/13/2021
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
-|250|Prefs File Size Greater Than Prefs Document Size|Unable to read full prefs file from SD|High|
+|250|Prefs File Size Mismatch|Provided file size in prefs does not match calculated size|High|
 |251|Storage Not Detected|Verify that SD card is inserted correctly|High|
 |252|Couldn't Load Prefs|Preferences file not found|Low|
+|253|Prefs File Version Mismatch|Version information in prefs file doesn't match expected value|Low|
 </details>
 
 ___
