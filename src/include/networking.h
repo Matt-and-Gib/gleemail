@@ -15,7 +15,7 @@
 #include "LiteChaCha/authenticatedencrypt.h"
 
 
-using namespace GLEEMAIL_DEBUG;
+using namespace GLEEMAIL_DEBUG; //This is bad! Move to implementation file ASAP
 
 
 class Networking {
