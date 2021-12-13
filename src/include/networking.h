@@ -144,7 +144,7 @@ private:
 	bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyToken();
 
-	//These two functions are use from doConfirmedPostProcess()
+	//These two functions are called from doConfirmedPostProcess()
 	static void removeFromQueue(Queue<Message>& fromQueue, Message& node);
 	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
 
