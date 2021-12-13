@@ -584,6 +584,11 @@ void setup() {
 
 					const char* prefsData = Preferences::getPrefs().serializePrefs();
 					storage.writeFile(prefsData, PREFS_PATH);
+
+					/*Serial.print(F("Wrote: '"));
+					Serial.print(prefsData);
+					Serial.println(F("'"));*/
+
 					delete[] prefsData;
 				} else {
 					Serial.println(F("network credentials were NOT changed, NOT saving new credentials"));

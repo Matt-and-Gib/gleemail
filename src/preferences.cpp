@@ -6,7 +6,7 @@
 
 
 Preferences& Preferences::getPrefs() {
-	static Preferences prefs; //wrong for singleton pattern!
+	static Preferences prefs;
 	return prefs;
 }
 
@@ -32,14 +32,14 @@ void Preferences::setWiFiPassword(char* p) {
 
 
 const char* Preferences::serializePrefs() const {
-		DynamicJsonDocument doc(CALCULATED_PREFS_SIZE);
+		DynamicJsonDocument doc = DynamicJsonDocument(CALCULATED_PREFS_SIZE);
 
 		doc["Size"] = CALCULATED_PREFS_SIZE;
 		doc["Preferences Version"] = PREFERENCES_VERSION;
-		doc["Morse Code Char Pairs Version"] = morseCodeCharPairsVersion;
+		doc["Morse Code Char Pairs Version"] = getMorseCodeCharPairsVersion();
 
-		doc["WiFiSSID"] = wifiSSID;
-		doc["WiFiPassword"] = wifiPassword;
+		doc["WiFiSSID"] = getWiFiSSID();
+		doc["WiFiPassword"] = getWiFiPassword();
 
 		const unsigned short outputSize = measureJson(doc);
 		char output[outputSize];
@@ -54,31 +54,34 @@ bool Preferences::deserializePrefs(const char* input, const unsigned short lengt
 		filter["Size"] = true;
 
 		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
-		deserializeJson(sizeDoc, input, DeserializationOption::Filter(filter));
-		const unsigned short size = sizeDoc["Size"];
+		DeserializationError error = deserializeJson(sizeDoc, input, DeserializationOption::Filter(filter));
+		if(error) {
+			GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::JSON_PREFS_FILTERED_DESERIALIZATION_ERROR);
+			Serial.print(F("filter deserialization error: "));
+			Serial.println(error.c_str());
+			return false;
+		}
 
+		const unsigned short size = sizeDoc["Size"];
 		if(size != CALCULATED_PREFS_SIZE) {
-			//DebugLog::getLog().logWarning(PREFERENCES_SIZE_MISMATCH);
+			GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_PREFS_FILE_SIZE_MISMATCH);
+			//return false;
 		}
 
 		DynamicJsonDocument doc(size);
-		DeserializationError error = deserializeJson(doc, input, length);
+		error = deserializeJson(doc, input, length);
 
 		if(error) {
-			//Serial.print(F("deserializeJson() failed: "));
-			//Serial.println(error.f_str());
 			GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::JSON_PREFS_DESERIALIZATION_ERROR);
 			return false;
 		}
 
 		const unsigned short preferencesFileVersion = doc["Preferences Version"];
 		if(preferencesFileVersion != PREFERENCES_VERSION) {
-			//DebugLog::getLog().logWarning(PREFERENCES_FILE_VERSION_MISMATCH);
+			GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_PREFS_FILE_VERSION_MISMATCH);
 		}
 
 		morseCodeCharPairsVersion = doc["Morse Code Char Pairs Version"];
-		//Serial.print(F("MCCP Version: "));
-		//Serial.println(morseCodeCharPairsVersion);
 
 		const char* tempSSID = doc["WiFiSSID"];
 		setWiFiSSID(copyAndTerminateString(tempSSID, strlen(tempSSID)));
