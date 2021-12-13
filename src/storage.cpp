@@ -64,6 +64,11 @@ const char* Storage::readFile(const char* filePath) { //REMEMBER TO DELETE! This
 }
 
 
+unsigned int Storage::lastReadFileLength() const {
+	return dataLength; //== 0 ? 0 : dataLength + 1;
+}
+
+
 bool Storage::eraseAll(const unsigned int confirmationCode) {
 	//If you're looking for the confirmation code, make sure that you understand this fuction will erase everything on the SD card.
 	if(confirmationCode != 133769) {
