@@ -27,6 +27,7 @@ public:
 		static Preferences prefs; //wrong for singleton pattern!
 		return prefs;
 	}
+	
 
 	const char* getWiFiSSID() const {return wifiSSID;}
 	void setWiFiSSID(char* s) {
@@ -38,6 +39,7 @@ public:
 		}
 	}
 
+
 	const char* getWiFiPassword() const {return wifiPassword;}
 	void setWiFiPassword(char* p) {
 		if(!p || p[0] == '\0') {
@@ -48,8 +50,10 @@ public:
 		}
 	}
 
+
 	unsigned short getMorseCodeCharPairsVersion() {return morseCodeCharPairsVersion;}
 	void setMorseCodeCharPairsVersion(const unsigned short v) {morseCodeCharPairsVersion = v;}
+
 
 	const char* serializePrefs() const {
 		DynamicJsonDocument doc(CALCULATED_PREFS_SIZE);
@@ -67,6 +71,7 @@ public:
 		serializeJson(doc, output, outputSize);
 		return copyAndTerminateString(output, outputSize);
 	}
+
 
 	bool deserializePrefs(const char* input, const unsigned short length) {
 		StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;

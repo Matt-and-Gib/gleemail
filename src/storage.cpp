@@ -18,8 +18,8 @@ bool Storage::begin() {
 		return false;
 	}
 
-	if(!SD.exists(rootPath)) {
-		SD.mkdir(rootPath);
+	if(!SD.exists(ROOT_PATH)) {
+		SD.mkdir(ROOT_PATH);
 	}
 
 	return true;
@@ -71,8 +71,8 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 	}
 
 	//TODO: recursively search and destory from gleemail root instead of listing specific files.
-	clearFile(prefsPath);
-	clearFile(morseCodeCharPairsPath);
+	clearFile(PREFS_PATH);
+	clearFile(MORSE_CODE_CHAR_PAIRS_PATH);
 
 	return true;
 }
