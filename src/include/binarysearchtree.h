@@ -28,7 +28,7 @@ protected:
 
 
 template <class T>
-BinarySearchTreeNode<T>::BinarySearchTreeNode() {
+inline BinarySearchTreeNode<T>::BinarySearchTreeNode() {
 	data = nullptr;
 	parentNode = nullptr;
 	lesserNode = nullptr;
@@ -37,7 +37,7 @@ BinarySearchTreeNode<T>::BinarySearchTreeNode() {
 
 
 template <class T>
-BinarySearchTreeNode<T>::BinarySearchTreeNode(T* d, BinarySearchTreeNode<T>* p) {
+inline BinarySearchTreeNode<T>::BinarySearchTreeNode(T* d, BinarySearchTreeNode<T>* p) {
 	data = d;
 	parentNode = p;
 	lesserNode = nullptr;
@@ -46,14 +46,14 @@ BinarySearchTreeNode<T>::BinarySearchTreeNode(T* d, BinarySearchTreeNode<T>* p) 
 
 
 template <class T>
-BinarySearchTreeNode<T>::~BinarySearchTreeNode() {
+inline BinarySearchTreeNode<T>::~BinarySearchTreeNode() {
 	delete lesserNode;
 	delete greaterNode;
 }
 
 
 template <class T>
-BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::insert(T& d) {
+inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::insert(T& d) {
 	if (d == *data) {
 		return nullptr; //No duplicates allowed!
 	}
@@ -77,7 +77,7 @@ BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::insert(T& d) {
 
 
 template <class T>
-BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::remove() {
+inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::remove() {
 	if(parentNode == nullptr) {
 		return nullptr; //shouldn't delete root node this way. delete root instead
 	}
@@ -126,7 +126,7 @@ BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::remove() {
 
 
 template <class T>
-BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::getSmallest() {
+inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::getSmallest() {
 	if(lesserNode == nullptr) {
 		return this;
 	}
