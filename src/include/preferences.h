@@ -6,8 +6,6 @@
 class Preferences {
 private:
 	Preferences() {}
-	Preferences(Preferences const&) = delete;
-	void operator=(Preferences const&) = delete;
 
 	const static unsigned short PREFERENCES_VERSION = 1;
 	const static unsigned short CALCULATED_PREFS_SIZE = 384; //This value represents the size of the current (most up-to-date) version of the preferences file, possibly different than what is on the SD
@@ -17,6 +15,8 @@ private:
 	char* wifiPassword = nullptr;
 public:
 	static Preferences& getPrefs();
+	Preferences(Preferences const&) = delete;
+	void operator=(Preferences const&) = delete;
 
 	const char* getWiFiSSID() const {return wifiSSID;}
 	void setWiFiSSID(char* s);
@@ -24,7 +24,7 @@ public:
 	const char* getWiFiPassword() const {return wifiPassword;}
 	void setWiFiPassword(char* p);
 
-	unsigned short getMorseCodeCharPairsVersion() {return morseCodeCharPairsVersion;}
+	const unsigned short getMorseCodeCharPairsVersion() const {return morseCodeCharPairsVersion;}
 	void setMorseCodeCharPairsVersion(const unsigned short v) {morseCodeCharPairsVersion = v;}
 
 	const char* serializePrefs() const;
