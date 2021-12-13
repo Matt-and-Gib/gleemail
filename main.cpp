@@ -140,7 +140,7 @@ void initializeNetworkCredentialsFromPreferences(char** desiredWiFiSSID, char** 
 
 
 bool preparePreferences() {
-	const char* preferencesData = storage.readFile(prefsPath);
+	const char* preferencesData = storage.readFile(PREFS_PATH);
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
 		delete[] preferencesData;
@@ -324,7 +324,7 @@ bool connectToWiFi(char* desiredWiFiSSID, char* desiredWiFiPassword) {
 		delete[] desiredPassword;
 
 		const char* prefsData = Preferences::getPrefs().serializePrefs();
-		storage.writeFile(prefsData, prefsPath);
+		storage.writeFile(prefsData, PREFS_PATH);
 		delete[] prefsData;
 	}
 
@@ -388,16 +388,16 @@ bool setupMorseCodeInputMethod() {
 	display.updateWriting("Downloading Data");
 
 	const unsigned short mccpVersion = getMorseCodeCharPairsVersion();
-	const char* data = storage.readFile(morseCodeCharPairsPath);
+	const char* data = storage.readFile(MORSE_CODE_CHAR_PAIRS_PATH);
 	if(!data) {
 		Serial.println(F("Downloading Input Method data..."));
 
 		data = getMorseCodeCharPairsData();
-		storage.writeFile(data, morseCodeCharPairsPath);
+		storage.writeFile(data, MORSE_CODE_CHAR_PAIRS_PATH);
 
 		Preferences::getPrefs().setMorseCodeCharPairsVersion(mccpVersion);
 		const char* prefsData = Preferences::getPrefs().serializePrefs();
-		storage.writeFile(prefsData, prefsPath);
+		storage.writeFile(prefsData, PREFS_PATH);
 		delete[] prefsData;
 	} else {
 		//webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders()); //REQUEST_HEADERS);
@@ -409,11 +409,11 @@ bool setupMorseCodeInputMethod() {
 			delete[] data;
 
 			data = getMorseCodeCharPairsData();
-			storage.writeFile(data, morseCodeCharPairsPath);
+			storage.writeFile(data, MORSE_CODE_CHAR_PAIRS_PATH);
 
 			Preferences::getPrefs().setMorseCodeCharPairsVersion(mccpVersion);
 			const char* prefsData = Preferences::getPrefs().serializePrefs();
-			storage.writeFile(prefsData, prefsPath);
+			storage.writeFile(prefsData, PREFS_PATH);
 			delete[] prefsData;
 		}
 	}
@@ -569,7 +569,7 @@ void setup() {
 			Serial.print(F("Password length: "));
 			Serial.println(strlen(desiredWiFiPassword));
 			Serial.print(F("Password: '"));
-			Serial.println(desiredWiFiPassword);
+			Serial.print(desiredWiFiPassword);
 			Serial.println("'");
 
 			if(connectToWiFi(desiredWiFiSSID, desiredWiFiPassword)) {
@@ -577,12 +577,15 @@ void setup() {
 				Serial.println(internet.getLocalIP());
 
 				if(networkCredentialsChanged) {
+					Serial.println(F("network credentials were changed, saving new credentials!"));
 					Preferences::getPrefs().setWiFiSSID(desiredWiFiSSID);
 					Preferences::getPrefs().setWiFiPassword(desiredWiFiPassword);
 
 					const char* prefsData = Preferences::getPrefs().serializePrefs();
-					storage.writeFile(prefsData, prefsPath);
+					storage.writeFile(prefsData, PREFS_PATH);
 					delete[] prefsData;
+				} else {
+					Serial.println(F("network credentials were NOT changed, NOT saving new credentials"));
 				}
 
 				setupState = SETUP_LEVEL::INPUT_METHOD;
