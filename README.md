@@ -61,7 +61,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 11/11/2021
+Last updated: 12/13/2021
 <details>
 <summary>0 - 9: General</summary>
 
@@ -123,6 +123,7 @@ Last updated: 11/11/2021
 |91|Prefs Deserialization Error|Could not read prefs file|High|
 |92|Message Deserialization Error|Could not read message|High|
 |93|Input Data Deserialization Error|Could not read downloaded data|High|
+|94|MorseCode Network Data Deserialization Error|Failed parsing downloaded MorseCodeCharPairs|High|
 </details>
 
 <details>

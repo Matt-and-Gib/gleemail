@@ -193,7 +193,9 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 	DeserializationError error = deserializeJson(mccpDoc, payload);
 
 	if(error) {
-		Serial.println(error.f_str());
+		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_NETWORK_DATA_DESERIALIZATION_ERROR);
+		//Serial.println(error.f_str());
+		return false;
 	}
 
 	const char* letter;
