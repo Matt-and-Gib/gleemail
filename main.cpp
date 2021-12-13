@@ -577,9 +577,6 @@ void setup() {
 			Serial.println("'");
 
 			if(connectToWiFi(desiredWiFiSSID, desiredWiFiPassword)) {
-				Serial.print(F("LocalIP: "));
-				Serial.println(internet.getLocalIP());
-
 				if(networkCredentialsChanged) {
 					Serial.println(F("network credentials were changed, saving new credentials!"));
 					Preferences::getPrefs().setWiFiSSID(desiredWiFiSSID);

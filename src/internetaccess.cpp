@@ -1,6 +1,41 @@
 #include "include/internetaccess.h"
 
+#include "include/global.h"
+
+#include <WiFiNINA.h>
+
+
 using namespace GLEEMAIL_DEBUG;
+
+
+InternetAccess::InternetAccess() {
+	client = new WiFiClient;
+}
+
+
+bool InternetAccess::connectToWeb(const char* address) {
+	return client->connectSSL(address, 443);
+}
+
+
+void InternetAccess::writeHeaderLine(const char* header) {
+	client->println(header);
+}
+
+
+bool InternetAccess::activeWebConnection() {
+	return client->connected();
+}
+
+
+bool InternetAccess::responseAvailableFromWeb() {
+	return client->available();
+}
+
+
+char InternetAccess::nextCharInWebResponse() {
+	return client->read();
+}
 
 
 bool InternetAccess::connectToNetwork(const char* networkName, const char* networkPassword, bool retry) {
@@ -49,13 +84,4 @@ bool InternetAccess::connectToNetwork(const char* networkName, const char* netwo
 
 void InternetAccess::disconnectFromNetwork() {
 	WiFi.disconnect();
-}
-
-
-IPAddress InternetAccess::getLocalIP() {
-	if(WiFi.status() != WL_CONNECTED) {
-		return nullptr;
-	} else {
-		return WiFi.localIP();
-	}
 }

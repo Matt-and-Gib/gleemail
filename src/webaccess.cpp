@@ -1,5 +1,8 @@
 #include "include/webaccess.h"
 
+#include "include/global.h"
+
+#include <WiFiNINA.h>
 
 using namespace GLEEMAIL_DEBUG;
 
