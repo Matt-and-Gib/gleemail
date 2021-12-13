@@ -61,7 +61,7 @@ public:
 
 
 template <class T>
-QueueNode<T>* Queue<T>::enqueue(T* o) {
+inline QueueNode<T>* Queue<T>::enqueue(T* o) {
 	if(root == nullptr) {
 		root = new QueueNode<T>(o);
 		return root;
@@ -72,7 +72,7 @@ QueueNode<T>* Queue<T>::enqueue(T* o) {
 
 
 template <class T>
-QueueNode<T>* Queue<T>::dequeue() {
+inline QueueNode<T>* Queue<T>::dequeue() {
 	if(root == nullptr) {
 		return nullptr;
 	}
@@ -91,13 +91,13 @@ QueueNode<T>* Queue<T>::dequeue() {
 
 
 template <class T>
-QueueNode<T>* Queue<T>::peek() {
+inline QueueNode<T>* Queue<T>::peek() {
 	return root;
 }
 
 
 template <class T>
-QueueNode<T>* Queue<T>::find(T& f) {
+inline QueueNode<T>* Queue<T>::find(T& f) {
 	QueueNode<T>* currentNode = root;
 	while(currentNode != nullptr) {
 		if(*currentNode->getData() == f) {
@@ -112,7 +112,7 @@ QueueNode<T>* Queue<T>::find(T& f) {
 
 
 /*template <class T>
-QueueNode<T>* Queue<T>::remove(T& match, QueueNode<T>* parent = nullptr) {
+inline QueueNode<T>* Queue<T>::remove(T& match, QueueNode<T>* parent = nullptr) {
 	if(*this->data == match) {
 		if(!parent) {
 			return dequeue();
@@ -129,7 +129,7 @@ QueueNode<T>* Queue<T>::remove(T& match, QueueNode<T>* parent = nullptr) {
 
 
 template <class T>
-QueueNode<T>* Queue<T>::remove(T& match) {
+inline QueueNode<T>* Queue<T>::remove(T& match) {
 	QueueNode<T>* parentNode = nullptr;
 	QueueNode<T>* currentNode = root;
 	while(currentNode) {
@@ -155,7 +155,7 @@ QueueNode<T>* Queue<T>::remove(T& match) {
 
 
 template <class T>
-QueueNode<T>* Queue<T>::remove(QueueNode<T>& match) {
+inline QueueNode<T>* Queue<T>::remove(QueueNode<T>& match) {
 	//return remove(*match.getData());
 	
 	QueueNode<T>* parentNode = nullptr;
