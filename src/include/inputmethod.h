@@ -1,9 +1,8 @@
 #ifndef INPUTMETHOD_H
 #define INPUTMETHOD_H
 
-#include "global.h"
-//#include "Arduino.h" //REMOVE ME
 
+struct Pin;
 
 class InputMethod {
 private:
@@ -28,7 +27,7 @@ public:
 	virtual const char* getServerAddress() const = 0;
 	virtual const char* const* getRequestHeaders() const = 0;
 
-	virtual Pin **getPins() = 0;
+	virtual Pin** getPins() = 0;
 	virtual void processInput(const unsigned long) = 0;
 
 	virtual unsigned short getDebounceThreshold() = 0;

@@ -1,35 +1,86 @@
 #include "include/morsecode.h"
 
+#include "include/global.h"
+
 
 using namespace GLEEMAIL_DEBUG;
 
 
 /*
-	TODO:
-[v]		implement basic morse char functions
-[v]		implement morse char comparison
-[v]		replace enum class usage with new type Morse Char
-[v]		DEBOUNCE
-[v]		finish BSTree data strcture
-[v]		hardcode morse phrase to char pairs
-[v]			push <currentMorsePhrase, char> pairs to tree
-[v]		lookup on currentMorsePhrase (key) in BSTree
-		...
+	WARNING: STATISTICS BELOW:
+
+	DOTS, DASHES, AND GAPS WERE MEASURED BY PROFESSIONALS IN A CLOSED TESTING ENVIRONMENT TO DETERMINE THE VALUES BELOW.
+	THESE VALUES MAY NOT WORK FOR YOUR MEAGER MORSE TYPING SKILL LEVEL.
 */
+
+namespace MORSE_CODE_LENGTHS {
+	static const constexpr unsigned short CALCULATED_DOT_DURATION = 165;
+	static const constexpr unsigned short DOT_DASH_THRESHOLD_BUFFER = 100;
+	static const constexpr unsigned short DOT_DASH_THRESHOLD = CALCULATED_DOT_DURATION + DOT_DASH_THRESHOLD_BUFFER;
+
+	static const constexpr unsigned short CALCULATED_DASH_DURATION = 2.35 * CALCULATED_DOT_DURATION;
+	static const constexpr unsigned short MAX_DASH_THRESHOLD_BUFFER = 200;
+	static const constexpr unsigned short MAX_DASH_THRESHOLD = CALCULATED_DASH_DURATION + MAX_DASH_THRESHOLD_BUFFER;
+
+	static const constexpr unsigned short CALCULATED_PHRASE_FINISHED_THRESHOLD = 3 * CALCULATED_DOT_DURATION;
+	static const constexpr unsigned short PHRASE_FINISHED_THRESHOLD_BUFFER = 100;
+	static const constexpr unsigned short PHRASE_FINISHED_THRESHOLD = CALCULATED_PHRASE_FINISHED_THRESHOLD + PHRASE_FINISHED_THRESHOLD_BUFFER;
+
+	static const constexpr unsigned short CALCULATED_WORD_FINISHED_THRESHOLD = 7 * CALCULATED_DOT_DURATION;
+	static const constexpr unsigned short WORD_FINISHED_THRESHOLD_BUFFER = 400;
+	static const constexpr unsigned short WORD_FINISHED_THRESHOLD = CALCULATED_WORD_FINISHED_THRESHOLD + WORD_FINISHED_THRESHOLD_BUFFER;
+
+	static const constexpr unsigned short CALCULATED_MESSAGE_FINISHED_THRESHOLD = 3 * CALCULATED_WORD_FINISHED_THRESHOLD;
+	static const constexpr unsigned short MESSAGE_FINISIHED_THRESHOLD_BUFFER = 500;
+	static const constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_FINISHED_THRESHOLD + MESSAGE_FINISIHED_THRESHOLD_BUFFER;
+}
+using namespace MORSE_CODE_LENGTHS;
+
+
+static const constexpr char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairs.json HTTP/1.1";
+static const constexpr short MCCP_REQUEST_HEADERS_LENGTH = 7;
+static const constexpr char* REQUEST_HEADERS[MCCP_REQUEST_HEADERS_LENGTH] = {
+	SERVER_REQUEST,
+	NETWORK_HEADER_USER_AGENT,
+	HOST,
+	NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
+	NETWORK_HEADER_CONNECTION_LIFETIME,
+	HEADER_TERMINATION,
+	nullptr
+};
 
 
 MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage) {
+	pins[0] = &NULL_PIN;
+	pins[1] = &NULL_PIN;
+	pins[2] = &NULL_PIN;
+
 	Pin *switchDigitalPin = new Pin(switchPinLocation, PIN_MODE::READ, MORSE_CODE_STATE::SWITCH_OPEN);
 	Pin *ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
 
-	pins[switchPinIndex] = switchDigitalPin;
-	pins[ledPinIndex] = ledDigitalPin;
+	pins[SWITCH_PIN_INDEX] = switchDigitalPin;
+	pins[LED_PIN_INDEX] = ledDigitalPin;
 }
 
 
 MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 	//delete currentMorsePhrase;
-}	
+}
+
+
+const char* MorseCodeInput::getServerAddress() const {
+	return SERVER;
+}
+
+
+const char* const* MorseCodeInput::getRequestHeaders() const {
+	return REQUEST_HEADERS;
+}
+
+
+unsigned short MorseCodeInput::getDebounceThreshold() {
+	return DEBOUNCE_THRESHOLD;
+}
 
 
 char MorseCodeInput::convertPhraseToCharacter() {
@@ -60,7 +111,7 @@ void MorseCodeInput::pushMorseCharacter(const MorseChar& morseCharacter) {
 
 //					***BUTTON RELEASED***
 void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
-	pins[ledPinIndex]->value = LED_STATUS::OFF;
+	pins[LED_PIN_INDEX]->value = LED_STATUS::OFF;
 
 	updateElapsedTime(currentCycleTime);
 
@@ -77,7 +128,7 @@ void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 
 //					***BUTTON PRESSED***
 void MorseCodeInput::processOpenToClosed(const unsigned long currentCycleTime) {
-	pins[ledPinIndex]->value = LED_STATUS::ON;
+	pins[LED_PIN_INDEX]->value = LED_STATUS::ON;
 
 	lastChangeTime = currentCycleTime;
 	inputState = MORSE_CODE_STATE::SWITCH_CLOSED;
@@ -159,12 +210,12 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 
 
 void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
-	if(pins[switchPinIndex]->value != lastInputState) {
+	if(pins[SWITCH_PIN_INDEX]->value != lastInputState) {
 		setLastDebounceTime(currentCycleTime);
 	}
 
 	if(currentCycleTime - getLastDebounceTime() > getDebounceThreshold()) {
-		if(pins[switchPinIndex]->value == MORSE_CODE_STATE::SWITCH_OPEN) {
+		if(pins[SWITCH_PIN_INDEX]->value == MORSE_CODE_STATE::SWITCH_OPEN) {
 			if(inputState == MORSE_CODE_STATE::SWITCH_CLOSED) {
 				processClosedToOpen(currentCycleTime);
 			}
@@ -177,5 +228,5 @@ void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
 		}
 	}
 
-	lastInputState = pins[switchPinIndex]->value == 1 ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
+	lastInputState = pins[SWITCH_PIN_INDEX]->value == 1 ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
 }

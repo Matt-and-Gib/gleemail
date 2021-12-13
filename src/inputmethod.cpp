@@ -1,5 +1,7 @@
 #include "include/inputmethod.h"
 
+#include "include/global.h"
+
 
 using namespace GLEEMAIL_DEBUG;
 

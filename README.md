@@ -219,11 +219,15 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 ![Install Certificate Picture Four.png](resources/InstallCertificatePictureFour.png)
 
-#### How to connect with your friend
+#### How to Connect with Your Friend
 
 If you've configured the hardware correctly, simply upload the code to your Arduino, open the serial monitor, and follow the prompts on screen (the LCD and serial monitor). If you haven't yet wired the hardware, refer to the [Wiring Diagram](#diagram).
 
-Features:
+#### Important Usage Notes:
+
+- If your switch is depressed at launch, a dot will be (immediately) pushed before switch is released
+
+#### Features:
 
 - 57 ~~flavors~~ morse code characters
 - You can hold down the switch to pause input
