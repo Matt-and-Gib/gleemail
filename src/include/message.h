@@ -3,6 +3,8 @@
 
 #include "Arduino.h"
 
+#include <ArduinoJson.hpp>
+
 #include "gleepal.h"
 #include "idempotencytoken.h"
 //#include "messageerror.h"
@@ -31,7 +33,7 @@ public:
 	Message() : sender{*glEEself} {}
 	
 	//Incoming Message Constructor
-	Message(const StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) : sender{from} {
+	Message(const ArduinoJson::StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) : sender{from} {
 
 		const unsigned short tempMessageType = parsedDocument["T"];
 		messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
