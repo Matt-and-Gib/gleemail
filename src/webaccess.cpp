@@ -1,6 +1,9 @@
 #include "include/webaccess.h"
 
 
+using namespace GLEEMAIL_DEBUG;
+
+
 bool WebAccess::writeHeadersToServer(InternetAccess& net, const char* const* headers) {
 	const char* headerLine = headers[0];
 	if(headerLine == nullptr) {

@@ -1,6 +1,9 @@
 #include "include/inputmethod.h"
 
 
+using namespace GLEEMAIL_DEBUG;
+
+
 InputMethod::InputMethod(void (*c)(char*), void (*s)(char*)) {
 	messageChanged = c;
 	sendMessage = s;

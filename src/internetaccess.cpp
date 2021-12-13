@@ -1,5 +1,7 @@
 #include "include/internetaccess.h"
 
+using namespace GLEEMAIL_DEBUG;
+
 
 bool InternetAccess::connectToNetwork(const char* networkName, const char* networkPassword, bool retry) {
 	if(networkName == nullptr || networkPassword == nullptr) {

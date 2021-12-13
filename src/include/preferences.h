@@ -27,7 +27,7 @@ public:
 		static Preferences prefs; //wrong for singleton pattern!
 		return prefs;
 	}
-	
+
 
 	const char* getWiFiSSID() const {return wifiSSID;}
 	void setWiFiSSID(char* s) {
@@ -91,7 +91,7 @@ public:
 		if(error) {
 			//Serial.print(F("deserializeJson() failed: "));
 			//Serial.println(error.f_str());
-			DebugLog::getLog().logError(ERROR_CODE::JSON_PREFS_DESERIALIZATION_ERROR);
+			GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::JSON_PREFS_DESERIALIZATION_ERROR);
 			return false;
 		}
 

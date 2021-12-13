@@ -15,6 +15,9 @@
 #include "LiteChaCha/authenticatedencrypt.h"
 
 
+using namespace GLEEMAIL_DEBUG;
+
+
 class Networking {
 private:
 	bool& shutdownFlag;

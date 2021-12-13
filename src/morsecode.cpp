@@ -1,6 +1,9 @@
 #include "include/morsecode.h"
 
 
+using namespace GLEEMAIL_DEBUG;
+
+
 /*
 	TODO:
 [v]		implement basic morse char functions

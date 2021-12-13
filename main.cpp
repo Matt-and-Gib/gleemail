@@ -11,6 +11,10 @@
 #include "src/include/networking.h"
 #include "src/include/webaccess.h"
 
+
+using namespace GLEEMAIL_DEBUG;
+
+
 //Weak empty variant initialization function.
 //May be redefined by variant files.
 void initVariant() __attribute__((weak));
