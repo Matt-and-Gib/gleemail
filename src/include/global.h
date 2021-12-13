@@ -53,7 +53,7 @@ static const constexpr unsigned short JSON_DOCUMENT_SIZE = 256; // This is the e
 
 static const constexpr unsigned short MESSAGE_BUFFER_SIZE = 345 + 1; //Calculated with worst-case JSON object, plus 1 for null terminator
 
-static const constexpr unsigned short JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES = 32;
+static const constexpr unsigned short JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES = 64; //This is a free-range, fair trade, hand-picked value
 
 //static const constexpr unsigned short PREFS_DOCUMENT_SIZE = 384;
 
