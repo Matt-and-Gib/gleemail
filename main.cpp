@@ -260,7 +260,7 @@ bool connectToWiFi(char* desiredWiFiSSID, char* desiredWiFiPassword) {
 }
 
 
-unsigned short getMorseCodeCharPairsVersion() {
+unsigned short getMorseCodeCharPairsVersion() { //move to morsecode.cpp
 	const char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
 	const char* REQUEST_HEADERS[] = {
 		SERVER_REQUEST,
@@ -278,31 +278,25 @@ unsigned short getMorseCodeCharPairsVersion() {
 
 	const char* data = webAccess.downloadFromServer(internet);
 	if(!data) {
-		Serial.println(F("Unable to download version data!"));
-		delete[] data;
+		Serial.println(F("Unable to download MCCP version data!"));
 		return 0;
 	}
 
 	const unsigned short downloadedMorseCodeCharPairsVersion = atoi(data);
 
-	//Serial.print(F("v: "));
-	//Serial.println(downloadedMorseCodeCharPairsVersion);
-
 	delete[] data;
-
 	return downloadedMorseCodeCharPairsVersion;
 }
 
 
-const char* getMorseCodeCharPairsData() {
+const char* getMorseCodeCharPairsData() { //move to morsecode.cpp
 	if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders())) {
 		return nullptr;
 	}
 
 	const char* data = webAccess.downloadFromServer(internet);
 	if(!data) {
-		Serial.println(F("Unable to download data!"));
-		delete[] data;
+		Serial.println(F("Unable to download MCCP data!"));
 		return nullptr;
 	}
 
@@ -310,7 +304,7 @@ const char* getMorseCodeCharPairsData() {
 }
 
 
-bool setupMorseCodeInputMethod() {
+bool setupMorseCodeInputMethod() { //move to morsecode.cpp
 	display.updateWriting("Downloading Data");
 
 	const unsigned short mccpVersion = getMorseCodeCharPairsVersion();
@@ -506,7 +500,7 @@ void setup() {
 		case SETUP_LEVEL::INPUT_METHOD:
 			display.updateReading("Setting Up Input");
 			if(input == nullptr) {
-				input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage);
+				input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment would have to be manually changed if a different input method is desired
 			}
 
 			if(setupMorseCodeInputMethod()) {
