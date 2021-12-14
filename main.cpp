@@ -500,7 +500,7 @@ void setup() {
 		case SETUP_LEVEL::INPUT_METHOD:
 			display.updateReading("Setting Up Input");
 			if(input == nullptr) {
-				input = new MorseCodeInput(SWITCH_PIN_INDEX, LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment would have to be manually changed if a different input method is desired
+				input = new MorseCodeInput(SWITCH_PIN_LOCATION, LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment would have to be manually changed if a different input method is desired
 			}
 
 			if(setupMorseCodeInputMethod()) {

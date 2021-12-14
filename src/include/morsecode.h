@@ -29,7 +29,7 @@ struct Pin;
 */
 
 
-static const constexpr unsigned short SWITCH_PIN_INDEX = 9;
+static const constexpr unsigned short SWITCH_PIN_LOCATION = 9;
 
 
 //static const constexpr unsigned short CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES = 4096;
@@ -37,9 +37,9 @@ static const constexpr unsigned short SWITCH_PIN_INDEX = 9;
 
 class MorseCodeInput : public InputMethod {
 private:
-	const unsigned short SWITCH_PIN_INDEX = 0;
-	const unsigned short LED_PIN_INDEX = 1;
 	Pin* pins[3];
+	const unsigned short PINS_INDEX_SWITCH = 0;
+	const unsigned short PINS_INDEX_LED = 1;
 
 	MorsePhrase& currentMorsePhrase;
 	MorseCodeTreeNode& morseCodeTreeRoot;

@@ -61,7 +61,7 @@ MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const uns
 	Pin *switchDigitalPin = new Pin(switchPinLocation, PIN_MODE::READ, MORSE_CODE_STATE::SWITCH_OPEN);
 	Pin *ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
 
-	pins[SWITCH_PIN_INDEX] = switchDigitalPin;
+	pins[PINS_INDEX_SWITCH] = switchDigitalPin;
 	pins[LED_PIN_INDEX] = ledDigitalPin;
 
 	lastInputState = MORSE_CODE_STATE::SWITCH_OPEN;
@@ -122,7 +122,7 @@ void MorseCodeInput::pushMorseCharacter(const MorseChar& morseCharacter) {
 
 //					***BUTTON RELEASED***
 void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
-	pins[LED_PIN_INDEX]->value = LED_STATUS::OFF;
+	pins[PINS_INDEX_LED]->value = LED_STATUS::OFF;
 
 	updateElapsedTime(currentCycleTime);
 
@@ -139,7 +139,7 @@ void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 
 //					***BUTTON PRESSED***
 void MorseCodeInput::processOpenToClosed(const unsigned long currentCycleTime) {
-	pins[LED_PIN_INDEX]->value = LED_STATUS::ON;
+	pins[PINS_INDEX_LED]->value = LED_STATUS::ON;
 
 	lastChangeTime = currentCycleTime;
 	inputState = MORSE_CODE_STATE::SWITCH_CLOSED;
@@ -223,12 +223,12 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 
 
 void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
-	if(pins[SWITCH_PIN_INDEX]->value != lastInputState) {
+	if(pins[PINS_INDEX_SWITCH]->value != lastInputState) {
 		setLastDebounceTime(currentCycleTime);
 	}
 
 	if(currentCycleTime - getLastDebounceTime() > getDebounceThreshold()) {
-		if(pins[SWITCH_PIN_INDEX]->value == MORSE_CODE_STATE::SWITCH_OPEN) {
+		if(pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_OPEN) {
 			if(inputState == MORSE_CODE_STATE::SWITCH_CLOSED) {
 				processClosedToOpen(currentCycleTime);
 			}
@@ -241,5 +241,5 @@ void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
 		}
 	}
 
-	lastInputState = pins[SWITCH_PIN_INDEX]->value == 1 ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
+	lastInputState = pins[PINS_INDEX_SWITCH]->value == 1 ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
 }
