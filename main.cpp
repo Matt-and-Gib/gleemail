@@ -131,26 +131,23 @@ void printErrorCodes() {
 
 
 void initializeNetworkCredentialsFromPreferences(char** desiredWiFiSSID, char** desiredWiFiPassword) {
+	delete[] *desiredWiFiSSID;
+	delete[] *desiredWiFiPassword;
+
 	const char* tempWiFiSSID = Preferences::getPrefs().getWiFiSSID();
 	if(tempWiFiSSID != nullptr && tempWiFiSSID[0] != '\0') {
-		*desiredWiFiSSID = copyString(tempWiFiSSID, strlen(tempWiFiSSID));
+		*desiredWiFiSSID = copyAndTerminateString(tempWiFiSSID, strlen(tempWiFiSSID));
 	}
 
 	const char* tempWiFiPassword = Preferences::getPrefs().getWiFiPassword();
 	if(tempWiFiPassword != nullptr && tempWiFiPassword[0] != '\0') {
-		*desiredWiFiPassword = copyString(tempWiFiPassword, strlen(tempWiFiPassword));
+		*desiredWiFiPassword = copyAndTerminateString(tempWiFiPassword, strlen(tempWiFiPassword));
 	}
 }
 
 
 bool preparePreferences() {
 	const char* preferencesData = storage.readFile(PREFS_PATH);
-
-	Serial.print(F("Read: '"));
-	Serial.print(preferencesData);
-	Serial.println(F("'"));
-	Serial.print(F("File length: '"));
-	Serial.println(storage.lastReadFileLength());
 
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
@@ -571,34 +568,14 @@ void setup() {
 				networkCredentialsChanged = promptForNewWiFiCredentials(&desiredWiFiSSID, &desiredWiFiPassword, !networkCredentialsExist);
 			}
 
-			Serial.print(F("SSID length: "));
-			Serial.println(strlen(desiredWiFiSSID));
-			Serial.print(F("SSID: '"));
-			Serial.print(desiredWiFiSSID);
-			Serial.println("'");
-
-			Serial.print(F("Password length: "));
-			Serial.println(strlen(desiredWiFiPassword));
-			Serial.print(F("Password: '"));
-			Serial.print(desiredWiFiPassword);
-			Serial.println("'");
-
 			if(connectToWiFi(desiredWiFiSSID, desiredWiFiPassword)) {
 				if(networkCredentialsChanged) {
-					Serial.println(F("network credentials were changed, saving new credentials!"));
 					Preferences::getPrefs().setWiFiSSID(desiredWiFiSSID);
 					Preferences::getPrefs().setWiFiPassword(desiredWiFiPassword);
 
 					const char* prefsData = Preferences::getPrefs().serializePrefs();
 					storage.writeFile(prefsData, PREFS_PATH);
-
-					/*Serial.print(F("Wrote: '"));
-					Serial.print(prefsData);
-					Serial.println(F("'"));*/
-
 					delete[] prefsData;
-				} else {
-					Serial.println(F("network credentials were NOT changed, NOT saving new credentials"));
 				}
 
 				setupState = SETUP_LEVEL::INPUT_METHOD;
