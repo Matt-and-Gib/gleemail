@@ -400,8 +400,8 @@ void setup() {
 	bool networkCredentialsChanged = false;
 	bool networkCredentialsExist = false;
 
-	const unsigned short SETUP_STEP_DELAY = 100;
-	const unsigned short NETWORK_FAILED_DELAY = 3600; //Smallest GitHub rate limit is 1000/hour, and there are 3600000ms in one hour, therefore sending one request per 3600ms will hopefully ensure we dont' exceed any limits
+	const unsigned short SETUP_STEP_DELAY_MS = 100;
+	const unsigned short NETWORK_FAILED_DELAY_MS = 3600; //Smallest GitHub rate limit is 1000/hour, and there are 3600000ms in one hour, therefore sending one request per 3600ms will hopefully ensure we dont' exceed any limits
 
 	do {
 		switch(setupState) {
@@ -478,7 +478,7 @@ void setup() {
 
 				setupState = SETUP_LEVEL::PINS;
 			} else {
-				delay(NETWORK_FAILED_DELAY); //Delay so we don't get blocked by GitHub if download repeatedly fails.
+				delay(NETWORK_FAILED_DELAY_MS); //Delay so we don't get blocked by GitHub if download repeatedly fails.
 			}
 		break;
 
@@ -513,7 +513,7 @@ void setup() {
 		}
 
 		printErrorCodes();
-		delay(SETUP_STEP_DELAY);
+		delay(SETUP_STEP_DELAY_MS);
 	} while (!setupComplete);
 }
 
