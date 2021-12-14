@@ -2,11 +2,12 @@
 #define MORSECODE_H
 
 #include "inputmethod.h"
-#include "morsecodetree.h"
-
-#include <ArduinoJson.h>
 
 
+class MorseChar;
+class MorsePhrase;
+class MorseCodeTreeNode;
+enum MORSE_CODE_STATE : bool;
 struct Pin;
 
 
@@ -40,14 +41,13 @@ private:
 	const unsigned short LED_PIN_INDEX = 1;
 	Pin* pins[3];
 
-	MorsePhrase& currentMorsePhrase = *new MorsePhrase();
-
-	MorseCodeTreeNode& morseCodeTreeRoot = *new MorseCodeTreeNode(*new MorsePhraseCharPair('\0', *new MorsePhrase()), nullptr);
+	MorsePhrase& currentMorsePhrase;
+	MorseCodeTreeNode& morseCodeTreeRoot;
 
 	static const constexpr unsigned short DEBOUNCE_THRESHOLD = 25;
 
-	MORSE_CODE_STATE lastInputState = MORSE_CODE_STATE::SWITCH_OPEN;
-	MORSE_CODE_STATE inputState = MORSE_CODE_STATE::SWITCH_OPEN;
+	MORSE_CODE_STATE lastInputState;
+	MORSE_CODE_STATE inputState;
 	short typingDelayState = -1;
 	unsigned long lastChangeTime = 0;
 	long long elapsedCycleTime = 0;
@@ -65,6 +65,8 @@ private:
 public:
 	MorseCodeInput(const unsigned short, const unsigned short, void (*)(char*), void (*)(char*));
 	~MorseCodeInput();
+
+	unsigned short setupInputMethod();
 
 	bool setNetworkData(const char*);
 	const char* getServerAddress() const;

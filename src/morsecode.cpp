@@ -1,6 +1,9 @@
 #include "include/morsecode.h"
 
 #include "include/global.h"
+#include "include/morsecodetree.h"
+
+#include <ArduinoJson.h>
 
 
 using namespace GLEEMAIL_DEBUG;
@@ -50,7 +53,7 @@ static const constexpr char* REQUEST_HEADERS[MCCP_REQUEST_HEADERS_LENGTH] = {
 };
 
 
-MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage) {
+MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage), currentMorsePhrase{*new MorsePhrase()}, morseCodeTreeRoot{*new MorseCodeTreeNode(*new MorsePhraseCharPair('\0', *new MorsePhrase()), nullptr)} {
 	pins[0] = &NULL_PIN;
 	pins[1] = &NULL_PIN;
 	pins[2] = &NULL_PIN;
@@ -60,11 +63,19 @@ MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const uns
 
 	pins[SWITCH_PIN_INDEX] = switchDigitalPin;
 	pins[LED_PIN_INDEX] = ledDigitalPin;
+
+	lastInputState = MORSE_CODE_STATE::SWITCH_OPEN;
+	inputState = MORSE_CODE_STATE::SWITCH_OPEN;
 }
 
 
 MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 	//delete currentMorsePhrase;
+}
+
+
+unsigned short MorseCodeInput::setupInputMethod() {
+	return 0;
 }
 
 
