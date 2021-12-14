@@ -145,6 +145,13 @@ void initializeNetworkCredentialsFromPreferences(char** desiredWiFiSSID, char** 
 
 bool preparePreferences() {
 	const char* preferencesData = storage.readFile(PREFS_PATH);
+
+	Serial.print(F("Read: '"));
+	Serial.print(preferencesData);
+	Serial.println(F("'"));
+	Serial.print(F("File length: '"));
+	Serial.println(storage.lastReadFileLength());
+
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
 		delete[] preferencesData;
