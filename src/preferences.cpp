@@ -57,8 +57,8 @@ bool Preferences::deserializePrefs(const char* input, const unsigned short lengt
 		DeserializationError error = deserializeJson(sizeDoc, input, DeserializationOption::Filter(filter));
 		if(error) {
 			GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::JSON_PREFS_FILTERED_DESERIALIZATION_ERROR);
-			Serial.print(F("filter deserialization error: "));
-			Serial.println(error.c_str());
+			//Serial.print(F("filter deserialization error: "));
+			//Serial.println(error.c_str());
 			return false;
 		}
 

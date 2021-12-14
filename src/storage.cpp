@@ -37,6 +37,7 @@ bool Storage::writeFile(const char* data, const char* filePath) { //The data tha
 	if(saveToFile) {
 		saveToFile.print(data);
 		saveToFile.close();
+
 		return true;
 	} else {
 		return false;
