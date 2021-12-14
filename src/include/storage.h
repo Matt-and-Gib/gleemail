@@ -8,6 +8,8 @@ namespace SDLib {
 
 class Storage {
 private:
+	const char ROOT_PATH[9] = "GLEEMAIL";
+
 	unsigned int dataLength = 0;
 
 	void recursiveErase(SDLib::File&, const char*);
@@ -16,7 +18,7 @@ public:
 	Storage();
 	~Storage();
 
-	const char* getRootPath() const {return "GLEEMAIL";}
+	const char* getRootPath() const {return ROOT_PATH;}
 
 	bool begin();
 	bool clearFile(const char* filePath);
