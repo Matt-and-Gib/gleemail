@@ -400,7 +400,8 @@ void setup() {
 	bool networkCredentialsChanged = false;
 	bool networkCredentialsExist = false;
 
-	const unsigned short SETUP_STEP_DELAY = 0;
+	const unsigned short SETUP_STEP_DELAY = 100;
+	const unsigned short NETWORK_FAILED_DELAY = 3600; //Smallest GitHub rate limit is 1000/hour, and there are 3600000ms in one hour, therefore sending one request per 3600ms will hopefully ensure we dont' exceed any limits
 
 	do {
 		switch(setupState) {
@@ -476,6 +477,8 @@ void setup() {
 				}
 
 				setupState = SETUP_LEVEL::PINS;
+			} else {
+				delay(NETWORK_FAILED_DELAY); //Delay so we don't get blocked by GitHub if download repeatedly fails.
 			}
 		break;
 
@@ -556,12 +559,12 @@ Estimated max time for single message processing: 4ms
 		//doAsynchronousProcess();
 		printErrorCodes();
 
-		cycleDuration = millis() - cycleStartTime;
-		if(cycleDuration > MAX_FRAME_DURATION_MS) {
+		cycleDuration = millis() - cycleStartTime; //Remove to increase processing speed
+		if(cycleDuration > MAX_FRAME_DURATION_MS) { //Remove to increase processing speed
 			cycleLatencyCount += 1;
 			if(cycleLatencyCount > FRAME_LATENCY_COUNT_ERROR_THRESHOLD) {
 				DebugLog::getLog().logError(CONTINUOUS_FRAME_LATENCY);
-				cycleLatencyCount = 0; //Reset to help latency by eliminating guaranteed error code print
+				cycleLatencyCount = 0;
 			}
 		} else {
 			cycleLatencyCount = 0;
