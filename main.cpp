@@ -436,11 +436,11 @@ void setup() {
 		case SETUP_LEVEL::NETWORK:
 			Serial.println(F("Joining WiFi"));
 			display.updateWriting("Joining WiFi");
-			delay(SETUP_STEP_DELAY);
+			delay(SETUP_STEP_DELAY_MS);
 
 			display.clearWriting();
 			display.updateReading("Joining WiFi");
-			delay(SETUP_STEP_DELAY);
+			delay(SETUP_STEP_DELAY_MS);
 
 			networkCredentialsExist = desiredWiFiSSID && desiredWiFiPassword;
 			if(!networkCredentialsExist || networkPromptForNewCredentials) {
