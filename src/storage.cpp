@@ -20,8 +20,8 @@ bool Storage::begin() {
 		return false;
 	}
 
-	if(!SD.exists(ROOT_PATH)) {
-		SD.mkdir(ROOT_PATH);
+	if(!SD.exists(getRootPath())) {
+		SD.mkdir(getRootPath());
 	}
 
 	return true;
@@ -107,9 +107,9 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 		return false;
 	}
 
-	File rootFile = SD.open(ROOT_PATH, FILE_READ);
+	File rootFile = SD.open(getRootPath(), FILE_READ);
 	recursiveErase(rootFile);
-	SD.rmdir(ROOT_PATH);
+	SD.rmdir(getRootPath());
 	
 	return true;
 }
@@ -147,9 +147,9 @@ void Storage::recursivePrint(SDLib::File& root, const char* rootPath = nullptr) 
 
 
 void Storage::printAll() {
-	if(SD.exists(ROOT_PATH)) {
-		File rootFile = SD.open(ROOT_PATH, FILE_READ);
+	if(SD.exists(getRootPath())) {
+		File rootFile = SD.open(getRootPath(), FILE_READ);
 		recursivePrint(rootFile);
-		Serial.println(ROOT_PATH);
+		Serial.println(getRootPath());
 	}
 }

@@ -147,7 +147,7 @@ void initializeNetworkCredentialsFromPreferences(char** desiredWiFiSSID, char** 
 
 
 bool preparePreferences() {
-	const char* preferencesData = storage.readFile(PREFS_PATH);
+	const char* preferencesData = storage.readFile(Preferences::getPrefs().getPrefsPath());
 
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
@@ -306,7 +306,7 @@ bool setupInputMethod() {
 
 		Preferences::getPrefs().setMorseCodeCharPairsVersion(inputMethodDataVersion); //Make this input-method agnostic
 		const char* prefsData = Preferences::getPrefs().serializePrefs();
-		storage.writeFile(prefsData, PREFS_PATH);
+		storage.writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
 		delete[] prefsData;
 	}
 
@@ -452,7 +452,7 @@ void setup() {
 					Preferences::getPrefs().setWiFiPassword(desiredWiFiPassword);
 
 					const char* prefsData = Preferences::getPrefs().serializePrefs();
-					storage.writeFile(prefsData, PREFS_PATH);
+					storage.writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
 					delete[] prefsData;
 				}
 

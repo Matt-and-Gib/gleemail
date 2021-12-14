@@ -12,11 +12,6 @@ static const constexpr unsigned short BAUD_RATE = 9600;
 
 static const constexpr unsigned short STORAGE_SLAVE_SELECT_PIN = 10;
 
-//NOTE: all paths are full caps, and file names must be in 8.3 format
-static const constexpr char ROOT_PATH[9] = "GLEEMAIL";
-static const constexpr char PREFS_PATH[19] = "GLEEMAIL/PREFS.GMD";
-//static const constexpr char MORSE_CODE_CHAR_PAIRS_PATH[18] = "GLEEMAIL/MCCP.GMD"; //Located in morsecode.h
-
 static const constexpr unsigned short FRAME_LATENCY_COUNT_ERROR_THRESHOLD = 3;
 static const constexpr unsigned short MAX_FRAME_DURATION_MS = 42;
 static const constexpr unsigned short MAX_NETWORKING_LOOP_DURATION_MS = 36;

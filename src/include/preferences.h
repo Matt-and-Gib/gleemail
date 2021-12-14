@@ -18,6 +18,8 @@ public:
 	Preferences(Preferences const&) = delete;
 	void operator=(Preferences const&) = delete;
 
+	const char* getPrefsPath() const {return "GLEEMAIL/PREFS.GMD";}
+
 	const char* getWiFiSSID() const {return wifiSSID;}
 	void setWiFiSSID(char* s);
 

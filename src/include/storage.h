@@ -16,6 +16,8 @@ public:
 	Storage();
 	~Storage();
 
+	const char* getRootPath() const {return "GLEEMAIL";}
+
 	bool begin();
 	bool clearFile(const char* filePath);
 
