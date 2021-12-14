@@ -29,14 +29,13 @@ struct Pin;
 */
 
 
-static const constexpr unsigned short SWITCH_PIN_LOCATION = 9;
-
-
 //static const constexpr unsigned short CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES = 4096;
 
 
 class MorseCodeInput : public InputMethod {
 private:
+	static const unsigned short SWITCH_PIN_LOCATION = 9;
+
 	Pin* pins[3];
 	const unsigned short PINS_INDEX_SWITCH = 0;
 	const unsigned short PINS_INDEX_LED = 1;
@@ -63,7 +62,7 @@ private:
 	void checkMessageElapsedThresholds();
 	void resetMorsePhrase();
 public:
-	MorseCodeInput(const unsigned short, const unsigned short, void (*)(char*), void (*)(char*));
+	MorseCodeInput(const unsigned short, void (*)(char*), void (*)(char*));
 	~MorseCodeInput();
 
 	unsigned short setupInputMethod();
