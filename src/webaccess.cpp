@@ -56,7 +56,7 @@ short WebAccess::findEndOfHeaderIndex(const char* const rawData, const unsigned 
 		if(rawData[beginningSubstringIndex] == '\r') {
 			headerEndSearchIndex = 0;
 			for(unsigned short endSubstringIndex = 0; endSubstringIndex < LENGTH_OF_HEADER_TERMINATION; endSubstringIndex += 1) {
-				if(rawData[beginningSubstringIndex + endSubstringIndex] != HEADER_TERMINATION[headerEndSearchIndex++]) {
+				if(rawData[beginningSubstringIndex + endSubstringIndex] != NETWORK_HEADER_TERMINATION[headerEndSearchIndex++]) {
 					goto headerEndMismatch;
 				}
 			}

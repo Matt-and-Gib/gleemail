@@ -15,7 +15,7 @@ static const constexpr unsigned short STORAGE_SLAVE_SELECT_PIN = 10;
 //NOTE: all paths are full caps, and file names must be in 8.3 format
 static const constexpr char ROOT_PATH[9] = "GLEEMAIL";
 static const constexpr char PREFS_PATH[19] = "GLEEMAIL/PREFS.GMD";
-static const constexpr char MORSE_CODE_CHAR_PAIRS_PATH[18] = "GLEEMAIL/MCCP.GMD";
+//static const constexpr char MORSE_CODE_CHAR_PAIRS_PATH[18] = "GLEEMAIL/MCCP.GMD"; //Located in morsecode.h
 
 static const constexpr unsigned short FRAME_LATENCY_COUNT_ERROR_THRESHOLD = 3;
 static const constexpr unsigned short MAX_FRAME_DURATION_MS = 42;
@@ -25,12 +25,12 @@ static const constexpr unsigned short MAX_IP_ADDRESS_LENGTH = 15;
 static const constexpr unsigned short CONNECTION_PORT = 29453;
 
 static const constexpr char SERVER[] = "raw.githubusercontent.com";
-static const constexpr char HOST[] = "Host: raw.githubusercontent.com";
-static const constexpr char NETWORK_HEADER_USER_AGENT[] = "User-Agent: ArduinoWifiClient";
+static const constexpr char NETWORK_HEADER_HOST[] = "Host: raw.githubusercontent.com";
+static const constexpr char NETWORK_HEADER_USER_AGENT[] = "User-Agent: glEEmailWebAccess";
 static const constexpr char NETWORK_HEADER_ACCEPTED_RETURN_TYPE[] = "Accept: */*";
 static const constexpr char NETWORK_HEADER_CONNECTION_LIFETIME[] = "Connection: close";
-static const constexpr char HEADER_TERMINATION[] = "\r\n\r\n";
-static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(HEADER_TERMINATION)/sizeof(HEADER_TERMINATION[0]) - 1;
+static const constexpr char NETWORK_HEADER_TERMINATION[] = "\r\n\r\n";
+static const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(NETWORK_HEADER_TERMINATION)/sizeof(NETWORK_HEADER_TERMINATION[0]) - 1;
 
 enum class MESSAGE_TYPE : unsigned short {ERROR = 0, HEARTBEAT = 1, CONFIRMATION = 2, CHAT = 3, HANDSHAKE = 4, NONE = 5};
 static const constexpr MESSAGE_TYPE START_MESSAGE_TYPE = static_cast<MESSAGE_TYPE>(0);

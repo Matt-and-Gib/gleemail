@@ -2,6 +2,7 @@
 
 #include "include/global.h"
 #include "include/morsecodetree.h"
+#include "include/webaccess.h"
 
 #include <ArduinoJson.h>
 
@@ -9,14 +10,14 @@
 using namespace GLEEMAIL_DEBUG;
 
 
-/*
-	WARNING: STATISTICS BELOW:
-
-	DOTS, DASHES, AND GAPS WERE MEASURED BY PROFESSIONALS IN A CLOSED TESTING ENVIRONMENT TO DETERMINE THE VALUES BELOW.
-	THESE VALUES MAY NOT WORK FOR YOUR MEAGER MORSE TYPING SKILL LEVEL.
-*/
-
 namespace MORSE_CODE_LENGTHS {
+	/*
+		WARNING: STATISTICS BELOW:
+
+		DOTS, DASHES, AND GAPS WERE MEASURED BY PROFESSIONALS IN A CLOSED TESTING ENVIRONMENT.
+		THESE VALUES MAY NOT WORK FOR YOUR MEAGER MORSE SKILL LEVEL.
+	*/
+
 	static const constexpr unsigned short CALCULATED_DOT_DURATION = 165;
 	static const constexpr unsigned short DOT_DASH_THRESHOLD_BUFFER = 100;
 	static const constexpr unsigned short DOT_DASH_THRESHOLD = CALCULATED_DOT_DURATION + DOT_DASH_THRESHOLD_BUFFER;
@@ -40,19 +41,6 @@ namespace MORSE_CODE_LENGTHS {
 using namespace MORSE_CODE_LENGTHS;
 
 
-static const constexpr char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairs.json HTTP/1.1";
-static const constexpr short MCCP_REQUEST_HEADERS_LENGTH = 7;
-static const constexpr char* REQUEST_HEADERS[MCCP_REQUEST_HEADERS_LENGTH] = {
-	SERVER_REQUEST,
-	NETWORK_HEADER_USER_AGENT,
-	HOST,
-	NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
-	NETWORK_HEADER_CONNECTION_LIFETIME,
-	HEADER_TERMINATION,
-	nullptr
-};
-
-
 MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage), currentMorsePhrase{*new MorsePhrase()}, morseCodeTreeRoot{*new MorseCodeTreeNode(*new MorsePhraseCharPair('\0', *new MorsePhrase()), nullptr)} {
 	pins[0] = &NULL_PIN;
 	pins[1] = &NULL_PIN;
@@ -71,21 +59,6 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 
 MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 	//delete currentMorsePhrase;
-}
-
-
-unsigned short MorseCodeInput::setupInputMethod() {
-	return 0;
-}
-
-
-const char* MorseCodeInput::getServerAddress() const {
-	return SERVER;
-}
-
-
-const char* const* MorseCodeInput::getRequestHeaders() const {
-	return REQUEST_HEADERS;
 }
 
 

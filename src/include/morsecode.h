@@ -34,6 +34,11 @@ struct Pin;
 
 class MorseCodeInput : public InputMethod {
 private:
+	const char MCCP_DATA_VERSION_SERVER_ENDPOINT[72] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
+	const char MCCP_DATA_SERVER_ENDPOINT[70] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairs.json HTTP/1.1";
+
+	const char MORSE_CODE_CHAR_PAIRS_PATH[18] = "GLEEMAIL/MCCP.GMD";
+
 	static const unsigned short SWITCH_PIN_LOCATION = 9;
 
 	Pin* pins[3];
@@ -65,11 +70,11 @@ public:
 	MorseCodeInput(const unsigned short, void (*)(char*), void (*)(char*));
 	~MorseCodeInput();
 
-	unsigned short setupInputMethod();
-
+	const char* getDataVersionRequestEndpoint() const {return MCCP_DATA_VERSION_SERVER_ENDPOINT;}
+	const char* getDataRequestEndpoint() const {return MCCP_DATA_SERVER_ENDPOINT;}
 	bool setNetworkData(const char*);
-	const char* getServerAddress() const;
-	const char* const* getRequestHeaders() const;
+
+	const char* getCachedDataPath() const {return MORSE_CODE_CHAR_PAIRS_PATH;}
 
 	Pin** getPins() {return pins;}
 	void processInput(const unsigned long);

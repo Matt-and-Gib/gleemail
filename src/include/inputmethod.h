@@ -2,7 +2,9 @@
 #define INPUTMETHOD_H
 
 
+class WebAccess;
 struct Pin;
+
 
 class InputMethod {
 private:
@@ -23,11 +25,11 @@ public:
 	InputMethod(void (*)(char*), void (*)(char*));
 	~InputMethod();
 
-	virtual unsigned short setupInputMethod() = 0;
-
+	virtual const char* getDataVersionRequestEndpoint() const = 0;
+	virtual const char* getDataRequestEndpoint() const = 0;
 	virtual bool setNetworkData(const char*) = 0;
-	virtual const char* getServerAddress() const = 0;
-	virtual const char* const* getRequestHeaders() const = 0;
+
+	virtual const char* getCachedDataPath() const = 0;
 
 	virtual Pin** getPins() = 0;
 	virtual void processInput(const unsigned long) = 0;

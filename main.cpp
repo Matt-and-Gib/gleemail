@@ -260,82 +260,54 @@ bool connectToWiFi(char* desiredWiFiSSID, char* desiredWiFiPassword) {
 }
 
 
-unsigned short getMorseCodeCharPairsVersion() { //move to morsecode.cpp
-	const char SERVER_REQUEST[] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
-	const char* REQUEST_HEADERS[] = {
-		SERVER_REQUEST,
+const char* getDataFromInternet(const char* requestEndpoint) {
+	const char* headers[7] = {
+		requestEndpoint,
 		NETWORK_HEADER_USER_AGENT,
-		HOST,
+		NETWORK_HEADER_HOST,
 		NETWORK_HEADER_ACCEPTED_RETURN_TYPE,
 		NETWORK_HEADER_CONNECTION_LIFETIME,
-		HEADER_TERMINATION,
+		NETWORK_HEADER_TERMINATION,
 		nullptr
 	};
 
-	if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), REQUEST_HEADERS)) {
-		return 0;
-	}
-
-	const char* data = webAccess.downloadFromServer(internet);
-	if(!data) {
-		Serial.println(F("Unable to download MCCP version data!"));
-		return 0;
-	}
-
-	const unsigned short downloadedMorseCodeCharPairsVersion = atoi(data);
-
-	delete[] data;
-	return downloadedMorseCodeCharPairsVersion;
-}
-
-
-const char* getMorseCodeCharPairsData() { //move to morsecode.cpp
-	if(!webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders())) {
+	if(!webAccess.sendRequestToServer(internet, SERVER, headers)) {
 		return nullptr;
 	}
 
-	const char* data = webAccess.downloadFromServer(internet);
-	if(!data) {
-		Serial.println(F("Unable to download MCCP data!"));
-		return nullptr;
-	}
-
-	return data;
+	return webAccess.downloadFromServer(internet);
 }
 
 
-bool setupMorseCodeInputMethod() { //move to morsecode.cpp
+bool setupInputMethod() {
 	display.updateWriting("Downloading Data");
 
-	const unsigned short mccpVersion = getMorseCodeCharPairsVersion();
-	const char* data = storage.readFile(MORSE_CODE_CHAR_PAIRS_PATH);
-	if(!data) {
+	const char* rawVersionData = getDataFromInternet(input->getDataVersionRequestEndpoint());
+	if(!rawVersionData) {
+		return false;
+	}
+	
+	const unsigned short inputMethodDataVersion = atoi(rawVersionData);
+	delete[] rawVersionData;
+
+	bool downloadFullDataPackage = true;
+	const char* data = storage.readFile(input->getCachedDataPath());
+	if(data && Preferences::getPrefs().getMorseCodeCharPairsVersion() == inputMethodDataVersion) { //Make this input-method agnostic
+		downloadFullDataPackage = false;
+	}
+
+	if(downloadFullDataPackage) {
 		Serial.println(F("Downloading Input Method data..."));
 
-		data = getMorseCodeCharPairsData();
-		storage.writeFile(data, MORSE_CODE_CHAR_PAIRS_PATH);
+		delete[] data;
+		data = getDataFromInternet(input->getDataRequestEndpoint());
 
-		Preferences::getPrefs().setMorseCodeCharPairsVersion(mccpVersion);
+		storage.writeFile(data, input->getCachedDataPath());
+
+		Preferences::getPrefs().setMorseCodeCharPairsVersion(inputMethodDataVersion); //Make this input-method agnostic
 		const char* prefsData = Preferences::getPrefs().serializePrefs();
 		storage.writeFile(prefsData, PREFS_PATH);
 		delete[] prefsData;
-	} else {
-		//webAccess.sendRequestToServer(internet, input->getServerAddress(), input->getRequestHeaders()); //REQUEST_HEADERS);
-		//doAsynchronousProcess = &verifyInputMethodData;
-
-		if(Preferences::getPrefs().getMorseCodeCharPairsVersion() != mccpVersion) {
-			Serial.println(F("Morse Code Char Pairs Version Mismatch"));
-
-			delete[] data;
-
-			data = getMorseCodeCharPairsData();
-			storage.writeFile(data, MORSE_CODE_CHAR_PAIRS_PATH);
-
-			Preferences::getPrefs().setMorseCodeCharPairsVersion(mccpVersion);
-			const char* prefsData = Preferences::getPrefs().serializePrefs();
-			storage.writeFile(prefsData, PREFS_PATH);
-			delete[] prefsData;
-		}
 	}
 
 	bool dataParsed = input->setNetworkData(data);
@@ -397,13 +369,7 @@ void connectToPeer() { //Use PEER wait time to do asynchronousProcess
 	Serial.print(friendsIP);
 	Serial.println(F("..."));
 
-	/*if(!network.connectToPeer(friendsIP)) {
-		Serial.println(F("Unable to connect to gleepal :("));
-	} else {
-		Serial.println(F("Connected to gleepal!"));
-	}*/
-
-	//delete[] ipAddressInputSubstringBuffer;
+	//delete[] ipAddressInputSubstringBuffer; //Not necessary because strtok modifies the original string (doesn't allocate memory)
 	delete[] ipAddressInputBuffer;
 }
 
@@ -500,10 +466,10 @@ void setup() {
 		case SETUP_LEVEL::INPUT_METHOD:
 			display.updateReading("Setting Up Input");
 			if(input == nullptr) {
-				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment would have to be manually changed if a different input method is desired
+				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment must be manually changed if a different input method is desired
 			}
 
-			if(setupMorseCodeInputMethod()) {
+			if(setupInputMethod()) {
 				for(unsigned short i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
 					userMessage[i] = '\0';
 					peerMessage[i] = '\0';
@@ -520,7 +486,7 @@ void setup() {
 		break;
 
 
-		case SETUP_LEVEL::PEER: //Use PEER wait time to do asynchronousProcess
+		case SETUP_LEVEL::PEER:
 			if(!OFFLINE_MODE) {
 				display.updateWriting("Wait for glEEpal");
 				connectToPeer();	
@@ -546,8 +512,6 @@ void setup() {
 		printErrorCodes();
 		delay(SETUP_STEP_DELAY);
 	} while (!setupComplete);
-
-	//display.clearAll();
 }
 
 
