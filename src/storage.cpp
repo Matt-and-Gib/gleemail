@@ -2,6 +2,8 @@
 #include "include/global.h"
 #include <SD.h>
 
+using namespace SDLib;
+
 
 Storage::Storage() {
 
@@ -70,15 +72,84 @@ unsigned int Storage::lastReadFileLength() const {
 }
 
 
+void Storage::recursiveErase(SDLib::File& root, const char* rootPath = nullptr) {
+	char path[80] = {0};
+	if(rootPath) {
+		strcat(path, rootPath);
+		strcat(path, "/\0");
+	}
+	strcat(path, root.name());
+
+	File item;
+	while(item = root.openNextFile()) {
+		if(item.isDirectory()) {
+			recursiveErase(item, path);
+
+			char eraseDirectoryPath[80] = {0};
+			strcat(eraseDirectoryPath, path);
+			strcat(eraseDirectoryPath, "/\0");
+			strcat(eraseDirectoryPath, item.name());
+			SD.rmdir(eraseDirectoryPath);
+		} else {
+			char eraseFilePath[80] = {0};
+			strcat(eraseFilePath, path);
+			strcat(eraseFilePath, "/\0");
+			strcat(eraseFilePath, item.name());
+			SD.remove(eraseFilePath);
+		}
+	}
+}
+
+
 bool Storage::eraseAll(const unsigned int confirmationCode) {
-	//If you're looking for the confirmation code, make sure that you understand this fuction will erase everything on the SD card.
+	//If you're looking for the confirmation code, make sure that you understand this fuction will erase all GLEEMAIL files and folders on the SD card.
 	if(confirmationCode != 133769) {
 		return false;
 	}
 
-	//TODO: recursively search and destory from gleemail root instead of listing specific files.
-	clearFile(PREFS_PATH);
-	clearFile(MORSE_CODE_CHAR_PAIRS_PATH);
-
+	File rootFile = SD.open(ROOT_PATH, FILE_READ);
+	recursiveErase(rootFile);
+	SD.rmdir(ROOT_PATH);
+	
 	return true;
+}
+
+
+void Storage::recursivePrint(SDLib::File& root, const char* rootPath = nullptr) {
+	char path[80] = {0};
+	if(rootPath) {
+		strcat(path, rootPath);
+		strcat(path, "/\0");
+	}
+	strcat(path, root.name());
+
+	File item;
+	while(item = root.openNextFile()) {
+		if(item.isDirectory()) {
+			recursivePrint(item, path);
+
+			char printDirectoryPath[80] = {0};
+			strcat(printDirectoryPath, path);
+			strcat(printDirectoryPath, "/\0");
+			strcat(printDirectoryPath, item.name());
+
+			Serial.println(printDirectoryPath);
+		} else {
+			char printFilePath[80] = {0};
+			strcat(printFilePath, path);
+			strcat(printFilePath, "/\0");
+			strcat(printFilePath, item.name());
+
+			Serial.println(printFilePath);
+		}
+	}
+}
+
+
+void Storage::printAll() {
+	if(SD.exists(ROOT_PATH)) {
+		File rootFile = SD.open(ROOT_PATH, FILE_READ);
+		recursivePrint(rootFile);
+		Serial.println(ROOT_PATH);
+	}
 }
