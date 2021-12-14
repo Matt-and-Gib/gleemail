@@ -62,7 +62,7 @@ MorseCodeInput::MorseCodeInput(const unsigned short switchPinLocation, const uns
 	Pin *ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
 
 	pins[PINS_INDEX_SWITCH] = switchDigitalPin;
-	pins[LED_PIN_INDEX] = ledDigitalPin;
+	pins[PINS_INDEX_LED] = ledDigitalPin;
 
 	lastInputState = MORSE_CODE_STATE::SWITCH_OPEN;
 	inputState = MORSE_CODE_STATE::SWITCH_OPEN;
