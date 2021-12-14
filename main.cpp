@@ -185,7 +185,7 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 
 	(*desiredWiFiSSID)[ssidInputLength] = '\0';
 
-	if(ssidInputLength >= InternetAccess::getMaxSSIDLength()) { //NOTE: if user enters a value equal to or in excess of max ssid length, we don't know if the ssid was truncated or just max-length
+	if(ssidInputLength >= InternetAccess::getMaxSSIDLength()) { //NOTE: if user enters a value equal to or in excess of max ssid length, we don't know if the ssid was truncated or just max-length. We COULD know this by checking if there is anything remaining on the input buffer.
 		DebugLog::getLog().logError(INTERNET_ACCESS_SSID_POSSIBLY_TRUNCATED);
 	}
 
@@ -207,7 +207,7 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 	}
 	(*desiredWiFiPassword)[passwordInputLength] = '\0';
 
-	if(passwordInputLength >= InternetAccess::getMaxPasswordLength()) { //NOTE: if user enters a value equal to or in excess of max password length, we don't know if the password was truncated or just max-length
+	if(passwordInputLength >= InternetAccess::getMaxPasswordLength()) { //NOTE: if user enters a value equal to or in excess of max password length, we don't know if the password was truncated or just max-length. We COULD know if there is more by checking the input buffer here for available characters.
 		DebugLog::getLog().logError(INTERNET_ACCESS_PASSWORD_POSSIBLY_TRUNCATED);
 	}
 
@@ -242,35 +242,6 @@ bool promptForNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassw
 
 
 bool connectToWiFi(char* desiredWiFiSSID, char* desiredWiFiPassword) {
-	/*
-		goal: successfully connect to wifi
-
-		step 1: check if ssid & password exist in preferences
-			no: ask for input
-
-		step 2: attempt connection
-
-		if(connection was successful && did not ask for new input) {
-			good to go!
-		}
-
-		if(connection was successful && asked for new input) {
-			set preferences to new input
-		}
-
-		if(connection failed && asked for new input) {
-			ask for input again (go back to top)
-			aka, return false
-		}
-
-		if(connection failed && did not ask for new input) {
-			clear preferences and
-			return false
-		}
-	
-		step 3: return connection successful?
-	*/
-
 	Serial.println(F("Attempting connection..."));
 	display.updateWriting("Connecting...");
 
@@ -287,59 +258,6 @@ bool connectToWiFi(char* desiredWiFiSSID, char* desiredWiFiPassword) {
 		return true;
 	}
 }
-
-
-/*bool connectToWiFi(bool& changedLoginInfo, bool forceManual = false) {
-	//bool changedLoginInfo = forceManual;
-
-	unsigned short ssidInputLength = strlen(Preferences::getPrefs().getWiFiSSID());
-	unsigned short passwordInputLength = strlen(Preferences::getPrefs().getWiFiPassword());
-	char* desiredSSID = copyAndTerminateString(Preferences::getPrefs().getWiFiSSID(), ssidInputLength);
-	char* desiredPassword = copyAndTerminateString(Preferences::getPrefs().getWiFiPassword(), passwordInputLength);
-
-	if(forceManual || ssidInputLength == 0 || passwordInputLength == 0) {
-		//desiredSSID = new char[InternetAccess::getMaxSSIDLength()];
-		//desiredPassword = new char[InternetAccess::getMaxPasswordLength()];
-
-		
-
-		changedLoginInfo = true;
-	} else {
-		changedLoginInfo = false;
-	}
-
-	Serial.println(F("Attempting connection..."));
-	display.updateWriting("Connecting...");
-
-	if(!internet.connectToNetwork(desiredSSID, desiredPassword)) {
-		display.updateWriting("Failed");
-		Serial.print(F("Unable to connect to "));
-		Serial.println(Preferences::getPrefs().getWiFiSSID());
-
-		if(changedLoginInfo) {
-			delete[] desiredSSID;
-			delete[] desiredPassword;
-		}
-
-		return false;
-	}
-
-	if(changedLoginInfo) {
-		Preferences::getPrefs().setWiFiSSID(copyAndTerminateString(desiredSSID, ssidInputLength));
-		Preferences::getPrefs().setWiFiPassword(copyAndTerminateString(desiredPassword, passwordInputLength));
-
-		delete[] desiredSSID;
-		delete[] desiredPassword;
-
-		const char* prefsData = Preferences::getPrefs().serializePrefs();
-		storage.writeFile(prefsData, PREFS_PATH);
-		delete[] prefsData;
-	}
-
-	Serial.println(F("Connected!"));
-	display.updateWriting("Connected!");
-	return true;
-}*/
 
 
 unsigned short getMorseCodeCharPairsVersion() {
