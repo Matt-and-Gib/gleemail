@@ -173,6 +173,14 @@ Last updated: 12/13/2021
 |253|Prefs File Version Mismatch|Version information in prefs file doesn't match expected value|Low|
 </details>
 
+<details>
+<summary>290 - 329: Display</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|290|RAM Integrity Threatened|Message to print exceeded available display line RAM|High|
+</details>
+
 ___
 
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
