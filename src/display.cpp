@@ -18,9 +18,8 @@ void Display::print(const char* message, const PRINT_ROW row, const bool retainS
 	wroteLength = lcd->print(message);
 
 	if(!retainScreen) {
-		while(wroteLength < DISPLAY_ROW_LENGTH) {
+		while(wroteLength++ < DISPLAY_ROW_LENGTH) {
 			lcd->write(' ');
-			wroteLength += 1;
 		}
 	}
 }
