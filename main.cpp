@@ -438,9 +438,9 @@ void setup() {
 		case SETUP_LEVEL::PREFERENCES:
 			if(preparePreferences()) {
 				initializeNetworkCredentialsFromPreferences(&desiredWiFiSSID, &desiredWiFiPassword);
-
-				setupState = SETUP_LEVEL::NETWORK;
 			}
+
+			setupState = SETUP_LEVEL::NETWORK;
 		break;
 
 
