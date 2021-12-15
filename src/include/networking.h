@@ -104,7 +104,7 @@ private:
 	void createMessagePayload(char*, const size_t);
 	void encryptBufferAndPrepareMessagePayload(char*, const size_t);
 
-	unsigned long long processStartTime = 0;
+	unsigned long processStartTime = 0;
 	unsigned short processElapsedTime = 0;
 
 	unsigned short doTimeSensitiveProcess(const unsigned short, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);

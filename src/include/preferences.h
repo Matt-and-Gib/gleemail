@@ -28,7 +28,7 @@ public:
 	const char* getWiFiPassword() const {return wifiPassword;}
 	void setWiFiPassword(char* p);
 
-	const unsigned short getMorseCodeCharPairsVersion() const {return morseCodeCharPairsVersion;}
+	unsigned short getMorseCodeCharPairsVersion() const {return morseCodeCharPairsVersion;}
 	void setMorseCodeCharPairsVersion(const unsigned short v) {morseCodeCharPairsVersion = v;}
 
 	const char* serializePrefs() const;
