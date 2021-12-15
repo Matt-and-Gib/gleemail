@@ -1,6 +1,7 @@
 #ifndef BINARYSEARCHTREE_H
 #define BINARYSEARCHTREE_H
 
+
 template <class T>
 class BinarySearchTreeNode {
 public:
