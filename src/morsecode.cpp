@@ -51,13 +51,48 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 	pins[PINS_INDEX_SWITCH] = switchDigitalPin;
 	pins[PINS_INDEX_LED] = ledDigitalPin;
 
-	lastInputState = MORSE_CODE_STATE::SWITCH_OPEN;
-	inputState = MORSE_CODE_STATE::SWITCH_OPEN;
+	inputState = (pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_OPEN ? MORSE_CODE_STATE::SWITCH_OPEN : MORSE_CODE_STATE::SWITCH_CLOSED);
+	lastInputState = inputState;
 }
 
 
 MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
 	//delete currentMorsePhrase;
+}
+
+
+bool MorseCodeInput::setNetworkData(const char* payload) {
+	if(!payload) {
+		DebugLog::getLog().logError(JSON_NULLPTR_PAYLOAD);
+		return false;
+	}
+
+	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
+	filter["size"] = true;
+
+	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
+	deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
+	const unsigned short mccpSize = sizeDoc["size"];
+
+	DynamicJsonDocument mccpDoc(mccpSize);
+	DeserializationError error = deserializeJson(mccpDoc, payload);
+
+	if(error) {
+		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_NETWORK_DATA_DESERIALIZATION_ERROR);
+		//Serial.println(error.f_str());
+		return false;
+	}
+
+	const char* letter;
+	const char* phrase;
+	for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
+		letter = elem["symbol"];
+		phrase = elem["phrase"];
+		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase)));
+	}
+
+	//morseCodeTreeRoot.print();
+	return true;
 }
 
 
@@ -156,41 +191,6 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long currentCycleTime) 
 
 	checkPhraseElapsedThreshold();
 	checkMessageElapsedThresholds();
-}
-
-
-bool MorseCodeInput::setNetworkData(const char* payload) {
-	if(!payload) {
-		DebugLog::getLog().logError(JSON_NULLPTR_PAYLOAD);
-		return false;
-	}
-
-	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
-	filter["size"] = true;
-
-	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
-	deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
-	const unsigned short mccpSize = sizeDoc["size"];
-
-	DynamicJsonDocument mccpDoc(mccpSize);
-	DeserializationError error = deserializeJson(mccpDoc, payload);
-
-	if(error) {
-		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_NETWORK_DATA_DESERIALIZATION_ERROR);
-		//Serial.println(error.f_str());
-		return false;
-	}
-
-	const char* letter;
-	const char* phrase;
-	for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
-		letter = elem["symbol"];
-		phrase = elem["phrase"];
-		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase)));
-	}
-
-	//morseCodeTreeRoot.print();
-	return true;
 }
 
 
