@@ -8,17 +8,18 @@ class hd44780_pinIO;
 class Display {
 private:
 	const char BLANK_LINE[17] = "                ";
+	const unsigned short MAX_LINE_LENGTH = 40;
 
-	static const unsigned short DISPLAY_ROW_LENGTH = 16;
-	static const unsigned short DISPLAY_COLUMN_LENGTH = 2;
+	static const constexpr unsigned short DISPLAY_ROW_LENGTH = 16;
+	static const constexpr unsigned short DISPLAY_COLUMN_LENGTH = 2;
 	enum PRINT_ROW : bool {TOP = false, BOTTOM = true};
 
-	static constexpr int RS = 7;
-	static constexpr int EN = 6;
-	static constexpr int D4 = 5;
-	static constexpr int D5 = 4;
-	static constexpr int D6 = 3;
-	static constexpr int D7 = 2;
+	unsigned short RS = 7;
+	unsigned short EN = 6;
+	unsigned short D4 = 5;
+	unsigned short D5 = 4;
+	unsigned short D6 = 3;
+	unsigned short D7 = 2;
 	hd44780_pinIO* lcd;
 
 	char lcdBuffer[DISPLAY_COLUMN_LENGTH][DISPLAY_ROW_LENGTH];
@@ -27,6 +28,9 @@ private:
 
 	unsigned short wroteLength = 0;
 	char* remainingLine;
+
+	bool scrollReading = false;
+	bool scrollWriting = false;
 public:
 	Display();
 
@@ -35,6 +39,7 @@ public:
 	void clearReading() {updateReading(BLANK_LINE, true);}
 	void clearWriting() {updateWriting(BLANK_LINE, true);}
 	void clearAll();
+	void scrollDisplay();
 };
 
 #endif

@@ -1,5 +1,5 @@
 #include "include/display.h"
-
+#include "include/global.h"
 
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_pinIO.h>
@@ -9,11 +9,16 @@ Display::Display() {
 	lcd = new hd44780_pinIO(RS, EN, D4, D5, D6, D7);
 
 	lcd->begin(16, 2);
-	lcd->clear();
+	clearAll();
 }
 
 
 void Display::print(const char* message, const PRINT_ROW row, const bool retainScreen) {
+	if(strlen(message) > MAX_LINE_LENGTH) { //Surely, we have already calculated this somewhere.
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::DISPLAY_RAM_INTEGRITY_THREATENED);
+		return;
+	}
+
 	lcd->setCursor(0, row);
 	wroteLength = lcd->print(message);
 
@@ -37,4 +42,11 @@ void Display::updateWriting(const char* message, const bool retainScreen) {
 
 void Display::clearAll() {
 	lcd->clear();
+	scrollReading = false;
+	scrollWriting = false;
+}
+
+
+void Display::scrollDisplay() {
+	//How to do this without adding significant processing every frame (comparing against millis, for example)?
 }
