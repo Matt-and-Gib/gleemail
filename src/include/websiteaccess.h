@@ -1,10 +1,10 @@
-#ifndef WEBACCESS_H
-#define WEBACCESS_H
+#ifndef WEBSITEACCESS_H
+#define WEBSITEACCESS_H
 
 #include "internetaccess.h"
 
 
-class WebAccess {
+class WebsiteAccess {
 private:
 	char* server = nullptr;
 

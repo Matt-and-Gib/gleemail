@@ -3,13 +3,15 @@
 #include "src/include/global.h"
 #include "src/include/preferences.h"
 
-#include "src/include/storage.h"
 #include "src/include/display.h"
-#include "src/include/morsecode.h"
+#include "src/include/storage.h"
 
 #include "src/include/internetaccess.h"
+#include "src/include/websiteaccess.h"
+
 #include "src/include/networking.h"
-#include "src/include/webaccess.h"
+
+#include "src/include/morsecode.h" //Manually change this if using different input method
 
 
 using namespace GLEEMAIL_DEBUG;
@@ -32,7 +34,7 @@ Display display;
 Storage storage;
 
 InternetAccess internet;
-WebAccess webAccess;
+WebsiteAccess websiteAccess;
 
 char* messageToPrint = nullptr;
 void connectedToPeerClearDisplay();
@@ -272,11 +274,11 @@ const char* getDataFromInternet(const char* requestEndpoint) {
 		nullptr
 	};
 
-	if(!webAccess.sendRequestToServer(internet, SERVER, headers)) {
+	if(!websiteAccess.sendRequestToServer(internet, SERVER, headers)) {
 		return nullptr;
 	}
 
-	return webAccess.downloadFromServer(internet);
+	return websiteAccess.downloadFromServer(internet);
 }
 
 

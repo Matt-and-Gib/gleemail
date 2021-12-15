@@ -1,4 +1,4 @@
-#include "include/webaccess.h"
+#include "include/websiteaccess.h"
 
 #include "include/global.h"
 
@@ -7,7 +7,7 @@
 using namespace GLEEMAIL_DEBUG;
 
 
-bool WebAccess::writeHeadersToServer(InternetAccess& net, const char* const* headers) {
+bool WebsiteAccess::writeHeadersToServer(InternetAccess& net, const char* const* headers) {
 	const char* headerLine = headers[0];
 	if(headerLine == nullptr) {
 		return false;
@@ -28,7 +28,7 @@ bool WebAccess::writeHeadersToServer(InternetAccess& net, const char* const* hea
 }
 
 
-bool WebAccess::sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers) {
+bool WebsiteAccess::sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers) {
 	if(WiFi.status() != WL_CONNECTED) {
 		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
 		return false;
@@ -48,7 +48,7 @@ bool WebAccess::sendRequestToServer(InternetAccess& net, const char* server, con
 }
 
 
-short WebAccess::findEndOfHeaderIndex(const char* const rawData, const unsigned short lengthOfData) {
+short WebsiteAccess::findEndOfHeaderIndex(const char* const rawData, const unsigned short lengthOfData) {
 	unsigned short headerEndSearchIndex = 0;
 	short endOfHeaderIndex = -1;
 
@@ -71,7 +71,7 @@ short WebAccess::findEndOfHeaderIndex(const char* const rawData, const unsigned 
 }
 
 
-char* WebAccess::downloadFromServer(InternetAccess& net) {
+char* WebsiteAccess::downloadFromServer(InternetAccess& net) {
 	int bufferIndex = 0;
 	char* dataBuffer = new char[DOWNLOADED_PACKET_BUFFER_SIZE];
 	while(net.activeWebConnection()) {
