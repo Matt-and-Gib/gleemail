@@ -16,12 +16,13 @@
 	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
 */
 
-
 enum MORSE_CODE_STATE : bool {SWITCH_CLOSED = 1, SWITCH_OPEN = 0};
 enum class MORSE_CHAR_STATE : char {NOTHING = '0', DOT = '1', DASH = '2'};
 
 
 class MorseChar {
+protected:
+	MORSE_CHAR_STATE value;
 public:
 	MorseChar() {value = MORSE_CHAR_STATE::NOTHING;}
 	MorseChar(const MORSE_CHAR_STATE v) {value = v;}
@@ -48,18 +49,18 @@ public:
 			return "NOTHING";
 		}
 	}
-protected:
-	MORSE_CHAR_STATE value;
-private:
 };
 
-//TODO: Make these into references! Why didn't we do this before?
-static const MorseChar& DOT = *new MorseChar(MORSE_CHAR_STATE::DOT);
-static const MorseChar& DASH = *new MorseChar(MORSE_CHAR_STATE::DASH);
-static const MorseChar& NOTHING = *new MorseChar(MORSE_CHAR_STATE::NOTHING);
+const MorseChar& DOT = *new MorseChar(DOT);
+const MorseChar& DASH = *new MorseChar(DASH);
+const MorseChar& NOTHING = *new MorseChar(NOTHING);
 
 
 class MorsePhrase {
+private:
+	static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6;
+	unsigned short firstOpenIndex;
+	MorseChar* phraseArray;
 public:
 	MorsePhrase() {
 		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
@@ -147,10 +148,6 @@ public:
 
 	bool phraseStarted() const {return firstOpenIndex > 0;}
 	bool phraseFull() const {return firstOpenIndex == MAX_MORSE_PHRASE_LENGTH;}
-private:
-	static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6;
-	unsigned short firstOpenIndex;
-	MorseChar *phraseArray;
 };
 
 
@@ -169,6 +166,26 @@ struct MorsePhraseCharPair {
 
 
 class MorseCodeTreeNode : public BinarySearchTreeNode<MorsePhraseCharPair> {
+/*private:
+	void printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
+		if(node) {
+			for(short i = 0; i < spacingIndex; i += 1) {
+				Serial.print(' ');
+			}
+
+			Serial.print(lesser ? "├── " : "└── ");
+			Serial.println(node->data->character);
+
+			printSubtree(spacingIndex + 4, node->lesserNode, true);
+			printSubtree(spacingIndex + 4, node->greaterNode, false);
+		}
+	}
+*/
+
+protected:
+	MorseCodeTreeNode* parentNode;
+	MorseCodeTreeNode* lesserNode;
+	MorseCodeTreeNode* greaterNode;
 public:
 	MorseCodeTreeNode(MorsePhraseCharPair& newData, MorseCodeTreeNode* newParent) {
 		data = &newData;
@@ -224,24 +241,6 @@ public:
 	}
 
 	//void print() {printSubtree(0, this, false);}
-protected:
-	MorseCodeTreeNode* parentNode;
-	MorseCodeTreeNode* lesserNode;
-	MorseCodeTreeNode* greaterNode;
-private:
-	/*void printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
-		if(node) {
-			for(short i = 0; i < spacingIndex; i += 1) {
-				Serial.print(' ');
-			}
-
-			Serial.print(lesser ? "├── " : "└── ");
-			Serial.println(node->data->character);
-
-			printSubtree(spacingIndex + 4, node->lesserNode, true);
-			printSubtree(spacingIndex + 4, node->greaterNode, false);
-		}
-	}*/
 };
 
 #endif
