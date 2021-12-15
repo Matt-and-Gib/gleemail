@@ -15,9 +15,6 @@ private:
 	void recursiveErase(SDLib::File&, const char*);
 	void recursivePrint(SDLib::File&, const char*);
 public:
-	Storage();
-	~Storage();
-
 	const char* getRootPath() const {return ROOT_PATH;}
 
 	bool begin();

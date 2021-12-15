@@ -1,18 +1,9 @@
 #include "include/storage.h"
 #include "include/global.h"
+#include <SPI.h>
 #include <SD.h>
 
 using namespace SDLib;
-
-
-Storage::Storage() {
-
-}
-
-
-Storage::~Storage() {
-
-}
 
 
 bool Storage::begin() {
@@ -34,7 +25,7 @@ bool Storage::clearFile(const char* filePath) {
 
 
 bool Storage::writeFile(const char* data, const char* filePath) { //The data that is sent into saveFile() ABSOLUTELY MUST BE TERMINATED!
-	File saveToFile = SD.open(filePath, O_WRITE | O_CREAT);
+	SDLib::File saveToFile = SD.open(filePath, O_WRITE | O_CREAT);
 
 	if(saveToFile) {
 		saveToFile.print(data);
@@ -49,7 +40,7 @@ bool Storage::writeFile(const char* data, const char* filePath) { //The data tha
 
 const char* Storage::readFile(const char* filePath) { //REMEMBER TO DELETE! This is on the heap
 	dataLength = 0;
-	File readFromFile = SD.open(filePath, FILE_READ);
+	SDLib::File readFromFile = SD.open(filePath, FILE_READ);
 	if(readFromFile) {
 		char* data = new char[readFromFile.size() + 1];
 
@@ -80,7 +71,7 @@ void Storage::recursiveErase(SDLib::File& root, const char* rootPath = nullptr) 
 	}
 	strcat(path, root.name());
 
-	File item;
+	SDLib::File item;
 	while(item = root.openNextFile()) {
 		if(item.isDirectory()) {
 			recursiveErase(item, path);
@@ -107,7 +98,7 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 		return false;
 	}
 
-	File rootFile = SD.open(getRootPath(), FILE_READ);
+	SDLib::File rootFile = SD.open(getRootPath(), FILE_READ);
 	recursiveErase(rootFile);
 	SD.rmdir(getRootPath());
 	
@@ -123,7 +114,7 @@ void Storage::recursivePrint(SDLib::File& root, const char* rootPath = nullptr) 
 	}
 	strcat(path, root.name());
 
-	File item;
+	SDLib::File item;
 	while(item = root.openNextFile()) {
 		if(item.isDirectory()) {
 			recursivePrint(item, path);
@@ -148,7 +139,7 @@ void Storage::recursivePrint(SDLib::File& root, const char* rootPath = nullptr) 
 
 void Storage::printAll() {
 	if(SD.exists(getRootPath())) {
-		File rootFile = SD.open(getRootPath(), FILE_READ);
+		SDLib::File rootFile = SD.open(getRootPath(), FILE_READ);
 		recursivePrint(rootFile);
 		Serial.println(getRootPath());
 	}
