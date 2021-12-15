@@ -68,7 +68,7 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 		n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
 		//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
 
-		if(VERBOSE_DEBUG_LOG) {
+		if(DebugLog::getLog().verboseMode()) {
 			Serial.print(F("Peer DSA Public Key:"));
 			for(unsigned short i = 0; i < keyBytes; i += 1) {
 				Serial.print(' ');
@@ -171,7 +171,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	createuuid(userID);
 	buildEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
-	if(VERBOSE_DEBUG_LOG) {
+	if(DebugLog::getLog().verboseMode()) {
 		Serial.print(F("User DSA Public Key:"));
 		for(unsigned short i = 0; i < keyBytes; i += 1) {
 			Serial.print(' ');

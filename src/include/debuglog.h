@@ -2,17 +2,14 @@
 #define DEBUGLOG_H
 
 
-static const constexpr bool VERBOSE_DEBUG_LOG = true;
-
-
 namespace GLEEMAIL_DEBUG {
-	static const constexpr unsigned short DEBUG_LOG_INPUT_METHOD_OFFSET = 10;
-	static const constexpr unsigned short DEBUG_LOG_NETWORK_OFFSET = 50;
-	static const constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
-	static const constexpr unsigned short DEBUG_LOG_MESSAGE_ERROR_OFFSET = 130;
-	static const constexpr unsigned short DEBUG_LOG_INTERNET_ACCESS_OFFSET = 170;
-	static const constexpr unsigned short DEBUG_LOG_WEB_ACCESS_OFFSET = 210;
-	static const constexpr unsigned short DEBUG_LOG_STORAGE_OFFSET = 250;
+	const constexpr unsigned short DEBUG_LOG_INPUT_METHOD_OFFSET = 10;
+	const constexpr unsigned short DEBUG_LOG_NETWORK_OFFSET = 50;
+	const constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
+	const constexpr unsigned short DEBUG_LOG_MESSAGE_ERROR_OFFSET = 130;
+	const constexpr unsigned short DEBUG_LOG_INTERNET_ACCESS_OFFSET = 170;
+	const constexpr unsigned short DEBUG_LOG_WEB_ACCESS_OFFSET = 210;
+	const constexpr unsigned short DEBUG_LOG_STORAGE_OFFSET = 250;
 	enum ERROR_CODE: short {
 		//Meta range: 0 - 9
 		NONE = 0,
@@ -92,17 +89,20 @@ namespace GLEEMAIL_DEBUG {
 	};
 
 
-	//Remember: DebugLog is a singleton! DO NOT waste memory.
 	class DebugLog {
 	private:
+		const bool VERBOSE_DEBUG_LOG = true;
+		static constexpr unsigned short MAX_ERROR_CODES = 16;
+		ERROR_CODE* errorCodes;
+		unsigned short errorCodesFirstOpenIndex = 0;
+
+
 		DebugLog() {
 			errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
 			for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
 				errorCodes[i] = ERROR_CODE::NONE;
 			}
 		}
-		DebugLog(DebugLog const&) = delete;
-		void operator=(DebugLog const&) = delete;
 
 
 		void log(ERROR_CODE e, bool critical) {
@@ -112,25 +112,22 @@ namespace GLEEMAIL_DEBUG {
 				}
 			}
 		}
-
-		static constexpr unsigned short MAX_ERROR_CODES = 16;
-		ERROR_CODE* errorCodes;
-		unsigned short errorCodesFirstOpenIndex = 0;
 	public:
+		DebugLog(DebugLog const&) = delete;
+		void operator=(DebugLog const&) = delete;
+
+
 		static DebugLog& getLog() {
 			static DebugLog log;
 			return log;
 		}
 
 
-		void logError(ERROR_CODE e) {
-			log(e, true);
-		}
+		bool verboseMode() const {return VERBOSE_DEBUG_LOG;}
 
 
-		void logWarning(ERROR_CODE e) {
-			log(e, false);
-		}
+		void logError(ERROR_CODE e) {log(e, true);}
+		void logWarning(ERROR_CODE e) {log(e, false);}
 
 
 		ERROR_CODE getNextError() {
