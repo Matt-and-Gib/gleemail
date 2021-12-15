@@ -1,0 +1,40 @@
+{
+	"size": 2048,
+	"codes": [
+		{"code": "QRM?", "meaning": "IS MY TRANSMISSION BEING INTERFERED WITH?"},
+		{"code": "QRM", "meaning": "YOUR TRANSMISSION IS BEING INTERFERED WITH."},
+
+		{"code": "QRN?", "meaning": "ARE YOU TROUBLED BY STATIC?"},
+		{"code": "QRN", "meaning": "I AM TROUBLED BY STATIC."},
+
+		{"code": "QRQ?", "meaning": "SHALL I SEND FASTER?"},
+		{"code": "QRQ", "meaning": "SEND FASTER."},
+
+		{"code": "QRS?", "meaning": "SHALL I SEND SLOWER?"},
+		{"code": "QRS", "meaning": "SEND SLOWER."},
+
+		{"code": "QRT?", "meaning": "SHALL I STOP SENDING?"},
+		{"code": "QRT", "meaning": "STOP SENDING."},
+
+		{"code": "QRU?", "meaning": "HAVE YOU ANYTHING FOR ME?"},
+		{"code": "QRU", "meaning": "I HAVE NOTHING FOR YOU."},
+
+		{"code": "QRV?", "meaning": "ARE YOU READY TO COPY?"},
+		{"code": "QRV", "meaning": "I AM READY TO COPY."},
+
+		{"code": "QRX?", "meaning": "SHOULD I WAIT?"},
+		{"code": "QRX", "meaning": "WAIT."},
+
+		{"code": "QRZ?", "meaning": "WHO IS CALLING ME?"},
+		{"code": "QRZ", "meaning": "YOU ARE BEING CALLED BY..."},
+
+		{"code": "QSB?", "meaning": "ARE MY SIGNALS FADING?"},
+		{"code": "SQB", "meaning": "YOUR SIGNALS ARE FADING."},
+
+		{"code": "QSL?", "meaning": "DO YOU ACKNOWLEDGE?"},
+		{"code": "QSL", "meaning": "I ACKNOWLEDGE RECEIPT."},
+
+		{"code": "QTH?", "meaning": "WHAT IS YOUR LOCATION?"},
+		{"code": "QTH", "meaning": "MY LOCATION IS..."}
+	]
+}
