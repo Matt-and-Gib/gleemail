@@ -5,15 +5,13 @@
 class hd44780_pinIO;
 
 
-namespace DisplayData {
-	static const constexpr char BLANK_LINE[] = "                \0";
-}
-
 class Display {
 private:
+	const char BLANK_LINE[17] = "                ";
+
 	static const unsigned short DISPLAY_ROW_LENGTH = 16;
 	static const unsigned short DISPLAY_COLUMN_LENGTH = 2;
-	enum class PRINT_ROW : bool {TOP = true, BOTTOM = false};
+	enum PRINT_ROW : bool {TOP = false, BOTTOM = true};
 
 	static constexpr int RS = 7;
 	static constexpr int EN = 6;
@@ -31,11 +29,11 @@ private:
 	char* remainingLine;
 public:
 	Display();
-	~Display();
+
 	void updateReading(const char* message, const bool retainScreen = false);
 	void updateWriting(const char* message, const bool retainScreen = false);
-	void clearReading() {updateReading(DisplayData::BLANK_LINE, true);}
-	void clearWriting() {updateWriting(DisplayData::BLANK_LINE, true);}
+	void clearReading() {updateReading(BLANK_LINE, true);}
+	void clearWriting() {updateWriting(BLANK_LINE, true);}
 	void clearAll();
 };
 

@@ -9,21 +9,12 @@ Display::Display() {
 	lcd = new hd44780_pinIO(RS, EN, D4, D5, D6, D7);
 
 	lcd->begin(16, 2);
-	for(unsigned short i = 0; i < DISPLAY_COLUMN_LENGTH; i += 1) {
-		for(unsigned short j = 0; j < DISPLAY_ROW_LENGTH; j += 1) {
-			lcdBuffer[i][j] = ' ';
-		}
-	}
-}
-
-
-Display::~Display() {
-
+	lcd->clear();
 }
 
 
 void Display::print(const char* message, const PRINT_ROW row, const bool retainScreen) {
-	lcd->setCursor(0, (row == PRINT_ROW::TOP ? 0 : 1));
+	lcd->setCursor(0, row);
 	wroteLength = lcd->print(message);
 
 	if(!retainScreen) {
