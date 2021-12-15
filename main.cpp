@@ -365,6 +365,8 @@ void connectToPeer() {
 	IPAddress friendsIP(ipAddressParts[0], ipAddressParts[1], ipAddressParts[2], ipAddressParts[3]);
 
 	Serial.println(F("Initializing Authentication..."));
+	display.updateReading("Initializing");
+	display.updateWriting("  Authentication"); //Right aligned
 
 	network.connectToPeer(friendsIP);
 
@@ -494,8 +496,9 @@ void setup() {
 
 		case SETUP_LEVEL::PEER:
 			if(!OFFLINE_MODE) {
-				display.updateWriting("Wait for glEEpal");
-				connectToPeer();	
+				display.clearWriting();
+				display.updateReading("Enter glEEpal IP");
+				connectToPeer();
 			}
 
 			setupState = SETUP_LEVEL::DONE;
