@@ -24,28 +24,29 @@ extern USBDeviceClass USBDevice;
 
 extern "C" void __libc_init_array(void);
 
+
 bool quit = false;
 
-static Storage storage;
+Display display;
 
-static InputMethod* input = nullptr;
-static unsigned short pinIndex = 0;
-static char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
-static char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
+Storage storage;
 
-static InternetAccess internet;
-static WebAccess webAccess;
+InternetAccess internet;
+WebAccess webAccess;
 
 char* messageToPrint = nullptr;
 void connectedToPeerClearDisplay();
 void updateDisplayWithPeerChat(char*);
-static Networking network(&millis, &updateDisplayWithPeerChat, &connectedToPeerClearDisplay, 0, quit);
+Networking network(&millis, &updateDisplayWithPeerChat, &connectedToPeerClearDisplay, 0, quit);
 
-static Display display;
+InputMethod* input = nullptr;
+unsigned short pinIndex = 0;
+char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
+char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
 
-static long long cycleStartTime = 0;
-static long cycleDuration = 0;
-static unsigned short cycleLatencyCount = 0;
+long long cycleStartTime = 0;
+long cycleDuration = 0;
+unsigned short cycleLatencyCount = 0;
 
 
 void clearSerialInputBuffer() {
@@ -292,7 +293,7 @@ bool setupInputMethod() {
 
 	bool downloadFullDataPackage = true;
 	const char* data = storage.readFile(input->getCachedDataPath());
-	if(data && Preferences::getPrefs().getMorseCodeCharPairsVersion() == inputMethodDataVersion) { //Make this input-method agnostic
+	if(data != nullptr && Preferences::getPrefs().getMorseCodeCharPairsVersion() == inputMethodDataVersion) { //Make this input-method agnostic
 		downloadFullDataPackage = false;
 	}
 
@@ -336,7 +337,7 @@ void setupPins() {
 }
 
 
-void connectToPeer() { //Use PEER wait time to do asynchronousProcess
+void connectToPeer() {
 	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
 	char* ipAddressInputSubstringBuffer;
 	uint8_t ipAddressParts[4];
@@ -531,6 +532,7 @@ int main(void) {
 
 	setup();
 
+//NOTE: The below timing calculations are probably incorrect now that chat messages are encrypted/decrypted
 /*
 Estimated max time for single message processing: 4ms
 
@@ -539,7 +541,7 @@ Estimated max time for single message processing: 4ms
 
 
 	180ms: totally unusable
-	90ms: completely unusalbe
+	90ms: completely unusable
 	45ms: unusable
 	25ms: okay
 	30ms: fine
