@@ -27,8 +27,8 @@ const constexpr char NETWORK_HEADER_CONNECTION_LIFETIME[] = "Connection: close";
 const constexpr char NETWORK_HEADER_TERMINATION[] = "\r\n\r\n";
 const constexpr unsigned short LENGTH_OF_HEADER_TERMINATION = sizeof(NETWORK_HEADER_TERMINATION)/sizeof(NETWORK_HEADER_TERMINATION[0]) - 1;
 
-enum class MESSAGE_TYPE : unsigned short {ERROR = 0, HEARTBEAT = 1, CONFIRMATION = 2, CHAT = 3, HANDSHAKE = 4, NONE = 5};
-const constexpr MESSAGE_TYPE START_MESSAGE_TYPE = static_cast<MESSAGE_TYPE>(0);
+enum class MESSAGE_TYPE : unsigned short {ERROR = 0, HEARTBEAT = 1, CONFIRMATION = 2, CHAT = 3, HANDSHAKE = 4, NONE = 5}; //We wouldn't have to cast things if this was an unscoped enum.
+const constexpr MESSAGE_TYPE START_MESSAGE_TYPE = static_cast<MESSAGE_TYPE>(0); //Casting 0 in case MESSAGE_TYPE sort changes (maybe ERROR won't always be 0)
 
 const constexpr unsigned short CHAT_COMPLETE_THRESHOLD = 16; //This is determined by the display width, and is only used in inputmethod.cpp. The maximum this could ever currently be is 132, which is half of MAX_MESSAGE_LENGTH, minus the null terminator. It is half because sending encrypted data requires doubling the chat length because WiFiNINA cannot send raw hex (so each hex char has to be converted into two ASCII chars)
 const constexpr unsigned short MAX_MESSAGE_LENGTH = 265; //This is the maximum size of an encryption info payload. Used for length of "chat" in Message object.
