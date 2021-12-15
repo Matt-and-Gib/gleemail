@@ -10,7 +10,7 @@
 using namespace GLEEMAIL_DEBUG;
 
 
-namespace MORSE_CODE_LENGTHS {
+namespace {
 	/*
 		WARNING: STATISTICS BELOW:
 
@@ -18,27 +18,26 @@ namespace MORSE_CODE_LENGTHS {
 		THESE VALUES MAY NOT WORK FOR YOUR MEAGER MORSE SKILL LEVEL.
 	*/
 
-	static const constexpr unsigned short CALCULATED_DOT_DURATION = 165;
-	static const constexpr unsigned short DOT_DASH_THRESHOLD_BUFFER = 100;
-	static const constexpr unsigned short DOT_DASH_THRESHOLD = CALCULATED_DOT_DURATION + DOT_DASH_THRESHOLD_BUFFER;
+	const constexpr unsigned short CALCULATED_DOT_DURATION = 165;
+	const constexpr unsigned short DOT_DASH_THRESHOLD_BUFFER = 100;
+	const constexpr unsigned short DOT_DASH_THRESHOLD = CALCULATED_DOT_DURATION + DOT_DASH_THRESHOLD_BUFFER;
 
-	static const constexpr unsigned short CALCULATED_DASH_DURATION = 2.35 * CALCULATED_DOT_DURATION;
-	static const constexpr unsigned short MAX_DASH_THRESHOLD_BUFFER = 200;
-	static const constexpr unsigned short MAX_DASH_THRESHOLD = CALCULATED_DASH_DURATION + MAX_DASH_THRESHOLD_BUFFER;
+	const constexpr unsigned short CALCULATED_DASH_DURATION = 2.35 * CALCULATED_DOT_DURATION;
+	const constexpr unsigned short MAX_DASH_THRESHOLD_BUFFER = 200;
+	const constexpr unsigned short MAX_DASH_THRESHOLD = CALCULATED_DASH_DURATION + MAX_DASH_THRESHOLD_BUFFER;
 
-	static const constexpr unsigned short CALCULATED_PHRASE_FINISHED_THRESHOLD = 3 * CALCULATED_DOT_DURATION;
-	static const constexpr unsigned short PHRASE_FINISHED_THRESHOLD_BUFFER = 100;
-	static const constexpr unsigned short PHRASE_FINISHED_THRESHOLD = CALCULATED_PHRASE_FINISHED_THRESHOLD + PHRASE_FINISHED_THRESHOLD_BUFFER;
+	const constexpr unsigned short CALCULATED_PHRASE_FINISHED_THRESHOLD = 3 * CALCULATED_DOT_DURATION;
+	const constexpr unsigned short PHRASE_FINISHED_THRESHOLD_BUFFER = 100;
+	const constexpr unsigned short PHRASE_FINISHED_THRESHOLD = CALCULATED_PHRASE_FINISHED_THRESHOLD + PHRASE_FINISHED_THRESHOLD_BUFFER;
 
-	static const constexpr unsigned short CALCULATED_WORD_FINISHED_THRESHOLD = 7 * CALCULATED_DOT_DURATION;
-	static const constexpr unsigned short WORD_FINISHED_THRESHOLD_BUFFER = 400;
-	static const constexpr unsigned short WORD_FINISHED_THRESHOLD = CALCULATED_WORD_FINISHED_THRESHOLD + WORD_FINISHED_THRESHOLD_BUFFER;
+	const constexpr unsigned short CALCULATED_WORD_FINISHED_THRESHOLD = 7 * CALCULATED_DOT_DURATION;
+	const constexpr unsigned short WORD_FINISHED_THRESHOLD_BUFFER = 400;
+	const constexpr unsigned short WORD_FINISHED_THRESHOLD = CALCULATED_WORD_FINISHED_THRESHOLD + WORD_FINISHED_THRESHOLD_BUFFER;
 
-	static const constexpr unsigned short CALCULATED_MESSAGE_FINISHED_THRESHOLD = 3 * CALCULATED_WORD_FINISHED_THRESHOLD;
-	static const constexpr unsigned short MESSAGE_FINISIHED_THRESHOLD_BUFFER = 500;
-	static const constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_FINISHED_THRESHOLD + MESSAGE_FINISIHED_THRESHOLD_BUFFER;
+	const constexpr unsigned short CALCULATED_MESSAGE_FINISHED_THRESHOLD = 3 * CALCULATED_WORD_FINISHED_THRESHOLD;
+	const constexpr unsigned short MESSAGE_FINISIHED_THRESHOLD_BUFFER = 500;
+	const constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_FINISHED_THRESHOLD + MESSAGE_FINISIHED_THRESHOLD_BUFFER;
 }
-using namespace MORSE_CODE_LENGTHS;
 
 
 MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage), currentMorsePhrase{*new MorsePhrase()}, morseCodeTreeRoot{*new MorseCodeTreeNode(*new MorsePhraseCharPair('\0', *new MorsePhrase()), nullptr)} {
