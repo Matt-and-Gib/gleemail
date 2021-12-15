@@ -395,7 +395,7 @@ void setup() {
 		Serial.println(F("Files deleted successfully"));
 	}
 
-	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, NETWORK = 2, INPUT_METHOD = 3, PINS = 4, PEER = 5, DONE = 6};
+	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, PREFERENCES = 2, NETWORK = 3, INPUT_METHOD = 4, PINS = 5, PEER = 6, DONE = 7};
 	SETUP_LEVEL setupState = WELCOME;
 	bool setupComplete = false;
 
@@ -426,15 +426,21 @@ void setup() {
 
 
 		case SETUP_LEVEL::STORAGE:
-			if(storage.begin()) {
-				if(preparePreferences()) {
-					initializeNetworkCredentialsFromPreferences(&desiredWiFiSSID, &desiredWiFiPassword);
-				}
-			} else {
+			if(!storage.begin()) {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
+				setupState = SETUP_LEVEL::NETWORK;
+			} else {
+				setupState = SETUP_LEVEL::PREFERENCES;
 			}
+		break;
 
-			setupState = SETUP_LEVEL::NETWORK;
+
+		case SETUP_LEVEL::PREFERENCES:
+			if(preparePreferences()) {
+				initializeNetworkCredentialsFromPreferences(&desiredWiFiSSID, &desiredWiFiPassword);
+
+				setupState = SETUP_LEVEL::NETWORK;
+			}
 		break;
 
 
