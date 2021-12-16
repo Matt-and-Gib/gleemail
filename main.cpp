@@ -166,6 +166,17 @@ bool preparePreferences() {
 }
 
 
+bool resetCodeEntered() {
+	signed char resetCode = Serial.peek();
+	if(resetCode == -1) {
+		return false;
+	} else {
+		clearSerialInputBuffer();
+		return resetCode == 'r' || resetCode == 'R';
+	}
+}
+
+
 void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword) {
 	delete[] *desiredWiFiSSID;
 	delete[] *desiredWiFiPassword;
@@ -389,12 +400,6 @@ void setup() {
 		Serial.read();
 	}
 
-	if(RESET_STORAGE) {
-		storage.begin();
-		storage.eraseAll(133769);
-		Serial.println(F("Files deleted successfully"));
-	}
-
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, PREFERENCES = 2, NETWORK = 3, INPUT_METHOD = 4, PINS = 5, PEER = 6, DONE = 7};
 	SETUP_LEVEL setupState = WELCOME;
 	bool setupComplete = false;
@@ -406,6 +411,7 @@ void setup() {
 	bool networkCredentialsExist = false;
 
 	const unsigned short SETUP_STEP_DELAY_MS = 100;
+	const unsigned short HELLO_GLEEMAIL_DELAY_MS = 1337;
 	const unsigned short NETWORK_FAILED_DELAY_MS = 3600; //Smallest GitHub rate limit is 1000/hour, and there are 3600000ms in one hour, therefore sending one request per 3600ms will hopefully ensure we dont' exceed any limits
 
 	do {
@@ -421,6 +427,7 @@ void setup() {
 			}
 
 			display.updateReading("Hello, glEEmail!");
+			delay(HELLO_GLEEMAIL_DELAY_MS);
 			setupState = SETUP_LEVEL::STORAGE;
 		break;
 
@@ -430,6 +437,12 @@ void setup() {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
+				storage.createBasePath();
+				if(resetCodeEntered()) {
+					storage.eraseAll(133769);
+					Serial.println(F("Files deleted successfully"));
+				}
+
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;

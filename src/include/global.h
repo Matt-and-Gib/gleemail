@@ -6,7 +6,6 @@
 
 const constexpr char GLEEMAIL_VERSION[] = "alpha 5";
 const constexpr bool OFFLINE_MODE = false;
-const constexpr bool RESET_STORAGE = false;
 
 const constexpr unsigned short BAUD_RATE = 9600;
 
