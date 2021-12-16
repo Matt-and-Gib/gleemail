@@ -433,12 +433,21 @@ void setup() {
 
 
 	{ //TODO: think of way to pass member function pointer instead of function pointer
-		Queue<KVPair<char, bool (*)(void)>> startupCodes;
-		const char testChar = 'R';
-		startupCodes.enqueue(new KVPair<char, bool (*)(void)>(testChar, &resetCodeEntered));
+		Queue<KVPair<char, bool (*)(void)>> startupCodes; //this will live right here in Setup
+		const char testChar = 'R'; //this would be a private member of an object (in this case Storage)
+		startupCodes.enqueue(new KVPair<char, bool (*)(void)>(testChar, &resetCodeEntered)); //the queue will probably be passed in to the object's begin function for the object to enqueue its KVPairs
 
-		//avoid memory leak:
-		delete startupCodes.dequeue();
+		/*
+			When checkStartupCodes() is called and a code is found, loop through the startupCodes queue to see if there are any matches, and if so: call the value function pointer.
+		*/
+
+		//at the end of setup()
+		/*//This is the "safe" way
+		QueueNode<KVPair<char, bool (*)(void)>>* pair;
+		while(pair = startupCodes.dequeue()) {
+			delete pair;
+		}*/
+		//but I'm pretty sure the destructor for Queue will cascade-delete all children
 	}
 
 

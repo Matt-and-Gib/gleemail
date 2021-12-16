@@ -15,7 +15,7 @@ public:
 
 	~QueueNode() {
 		delete data;
-		delete node; //Note: This will cascade-delete all children if called on a node with children. Always use in tandem with remove()
+		delete node; //Note: This will cascade-delete all children if called on a node with children. Always use in tandem with remove() or dequeue()
 	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak
@@ -43,7 +43,7 @@ public:
 		root = nullptr;
 	}
 	~Queue() {
-		delete root;
+		delete root; //Note: I think this will cascade-delete all children. This could be expected behavior, or it could do bad things. Just, be aware.
 	}
 
 	QueueNode<T>* enqueue(T*); //puts node at end of queue
