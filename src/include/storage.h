@@ -18,7 +18,6 @@ public:
 	bool begin();
 
 	const char* getRootPath() const {return ROOT_PATH;}
-	bool createBasePath();
 	
 	bool writeFile(const char* data, const char* filePath);
 

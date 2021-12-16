@@ -11,12 +11,11 @@ bool Storage::begin() {
 }
 
 
-bool Storage::createBasePath() {
-	return SD.mkdir(getRootPath());
-}
-
-
 bool Storage::writeFile(const char* data, const char* filePath) { //The data that is sent into saveFile() ABSOLUTELY MUST BE TERMINATED!
+	if(!SD.exists(getRootPath())) {
+		SD.mkdir(getRootPath());
+	}
+
 	SDLib::File saveToFile = SD.open(filePath, O_WRITE | O_CREAT);
 
 	if(saveToFile) {

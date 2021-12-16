@@ -437,7 +437,6 @@ void setup() {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
-				storage.createBasePath();
 				if(resetCodeEntered()) {
 					storage.eraseAll(133769);
 					Serial.println(F("Files deleted successfully"));
