@@ -3,6 +3,9 @@
 #include "src/include/global.h"
 #include "src/include/preferences.h"
 
+#include "src/include/queue.h"
+#include "src/include/kvpair.h"
+
 #include "src/include/display.h"
 #include "src/include/storage.h"
 
@@ -422,11 +425,22 @@ void setup() {
 		delay(250);
 	}
 
-	clearSerialInputBuffer();
+	clearSerialInputBuffer(); //This is probably unnecessary.
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, PREFERENCES = 2, NETWORK = 3, INPUT_METHOD = 4, PINS = 5, PEER = 6, DONE = 7};
 	SETUP_LEVEL setupState = WELCOME;
 	bool setupComplete = false;
+
+
+	{ //TODO: think of way to pass member function pointer instead of function pointer
+		Queue<KVPair<char, bool (*)(void)>> startupCodes;
+		const char testChar = 'R';
+		startupCodes.enqueue(new KVPair<char, bool (*)(void)>(testChar, &resetCodeEntered));
+
+		//avoid memory leak:
+		delete startupCodes.dequeue();
+	}
+
 
 	char* desiredWiFiSSID = nullptr;
 	char* desiredWiFiPassword = nullptr;
