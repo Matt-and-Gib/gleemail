@@ -9,6 +9,7 @@ namespace SDLib {
 class Storage {
 private:
 	const char ROOT_PATH[9] = "GLEEMAIL";
+	const char RESET_CODE = 'R';
 
 	unsigned int dataLength = 0;
 
