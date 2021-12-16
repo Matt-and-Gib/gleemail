@@ -14,8 +14,9 @@ ___
 4. [Error Codes](#errortable)
 5. [Getting Started in the Code](#gettingstarted)
 6. [Usage Instructions](#instructions)
-7. [Future Plans](#plans)
-8. [Legal Info](#legal)
+7. [Startup Codes](#startup-codes)
+8. [Future Plans](#plans)
+9. [Legal Info](#legal)
 
 ___
 
@@ -247,6 +248,11 @@ If you've configured the hardware correctly, simply upload the code to your Ardu
 - Be a glEEpal
 
 ***IMPORTANT NOTE:*** You are limited to sending no more than ~32,768 messages per session due to the size of the idempotency token (unsigned short- i.e. 2 bytes) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glee-ware every once in a while.
+___
+
+### <a name="startup-codes"></a>**Startup Codes**
+
+Entering an 'r' in the Serial monitor at startup will erase all glEEmail data from the SD card.
 ___
 
 ### <a name="plans"></a>**Future Plans**
