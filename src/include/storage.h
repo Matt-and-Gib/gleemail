@@ -15,16 +15,17 @@ private:
 	void recursiveErase(SDLib::File&, const char*);
 	void recursivePrint(SDLib::File&, const char*);
 public:
-	const char* getRootPath() const {return ROOT_PATH;}
-
 	bool begin();
-	bool clearFile(const char* filePath);
 
+	const char* getRootPath() const {return ROOT_PATH;}
+	bool createBasePath();
+	
 	bool writeFile(const char* data, const char* filePath);
 
 	const char* readFile(const char* filePath); //Remember to delete! Stores on heap
 	unsigned int lastReadFileLength() const;
 
+	bool clearFile(const char* filePath);
 	bool eraseAll(const unsigned int confirmationCode);
 
 	void printAll();

@@ -7,20 +7,12 @@ using namespace SDLib;
 
 
 bool Storage::begin() {
-	if(!SD.begin(STORAGE_SLAVE_SELECT_PIN)) {
-		return false;
-	}
-
-	if(!SD.exists(getRootPath())) {
-		SD.mkdir(getRootPath());
-	}
-
-	return true;
+	return SD.begin(STORAGE_SLAVE_SELECT_PIN);
 }
 
 
-bool Storage::clearFile(const char* filePath) {
-	return SD.remove(filePath);
+bool Storage::createBasePath() {
+	return SD.mkdir(getRootPath());
 }
 
 
@@ -60,6 +52,11 @@ const char* Storage::readFile(const char* filePath) { //REMEMBER TO DELETE! This
 
 unsigned int Storage::lastReadFileLength() const {
 	return dataLength; //== 0 ? 0 : dataLength + 1;
+}
+
+
+bool Storage::clearFile(const char* filePath) {
+	return SD.remove(filePath);
 }
 
 
