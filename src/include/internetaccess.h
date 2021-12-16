@@ -10,7 +10,7 @@ private:
 	char* ssid;
 	char* password;
 	static const unsigned char MAX_SSID_LENGTH = 32;
-	static const unsigned char MAX_PASSWORD_LENGTH = 63;
+	static const unsigned char MAX_PASSWORD_LENGTH = 63; //Note: Serial buffer size is 64
 
 	WiFiClient* client;
 public:
