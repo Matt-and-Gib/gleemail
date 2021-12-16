@@ -52,7 +52,7 @@ unsigned short cycleLatencyCount = 0;
 
 
 void clearSerialInputBuffer() {
-	while(Serial.available() > 0) {
+	while(Serial.available()) {
 		Serial.read();
 	}
 }
@@ -133,6 +133,43 @@ void printErrorCodes() {
 }
 
 
+bool resetCodeEntered() {
+	return storage.eraseAll(133769);
+}
+
+
+void checkStartupCodes() {
+	if(Serial.available()) {
+		if(Serial.peek() == '-') {
+			Serial.read();
+			switch(Serial.read()) { //Assuming a second character is available; if not, this will block!
+			case 'R':
+				if(resetCodeEntered()) {
+					Serial.println(F("Files deleted successfully"));
+				} else {
+					Serial.println(F("Unable to erase SD card!")); //Should probably be an error code
+				}
+			break;
+
+			case 't':
+				Serial.println(F("Startup Code Test"));
+			break;
+
+			default:
+				DebugLog::getLog().logError(ERROR_CODE::UNKNOWN_STARTUP_CODE);
+			break;
+			}
+
+			//Handle additional codes?
+		} else {
+			DebugLog::getLog().logWarning(ERROR_CODE::INVALID_STARTUP_CODE);
+		}
+
+		clearSerialInputBuffer();
+	}
+}
+
+
 void initializeNetworkCredentialsFromPreferences(char** desiredWiFiSSID, char** desiredWiFiPassword) {
 	delete[] *desiredWiFiSSID;
 	delete[] *desiredWiFiPassword;
@@ -162,17 +199,6 @@ bool preparePreferences() {
 		delete[] preferencesData;
 
 		return true;
-	}
-}
-
-
-bool resetCodeEntered() {
-	signed char resetCode = Serial.peek();
-	if(resetCode == -1) {
-		return false;
-	} else {
-		clearSerialInputBuffer();
-		return resetCode == 'r' || resetCode == 'R';
 	}
 }
 
@@ -396,9 +422,7 @@ void setup() {
 		delay(250);
 	}
 
-	while(Serial.available()) {
-		Serial.read();
-	}
+	clearSerialInputBuffer();
 
 	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, PREFERENCES = 2, NETWORK = 3, INPUT_METHOD = 4, PINS = 5, PEER = 6, DONE = 7};
 	SETUP_LEVEL setupState = WELCOME;
@@ -437,11 +461,6 @@ void setup() {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
-				if(resetCodeEntered()) {
-					storage.eraseAll(133769);
-					Serial.println(F("Files deleted successfully"));
-				}
-
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;
@@ -536,6 +555,7 @@ void setup() {
 		break;
 		}
 
+		checkStartupCodes();
 		printErrorCodes();
 		delay(SETUP_STEP_DELAY_MS);
 	} while (!setupComplete);
