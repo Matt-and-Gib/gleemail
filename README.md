@@ -73,6 +73,8 @@ Last updated: 12/13/2021
 |2|Unknown Setup State|An unknown step was specified in setup|High|
 |3|Continuous Frame Latency|Lag may cause inaccuracies in input|High|
 |4|All Functions Succeeded||N/A|
+|5|Invalid Startup Code|Input between setup steps was not formatted properly|Low|
+|6|Unknown Startup Code|No behavior defined for provided code|High|
 </details>
 
 <details>
@@ -252,7 +254,10 @@ ___
 
 ### <a name="startup-codes"></a>**Startup Codes**
 
-Entering an 'r' in the Serial monitor at startup will erase all glEEmail data from the SD card.
+|Code|Behavior|Notes|
+|----|--------|-----|
+|-R|Remove glEEmail data from SD card|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
+|-t|Startup code test|Provides confirmation that startup code was received|
 ___
 
 ### <a name="plans"></a>**Future Plans**
