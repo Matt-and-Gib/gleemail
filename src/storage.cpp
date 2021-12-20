@@ -13,7 +13,10 @@ bool Storage::begin() {
 
 bool Storage::writeFile(const char* data, const char* filePath) { //The data that is sent into saveFile() ABSOLUTELY MUST BE TERMINATED!
 	if(!SD.exists(getRootPath())) {
-		SD.mkdir(getRootPath());
+		if(!SD.mkdir(getRootPath())) {
+			Serial.println(F("writeFile: root path did not exist and creating it failed!")); //Maybe replace with a debug log entry.
+			return false;
+		}
 	}
 
 	SDLib::File saveToFile = SD.open(filePath, O_WRITE | O_CREAT);
@@ -21,9 +24,14 @@ bool Storage::writeFile(const char* data, const char* filePath) { //The data tha
 	if(saveToFile) {
 		saveToFile.print(data);
 		saveToFile.close();
+		
+		Serial.println(F("Successfully opened, wrote, and closed filePath"));
+		Serial.print(F("Wrote: "));
+		Serial.println(data);
 
 		return true;
 	} else {
+		Serial.println(F("Failed to open filePath"));
 		return false;
 	}
 }
