@@ -43,7 +43,7 @@ public:
 		root = nullptr;
 	}
 	~Queue() {
-		delete root; //Note: I think this will cascade-delete all children. This could be expected behavior, or it could do bad things. Just, be aware.
+		delete root; //Note: All children will be recursively deleted. This could be expected behavior, or it could do bad things. Just, be aware.
 	}
 
 	QueueNode<T>* enqueue(T*); //puts node at end of queue

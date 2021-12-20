@@ -484,6 +484,7 @@ void setup() {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
+				storage.printAll(); //DEBUG_ONLY_REMOVE_ME
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;
@@ -491,7 +492,10 @@ void setup() {
 
 		case SETUP_LEVEL::PREFERENCES:
 			if(preparePreferences()) {
+				Serial.println(F("Prepare preferences succeeded; init network creds")); //DEBUG_ONLY_REMOVE_ME
 				initializeNetworkCredentialsFromPreferences(&desiredWiFiSSID, &desiredWiFiPassword);
+			} else {
+				Serial.println(F("Prepare prefs failed!")); //DEBUG_ONLY_REMOVE_ME
 			}
 
 			setupState = SETUP_LEVEL::NETWORK;
