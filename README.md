@@ -188,7 +188,19 @@ ___
 
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
 
-To-do...
+The first step to becoming a glEEveloper is understanding the project structure. Now, you may think that you already understand the structure because you saw that "src" folder, and you know what that's all about, but I'm here to tell you that there's more to the story. See, Arduino requires a .ino file with the same name as the project to live in the root folder. Now, again, you're like "I already know this," but hang on; if you open the .ino, you may eventually notice that it's completely empty. Yeah, like, what? Well, there's also a main.cpp file in the root of the project, and _that's_ where the magic happens. Our main.cpp overwrites the implicit main.cpp created by Arduino so that we can control the main loop.
+
+Aside from that, all other code files may be found inside `src`. The folder `src` itself is for source files, `src/include` is for headers, and `src/include/LiteChaCha` is for the encryption library [written by DualJustice](https://github.com/DualJustice/LiteChaCha). We've separated as many files as possible into definition and implementation, but several important files are exclusive to `src/include`, such as data structures like our queue and binary search tree.
+
+Most work will be done on implementation files in the base `src` folder. For an idea of what glEEmail does at runtime, please take a look at our flow diagram below, however for a basic overview, see the following:
+
+```
+main.cpp : initial setup, then loop control
+morsecode.cpp : processInputMethod()
+networking.cpp : processNetwork()
+display.cpp : updateDisplay()
+main.cpp : printErrorCodes()
+```
 
 [View Online Program Flow Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2FglEEmail%20flow.drawio)
 
