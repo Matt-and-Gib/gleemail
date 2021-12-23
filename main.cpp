@@ -359,6 +359,9 @@ bool setupInputMethod() {
 		delete[] prefsData;
 	}
 
+	Serial.print(F("setupInputMethod data: "));
+	Serial.println(data);
+	
 	bool dataParsed = input->setNetworkData(data);
 	delete[] data;
 	return dataParsed;
