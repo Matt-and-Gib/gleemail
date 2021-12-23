@@ -1,24 +1,23 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-namespace SDLib {
-	class File;
-}
+
+class SdFat32;
 
 
 class Storage {
 private:
-	const char ROOT_PATH[9] = "GLEEMAIL";
+	const unsigned short SLAVE_SELECT_PIN = 10;
 	const char RESET_CODE = 'R';
+	const char GLEEMAIL_ROOT_PATH[9] = "GLEEMAIL";
 
 	unsigned int dataLength = 0;
 
-	void recursiveErase(SDLib::File&, const char*);
-	void recursivePrint(SDLib::File&, const char*);
+	SdFat32* sd;
 public:
 	bool begin();
 
-	const char* getRootPath() const {return ROOT_PATH;}
+	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
 	
 	bool writeFile(const char* data, const char* filePath);
 

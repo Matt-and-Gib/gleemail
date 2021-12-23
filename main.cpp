@@ -192,6 +192,12 @@ void initializeNetworkCredentialsFromPreferences(char** desiredWiFiSSID, char** 
 bool preparePreferences() {
 	const char* preferencesData = storage.readFile(Preferences::getPrefs().getPrefsPath());
 
+	/*Serial.print(F("Data read: "));
+	Serial.println(preferencesData);
+	Serial.print(F("Read "));
+	Serial.print(storage.lastReadFileLength());
+	Serial.println(F(" bytes."));*/
+
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
 		delete[] preferencesData;
@@ -432,7 +438,7 @@ void setup() {
 	bool setupComplete = false;
 
 
-	{ //TODO: think of way to pass member function pointer instead of function pointer
+	if(false) { //TODO: think of way to pass member function pointer instead of function pointer
 		Queue<KVPair<char, bool (*)(void)>> startupCodes; //this will live right here in Setup
 		const char testChar = 'R'; //this would be a private member of an object (in this case Storage)
 		startupCodes.enqueue(new KVPair<char, bool (*)(void)>(testChar, &resetCodeEntered)); //the queue will probably be passed in to the object's begin function for the object to enqueue its KVPairs

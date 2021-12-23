@@ -1,150 +1,113 @@
 #include "include/storage.h"
-#include "include/global.h"
 #include <SPI.h>
-#include <SD.h>
-
-using namespace SDLib;
+#include "SdFat.h"
+#include <Arduino.h>
 
 
 bool Storage::begin() {
-	return SD.begin(STORAGE_SLAVE_SELECT_PIN);
-}
-
-
-bool Storage::writeFile(const char* data, const char* filePath) { //The data that is sent into saveFile() ABSOLUTELY MUST BE TERMINATED!
-	if(!SD.exists(getRootPath())) {
-		if(!SD.mkdir(getRootPath())) {
-			Serial.println(F("writeFile: root path did not exist and creating it failed!")); //Maybe replace with a debug log entry.
-			return false;
-		}
-	}
-
-	SDLib::File saveToFile = SD.open(filePath, O_WRITE | O_CREAT);
-
-	if(saveToFile) {
-		saveToFile.print(data);
-		saveToFile.close();
-		
-		Serial.println(F("Successfully opened, wrote, and closed filePath"));
-		Serial.print(F("Wrote: "));
-		Serial.println(data);
-
-		return true;
+	sd = new SdFat32;
+	if(sd != nullptr) {
+		//failure: sd.initErrorHalt(&Serial);
+		return sd->begin(SLAVE_SELECT_PIN);
 	} else {
-		Serial.println(F("Failed to open filePath"));
 		return false;
 	}
 }
 
 
-const char* Storage::readFile(const char* filePath) { //REMEMBER TO DELETE! This is on the heap
-	dataLength = 0;
-	SDLib::File readFromFile = SD.open(filePath, FILE_READ);
-	if(readFromFile) {
-		char* data = new char[readFromFile.size() + 1];
+bool Storage::writeFile(const char* data, const char* filePath) {
+	Serial.print(F("filePath: "));
+	Serial.println(filePath);
 
-		while(readFromFile.available()) {
-			data[dataLength++] = readFromFile.read();
+	Serial.print(F("data: "));
+	Serial.println(data);
+
+	if(!sd) {
+		Serial.println(F("!sd"));
+		return false;
+	}
+
+	File32 item; //make member instead?
+	if(!item.openRoot(sd->vol())) {
+		Serial.println(F("!item.openRoot(sd->vol())"));
+		return false;
+	}
+
+	if(!item.exists(GLEEMAIL_ROOT_PATH)) {
+		Serial.println(F("!item.exists(ROOT_PATH)"));
+		File32 createdFolder;
+		if(!createdFolder.mkdir(&item, GLEEMAIL_ROOT_PATH, true)) {
+			Serial.println(F("item.mkdir FAILED!"));
+		} else {
+			item.sync();
 		}
+	}
+	item.close();
 
-		readFromFile.close();
-		data[dataLength] = '\0';
+	if(!item.open(filePath, O_RDWR | O_CREAT | O_TRUNC)) {
+		Serial.println(F("itemOpen failed"));
+		return false;
+	}
 
-		return data;
-	} else {
+	const short wroteLength = item.write(data); //make member instead?
+	item.sync();
+	item.close();
+
+	return wroteLength != -1;
+}
+
+
+const char* Storage::readFile(const char* filePath) {
+	if(!sd) {
 		return nullptr;
 	}
+
+	File32 item; //make member instead?
+	if(!item.open(filePath)) {
+		return nullptr;
+	}
+
+	dataLength = 0;
+
+	char* fileData = new char[item.fileSize() + 1];
+	while(item.available()) {
+		fileData[dataLength++] = item.read();
+	}
+
+	item.close();
+	fileData[dataLength] = '\0';
+
+	return fileData;
 }
 
 
 unsigned int Storage::lastReadFileLength() const {
-	return dataLength; //== 0 ? 0 : dataLength + 1;
+	return dataLength;
 }
 
 
 bool Storage::clearFile(const char* filePath) {
-	return SD.remove(filePath);
-}
-
-
-void Storage::recursiveErase(SDLib::File& root, const char* rootPath = nullptr) {
-	char path[80] = {0};
-	if(rootPath) {
-		strcat(path, rootPath);
-		strcat(path, "/\0");
-	}
-	strcat(path, root.name());
-
-	SDLib::File item;
-	while(item = root.openNextFile()) {
-		if(item.isDirectory()) {
-			recursiveErase(item, path);
-
-			char eraseDirectoryPath[80] = {0};
-			strcat(eraseDirectoryPath, path);
-			strcat(eraseDirectoryPath, "/\0");
-			strcat(eraseDirectoryPath, item.name());
-			SD.rmdir(eraseDirectoryPath);
-		} else {
-			char eraseFilePath[80] = {0};
-			strcat(eraseFilePath, path);
-			strcat(eraseFilePath, "/\0");
-			strcat(eraseFilePath, item.name());
-			SD.remove(eraseFilePath);
-		}
-	}
-}
-
-
-bool Storage::eraseAll(const unsigned int confirmationCode) {
-	//If you're looking for the confirmation code, make sure that you understand this fuction will erase all GLEEMAIL files and folders on the SD card.
-	if(confirmationCode != 133769) {
-		return false;
-	}
-
-	SDLib::File rootFile = SD.open(getRootPath(), FILE_READ);
-	recursiveErase(rootFile);
-	SD.rmdir(getRootPath());
-	
 	return true;
 }
 
 
-void Storage::recursivePrint(SDLib::File& root, const char* rootPath = nullptr) {
-	char path[80] = {0};
-	if(rootPath) {
-		strcat(path, rootPath);
-		strcat(path, "/\0");
+bool Storage::eraseAll(const unsigned int confirmationCode) {
+	if(confirmationCode != 133769 || !sd) {
+		return false;
 	}
-	strcat(path, root.name());
 
-	SDLib::File item;
-	while(item = root.openNextFile()) {
-		if(item.isDirectory()) {
-			recursivePrint(item, path);
-
-			char printDirectoryPath[80] = {0};
-			strcat(printDirectoryPath, path);
-			strcat(printDirectoryPath, "/\0");
-			strcat(printDirectoryPath, item.name());
-
-			Serial.println(printDirectoryPath);
-		} else {
-			char printFilePath[80] = {0};
-			strcat(printFilePath, path);
-			strcat(printFilePath, "/\0");
-			strcat(printFilePath, item.name());
-
-			Serial.println(printFilePath);
-		}
+	File32 item; //make member instead?
+	if(!item.open(GLEEMAIL_ROOT_PATH)) {
+		return false; //maybe return true if the root directory doesn't exist?
 	}
+
+	item.rmRfStar(); //This function should not be used to delete the 8.3 version of a directory that has a long name.
+
+	item.close();
+	return true;
 }
 
 
 void Storage::printAll() {
-	if(SD.exists(getRootPath())) {
-		SDLib::File rootFile = SD.open(getRootPath(), FILE_READ);
-		recursivePrint(rootFile);
-		Serial.println(getRootPath());
-	}
+	return;
 }

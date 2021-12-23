@@ -17,6 +17,6 @@ jobs:
           libraries: |
             - name: ArduinoJson
             - name: WiFiNINA
-            - name: SD
             - name: hd44780
+            - name: SdFat
           sketch-paths: 'gleemail.ino'

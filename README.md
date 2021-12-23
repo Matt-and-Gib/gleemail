@@ -209,7 +209,7 @@ Required Libraries
 - ArduinoJson by Benoit Blanchon
 - hd44780 by Bill Perry
 - WiFiNINA
-- SD
+- SdFat by Bill Greiman
 
 Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
 
