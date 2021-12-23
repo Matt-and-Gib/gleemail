@@ -5,12 +5,16 @@
 
 
 bool Storage::begin() {
-	sd = new SdFat32;
-	if(sd != nullptr) {
-		//failure: sd.initErrorHalt(&Serial);
-		return sd->begin(SLAVE_SELECT_PIN);
+	if(!sd) {
+		sd = new SdFat32;
+		if(sd != nullptr) {
+			//failure: sd.initErrorHalt(&Serial);
+			return sd->begin(SLAVE_SELECT_PIN);
+		} else {
+			return false;
+		}
 	} else {
-		return false;
+		return true; //log warning?
 	}
 }
 
@@ -92,8 +96,12 @@ bool Storage::clearFile(const char* filePath) {
 
 
 bool Storage::eraseAll(const unsigned int confirmationCode) {
-	if(confirmationCode != 133769 || !sd) {
+	if(confirmationCode != 133769) {
 		return false;
+	}
+
+	if(!sd) {
+		begin();
 	}
 
 	File32 item; //make member instead?
