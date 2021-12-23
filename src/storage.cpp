@@ -98,14 +98,17 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 
 	File32 item; //make member instead?
 	if(!item.open(GLEEMAIL_ROOT_PATH)) {
+		Serial.println(F("eraseAll: Unable to open root path."));
 		return false; //maybe return true if the root directory doesn't exist?
 	}
 
 	bool removeSuccess = false;
 
 	if(item.isDirectory()) {
+		Serial.println(F("eraseAll: root is directory"));
 		removeSuccess = item.rmRfStar(); //This function should not be used to delete the 8.3 version of a directory that has a long name.
 	} else {
+		Serial.println(F("eraseAll: root is a file"));
 		removeSuccess = item.remove(); //This function should not be used to delete the 8.3 version of a file that has a long name. For example if a file has the long name "New Text Document.txt" you should not delete the 8.3 name "NEWTEX~1.TXT".
 	}
 
