@@ -64,7 +64,7 @@ bool Preferences::deserializePrefs(const char* input, const unsigned short lengt
 
 		const unsigned short size = sizeDoc["Size"];
 		if(size != CALCULATED_PREFS_SIZE) {
-			GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_PREFS_FILE_SIZE_MISMATCH);
+			GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::PREFERENCES_FILE_SIZE_MISMATCH);
 			//return false;
 		}
 
@@ -78,7 +78,7 @@ bool Preferences::deserializePrefs(const char* input, const unsigned short lengt
 
 		const unsigned short preferencesFileVersion = doc["Preferences Version"];
 		if(preferencesFileVersion != PREFERENCES_VERSION) {
-			GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_PREFS_FILE_VERSION_MISMATCH);
+			GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::PREFERENCES_FILE_VERSION_MISMATCH);
 		}
 
 		morseCodeCharPairsVersion = doc["Morse Code Char Pairs Version"];
