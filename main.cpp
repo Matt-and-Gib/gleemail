@@ -46,8 +46,8 @@ Networking network(&millis, &updateDisplayWithPeerChat, &connectedToPeerClearDis
 
 InputMethod* input = nullptr;
 unsigned short pinIndex = 0;
-char* userMessage = new char[MAX_MESSAGE_LENGTH + 1];
-char* peerMessage = new char[MAX_MESSAGE_LENGTH + 1];
+char* userMessage = new char[MAX_MESSAGE_LENGTH + TERMINATOR];
+char* peerMessage = new char[MAX_MESSAGE_LENGTH + TERMINATOR];
 
 long long cycleStartTime = 0;
 long cycleDuration = 0;
@@ -216,8 +216,8 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 	delete[] *desiredWiFiSSID;
 	delete[] *desiredWiFiPassword;
 
-	*desiredWiFiSSID = new char[InternetAccess::getMaxSSIDLength() + 1]; //The + 1 is for the null terminator added in enterNewWiFiCredentials().
-	*desiredWiFiPassword = new char[InternetAccess::getMaxPasswordLength() + 1]; //The + 1 is for the null terminator added in enterNewWiFiCredentials().
+	*desiredWiFiSSID = new char[InternetAccess::getMaxSSIDLength() + TERMINATOR];
+	*desiredWiFiPassword = new char[InternetAccess::getMaxPasswordLength() + TERMINATOR];
 
 	Serial.println(F("Enter WiFi SSID:"));
 	display.updateWriting("Enter SSID");
@@ -389,7 +389,7 @@ void setupPins() {
 
 
 void connectToPeer() {
-	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + 1];
+	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + TERMINATOR];
 	char* ipAddressInputSubstringBuffer;
 	uint8_t ipAddressParts[4];
 	size_t ipAddressPartsIndex = 0;
@@ -545,7 +545,7 @@ void setup() {
 			}
 
 			if(setupInputMethod()) {
-				for(unsigned short i = 0; i < MAX_MESSAGE_LENGTH + 1; i += 1) {
+				for(unsigned short i = 0; i < (MAX_MESSAGE_LENGTH + TERMINATOR); i += 1) {
 					userMessage[i] = '\0';
 					peerMessage[i] = '\0';
 				}

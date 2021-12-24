@@ -71,7 +71,7 @@ const char* Storage::readFile(const char* filePath) {
 
 	dataLength = 0;
 
-	char* fileData = new char[item.fileSize() + 1];
+	char* fileData = new char[item.fileSize() + TERMINATOR];
 	while(item.available()) {
 		fileData[dataLength++] = item.read();
 	}

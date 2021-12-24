@@ -298,7 +298,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	char* encryptedChat = nullptr;
 	char* authenticationPayload = nullptr;
 	if((msg.getMessageType() == MESSAGE_TYPE::CHAT) && connected) { //the && connected might be redundant.
-		encryptedChat = new char[(2 * msg.getChatLength()) + 1];
+		encryptedChat = new char[(2 * msg.getChatLength()) + TERMINATOR];
 		overwriteString(msg.getChat(), msg.getChatLength(), encryptedChat);
 		ae.encryptAndTagMessage(messageCount, tag, encryptedChat, msg.getChatLength());
 		prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
@@ -426,7 +426,7 @@ char* Networking::decryptChat(Message& msg) {
 
 	unsigned short decryptedMessageLength = msg.getChatLength() / 2;
 
-	char* chatDecryptionBuffer = new char[msg.getChatLength() + 1]; //delete[]'ed by updateDispaly() in main
+	char* chatDecryptionBuffer = new char[msg.getChatLength() + TERMINATOR]; //delete[]'ed by updateDispaly() in main
 	stringToHex(chatDecryptionBuffer, msg.getChat(), 0, msg.getChatLength());
 	chatDecryptionBuffer[decryptedMessageLength] = '\0';
 
