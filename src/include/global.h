@@ -16,6 +16,8 @@ const constexpr unsigned short MAX_NETWORKING_LOOP_DURATION_MS = 36;
 const constexpr unsigned short MAX_IP_ADDRESS_LENGTH = 15;
 const constexpr unsigned short CONNECTION_PORT = 29453;
 
+const constexpr unsigned short TERMINATOR = 1;
+
 const constexpr char SERVER[] = "raw.githubusercontent.com";
 const constexpr char NETWORK_HEADER_HOST[] = "Host: raw.githubusercontent.com";
 const constexpr char NETWORK_HEADER_USER_AGENT[] = "User-Agent: glEEmailWebAccess";
@@ -43,14 +45,14 @@ static const constexpr unsigned short MAX_MESSAGE_LENGTH = 140; // This value is
 static const constexpr unsigned short JSON_DOCUMENT_SIZE = 256; // This is the end of the line, the ultimate determiner of the size of the packets we cand send (bytes)!
 */
 
-const constexpr unsigned short MESSAGE_BUFFER_SIZE = 345 + 1; //Calculated with worst-case JSON object, plus 1 for null terminator
+const constexpr unsigned short MESSAGE_BUFFER_SIZE = 345 + TERMINATOR; //Calculated with worst-case JSON object
 const constexpr unsigned short JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES = 64; //This is a free-range, fair trade, hand-picked value
 
 const constexpr char CANCEL_CHAR = (char)24;
 
 
 inline char* copyString(const char* original, const unsigned short LEN) {
-	char* duplicate = new char[LEN]; //on the heap
+	char* duplicate = new char[LEN];
 	for(short i = 0; i < LEN; i += 1) {
 		duplicate[i] = original[i];
 	}
@@ -60,7 +62,7 @@ inline char* copyString(const char* original, const unsigned short LEN) {
 
 
 inline char* copyAndTerminateString(const char* original, const unsigned short LEN) {
-	char* duplicate = new char[LEN + 1]; //on the heap
+	char* duplicate = new char[LEN + TERMINATOR];
 	for(short i = 0; i < LEN; i += 1) {
 		duplicate[i] = original[i];
 	}
