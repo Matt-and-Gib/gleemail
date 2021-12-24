@@ -1,47 +1,43 @@
 #include "include/storage.h"
 #include <SPI.h>
 #include "SdFat.h"
-#include <Arduino.h>
+#include "include/global.h"
 
 
 bool Storage::begin() {
 	if(!sd) {
 		sd = new SdFat32;
 		if(sd != nullptr) {
-			//failure: sd.initErrorHalt(&Serial);
 			return sd->begin(SLAVE_SELECT_PIN);
 		} else {
+			//Allocating space for sd failed- this is a critical issue that should probably halt the program
 			return false;
 		}
 	} else {
-		return true; //log warning?
+		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_ALREADY_INITIALIZED);
+		return true;
 	}
 }
 
 
 bool Storage::writeFile(const char* data, const char* filePath) {
-	Serial.print(F("filePath: "));
-	Serial.println(filePath);
-
-	Serial.print(F("data: "));
-	Serial.println(data);
-
 	if(!sd) {
-		Serial.println(F("!sd"));
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_WRITE);
 		return false;
 	}
 
 	File32 item; //make member instead?
 	if(!item.openRoot(sd->vol())) {
-		Serial.println(F("!item.openRoot(sd->vol())"));
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_ROOT_FS_ACCESS_FAILED);
 		return false;
 	}
 
 	if(!item.exists(GLEEMAIL_ROOT_PATH)) {
-		Serial.println(F("!item.exists(ROOT_PATH)"));
 		File32 createdFolder;
 		if(!createdFolder.mkdir(&item, GLEEMAIL_ROOT_PATH, true)) {
-			Serial.println(F("item.mkdir FAILED!"));
+			GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_CREATE_GLEEMAIL_ROOT_FAILED);
+			//item.close();
+			return false;
 		} else {
 			item.sync();
 		}
@@ -49,7 +45,7 @@ bool Storage::writeFile(const char* data, const char* filePath) {
 	item.close();
 
 	if(!item.open(filePath, O_RDWR | O_CREAT | O_TRUNC)) {
-		Serial.println(F("itemOpen failed"));
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_WRITE_OPEN_FAILED);
 		return false;
 	}
 
@@ -63,11 +59,13 @@ bool Storage::writeFile(const char* data, const char* filePath) {
 
 const char* Storage::readFile(const char* filePath) {
 	if(!sd) {
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_READ);
 		return nullptr;
 	}
 
 	File32 item; //make member instead?
 	if(!item.open(filePath)) {
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_READ_OPEN_FAILED);
 		return nullptr;
 	}
 
@@ -91,32 +89,34 @@ unsigned int Storage::lastReadFileLength() const {
 
 
 bool Storage::clearFile(const char* filePath) {
+	//TODO
 	return true;
 }
 
 
 bool Storage::eraseAll(const unsigned int confirmationCode) {
 	if(confirmationCode != 133769) {
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNCONFIRMED_ERASE);
 		return false;
 	}
 
 	if(!sd) {
+		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_ERASE);
 		begin();
 	}
 
 	File32 item; //make member instead?
 	if(!item.open(GLEEMAIL_ROOT_PATH)) {
-		Serial.println(F("eraseAll: Unable to open root path."));
-		return sd->exists(GLEEMAIL_ROOT_PATH); //false; //maybe return true if the root directory doesn't exist?
+		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_OPEN_GLEEMAIL_ROOT_FOR_ERASE_FAILED);
+		return sd->exists(GLEEMAIL_ROOT_PATH);
 	}
 
 	bool removeSuccess = false;
 
 	if(item.isDirectory()) {
-		Serial.println(F("eraseAll: root is directory"));
 		removeSuccess = item.rmRfStar(); //This function should not be used to delete the 8.3 version of a directory that has a long name.
 	} else {
-		Serial.println(F("eraseAll: root is a file"));
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_GLEEMAIL_ROOT_IS_FILE);
 		removeSuccess = sd->remove(GLEEMAIL_ROOT_PATH); //item.remove(); //This function should not be used to delete the 8.3 version of a file that has a long name. For example if a file has the long name "New Text Document.txt" you should not delete the 8.3 name "NEWTEX~1.TXT".
 	}
 	item.close();
@@ -125,5 +125,6 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 
 
 void Storage::printAll() {
+	//TODO
 	return;
 }
