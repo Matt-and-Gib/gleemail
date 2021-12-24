@@ -493,7 +493,6 @@ void setup() {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
-				storage.printAll(); //DEBUG_ONLY_REMOVE_ME
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;
@@ -501,10 +500,7 @@ void setup() {
 
 		case SETUP_LEVEL::PREFERENCES:
 			if(preparePreferences()) {
-				Serial.println(F("Prepare preferences succeeded; init network creds")); //DEBUG_ONLY_REMOVE_ME
 				initializeNetworkCredentialsFromPreferences(&desiredWiFiSSID, &desiredWiFiPassword);
-			} else {
-				Serial.println(F("Prepare prefs failed!")); //DEBUG_ONLY_REMOVE_ME
 			}
 
 			setupState = SETUP_LEVEL::NETWORK;
@@ -531,15 +527,8 @@ void setup() {
 					Preferences::getPrefs().setWiFiPassword(desiredWiFiPassword);
 
 					const char* prefsData = Preferences::getPrefs().serializePrefs();
-					if(!storage.writeFile(prefsData, Preferences::getPrefs().getPrefsPath())) {
-						Serial.println(F("Writing prefs FAILED!")); //DEBUG_ONLY_REMOVE_ME
-					} else {
-						Serial.println(F("Writing prefs succeeded! SD Card contents:")); //DEBUG_ONLY_REMOVE_ME
-						storage.printAll(); //DEBUG_ONLY_REMOVE_ME
-					}
+					storage.writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
 					delete[] prefsData;
-				} else {
-					Serial.println(F("Credentials unchanged- NOT writing to SD"));
 				}
 
 				setupState = SETUP_LEVEL::INPUT_METHOD;
@@ -588,9 +577,6 @@ void setup() {
 		case SETUP_LEVEL::DONE:
 			display.clearWriting();
 			display.updateReading("Wait for glEEpal");
-
-			Serial.println(F("Setup done! SD contents:")); //DEBUG_ONLY_REMOVE_ME
-			storage.printAll(); //DEBUG_ONLY_REMOVE_ME
 
 			setupComplete = true;
 		break;
