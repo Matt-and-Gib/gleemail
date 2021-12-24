@@ -62,7 +62,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 12/13/2021
+Last updated: 12/23/2021
 <details>
 <summary>0 - 9: General</summary>
 
@@ -170,10 +170,19 @@ Last updated: 12/13/2021
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
-|250|Prefs File Size Mismatch|Provided file size in prefs does not match calculated size|High|
-|251|Storage Not Detected|Verify that SD card is inserted correctly|High|
-|252|Couldn't Load Prefs|Preferences file not found|Low|
-|253|Prefs File Version Mismatch|Version information in prefs file doesn't match expected value|Low|
+|250|Storage Not Detected|Verify that SD card is inserted correctly|High|
+|251|Couldn't Load Prefs|Preferences file not found|Low|
+|252|Storage Already Initialized||Low|
+|253|Uninitialized Write|Uninitialized SD caused write to fail|High|
+|254|Root FS Access Failed||High|
+|255|Create glEEmail Root Failed|Unable to create GLEEMAIL/ folder in SD root|High|
+|256|Write Open Failed|Writing to SD failed because the file couldn't be opened|High|
+|257|Uninitialized Read|Uninitialized SD caused read to fail|High|
+|258|Read Open Failed|Reading from SD failed because the file couldn't be opened|High|
+|259|Unconfirmed Erase|Attempted to erase SD without confirmation (no data erased)|High|
+|260|Uninitialized Erase|SD was initialized early to allow erasing all data|Low|
+|261|Open glEEmail Root For Erase Failed||Low|
+|262|glEEmail Root Is File|glEEmail root was file before erase|High|
 </details>
 
 <details>
@@ -182,6 +191,15 @@ Last updated: 12/13/2021
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
 |290|RAM Integrity Threatened|Message to print exceeded available display line RAM|High|
+</details>
+
+<details>
+<summary>330 - 359: Preferences</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|330|File Size Mismatch|Size attribute of preferences file does not match expected size|Low|
+|331|File Version Mismatch|Version attribute of preferences file does not match expected version|Low|
 </details>
 
 ___
