@@ -62,7 +62,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 12/23/2021
+Last updated: 12/24/2021
 <details>
 <summary>0 - 9: General</summary>
 
@@ -170,8 +170,7 @@ Last updated: 12/23/2021
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
-|250|Storage Not Detected|Verify that SD card is inserted correctly|High|
-|251|Couldn't Load Prefs|Preferences file not found|Low|
+|250|Storage Not Detected|Verify wiring and presence of SD card|High|
 |252|Storage Already Initialized||Low|
 |253|Uninitialized Write|Uninitialized SD caused write to fail|High|
 |254|Root FS Access Failed||High|
@@ -181,7 +180,7 @@ Last updated: 12/23/2021
 |258|Read Open Failed|Reading from SD failed because the file couldn't be opened|High|
 |259|Unconfirmed Erase|Attempted to erase SD without confirmation (no data erased)|High|
 |260|Uninitialized Erase|SD was initialized early to allow erasing all data|Low|
-|261|Open glEEmail Root For Erase Failed||Low|
+|261|Open glEEmail Root For Erase Failed|No data erased because a glEEmail root folder couldn't be found|Low|
 |262|glEEmail Root Is File|glEEmail root was file before erase|High|
 </details>
 
@@ -198,6 +197,7 @@ Last updated: 12/23/2021
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
+|330|Load Failed|Couldn't load preferences from SD card|Low|
 |330|File Size Mismatch|Size attribute of preferences file does not match expected size|Low|
 |331|File Version Mismatch|Version attribute of preferences file does not match expected version|Low|
 </details>

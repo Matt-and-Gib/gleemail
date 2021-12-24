@@ -199,7 +199,7 @@ bool preparePreferences() {
 	Serial.println(F(" bytes."));*/
 
 	if(!preferencesData) {
-		DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_COULDNT_LOAD_PREFS);
+		DebugLog::getLog().logWarning(ERROR_CODE::PREFERENCES_LOAD_FAILED);
 		delete[] preferencesData;
 
 		return false;
@@ -552,7 +552,7 @@ void setup() {
 
 				setupState = SETUP_LEVEL::PINS;
 			} else {
-				delay(NETWORK_FAILED_DELAY_MS); //Delay so we don't get blocked by GitHub if download repeatedly fails.
+				delay(NETWORK_FAILED_DELAY_MS); //Don't want to get blocked by GitHub when download is repeated
 			}
 		break;
 
