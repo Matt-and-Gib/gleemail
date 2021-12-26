@@ -461,7 +461,7 @@ void setup() {
 
 	char* desiredWiFiSSID = nullptr;
 	char* desiredWiFiPassword = nullptr;
-	bool networkPromptForNewCredentials = false;
+	bool promptForNewNetworkCredentials = false;
 	bool networkCredentialsChanged = false;
 	bool networkCredentialsExist = false;
 
@@ -516,7 +516,7 @@ void setup() {
 			delay(SETUP_STEP_DELAY_MS);
 
 			networkCredentialsExist = desiredWiFiSSID && desiredWiFiPassword;
-			if(!networkCredentialsExist || networkPromptForNewCredentials) {
+			if(!networkCredentialsExist || promptForNewNetworkCredentials) {
 				networkCredentialsChanged = promptForNewWiFiCredentials(&desiredWiFiSSID, &desiredWiFiPassword, !networkCredentialsExist);
 			}
 
@@ -532,7 +532,7 @@ void setup() {
 
 				setupState = SETUP_LEVEL::INPUT_METHOD;
 			} else {
-				networkPromptForNewCredentials = true;
+				promptForNewNetworkCredentials = true;
 			}
 		break;
 
