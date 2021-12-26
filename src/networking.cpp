@@ -501,7 +501,7 @@ void Networking::processIncomingMessage(QueueNode<Message>& msg) {
 	break;
 
 	default:
-		DebugLog::getLog().logWarning(NETWORK_UNKNOWN_INCOMING_MESSAGE_TYPE);
+		DebugLog::getLog().logError(NETWORK_UNKNOWN_INCOMING_MESSAGE_TYPE);
 	break;
 	}
 }
