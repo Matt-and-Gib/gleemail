@@ -24,10 +24,8 @@ public:
 	const char* readFile(const char* filePath); //Remember to delete! Stores on heap
 	unsigned int lastReadFileLength() const;
 
-	bool clearFile(const char* filePath);
+	bool eraseFile(const char* removeAtPath);
 	bool eraseAll(const unsigned int confirmationCode);
-
-	void printAll();
 };
 
 #endif

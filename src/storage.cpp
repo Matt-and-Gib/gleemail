@@ -1,7 +1,7 @@
 #include "include/storage.h"
-#include <SPI.h>
-#include "SdFat.h"
 #include "include/global.h"
+#include "SdFat.h"
+#include <SPI.h>
 
 
 bool Storage::begin() {
@@ -88,9 +88,13 @@ unsigned int Storage::lastReadFileLength() const {
 }
 
 
-bool Storage::clearFile(const char* filePath) {
-	//TODO
-	return true;
+bool Storage::eraseFile(const char* removeAtPath) {
+	if(!sd) {
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_ERASE);
+		return false;
+	}
+
+	return sd->remove(removeAtPath);
 }
 
 
@@ -101,7 +105,7 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 	}
 
 	if(!sd) {
-		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_ERASE);
+		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_ERASE_ALL);
 		begin();
 	}
 
@@ -121,10 +125,4 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 	}
 	item.close();
 	return removeSuccess;
-}
-
-
-void Storage::printAll() {
-	//TODO
-	return;
 }
