@@ -171,7 +171,7 @@ Last updated: 12/26/2021
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
-|250|Storage Not Detected|Verify wiring and presence of SD card|High|
+|250|Storage Not Detected|Verify wiring and presence of SD card|Low|
 |252|Storage Already Initialized||Low|
 |253|Uninitialized Write|Uninitialized SD caused write to fail|High|
 |254|Root FS Access Failed||High|
@@ -269,6 +269,13 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 If you've configured the hardware correctly, simply upload the code to your Arduino, open the serial monitor, and follow the prompts on screen (the LCD and serial monitor). If you haven't yet wired the hardware, refer to the [Wiring Diagram](#diagram).
 
+#### Unexpected Behavior?
+
+Experiencing unexpected behavior? Maybe we've run into your problem before you!
+The first step we'd advise you take if anything unexpected happens is to turn on Verbose Mode. Please see the startup code table below for further instructions.
+
+If that doesn't solve your problem, please submit an [issue on GitHub](https://github.com/Matt-and-Gib/gleemail/issues) and we will take a look at it (*should the stars align*).
+
 #### Features
 
 - 57 ~~flavors~~ morse code characters
@@ -281,10 +288,12 @@ If you've configured the hardware correctly, simply upload the code to your Ardu
 - Be social
 - Be a glEEpal
 
-***IMPORTANT NOTE:*** You are limited to sending no more than ~32,768 messages per session due to the size of the idempotency token (unsigned short- i.e. 2 bytes) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glee-ware every once in a while.
+***IMPORTANT NOTE:*** You are limited to sending no more than ~32,768 messages per session due to the size of the idempotency token (unsigned short- i.e. 2 bytes) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glEEware every once in a while.
 ___
 
 ### <a name="startup-codes"></a>**Startup Codes**
+
+During setup (the period before you start connecting to a glEEpal), the following startup codes may be entered to trigger additional behavior.
 
 |Code|Behavior|Notes|
 |----|--------|-----|
