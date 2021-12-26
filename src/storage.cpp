@@ -10,7 +10,6 @@ bool Storage::begin() {
 		if(sd != nullptr) {
 			return sd->begin(SLAVE_SELECT_PIN);
 		} else {
-			//Allocating space for sd failed- this is a critical issue that should probably halt the program
 			return false;
 		}
 	} else {
@@ -26,7 +25,7 @@ bool Storage::writeFile(const char* data, const char* filePath) {
 		return false;
 	}
 
-	File32 item; //make member instead?
+	File32 item;
 	if(!item.openRoot(sd->vol())) {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_ROOT_FS_ACCESS_FAILED);
 		return false;
@@ -49,7 +48,7 @@ bool Storage::writeFile(const char* data, const char* filePath) {
 		return false;
 	}
 
-	const short wroteLength = item.write(data); //make member instead?
+	const short wroteLength = item.write(data);
 	item.sync();
 	item.close();
 
@@ -63,7 +62,7 @@ const char* Storage::readFile(const char* filePath) {
 		return nullptr;
 	}
 
-	File32 item; //make member instead?
+	File32 item;
 	if(!item.open(filePath)) {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_READ_OPEN_FAILED);
 		return nullptr;
@@ -109,7 +108,7 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 		begin();
 	}
 
-	File32 item; //make member instead?
+	File32 item;
 	if(!item.open(GLEEMAIL_ROOT_PATH)) {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_OPEN_GLEEMAIL_ROOT_FOR_ERASE_FAILED);
 		return sd->exists(GLEEMAIL_ROOT_PATH);
