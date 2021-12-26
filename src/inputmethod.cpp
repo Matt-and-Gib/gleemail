@@ -70,6 +70,8 @@ void InputMethod::pushCharacterToMessage(const char c) {
 			DebugLog::getLog().logError(MORSE_MESSAGE_TO_SEND_EXCEEDED_CHAT_COMPLETE_THRESHOLD);
 			commitMessage();
 		}
+	} else {
+		DebugLog::getLog().logError(MORSE_PUSHED_CHAR_NOTHING);
 	}
 }
 
@@ -101,12 +103,9 @@ void InputMethod::commitMessage() {
 		}
 
 		if(userMessage[0] == '\0') {
-			DebugLog::getLog().logWarning(INPUT_METHOD_MESSAGE_ONLY_WHITESPACE);
+			DebugLog::getLog().logError(INPUT_METHOD_MESSAGE_ONLY_WHITESPACE);
 			return;
 		}
-
-		//Serial.print("Commiting: "); //DEBUG
-		//Serial.println(userMessage); //DEBUG
 
 		(*sendMessage)(userMessage);
 		clearUserMessage();
