@@ -62,17 +62,17 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 12/24/2021
+Last updated: 12/26/2021
 <details>
 <summary>0 - 9: General</summary>
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
-|0|None|No error was reported|N/A|
-|1|Debug Debug Log|Verified that debug log is functional|N/A|
+|0|None|No error was reported||
+|1|Debug Debug Log|Verified that debug log is functional||
 |2|Unknown Setup State|An unknown step was specified in setup|High|
 |3|Continuous Frame Latency|Lag may cause inaccuracies in input|High|
-|4|All Functions Succeeded||N/A|
+|4|All Functions Succeeded|||
 |5|Invalid Startup Code|Input between setup steps was not formatted properly|Low|
 |6|Unknown Startup Code|No behavior defined for provided code|High|
 </details>
@@ -83,6 +83,7 @@ Last updated: 12/24/2021
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
 |10|Morse Phrase Imminent Overflow|The Morse phrase is at capacity and must be committed without storing the provided dot/dash|High|
+|11|Pushed Char Nothing||High|
 |12|Morse Code Lookup Failed|The entered combination of dots and dashes does not match any Morse Code pattern|Low|
 |13|Morse Message To Send Reached Chat Complete Threshold|Entered message has reached the maximum length and must be sent immediately|Low|
 |14|Morse Message To Send Exceeded Chat Complete Threshold|Entered message has exceeded the maximum length and must be sent immediately without storing the provided character|High|
@@ -135,7 +136,7 @@ Last updated: 12/24/2021
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
-|130|None|No message error|N/A|
+|130|None|No message error||
 </details>
 
 <details>
