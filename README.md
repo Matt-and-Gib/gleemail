@@ -179,9 +179,10 @@ Last updated: 12/24/2021
 |257|Uninitialized Read|Uninitialized SD caused read to fail|High|
 |258|Read Open Failed|Reading from SD failed because the file couldn't be opened|High|
 |259|Unconfirmed Erase|Attempted to erase SD without confirmation (no data erased)|High|
-|260|Uninitialized Erase|SD was initialized early to allow erasing all data|Low|
+|260|Uninitialized Erase All|SD was initialized early to allow erasing all data|Low|
 |261|Open glEEmail Root For Erase Failed|No data erased because a glEEmail root folder couldn't be found|Low|
 |262|glEEmail Root Is File|glEEmail root was file before erase|High|
+|263|Uninitialized Erase|Erase single file/folder failed because SD was uninitialized|High|
 </details>
 
 <details>
