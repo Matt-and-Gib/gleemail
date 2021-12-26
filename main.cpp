@@ -17,6 +17,10 @@
 #include "src/include/morsecode.h" //Manually change this if using different input method
 
 
+#define GLEEMAIL_FRAME_TIMER
+//#define GLEEMAIL_STARTUP_CODES_TEST
+
+
 using namespace GLEEMAIL_DEBUG;
 
 
@@ -358,9 +362,6 @@ bool setupInputMethod() {
 		storage.writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
 		delete[] prefsData;
 	}
-
-	Serial.print(F("setupInputMethod data: "));
-	Serial.println(data);
 	
 	bool dataParsed = input->setNetworkData(data);
 	delete[] data;
@@ -415,15 +416,13 @@ void connectToPeer() {
 
 	Serial.println(F("Initializing Authentication..."));
 	display.updateReading("Initializing");
-	display.updateWriting("  Authentication"); //Right aligned
+	display.updateWriting("  Authentication");
 
 	network.connectToPeer(friendsIP);
 
 	Serial.print(F("Waiting for gleepal at "));
-	Serial.print(friendsIP);
-	Serial.println(F("..."));
+	Serial.println(friendsIP);
 
-	//delete[] ipAddressInputSubstringBuffer; //Not necessary because strtok modifies the original string (doesn't allocate memory)
 	delete[] ipAddressInputBuffer;
 }
 
@@ -434,14 +433,14 @@ void setup() {
 		delay(250);
 	}
 
-	clearSerialInputBuffer(); //This is probably unnecessary.
+	clearSerialInputBuffer();
 
-	enum SETUP_LEVEL : short {WELCOME = 0, STORAGE = 1, PREFERENCES = 2, NETWORK = 3, INPUT_METHOD = 4, PINS = 5, PEER = 6, DONE = 7};
-	SETUP_LEVEL setupState = WELCOME;
-	bool setupComplete = false;
+	enum class SETUP_LEVEL {WELCOME, STORAGE, PREFERENCES, NETWORK, INPUT_METHOD, PINS, PEER, DONE};
+	SETUP_LEVEL setupState = SETUP_LEVEL::WELCOME;
 
 
-	if(false) { //TODO: think of way to pass member function pointer instead of function pointer
+#ifdef GLEEMAIL_STARTUP_CODES_TEST
+		//TODO: think of way to pass member function pointer instead of function pointer
 		Queue<KVPair<char, bool (*)(void)>> startupCodes; //this will live right here in Setup
 		const char testChar = 'R'; //this would be a private member of an object (in this case Storage)
 		startupCodes.enqueue(new KVPair<char, bool (*)(void)>(testChar, &resetCodeEntered)); //the queue will probably be passed in to the object's begin function for the object to enqueue its KVPairs
@@ -457,7 +456,7 @@ void setup() {
 			delete pair;
 		}*/
 		//but I'm pretty sure the destructor for Queue will cascade-delete all children
-	}
+#endif
 
 
 	char* desiredWiFiSSID = nullptr;
@@ -568,17 +567,11 @@ void setup() {
 				display.clearWriting();
 				display.updateReading("Enter glEEpal IP");
 				connectToPeer();
+				display.clearWriting();
+				display.updateReading("Wait for glEEpal");
 			}
 
 			setupState = SETUP_LEVEL::DONE;
-		break;
-
-
-		case SETUP_LEVEL::DONE:
-			display.clearWriting();
-			display.updateReading("Wait for glEEpal");
-
-			setupComplete = true;
 		break;
 
 
@@ -590,7 +583,7 @@ void setup() {
 		checkStartupCodes();
 		printErrorCodes();
 		delay(SETUP_STEP_DELAY_MS);
-	} while (!setupComplete);
+	} while (setupState != SETUP_LEVEL::DONE);
 }
 
 
@@ -636,8 +629,9 @@ Estimated max time for single message processing: 4ms
 		//doAsynchronousProcess();
 		printErrorCodes();
 
-		cycleDuration = millis() - cycleStartTime; //Remove to increase processing speed
-		if(cycleDuration > MAX_FRAME_DURATION_MS) { //Remove to increase processing speed
+#ifdef GLEEMAIL_FRAME_TIMER
+		cycleDuration = millis() - cycleStartTime;
+		if(cycleDuration > MAX_FRAME_DURATION_MS) {
 			cycleLatencyCount += 1;
 			if(cycleLatencyCount > FRAME_LATENCY_COUNT_ERROR_THRESHOLD) {
 				DebugLog::getLog().logError(CONTINUOUS_FRAME_LATENCY);
@@ -646,6 +640,7 @@ Estimated max time for single message processing: 4ms
 		} else {
 			cycleLatencyCount = 0;
 		}
+#endif
 
 		if(arduino::serialEventRun) {
 			arduino::serialEventRun();
