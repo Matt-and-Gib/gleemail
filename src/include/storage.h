@@ -19,12 +19,12 @@ public:
 
 	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
 	
-	bool writeFile(const char* data, const char* filePath);
+	bool writeFile(const char* data, const char* filePath) const;
 
 	const char* readFile(const char* filePath); //Remember to delete! Stores on heap
-	unsigned int lastReadFileLength() const;
+	unsigned int lastReadFileLength() const {return dataLength;}
 
-	bool eraseFile(const char* removeAtPath);
+	bool eraseFile(const char* removeAtPath) const;
 	bool eraseAll(const unsigned int confirmationCode);
 };
 

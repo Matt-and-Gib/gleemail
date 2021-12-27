@@ -16,7 +16,7 @@ bool Storage::begin() {
 				return false;
 			}
 		} else {
-			return false; //This false occurs if sd allocation fails. This should NEVER happen, and if it does, you have bigger (and probably hardware) problems, buddy! It is here to prevent returning true should this be the case.
+			return false; //This false occurs if SD allocation fails. This should NEVER happen, and if it does, you have bigger (and probably hardware) problems! It is here to prevent returning true should this be the case.
 		}
 	} else {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_ALREADY_INITIALIZED);
@@ -25,7 +25,7 @@ bool Storage::begin() {
 }
 
 
-bool Storage::writeFile(const char* data, const char* filePath) {
+bool Storage::writeFile(const char* data, const char* filePath) const {
 	if(!sd) {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_WRITE);
 		return false;
@@ -41,7 +41,7 @@ bool Storage::writeFile(const char* data, const char* filePath) {
 		File32 createdFolder;
 		if(!createdFolder.mkdir(&item, GLEEMAIL_ROOT_PATH, true)) {
 			GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_CREATE_GLEEMAIL_ROOT_FAILED);
-			//item.close();
+			item.close();
 			return false;
 		} else {
 			item.sync();
@@ -88,12 +88,7 @@ const char* Storage::readFile(const char* filePath) {
 }
 
 
-unsigned int Storage::lastReadFileLength() const {
-	return dataLength;
-}
-
-
-bool Storage::eraseFile(const char* removeAtPath) {
+bool Storage::eraseFile(const char* removeAtPath) const {
 	if(!sd) {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_ERASE);
 		return false;
@@ -123,10 +118,10 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 	bool removeSuccess = false;
 
 	if(item.isDirectory()) {
-		removeSuccess = item.rmRfStar(); //This function should not be used to delete the 8.3 version of a directory that has a long name.
+		removeSuccess = item.rmRfStar();
 	} else {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_GLEEMAIL_ROOT_IS_FILE);
-		removeSuccess = sd->remove(GLEEMAIL_ROOT_PATH); //item.remove(); //This function should not be used to delete the 8.3 version of a file that has a long name. For example if a file has the long name "New Text Document.txt" you should not delete the 8.3 name "NEWTEX~1.TXT".
+		removeSuccess = sd->remove(GLEEMAIL_ROOT_PATH);
 	}
 	item.close();
 	return removeSuccess;
