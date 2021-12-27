@@ -8,9 +8,15 @@ bool Storage::begin() {
 	if(!sd) {
 		sd = new SdFat32;
 		if(sd != nullptr) {
-			return sd->begin(SLAVE_SELECT_PIN);
+			if(sd->begin(SLAVE_SELECT_PIN)) {
+				return true;
+			} else {
+				delete sd;
+				sd = nullptr;
+				return false;
+			}
 		} else {
-			return false;
+			return false; //This false occurs if sd allocation fails. This should NEVER happen, and if it does, you have bigger (and probably hardware) problems, buddy! It is here to prevent returning true should this be the case.
 		}
 	} else {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_ALREADY_INITIALIZED);
