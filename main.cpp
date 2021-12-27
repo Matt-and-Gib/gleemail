@@ -340,38 +340,52 @@ bool setupInputMethod() {
 
 	const char* rawVersionData = getDataFromInternet(input->getDataVersionRequestEndpoint());
 	if(!rawVersionData) {
+		DebugLog::getLog().logWarning(ERROR_CODE::INPUT_METHOD_DATA_VERSION_DOWNLOAD_FAILED);
 		return false;
 	}
-	
+
 	const unsigned short inputMethodDataVersion = atoi(rawVersionData);
 	delete[] rawVersionData;
+	rawVersionData = nullptr;
 
-	bool downloadFullDataPackage = true;
+	bool downloadDataPackage = true;
 	const char* data = nullptr;
 	if(storage) {
 		data = storage->readFile(input->getCachedDataPath());
 	}
 
 	if(data != nullptr && Preferences::getPrefs().getMorseCodeCharPairsVersion() == inputMethodDataVersion) { //Make this input-method agnostic
-		downloadFullDataPackage = false;
+		downloadDataPackage = false;
 	}
 
-	if(downloadFullDataPackage) {
+	if(downloadDataPackage) {
 		Serial.println(F("Downloading Input Method data..."));
 
 		delete[] data;
 		data = getDataFromInternet(input->getDataRequestEndpoint());
-		Preferences::getPrefs().setMorseCodeCharPairsVersion(inputMethodDataVersion); //Make this input-method agnostic
+		if(!data) {
+			DebugLog::getLog().logWarning(ERROR_CODE::INPUT_METHOD_DATA_DOWNLOAD_FAILED);
+			return false;
+		}
+	}
+
+	bool dataParsed = input->setNetworkData(data);
+	if(dataParsed && downloadDataPackage) {
+		if(inputMethodDataVersion > Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
+			Preferences::getPrefs().setMorseCodeCharPairsVersion(inputMethodDataVersion); //Make this input-method agnostic
+		}
+
 		if(storage) {
 			storage->writeFile(data, input->getCachedDataPath());
 
-			const char* prefsData = Preferences::getPrefs().serializePrefs();
-			storage->writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
-			delete[] prefsData;
+			if(inputMethodDataVersion > Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
+				const char* prefsData = Preferences::getPrefs().serializePrefs();
+				storage->writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
+				delete[] prefsData;
+			}
 		}
 	}
 	
-	bool dataParsed = input->setNetworkData(data);
 	delete[] data;
 	return dataParsed;
 }
@@ -555,7 +569,7 @@ void setup() {
 
 		case SETUP_LEVEL::INPUT_METHOD:
 			display.updateReading("Setting Up Input");
-			if(input == nullptr) {
+			if(!input) {
 				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment must be manually changed if a different input method is desired
 			}
 
