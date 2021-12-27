@@ -184,6 +184,7 @@ Last updated: 12/26/2021
 |261|Open glEEmail Root For Erase Failed|No data erased because a glEEmail root folder couldn't be found|Low|
 |262|glEEmail Root Is File|glEEmail root was file before erase|High|
 |263|Uninitialized Erase|Erase single file/folder failed because SD was uninitialized|High|
+|264|Storage Object Unsuccessfully Allocated||High|
 </details>
 
 <details>
