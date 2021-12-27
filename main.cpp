@@ -38,7 +38,7 @@ bool quit = false;
 
 Display display;
 
-Storage storage;
+Storage* storage = nullptr;
 
 InternetAccess internet;
 WebsiteAccess websiteAccess;
@@ -141,7 +141,11 @@ void printErrorCodes() {
 
 
 bool resetCodeEntered() {
-	return storage.eraseAll(133769);
+	if(storage) {
+		return storage->eraseAll(133769);
+	} else {
+		return false;
+	}
 }
 
 
@@ -194,13 +198,12 @@ void initializeNetworkCredentialsFromPreferences(char** desiredWiFiSSID, char** 
 
 
 bool preparePreferences() {
-	const char* preferencesData = storage.readFile(Preferences::getPrefs().getPrefsPath());
+	if(!storage) {
+		DebugLog::getLog().logError(ERROR_CODE::STORAGE_OBJECT_UNSUCCESSFULLY_ALLOCATED);
+		return false;
+	}
 
-	/*Serial.print(F("Data read: "));
-	Serial.println(preferencesData);
-	Serial.print(F("Read "));
-	Serial.print(storage.lastReadFileLength());
-	Serial.println(F(" bytes."));*/
+	const char* preferencesData = storage->readFile(Preferences::getPrefs().getPrefsPath());
 
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::PREFERENCES_LOAD_FAILED);
@@ -208,7 +211,7 @@ bool preparePreferences() {
 
 		return false;
 	} else {
-		Preferences::getPrefs().deserializePrefs(preferencesData, storage.lastReadFileLength());
+		Preferences::getPrefs().deserializePrefs(preferencesData, storage->lastReadFileLength());
 		delete[] preferencesData;
 
 		return true;
@@ -344,7 +347,11 @@ bool setupInputMethod() {
 	delete[] rawVersionData;
 
 	bool downloadFullDataPackage = true;
-	const char* data = storage.readFile(input->getCachedDataPath());
+	const char* data = nullptr;
+	if(storage) {
+		data = storage->readFile(input->getCachedDataPath());
+	}
+
 	if(data != nullptr && Preferences::getPrefs().getMorseCodeCharPairsVersion() == inputMethodDataVersion) { //Make this input-method agnostic
 		downloadFullDataPackage = false;
 	}
@@ -354,13 +361,14 @@ bool setupInputMethod() {
 
 		delete[] data;
 		data = getDataFromInternet(input->getDataRequestEndpoint());
-
-		storage.writeFile(data, input->getCachedDataPath());
-
 		Preferences::getPrefs().setMorseCodeCharPairsVersion(inputMethodDataVersion); //Make this input-method agnostic
-		const char* prefsData = Preferences::getPrefs().serializePrefs();
-		storage.writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
-		delete[] prefsData;
+		if(storage) {
+			storage->writeFile(data, input->getCachedDataPath());
+
+			const char* prefsData = Preferences::getPrefs().serializePrefs();
+			storage->writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
+			delete[] prefsData;
+		}
 	}
 	
 	bool dataParsed = input->setNetworkData(data);
@@ -488,8 +496,15 @@ void setup() {
 
 
 		case SETUP_LEVEL::STORAGE:
-			if(!storage.begin()) {
+			storage = new Storage;
+			if(!storage) {
+				Serial.println(F("CRITICAL ALLOCATION FAILURE IN STORAGE SETUP"));
+			}
+
+			if(!storage->begin()) {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
+				delete storage;
+
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
 				setupState = SETUP_LEVEL::PREFERENCES;
@@ -521,12 +536,12 @@ void setup() {
 			}
 
 			if(connectToWiFi(desiredWiFiSSID, desiredWiFiPassword)) {
-				if(networkCredentialsChanged) {
+				if(networkCredentialsChanged && storage) {
 					Preferences::getPrefs().setWiFiSSID(desiredWiFiSSID);
 					Preferences::getPrefs().setWiFiPassword(desiredWiFiPassword);
 
 					const char* prefsData = Preferences::getPrefs().serializePrefs();
-					storage.writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
+					storage->writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
 					delete[] prefsData;
 				}
 
