@@ -91,6 +91,8 @@ Last updated: 12/26/2021
 |18|Version Number Overflow||High|
 |19|Morse Code Char Pairs Version Mismatch||Low|
 |20|Message Only Whitespace||Low|
+|21|Data Version Download Failed||Low|
+|22|Data Download Failed||Low|
 </details>
 
 <details>
