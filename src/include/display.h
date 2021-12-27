@@ -8,7 +8,7 @@ class hd44780_pinIO;
 class Display {
 private:
 	const char BLANK_LINE[17] = "                ";
-	const unsigned short MAX_LINE_LENGTH = 40;
+	const unsigned short MAX_LINE_LENGTH = 40; //HD44780 RAM size for each line
 
 	static const constexpr unsigned short DISPLAY_ROW_LENGTH = 16;
 	static const constexpr unsigned short DISPLAY_COLUMN_LENGTH = 2;
