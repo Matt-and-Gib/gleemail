@@ -135,10 +135,6 @@ void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 
 	updateElapsedTime(currentCycleTime);
 
-	Serial.println(F("Dot, Dash values:"));
-	Serial.println(DOT.toString());
-	Serial.println(DASH.toString());
-
 	if(elapsedCycleTime < DOT_DASH_THRESHOLD) {
 		pushMorseCharacter(DOT);
 	} else if (elapsedCycleTime < MAX_DASH_THRESHOLD) {
