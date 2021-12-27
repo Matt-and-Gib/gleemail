@@ -71,11 +71,14 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 	filter["size"] = true;
 
 	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
-	deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
+	DeserializationError error = deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
+	if(error) {
+		Serial.println(error.c_str()); //Remove Me!!!!! For debugging purposes.
+	}
 	const unsigned short mccpSize = sizeDoc["size"];
 
 	DynamicJsonDocument mccpDoc(mccpSize);
-	DeserializationError error = deserializeJson(mccpDoc, payload);
+	error = deserializeJson(mccpDoc, payload);
 
 	if(error) {
 		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_NETWORK_DATA_DESERIALIZATION_ERROR);
@@ -91,7 +94,6 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase)));
 	}
 
-	//morseCodeTreeRoot.print();
 	return true;
 }
 
@@ -132,6 +134,10 @@ void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 	pins[PINS_INDEX_LED]->value = LED_STATUS::OFF;
 
 	updateElapsedTime(currentCycleTime);
+
+	Serial.println(F("Dot, Dash values:"));
+	Serial.println(DOT.toString());
+	Serial.println(DASH.toString());
 
 	if(elapsedCycleTime < DOT_DASH_THRESHOLD) {
 		pushMorseCharacter(DOT);
@@ -213,5 +219,5 @@ void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
 		}
 	}
 
-	lastInputState = pins[PINS_INDEX_SWITCH]->value == 1 ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
+	lastInputState = pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_CLOSED ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
 }

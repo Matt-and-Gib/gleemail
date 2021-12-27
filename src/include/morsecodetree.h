@@ -24,8 +24,8 @@ class MorseChar {
 protected:
 	MORSE_CHAR_STATE value;
 public:
-	MorseChar() {value = MORSE_CHAR_STATE::NOTHING;}
-	MorseChar(const MORSE_CHAR_STATE v) {value = v;}
+	explicit MorseChar() {value = MORSE_CHAR_STATE::NOTHING;}
+	explicit MorseChar(const MORSE_CHAR_STATE v) {value = v;}
 
 	bool operator==(const MorseChar& o) {return value == o.value;}
 	bool operator!=(const MorseChar& o) {return value != o.value;}
@@ -51,9 +51,9 @@ public:
 	}
 };
 
-const MorseChar& DOT = *new MorseChar(DOT);
-const MorseChar& DASH = *new MorseChar(DASH);
-const MorseChar& NOTHING = *new MorseChar(NOTHING);
+const MorseChar& DOT = *new MorseChar(MORSE_CHAR_STATE::DOT);
+const MorseChar& DASH = *new MorseChar(MORSE_CHAR_STATE::DASH);
+const MorseChar& NOTHING = *new MorseChar(MORSE_CHAR_STATE::NOTHING);
 
 
 class MorsePhrase {
