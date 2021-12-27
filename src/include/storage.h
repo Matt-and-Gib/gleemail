@@ -13,7 +13,7 @@ private:
 
 	unsigned int dataLength = 0;
 
-	SdFat32* sd;
+	SdFat32* sd = nullptr;
 public:
 	bool begin();
 
