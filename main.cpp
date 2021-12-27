@@ -504,6 +504,7 @@ void setup() {
 			if(!storage->begin()) {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 				delete storage;
+				storage = nullptr;
 
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
