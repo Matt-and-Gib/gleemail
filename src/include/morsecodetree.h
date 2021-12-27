@@ -40,7 +40,7 @@ public:
 		return (value == MORSE_CHAR_STATE::DOT);
 	};
 
-	const char* toString() {
+	const char* toString() const {
 		if(value == MORSE_CHAR_STATE::DOT) {
 			return "DOT";
 		} else if(value == MORSE_CHAR_STATE::DASH) {
@@ -63,7 +63,7 @@ private:
 	MorseChar* phraseArray;
 public:
 	MorsePhrase() {
-		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH]();
+		phraseArray = new MorseChar[MAX_MORSE_PHRASE_LENGTH];
 		/*for(unsigned short i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
 			phraseArray[i] = NOTHING;
 		}*/
