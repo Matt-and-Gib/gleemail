@@ -510,9 +510,6 @@ void setup() {
 			} else {
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
-
-			Serial.println(F("-R here bro"));
-			delay(2000); //REMOVE ME YIKES THIS IS STINKY! DEBUG ONLY BRO (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
 		break;
 
 
