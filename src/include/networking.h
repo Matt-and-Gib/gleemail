@@ -16,7 +16,7 @@ class Message;
 class IdempotencyToken;
 
 
-class Networking {
+class Networking final {
 private:
 	bool& shutdownFlag;
 
