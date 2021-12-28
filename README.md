@@ -46,7 +46,7 @@ For the full parts list that we used (for a single user), please see the table b
 |1x|10k Ω Resistor|
 |1x|10k Ω Potentiometer|
 |1x|Adafruit 4682|
-|1x|Micro SD Card|
+|1x|Micro SD Card (Format as Fat32)|
 
 ___
 
