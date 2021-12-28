@@ -32,7 +32,7 @@ struct Pin;
 //static const constexpr unsigned short CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES = 4096;
 
 
-class MorseCodeInput : public InputMethod {
+class MorseCodeInput final : public InputMethod {
 private:
 	const char MCCP_DATA_VERSION_SERVER_ENDPOINT[72] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairsVersion HTTP/1.1";
 	const char MCCP_DATA_SERVER_ENDPOINT[70] = "GET /Matt-and-Gib/gleemail/main/data/MorseCodeCharPairs.json HTTP/1.1";
