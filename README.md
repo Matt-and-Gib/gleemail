@@ -218,13 +218,11 @@ Aside from that, all other code files may be found inside `src`. The folder `src
 
 Most work will be done on implementation files in the base `src` folder. For an idea of what glEEmail does at runtime, please take a look at our flow diagram below, however for a basic overview, see the following:
 
-```
-main.cpp : initial setup, then loop control
-morsecode.cpp : processInputMethod()
-networking.cpp : processNetwork()
-display.cpp : updateDisplay()
-main.cpp : printErrorCodes()
-```
+> main.cpp : initial setup, then loop control
+> morsecode.cpp : processInputMethod()
+> networking.cpp : processNetwork()
+> display.cpp : updateDisplay()
+> main.cpp : printErrorCodes()
 
 [View Online Program Flow Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2FglEEmail%20flow.drawio)
 
@@ -297,12 +295,26 @@ ___
 
 ### <a name="startup-codes"></a>**Startup Codes**
 
-During setup (the period before you start connecting to a glEEpal), the following startup codes may be entered to trigger additional behavior.
+At launch, send **-A** via Serial to trigger Startup Code Mode. Once triggered, provide a string consisting of single-letter, case-sensitive arguments to alter or enable additional behavior in glEEmail. The built-in arguments are listed below:
 
 |Code|Behavior|Notes|
 |----|--------|-----|
-|-R|Remove glEEmail data from SD card|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
-|-t|Startup code test|Provides confirmation that startup code was received|
+|t|Startup code test|Confirmations that startup code was received|
+|v|Enable Verbose Debug Mode|Warnings will be sent via Serial in addition to errors|
+|R|Remove glEEmail data from SD card|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
+|O|Enable Offline Mode|No network connections will be made (there's no shame in a solo glEEmail session)|
+
+A usage example is provided below. Note that `-A` is entered as soon as glEEmail launches, then the desired arguments, `tvR`, are entered after "Enter startup codes:" arrives via Serial.
+
+``` plaintext
+Welcome to glEEmail!
+Version alpha 6
+-A
+Enter startup codes: Ov
+Joining WiFi
+...
+```
+
 ___
 
 ### <a name="plans"></a>**Future Plans**
