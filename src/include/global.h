@@ -7,8 +7,6 @@
 const constexpr char GLEEMAIL_VERSION[] = "alpha 5";
 const constexpr bool OFFLINE_MODE = false;
 
-const constexpr unsigned short BAUD_RATE = 9600;
-
 const constexpr unsigned short FRAME_LATENCY_COUNT_ERROR_THRESHOLD = 3;
 const constexpr unsigned short MAX_FRAME_DURATION_MS = 42;
 const constexpr unsigned short MAX_NETWORKING_LOOP_DURATION_MS = 36;
