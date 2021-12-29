@@ -4,10 +4,13 @@
 #include "inputmethod.h"
 
 
-class MorseChar;
-class MorsePhrase;
-class MorseCodeTreeNode;
-enum MORSE_CODE_STATE : bool;
+namespace GLEEMAIL_MORSE_CODE {
+	class MorseChar;
+	class MorsePhrase;
+	class MorseCodeTreeNode;
+	enum MORSE_CODE_STATE : bool;
+}
+
 struct Pin;
 
 
@@ -45,13 +48,13 @@ private:
 	const unsigned short PINS_INDEX_SWITCH = 0;
 	const unsigned short PINS_INDEX_LED = 1;
 
-	MorsePhrase& currentMorsePhrase;
-	MorseCodeTreeNode& morseCodeTreeRoot;
+	GLEEMAIL_MORSE_CODE::MorsePhrase& currentMorsePhrase;
+	GLEEMAIL_MORSE_CODE::MorseCodeTreeNode& morseCodeTreeRoot;
 
 	static const constexpr unsigned short DEBOUNCE_THRESHOLD = 25;
 
-	MORSE_CODE_STATE lastInputState;
-	MORSE_CODE_STATE inputState;
+	GLEEMAIL_MORSE_CODE::MORSE_CODE_STATE lastInputState;
+	GLEEMAIL_MORSE_CODE::MORSE_CODE_STATE inputState;
 	short typingDelayState = -1;
 	unsigned long lastChangeTime = 0;
 	long long elapsedCycleTime = 0;
@@ -59,7 +62,7 @@ private:
 
 	void processClosedToOpen(const unsigned long);
 	void processOpenToClosed(const unsigned long);
-	void pushMorseCharacter(const MorseChar&);
+	void pushMorseCharacter(const GLEEMAIL_MORSE_CODE::MorseChar&);
 	char convertPhraseToCharacter();
 
 	void checkOpenElapsedTime(const unsigned long);

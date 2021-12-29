@@ -8,6 +8,7 @@
 
 
 using namespace GLEEMAIL_DEBUG;
+using namespace GLEEMAIL_MORSE_CODE;
 
 
 namespace {
@@ -56,8 +57,9 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 }
 
 
-MorseCodeInput::~MorseCodeInput() { //MEMORY LEAK
-	//delete currentMorsePhrase;
+MorseCodeInput::~MorseCodeInput() {
+	delete &currentMorsePhrase;
+	delete &morseCodeTreeRoot;
 }
 
 
@@ -91,7 +93,9 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 	for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
 		letter = elem["symbol"];
 		phrase = elem["phrase"];
-		morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase)));
+		if(morseCodeTreeRoot.insert(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase))) == nullptr) {
+			DebugLog::getLog().logError(ERROR_CODE::MORSE_INSERTING_INTO_TREE_FAILED);
+		}
 	}
 
 	return true;
