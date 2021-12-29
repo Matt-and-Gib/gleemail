@@ -144,15 +144,6 @@ void printErrorCodes() {
 }
 
 
-bool resetCodeEntered() {
-	if(storage) {
-		return storage->eraseAll(133769);
-	} else {
-		return false;
-	}
-}
-
-
 bool checkForStartupCodes() {
 	if(Serial.available() > 1) {
 		if(Serial.peek() == '-') {
@@ -235,6 +226,9 @@ void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVP
 			break;
 		} else {
 			bool result = (storage->*reinterpret_cast<bool (Storage::*)(void)>((registeredHandler->getData()->getValue())))();
+
+			//need to provide an instance (not bad- can be passed in to registerNewStartupCodes)
+			//need to think of way to either: [figure out Member type information at runtime to replace Storage::] or [eliminate the need for a reinterpret cast altogether (this is preferable)]
 
 			codes[index] = '\0';
 		}
