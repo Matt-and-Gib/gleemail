@@ -243,12 +243,12 @@ Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing
 <summary>Steps to take after changing certain files</summary>
 
 - preferences.h
-	- Increment `PREFERENCES_VERSION` in `src/include/preferences.h`
-	- Re-Calculate `CALCULATED_PREFS_SIZE` in `src/include/preferences.h`
+  - Increment `PREFERENCES_VERSION` in `src/include/preferences.h`
+  - Re-Calculate `CALCULATED_PREFS_SIZE` in `src/include/preferences.h`
 
 - MorseCodeCharPairs.json (note: don't forget to update `SERVER` and `SERVER_REQUEST` URLs to your forked repo)
-	- Increment `morseCodeCharPairsVersion` in `data/MorseCodeCharPairsVersion`
-	- Re-Calculate `CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES` in `data/MorseCodeCharPairs.json`
+  - Increment `morseCodeCharPairsVersion` in `data/MorseCodeCharPairsVersion`
+  - Re-Calculate `CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES` in `data/MorseCodeCharPairs.json`
 
 </details>
 ___
@@ -299,7 +299,7 @@ ___
 
 ### <a name="startup-codes"></a>**Startup Codes**
 
-At launch, send **-A** via Serial to trigger Startup Code Mode. Once triggered, provide a string consisting of single-letter, case-sensitive arguments to alter or enable additional behavior in glEEmail. The built-in arguments are listed below:
+At launch, send **-A** via Serial to trigger the Startup Code Prompt. Once directed, provide a string consisting of single-letter, case-sensitive arguments to alter or enable additional behavior in glEEmail. The built-in arguments are listed below:
 
 |Code|Behavior|Notes|
 |----|--------|-----|
