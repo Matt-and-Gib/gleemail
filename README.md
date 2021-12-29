@@ -62,7 +62,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 12/26/2021
+Last updated: 12/29/2021
 <details>
 <summary>0 - 9: General</summary>
 
@@ -73,8 +73,6 @@ Last updated: 12/26/2021
 |2|Unknown Setup State|An unknown step was specified in setup|High|
 |3|Continuous Frame Latency|Lag may cause inaccuracies in input|High|
 |4|All Functions Succeeded|||
-|5|Invalid Startup Code|Input between setup steps was not formatted properly|Low|
-|6|Unknown Startup Code|No behavior defined for provided code|High|
 </details>
 
 <details>
@@ -199,13 +197,24 @@ Last updated: 12/26/2021
 </details>
 
 <details>
-<summary>330 - 359: Preferences</summary>
+<summary>330 - 369: Preferences</summary>
 
 |Code|Title|Notes|Severity|
 |----|-----|-----|--------|
 |330|Load Failed|Couldn't load preferences from SD card|Low|
 |330|File Size Mismatch|Size attribute of preferences file does not match expected size|Low|
 |331|File Version Mismatch|Version attribute of preferences file does not match expected version|Low|
+</details>
+
+<details>
+<summary>370 - 409: Startup Code</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|370|Unexpected Serial Input||Low|
+|371|Malformed Prompt Trigger|Provided code not recognized (use -A to trigger Startup Codes Prompt)|High|
+|372|Too Many Codes Provided||High|
+|373|Duplicate Codes Not Allowed||Low|
 </details>
 
 ___
@@ -278,9 +287,9 @@ If you've configured the hardware correctly, simply upload the code to your Ardu
 #### Unexpected Behavior?
 
 Experiencing unexpected behavior? Maybe we've run into your problem before you!
-The first step we'd advise you take if anything unexpected happens is to turn on Verbose Mode. Please see the startup code table below for further instructions.
+The first step we'd advise you take if anything unexpected happens is to turn on Verbose Mode. Please see [startup codes](#startup-codes) for further instructions.
 
-If that doesn't solve your problem, please submit an [issue on GitHub](https://github.com/Matt-and-Gib/gleemail/issues) and we will take a look at it (*should the stars align*).
+If that doesn't solve your problem, submit an [issue on GitHub](https://github.com/Matt-and-Gib/gleemail/issues) and we will take a look at it (*should the stars align*).
 
 #### Features
 
@@ -301,12 +310,12 @@ ___
 
 At launch, send **-A** via Serial to trigger the Startup Code Prompt. Once directed, provide a string consisting of single-letter, case-sensitive arguments to alter or enable additional behavior in glEEmail. The built-in arguments are listed below:
 
-|Code|Behavior|Notes|
-|----|--------|-----|
-|t|Startup code test|Confirmations that startup code was received|
-|v|Enable Verbose Debug Mode|Warnings will be sent via Serial in addition to errors|
-|R|Remove glEEmail data from SD card|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
-|O|Enable Offline Mode|No network connections will be made (there's no shame in a solo glEEmail session)|
+|Code|Behavior|Component|Notes|
+|----|--------|---------|-----|
+|t|Startup code test|glEEmail|Confirmations that startup code was received|
+|v|Enable Verbose Debug Mode|glEEmail|Warnings will be sent via Serial in addition to errors|
+|R|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
+|O|Enable Offline Mode|glEEmail|No network connections will be made (there's no shame in a solo glEEmail session)|
 
 A usage example is provided below. Note that `-A` is entered as soon as glEEmail launches, then the desired arguments, `tvR`, are entered after "Enter startup codes:" arrives via Serial.
 
@@ -314,7 +323,7 @@ A usage example is provided below. Note that `-A` is entered as soon as glEEmail
 Welcome to glEEmail!
 Version alpha 6
 -A
-Enter startup codes: Ov
+Enter Startup Codes: Ov
 Joining WiFi
 ...
 ```
