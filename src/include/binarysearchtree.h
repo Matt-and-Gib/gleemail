@@ -83,7 +83,7 @@ inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::remove() {
 		return nullptr; //shouldn't delete root node this way. delete root instead
 	}
 
-	if(!lesserNode && !greaterNode) { //no children
+	if(!lesserNode && !greaterNode) {
 		if(parentNode->lesserNode == this) {
 			parentNode->lesserNode = nullptr;
 		} else {
@@ -92,7 +92,7 @@ inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::remove() {
 		return this;
 	}
 
-	if(lesserNode && !greaterNode) { //only one child (lesser)
+	if(lesserNode && !greaterNode) {
 		if(parentNode->lesserNode == this) {
 			parentNode->lesserNode = lesserNode;
 		} else {
@@ -101,7 +101,7 @@ inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::remove() {
 		return this;
 	}
 
-	if(!lesserNode && greaterNode) { //only one child (greater)
+	if(!lesserNode && greaterNode) {
 		if(parentNode->lesserNode == this) {
 			parentNode->lesserNode = greaterNode;
 		} else {
