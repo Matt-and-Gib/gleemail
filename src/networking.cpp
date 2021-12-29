@@ -557,7 +557,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 				return true;
 			}
 
-			QueueNode<Message>* enqueuedQueueNode = intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
+			intoQueue.enqueue(new Message(parsedDocument, nowMS(), *glEEpalInfo));
 		} else {
 			DebugLog::getLog().logWarning(NETWORK_UNKNOWN_MESSAGE_SENDER);
 		}
