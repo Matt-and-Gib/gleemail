@@ -3,8 +3,9 @@
 #include "src/include/global.h"
 #include "src/include/preferences.h"
 
+#include "src/include/startupcodehandler.h"
 #include "src/include/queue.h"
-#include "src/include/kvpair.h"
+#include "src/include/keyvaluepair.h"
 
 #include "src/include/display.h"
 #include "src/include/storage.h"
@@ -143,13 +144,13 @@ void printErrorCodes() {
 }
 
 
-/*bool resetCodeEntered() {
+bool resetCodeEntered() {
 	if(storage) {
 		return storage->eraseAll(133769);
 	} else {
 		return false;
 	}
-}*/
+}
 
 
 bool checkForStartupCodes() {
@@ -159,7 +160,7 @@ bool checkForStartupCodes() {
 			if(Serial.read() == 'A') {
 				if(Serial.peek() < ' ') {
 					clearSerialInputBuffer();
-				} //else don't clear to support single-line command like "-A tv"
+				}
 
 				return true;
 			} else {
@@ -181,7 +182,7 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 	}
 
 	unsigned short codesCount = 0;
-	char currentCode = 0;
+	char currentCode = '\0';
 	do {
 		if(codesCount == MAX_STARTUP_CODES) {
 			DebugLog::getLog().logError(ERROR_CODE::STARTUP_CODE_TOO_MANY_CODES_PROVIDED);
@@ -215,33 +216,29 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 }
 
 
-void checkStartupCodes() {
-	/*if(Serial.available()) {
-		if(Serial.peek() == '-') {
-			Serial.read();
-			switch(Serial.read()) {
-			case 'R':
-				if(resetCodeEntered()) {
-					Serial.println(F("Files deleted successfully"));
-				} else {
-					Serial.println(F("Unable to erase SD card!")); //Should probably be an error code
-				}
+void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, bool (StartupCodeHandler::*)(void)>>& handlers) {
+	for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
+		if(codes[index] == '\0') {
 			break;
+		}
 
-			case 't':
-				Serial.println(F("Startup Code Test"));
-			break;
-
-			default:
-				DebugLog::getLog().logError(ERROR_CODE::UNKNOWN_STARTUP_CODE);
-			break;
+		QueueNode<KVPair<char, bool (StartupCodeHandler::*)(void)>>* registeredHandler = handlers.peek();
+		while(registeredHandler != nullptr) {
+			if(*(registeredHandler->getData()) == codes[index]) {
+				break;
 			}
 
-			//Handle additional codes?
-		} else {
-			DebugLog::getLog().logWarning(ERROR_CODE::INVALID_STARTUP_CODE);
+			registeredHandler = registeredHandler->getNode();
 		}
-	}*/
+
+		if(!registeredHandler) {
+			break;
+		} else {
+			bool result = (storage->*reinterpret_cast<bool (Storage::*)(void)>((registeredHandler->getData()->getValue())))();
+
+			codes[index] = '\0';
+		}
+	}
 }
 
 
@@ -517,29 +514,10 @@ void setup() {
 	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORK, INPUT_METHOD, PINS, PEER, DONE};
 	SETUP_LEVEL setupState = SETUP_LEVEL::BEGIN;
 
-
-#ifdef GLEEMAIL_STARTUP_CODES_TEST
-		//TODO: think of way to pass member function pointer instead of function pointer
-		Queue<KVPair<char, bool (*)(void)>> startupCodes; //this will live right here in Setup
-		const char testChar = 'R'; //this would be a private member of an object (in this case Storage)
-		startupCodes.enqueue(new KVPair<char, bool (*)(void)>(testChar, &resetCodeEntered)); //the queue will probably be passed in to the object's begin function for the object to enqueue its KVPairs
-
-		/*
-			When checkStartupCodes() is called and a code is found, loop through the startupCodes queue to see if there are any matches, and if so: call the value function pointer.
-		*/
-
-		//at the end of setup()
-		/*//This is the "safe" way
-		QueueNode<KVPair<char, bool (*)(void)>>* pair;
-		while(pair = startupCodes.dequeue()) {
-			delete pair;
-		}*/
-		//but I'm pretty sure the destructor for Queue will cascade-delete all children
-#endif
-
 	const unsigned short BAUD_RATE = 9600;
 
 	char startupCodes[MAX_STARTUP_CODES + TERMINATOR] {0};
+	Queue<KVPair<char, bool (StartupCodeHandler::*)(void)>> startupCodeHandlers;
 
 	char* desiredWiFiSSID = nullptr;
 	char* desiredWiFiPassword = nullptr;
@@ -617,6 +595,7 @@ void setup() {
 
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
+				storage->registerNewStartupCodes(startupCodeHandlers);
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;
@@ -705,7 +684,7 @@ void setup() {
 		break;
 		}
 
-		checkStartupCodes();
+		checkStartupCodes(startupCodes, startupCodeHandlers);
 		printErrorCodes();
 		delay(SETUP_STEP_DELAY_MS);
 	} while (setupState != SETUP_LEVEL::DONE);

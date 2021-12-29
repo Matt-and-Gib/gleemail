@@ -2,7 +2,7 @@
 #define MESSAGE_ERROR
 
 //MessageError will cause seg faults when deleted if dynamic memory has not been allocated (You can only delete what yo have new'd!) ☜(ﾟヮﾟ☜)
-/lass MessageError {
+class MessageError {
 private:
 	ERROR_CODE id;
 	const char* attribute;

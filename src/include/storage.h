@@ -1,21 +1,29 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
+#include "startupcodehandler.h"
 
 class SdFat32;
 
 
-class Storage {
+class Storage final : public StartupCodeHandler {
 private:
 	const unsigned short SLAVE_SELECT_PIN = 10;
+
 	const char RESET_CODE = 'R';
+	bool resetStartupCodeReceived() {return eraseAll(133769);}
+	
 	const char GLEEMAIL_ROOT_PATH[9] = "GLEEMAIL";
 
 	unsigned int dataLength = 0;
 
 	SdFat32* sd = nullptr;
 public:
+	Storage();
+
 	bool begin();
+
+	void registerNewStartupCodes(Queue<KVPair<char, bool (StartupCodeHandler::*)(void)>>& startupCodeHandlers) const;
 
 	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
 	

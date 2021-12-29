@@ -3,6 +3,14 @@
 #include "SdFat.h"
 #include <SPI.h>
 
+#include "include/queue.h"
+#include "include/keyvaluepair.h"
+
+
+Storage::Storage() : StartupCodeHandler() {
+
+}
+
 
 bool Storage::begin() {
 	if(!sd) {
@@ -22,6 +30,11 @@ bool Storage::begin() {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_ALREADY_INITIALIZED);
 		return true;
 	}
+}
+
+
+void Storage::registerNewStartupCodes(Queue<KVPair<char, bool (StartupCodeHandler::*)(void)>>& startupCodeHandlers) const {
+	startupCodeHandlers.enqueue(new KVPair<char, bool (StartupCodeHandler::*)(void)>(RESET_CODE, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived)));
 }
 
 
