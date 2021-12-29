@@ -219,9 +219,13 @@ Aside from that, all other code files may be found inside `src`. The folder `src
 Most work will be done on implementation files in the base `src` folder. For an idea of what glEEmail does at runtime, please take a look at our flow diagram below, however for a basic overview, see the following:
 
 > main.cpp : initial setup, then loop control
+>
 > morsecode.cpp : processInputMethod()
+>
 > networking.cpp : processNetwork()
+>
 > display.cpp : updateDisplay()
+>
 > main.cpp : printErrorCodes()
 
 [View Online Program Flow Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2FglEEmail%20flow.drawio)
