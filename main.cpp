@@ -34,6 +34,9 @@ extern USBDeviceClass USBDevice;
 extern "C" void __libc_init_array(void);
 
 
+const constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
+const unsigned short MAX_STARTUP_CODES = 8;
+
 bool quit = false;
 
 Display display;
@@ -140,20 +143,83 @@ void printErrorCodes() {
 }
 
 
-bool resetCodeEntered() {
+/*bool resetCodeEntered() {
 	if(storage) {
 		return storage->eraseAll(133769);
 	} else {
 		return false;
 	}
+}*/
+
+
+bool checkForStartupCodes() {
+	if(Serial.available() > 1) {
+		if(Serial.peek() == '-') {
+			Serial.read();
+			if(Serial.read() == 'A') {
+				if(Serial.peek() < ' ') {
+					clearSerialInputBuffer();
+				} //else don't clear to support single-line command like "-A tv"
+
+				return true;
+			} else {
+				DebugLog::getLog().logError(ERROR_CODE::STARTUP_CODE_MALFORMED_PROMPT_TRIGGER);
+				clearSerialInputBuffer();
+			}
+		} else {
+			DebugLog::getLog().logWarning(ERROR_CODE::STARTUP_CODE_UNEXPECTED_SERIAL_INPUT);
+		}
+	}	
+
+	return false;	
+}
+
+
+void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
+	while(!Serial.available()) {
+		delay(SERIAL_READ_LOOP_DELAY_MS);
+	}
+
+	unsigned short codesCount = 0;
+	char currentCode = 0;
+	do {
+		if(codesCount == MAX_STARTUP_CODES) {
+			DebugLog::getLog().logError(ERROR_CODE::STARTUP_CODE_TOO_MANY_CODES_PROVIDED);
+			break;
+		}
+
+		currentCode = Serial.read();
+		if(currentCode < ' ') {
+			break;
+		}
+
+		if(currentCode == ' ') {
+			continue;
+		} else {
+			for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
+				if(startupCodes[index] == '\0') {
+					startupCodes[index] = currentCode;
+					codesCount += 1;
+					break;
+				} else {
+					if(startupCodes[index] == currentCode) {
+						DebugLog::getLog().logWarning(ERROR_CODE::STARTUP_CODE_DUPLICATE_CODES_NOT_ALLOWED);
+						break;
+					}
+				}
+			}
+		}
+	} while (Serial.available());
+
+	clearSerialInputBuffer();
 }
 
 
 void checkStartupCodes() {
-	if(Serial.available()) {
+	/*if(Serial.available()) {
 		if(Serial.peek() == '-') {
 			Serial.read();
-			switch(Serial.read()) { //Assuming a second character is available; if not, this will block!
+			switch(Serial.read()) {
 			case 'R':
 				if(resetCodeEntered()) {
 					Serial.println(F("Files deleted successfully"));
@@ -175,9 +241,7 @@ void checkStartupCodes() {
 		} else {
 			DebugLog::getLog().logWarning(ERROR_CODE::INVALID_STARTUP_CODE);
 		}
-
-		clearSerialInputBuffer();
-	}
+	}*/
 }
 
 
@@ -236,7 +300,7 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 			break;
 		}
 
-		delay(250);
+		delay(SERIAL_READ_LOOP_DELAY_MS);
 	}
 
 	(*desiredWiFiSSID)[ssidInputLength] = '\0';
@@ -259,7 +323,7 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 			break;
 		}
 
-		delay(250);
+		delay(SERIAL_READ_LOOP_DELAY_MS);
 	}
 	(*desiredWiFiPassword)[passwordInputLength] = '\0';
 
@@ -419,7 +483,7 @@ void connectToPeer() {
 
 	Serial.println(F("Enter your gleepal's IP address:"));
 	while(!(Serial.available() > 0)) {
-		delay(250);
+		delay(SERIAL_READ_LOOP_DELAY_MS);
 	}
 
 	size_t readLength = Serial.readBytesUntil('\n', ipAddressInputBuffer, MAX_IP_ADDRESS_LENGTH);
@@ -450,15 +514,8 @@ void connectToPeer() {
 
 
 void setup() {
-	Serial.begin(BAUD_RATE);
-	while(!Serial) {
-		delay(250);
-	}
-
-	clearSerialInputBuffer();
-
-	enum class SETUP_LEVEL {WELCOME, STORAGE, PREFERENCES, NETWORK, INPUT_METHOD, PINS, PEER, DONE};
-	SETUP_LEVEL setupState = SETUP_LEVEL::WELCOME;
+	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORK, INPUT_METHOD, PINS, PEER, DONE};
+	SETUP_LEVEL setupState = SETUP_LEVEL::BEGIN;
 
 
 #ifdef GLEEMAIL_STARTUP_CODES_TEST
@@ -480,6 +537,9 @@ void setup() {
 		//but I'm pretty sure the destructor for Queue will cascade-delete all children
 #endif
 
+	const unsigned short BAUD_RATE = 9600;
+
+	char startupCodes[MAX_STARTUP_CODES + TERMINATOR] {0};
 
 	char* desiredWiFiSSID = nullptr;
 	char* desiredWiFiPassword = nullptr;
@@ -488,20 +548,55 @@ void setup() {
 	bool networkCredentialsExist = false;
 
 	const unsigned short SETUP_STEP_DELAY_MS = 100;
-	const unsigned short HELLO_GLEEMAIL_DELAY_MS = 1337;
+	const unsigned short STARTUP_CODE_INPUT_TIME_MS = 1500;
+	const unsigned short HELLO_GLEEMAIL_DELAY_MS = 1000;
 	const unsigned short NETWORK_FAILED_DELAY_MS = 3600; //Smallest GitHub rate limit is 1000/hour, and there are 3600000ms in one hour, therefore sending one request per 3600ms will hopefully ensure we dont' exceed any limits
 
 	do {
 		switch(setupState) {
+		case SETUP_LEVEL::BEGIN:
+			setupState = SETUP_LEVEL::SERIAL_COMM;
+		break;
+
+
+		case SETUP_LEVEL::SERIAL_COMM:
+			Serial.begin(BAUD_RATE);
+			while(!Serial) {
+				delay(SERIAL_READ_LOOP_DELAY_MS);
+			}
+
+			clearSerialInputBuffer();
+
+			setupState = SETUP_LEVEL::STARTUP_CODES;
+		break;
+
+
+		case SETUP_LEVEL::STARTUP_CODES:
+			delay(STARTUP_CODE_INPUT_TIME_MS);
+
+			if(checkForStartupCodes()) {
+				Serial.print(F("Enter Startup Codes: "));
+				setStartupCodes(startupCodes);
+				Serial.println(startupCodes);
+				
+			} else {
+				Serial.println(F("Not Checking Startup Codes"));
+			}
+
+			setupState = SETUP_LEVEL::LCD;
+		break;
+
+
+		case SETUP_LEVEL::LCD:
+			setupState = SETUP_LEVEL::WELCOME;
+		break;
+
+
 		case SETUP_LEVEL::WELCOME:
 			Serial.println(F("Welcome to glEEmail!"));
 			Serial.print(F("Version "));
 			Serial.println(GLEEMAIL_VERSION);
 			Serial.println();
-
-			if(OFFLINE_MODE) {
-				Serial.println(F("Offline Mode Active\n"));
-			}
 
 			display.updateReading("Hello, glEEmail!");
 			delay(HELLO_GLEEMAIL_DELAY_MS);
