@@ -93,7 +93,7 @@ Last updated: 12/26/2021
 |20|Message Only Whitespace||Low|
 |21|Data Version Download Failed||Low|
 |22|Data Download Failed||Low|
-|23|Inserting into Tree Failed|Error building Morse Code data (did you try to insert a duplicate?)|High|
+|23|Inserting Into Tree Failed|Error building Morse Code data (did you try to insert a duplicate?)|High|
 </details>
 
 <details>
