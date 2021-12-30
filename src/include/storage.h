@@ -10,7 +10,7 @@ class Storage final : public StartupCodeHandler {
 private:
 	const unsigned short SLAVE_SELECT_PIN = 10;
 
-	const char RESET_CODE = 'R';
+	const char RESET_STARTUP_CODE = 'R';
 	bool resetStartupCodeReceived() {return eraseAll(133769);}
 	
 	const char GLEEMAIL_ROOT_PATH[9] = "GLEEMAIL";
@@ -23,7 +23,8 @@ public:
 
 	bool begin();
 
-	void registerNewStartupCodes(Queue<KVPair<char, bool (StartupCodeHandler::*)(void)>>& startupCodeHandlers) const;
+	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&);
+	void startupCodeReceived(bool (StartupCodeHandler::*)(void));
 
 	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
 	
