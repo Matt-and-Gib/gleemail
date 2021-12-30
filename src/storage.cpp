@@ -3,8 +3,8 @@
 #include "SdFat.h"
 #include <SPI.h>
 
-#include "include/queue.h"
 #include "include/keyvaluepair.h"
+#include "include/queue.h"
 
 
 Storage::Storage() : StartupCodeHandler() {

@@ -246,7 +246,7 @@ Required Libraries
 - WiFiNINA
 - SdFat by Bill Greiman
 
-Note: Do not use ASCII character 24 (cancel), it is reserved to prevent printing erroneous lines.
+Note: Do not pass ASCII character 24 (cancel) to `InputMethod::pushCharacterToMessage`, it is reserved to prevent printing erroneous lines.
 
 <details>
 <summary>Steps to take after changing certain files</summary>
