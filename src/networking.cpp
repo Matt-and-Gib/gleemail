@@ -571,14 +571,14 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 unsigned short Networking::doTimeSensitiveProcess(const unsigned int previousProcessElapsedTime, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
 	processStartTime = nowMS();
-	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + (MAX_PROCESSING_TIME - previousProcessElapsedTime)) {
+	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + (MAX_PROCESSING_TIME - previousProcessElapsedTime)) { //This bothers me... What if previousProcessElapsedTime > MAX_PROCESSING_TIME? Do we want to reduce the time a process has if the previous process took longer than its max time?
 		if(!(this->*doProcess)(passProcess, onQueue)) {
 			break;
 		}
 	}
 
 	processElapsedTime = nowMS() - processStartTime;
-	return processElapsedTime;
+	return processElapsedTime; //Unnecessary? Could doTimeSensitiveProcess() be void.
 }
 
 
