@@ -19,7 +19,6 @@
 
 
 #define GLEEMAIL_FRAME_TIMER
-//#define GLEEMAIL_STARTUP_CODES_TEST
 
 
 using namespace GLEEMAIL_DEBUG;
@@ -40,8 +39,7 @@ const unsigned short MAX_STARTUP_CODES = 8;
 
 bool quit = false;
 
-Display display;
-
+Display* display = nullptr;
 Storage* storage = nullptr;
 
 InternetAccess internet;
@@ -70,7 +68,7 @@ void clearSerialInputBuffer() {
 
 
 void connectedToPeerClearDisplay() {
-	display.clearAll();
+	display->clearAll();
 }
 
 
@@ -107,7 +105,7 @@ void updateNetwork() {
 
 
 void userMessageChanged(char* chat) {
-	display.updateWriting(chat);
+	display->updateWriting(chat);
 }
 
 
@@ -124,7 +122,7 @@ void updateDisplayWithPeerChat(char* messageBody) {
 
 void updateDisplay() {
 	if(messageToPrint != nullptr) {
-		display.updateReading(messageToPrint);
+		display->updateReading(messageToPrint);
 		delete[] messageToPrint;
 		messageToPrint = nullptr;
 	}
@@ -144,7 +142,7 @@ void printErrorCodes() {
 }
 
 
-bool checkForStartupCodes() {
+bool checkEnableStartupCodes() {
 	if(Serial.available() > 1) {
 		if(Serial.peek() == '-') {
 			Serial.read();
@@ -207,13 +205,13 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 }
 
 
-void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, bool (StartupCodeHandler::*)(void)>>& handlers) {
+void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerData*>>& handlers) {
 	for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
 		if(codes[index] == '\0') {
 			break;
 		}
 
-		QueueNode<KVPair<char, bool (StartupCodeHandler::*)(void)>>* registeredHandler = handlers.peek();
+		QueueNode<KVPair<char, StartupCodeHandlerData*>>* registeredHandler = handlers.peek();
 		while(registeredHandler != nullptr) {
 			if(*(registeredHandler->getData()) == codes[index]) {
 				break;
@@ -225,11 +223,7 @@ void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVP
 		if(!registeredHandler) {
 			break;
 		} else {
-			bool result = (storage->*reinterpret_cast<bool (Storage::*)(void)>((registeredHandler->getData()->getValue())))();
-
-			//need to provide an instance (not bad- can be passed in to registerNewStartupCodes)
-			//need to think of way to either: [figure out Member type information at runtime to replace Storage::] or [eliminate the need for a reinterpret cast altogether (this is preferable)]
-
+			registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
 			codes[index] = '\0';
 		}
 	}
@@ -282,7 +276,7 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 	*desiredWiFiPassword = new char[InternetAccess::getMaxPasswordLength() + TERMINATOR];
 
 	Serial.println(F("Enter WiFi SSID:"));
-	display.updateWriting("Enter SSID");
+	display->updateWriting("Enter SSID");
 
 	unsigned short ssidInputLength = 0;
 	while(true) {
@@ -305,7 +299,7 @@ void enterNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassword)
 	Serial.print(F("Enter password for "));
 	Serial.print(*desiredWiFiSSID);
 	Serial.println(F(":"));
-	display.updateWriting("Enter Password");
+	display->updateWriting("Enter Password");
 
 	unsigned short passwordInputLength = 0;
 	while(true) {
@@ -354,17 +348,17 @@ bool promptForNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassw
 
 bool connectToWiFi(char* desiredWiFiSSID, char* desiredWiFiPassword) {
 	Serial.println(F("Attempting connection..."));
-	display.updateWriting("Connecting...");
+	display->updateWriting("Connecting...");
 
 	if(!internet.connectToNetwork(desiredWiFiSSID, desiredWiFiPassword)) {
-		display.updateWriting("Failed");
+		display->updateWriting("Failed");
 		Serial.print(F("Unable to connect to "));
 		Serial.println(desiredWiFiSSID);
 
 		return false;
 	} else {
 		Serial.println(F("Connected!"));
-		display.updateWriting("Connected!");
+		display->updateWriting("Connected!");
 
 		return true;
 	}
@@ -391,7 +385,7 @@ const char* getDataFromInternet(const char* requestEndpoint) {
 
 
 bool setupInputMethod() {
-	display.updateWriting("Downloading Data");
+	display->updateWriting("Downloading Data");
 
 	const char* rawVersionData = getDataFromInternet(input->getDataVersionRequestEndpoint());
 	if(!rawVersionData) {
@@ -430,7 +424,7 @@ bool setupInputMethod() {
 			Preferences::getPrefs().setMorseCodeCharPairsVersion(inputMethodDataVersion); //Make this input-method agnostic
 		}
 
-		if(storage) {
+		if(storage != nullptr) {
 			storage->writeFile(data, input->getCachedDataPath());
 
 			if(inputMethodDataVersion > Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
@@ -492,8 +486,8 @@ void connectToPeer() {
 	IPAddress friendsIP(ipAddressParts[0], ipAddressParts[1], ipAddressParts[2], ipAddressParts[3]);
 
 	Serial.println(F("Initializing Authentication..."));
-	display.updateReading("Initializing");
-	display.updateWriting("  Authentication");
+	display->updateReading("Initializing");
+	display->updateWriting("  Authentication");
 
 	network.connectToPeer(friendsIP);
 
@@ -511,7 +505,7 @@ void setup() {
 	const unsigned short BAUD_RATE = 9600;
 
 	char startupCodes[MAX_STARTUP_CODES + TERMINATOR] {0};
-	Queue<KVPair<char, bool (StartupCodeHandler::*)(void)>> startupCodeHandlers;
+	Queue<KVPair<char, StartupCodeHandlerData*>> startupCodeHandlers;
 
 	char* desiredWiFiSSID = nullptr;
 	char* desiredWiFiPassword = nullptr;
@@ -546,13 +540,10 @@ void setup() {
 		case SETUP_LEVEL::STARTUP_CODES:
 			delay(STARTUP_CODE_INPUT_TIME_MS);
 
-			if(checkForStartupCodes()) {
+			if(checkEnableStartupCodes()) {
 				Serial.print(F("Enter Startup Codes: "));
 				setStartupCodes(startupCodes);
 				Serial.println(startupCodes);
-				
-			} else {
-				Serial.println(F("Not Checking Startup Codes"));
 			}
 
 			setupState = SETUP_LEVEL::LCD;
@@ -560,17 +551,20 @@ void setup() {
 
 
 		case SETUP_LEVEL::LCD:
+			display = new Display;
+
 			setupState = SETUP_LEVEL::WELCOME;
 		break;
 
 
 		case SETUP_LEVEL::WELCOME:
+			Serial.println();
 			Serial.println(F("Welcome to glEEmail!"));
 			Serial.print(F("Version "));
 			Serial.println(GLEEMAIL_VERSION);
 			Serial.println();
 
-			display.updateReading("Hello, glEEmail!");
+			display->updateReading("Hello, glEEmail!");
 			delay(HELLO_GLEEMAIL_DELAY_MS);
 			setupState = SETUP_LEVEL::STORAGE;
 		break;
@@ -606,11 +600,11 @@ void setup() {
 
 		case SETUP_LEVEL::NETWORK:
 			Serial.println(F("Joining WiFi"));
-			display.updateWriting("Joining WiFi");
+			display->updateWriting("Joining WiFi");
 			delay(SETUP_STEP_DELAY_MS);
 
-			display.clearWriting();
-			display.updateReading("Joining WiFi");
+			display->clearWriting();
+			display->updateReading("Joining WiFi");
 			delay(SETUP_STEP_DELAY_MS);
 
 			networkCredentialsExist = desiredWiFiSSID && desiredWiFiPassword;
@@ -636,7 +630,7 @@ void setup() {
 
 
 		case SETUP_LEVEL::INPUT_METHOD:
-			display.updateReading("Setting Up Input");
+			display->updateReading("Setting Up Input");
 			if(!input) {
 				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment must be manually changed if a different input method is desired
 			}
@@ -662,11 +656,11 @@ void setup() {
 
 		case SETUP_LEVEL::PEER:
 			if(!OFFLINE_MODE) {
-				display.clearWriting();
-				display.updateReading("Enter glEEpal IP");
+				display->clearWriting();
+				display->updateReading("Enter glEEpal IP");
 				connectToPeer();
-				display.clearWriting();
-				display.updateReading("Wait for glEEpal");
+				display->clearWriting();
+				display->updateReading("Wait for glEEpal");
 			}
 
 			setupState = SETUP_LEVEL::DONE;
@@ -745,8 +739,8 @@ Estimated max time for single message processing: 4ms
 		}
 	}
 
-	display.updateReading("glEEbye!");
-	display.clearWriting();
+	display->updateReading("glEEbye!");
+	display->clearWriting();
 
 	Serial.println(F("Lost connection to glEEpal"));
 	if(arduino::serialEventRun) {
@@ -754,6 +748,6 @@ Estimated max time for single message processing: 4ms
 	}
 
 	delay(5000);
-	display.clearAll();
+	display->clearAll();
 	return 0;
 }
