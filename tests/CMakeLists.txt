@@ -1,0 +1,6 @@
+file( GLOB APP_SOURCES app/*.cxx ) #This is okay because GitHub Actions doesn't cache our files (will be rebuilt every time anyway)
+foreach( testsourcefile ${APP_SOURCES} )
+    string( REPLACE ".cpp" "" testname ${testsourcefile} )
+    add_executable( ${testname} ${testsourcefile} )
+    target_link_libraries( ${testname} YourLib )
+endforeach( testsourcefile ${APP_SOURCES} )
