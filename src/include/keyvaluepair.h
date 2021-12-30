@@ -7,8 +7,8 @@ private:
 	const K& key;
 	const V& value;
 public:
-	KVPair() {}
 	KVPair(const K& k, const V& v) : key{k}, value{v} {}
+	//~KVPair() {} //Implement this! This is important!
 	const K& getKey() const {return key;}
 	const V& getValue() const {return value;}
 
