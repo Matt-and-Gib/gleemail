@@ -7,12 +7,23 @@ class Queue;
 template <class U, class V>
 class KVPair;
 
+class StartupCodeHandler;
+
+
+struct StartupCodeHandlerData {
+	StartupCodeHandler* instance = nullptr;
+	bool (StartupCodeHandler::*callback)(void);
+
+	StartupCodeHandlerData(StartupCodeHandler* i, bool (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {}
+};
+
 
 class StartupCodeHandler {
 private:
 
 public:
-	virtual void registerNewStartupCodes(Queue<KVPair<char, bool (StartupCodeHandler::*)(void)>>& startupCodeHandlers) const = 0;
+	virtual void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&) = 0;
+	virtual void startupCodeReceived(bool (StartupCodeHandler::*)(void)) = 0;
 };
 
 #endif
