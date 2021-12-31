@@ -8,4 +8,6 @@ add_compile_options(-Wall -Wextra -pedantic) # -Werror)
 #file(GLOB LIB_HEADERS src/include/*.h) #This is okay because GitHub Actions doesn't cache our files (will be rebuilt every time)
 #add_library(glEEmailCode ${LIB_SOURCES} ${LIB_HEADERS})
 
+MESSAGE("inside root cmakelists")
+
 add_subdirectory (tests)
