@@ -23,7 +23,7 @@ public:
 
 	bool begin();
 
-	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&);
+	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerInfo*>>&);
 	void startupCodeReceived(bool (StartupCodeHandler::*)(void));
 
 	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}

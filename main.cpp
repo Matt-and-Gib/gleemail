@@ -35,7 +35,8 @@ extern "C" void __libc_init_array(void);
 
 
 const constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
-const unsigned short MAX_STARTUP_CODES = 8;
+const constexpr unsigned short MAX_STARTUP_CODES = 8;
+const constexpr char EMPTY_STARTUP_CODE = 127;
 
 bool quit = false;
 
@@ -58,6 +59,39 @@ char* peerMessage = new char[MAX_MESSAGE_LENGTH + TERMINATOR];
 long long cycleStartTime = 0;
 long cycleDuration = 0;
 unsigned short cycleLatencyCount = 0;
+
+
+class OfflineMode final : public StartupCodeHandler {
+private:
+	const char OFFLINE_MODE_STARTUP_CODE = 'O';
+	bool offlineMode = false;
+	bool enableOfflineMode() {
+		Serial.println(F("Offline Mode ENABLED"));
+		return offlineMode = true;
+	}
+public:
+	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerInfo*>>& startupCodeHandlers) {
+		startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerInfo*>(OFFLINE_MODE_STARTUP_CODE, new StartupCodeHandlerInfo(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&OfflineMode::enableOfflineMode))));
+	}
+
+
+	void startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
+		Serial.println(F("startupCodeReceived: top"));
+		if(this == nullptr) {
+			Serial.println(F("startupCodeReceived: this is nullptr"));
+		} else {
+			Serial.println(F("startupCodeReceived: this is NOT nullptr"));
+		}
+
+		(this->*reinterpret_cast<bool (OfflineMode::*)(void)>(memberFunction))();
+		Serial.println(F("startupCodeReceived: bottom"));
+	}
+
+
+	bool isEnabled() const {
+		return offlineMode;
+	}
+};
 
 
 void clearSerialInputBuffer() {
@@ -132,10 +166,8 @@ void updateDisplay() {
 void printErrorCodes() {
 	ERROR_CODE e = DebugLog::getLog().getNextError();
 	while(e != ERROR_CODE::NONE) {
-		if(!(OFFLINE_MODE && (e == NETWORK_HEARTBEAT_FLATLINE))) {
-			Serial.print(F("\nError Code: "));
-			Serial.println(e);
-		}
+		Serial.print(F("\nError Code: "));
+		Serial.println(e);
 
 		e = DebugLog::getLog().getNextError();
 	}
@@ -187,7 +219,7 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 			continue;
 		} else {
 			for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
-				if(startupCodes[index] == '\0') {
+				if(startupCodes[index] == EMPTY_STARTUP_CODE) {
 					startupCodes[index] = currentCode;
 					codesCount += 1;
 					break;
@@ -205,15 +237,25 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 }
 
 
-void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerData*>>& handlers) {
+void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerInfo*>>& handlers) {
+	Serial.println(F("checkStartupCodes: top"));
 	for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
 		if(codes[index] == '\0') {
+			Serial.println(F("checkStartupCodes: found EOF"));
 			break;
 		}
 
-		QueueNode<KVPair<char, StartupCodeHandlerData*>>* registeredHandler = handlers.peek();
+		if(codes[index] == EMPTY_STARTUP_CODE) {
+			Serial.println(F("checkStartupCodes: found empty code"));
+			continue;
+		} else {
+			Serial.println(F("checkStartupCodes: found code"));
+		}
+
+		QueueNode<KVPair<char, StartupCodeHandlerInfo*>>* registeredHandler = handlers.peek();
 		while(registeredHandler != nullptr) {
 			if(*(registeredHandler->getData()) == codes[index]) {
+				Serial.println(F("checkStartupCodes: found match"));
 				break;
 			}
 
@@ -221,12 +263,28 @@ void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVP
 		}
 
 		if(!registeredHandler) {
-			break;
+			Serial.println(F("checkStartupCodes: no match for code"));
+			continue;
 		} else {
+			if(registeredHandler->getData()->getValue()->instance == nullptr) {
+				Serial.println(F("checkStartupCodes: instance is nullptr"));
+			} else {
+				Serial.println(F("checkStartupCodes: instance is not a nullptr"));
+			}
+
+			if(registeredHandler->getData()->getValue()->callback == nullptr) {
+				Serial.println(F("checkStartupCodes: callback is nullptr"));
+			} else {
+				Serial.println(F("checkStartupCodes: callback is not a nullptr"));
+			}
+
+			Serial.println(F("checkStartupCodes: calling match"));
 			registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
-			codes[index] = '\0';
+			codes[index] = EMPTY_STARTUP_CODE;
 		}
 	}
+
+	Serial.println(F("checkStartupCodes: bottom"));
 }
 
 
@@ -504,8 +562,13 @@ void setup() {
 
 	const unsigned short BAUD_RATE = 9600;
 
+	Queue<KVPair<char, StartupCodeHandlerInfo*>> startupCodeHandlers;
 	char startupCodes[MAX_STARTUP_CODES + TERMINATOR] {0};
-	Queue<KVPair<char, StartupCodeHandlerData*>> startupCodeHandlers;
+	for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
+		startupCodes[index] = EMPTY_STARTUP_CODE;
+	}
+
+	OfflineMode* offlineMode = nullptr;
 
 	char* desiredWiFiSSID = nullptr;
 	char* desiredWiFiPassword = nullptr;
@@ -558,6 +621,9 @@ void setup() {
 
 
 		case SETUP_LEVEL::WELCOME:
+			offlineMode = new OfflineMode;
+			offlineMode->registerNewStartupCodes(startupCodeHandlers);
+
 			Serial.println();
 			Serial.println(F("Welcome to glEEmail!"));
 			Serial.print(F("Version "));

@@ -33,8 +33,8 @@ bool Storage::begin() {
 }
 
 
-void Storage::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>& startupCodeHandlers) {
-	startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerData*>(RESET_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived))));
+void Storage::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerInfo*>>& startupCodeHandlers) {
+	startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerInfo*>(RESET_STARTUP_CODE, new StartupCodeHandlerInfo(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived))));
 }
 
 

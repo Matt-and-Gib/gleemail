@@ -312,6 +312,7 @@ At launch, send **-A** via Serial to trigger the Startup Code Prompt. Once direc
 
 |Code|Behavior|Component|Notes|
 |----|--------|---------|-----|
+|[DEL]|None|glEEmail|Reserved for system use|
 |t|Startup code test|glEEmail|Confirmations that startup code was received|
 |v|Enable Verbose Debug Mode|glEEmail|Warnings will be sent via Serial in addition to errors|
 |R|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
