@@ -20,7 +20,7 @@ struct StartupCodeHandlerInfo {
 
 class StartupCodeHandler {
 public:
-	virtual void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerInfo*>>&) = 0;
+	virtual void registerNewStartupCodes(StartupCodeHandler*, Queue<KVPair<char, StartupCodeHandlerInfo*>>&) const = 0;
 	virtual void startupCodeReceived(bool (StartupCodeHandler::*)(void)) = 0;
 };
 

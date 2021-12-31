@@ -70,8 +70,10 @@ private:
 		return offlineMode = true;
 	}
 public:
-	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerInfo*>>& startupCodeHandlers) {
-		startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerInfo*>(OFFLINE_MODE_STARTUP_CODE, new StartupCodeHandlerInfo(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&OfflineMode::enableOfflineMode))));
+	OfflineMode() : StartupCodeHandler() {}
+
+	void registerNewStartupCodes(StartupCodeHandler* instance, Queue<KVPair<char, StartupCodeHandlerInfo*>>& startupCodeHandlers) const {
+		startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerInfo*>(OFFLINE_MODE_STARTUP_CODE, new StartupCodeHandlerInfo(instance, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&OfflineMode::enableOfflineMode))));
 	}
 
 
@@ -622,7 +624,7 @@ void setup() {
 
 		case SETUP_LEVEL::WELCOME:
 			offlineMode = new OfflineMode;
-			offlineMode->registerNewStartupCodes(startupCodeHandlers);
+			offlineMode->registerNewStartupCodes(offlineMode, startupCodeHandlers);
 
 			Serial.println();
 			Serial.println(F("Welcome to glEEmail!"));
@@ -649,7 +651,7 @@ void setup() {
 
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
-				storage->registerNewStartupCodes(startupCodeHandlers);
+				storage->registerNewStartupCodes(storage, startupCodeHandlers);
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;
