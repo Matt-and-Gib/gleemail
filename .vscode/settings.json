@@ -2,5 +2,6 @@
 	"files.associations": {
 		"array": "cpp",
 		"string_view": "cpp"
-	}
+	},
+	"cmake.cmakePath": "/home/j54aaay/tools/cmake-3.22.1-linux-x86_64/bin/cmake"
 }
