@@ -1,6 +1,17 @@
-file( GLOB APP_SOURCES app/*.cxx ) #This is okay because GitHub Actions doesn't cache our files (will be rebuilt every time anyway)
-foreach( testsourcefile ${APP_SOURCES} )
-    get_filename_component(testname ${testsourcefile} NAME_WE)
-    add_executable( ${testname} ${testsourcefile} )
-    target_link_libraries( ${testname} YourLib )
-endforeach( testsourcefile ${APP_SOURCES} )
+MACRO(SUBDIRLIST result curdir)
+  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  SET(dirlist "")
+  FOREACH(child ${children})
+    IF(IS_DIRECTORY ${curdir}/${child})
+      LIST(APPEND dirlist ${child})
+    ENDIF()
+  ENDFOREACH()
+  SET(${result} ${dirlist})
+ENDMACRO()
+
+
+
+#file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES true (${PROJECT_SOURCE_DIR}/tests) CMakeLists.txt) #This is okay because GitHub Actions doesn't cache our files (will be rebuilt every time)
+foreach(testdirectory ${SUBDIRLIST})
+	add_subdirectory(${testdirectory})
+endforeach()
