@@ -14,6 +14,7 @@ jobs:
       - uses: arduino/compile-sketches@v1.0.0
         with:
           fqbn: 'arduino:samd:nano_33_iot'
+# Disable unused parameter warnings because we necessarily have "no-action" functions due to our callbacks
           cli-compile-flags: |
             - --build-property
             - compiler.cpp.extra_flags="-Wno-unused-parameter"
