@@ -14,8 +14,8 @@ jobs:
       - uses: arduino/compile-sketches@v1.0.0
         with:
           fqbn: 'arduino:samd:nano_33_iot'
-          cli-compile-flags: |-
-             - --build-property "compiler.cpp.extra_flags=\"-DSSID=\"hello world\"\""
+          cli-compile-flags: |
+             - build-property "compiler.cpp.extra_flags=\"-DSSID=\"hello world\"\""
 #            - "--build-property \"compiler.cpp.extra_flags=\"-Wno-unused-parameter\"\""
           libraries: |
             - name: ArduinoJson
