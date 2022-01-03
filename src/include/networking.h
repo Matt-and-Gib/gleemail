@@ -1,18 +1,25 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
+#ifdef UNIT_TEST_MODE
+//#include "moc_Arduino.h"
+//#include "moc_WiFiUdp.h"
+//#include "moc_ArduinoJson.hpp"
+//#include "moc_global.h"
+//#include "moc_queue.h"
+//#include "moc_message.h"
+//#include "moc_LiteChaCha/moc_keyinfrastructure.h"
+//#include "moc_LiteChaCha/moc_authenticatedencrypt.h"
+#else
 #include "Arduino.h"
-
 #include <WiFiUdp.h>
 #include <ArduinoJson.hpp>
-
 #include "global.h"
 #include "queue.h"
-
 #include "message.h"
-
 #include "LiteChaCha/keyinfrastructure.h"
 #include "LiteChaCha/authenticatedencrypt.h"
+#endif
 
 
 class Networking {

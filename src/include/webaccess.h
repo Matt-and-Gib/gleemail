@@ -1,7 +1,11 @@
 #ifndef WEBACCESS_H
 #define WEBACCESS_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_internetaccess.h
+#else
 #include "internetaccess.h"
+#endif
 
 
 class WebAccess {

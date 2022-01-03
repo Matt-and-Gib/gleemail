@@ -1,10 +1,15 @@
 #ifndef INTERNETACCESS_H
 #define INTERNETACCESS_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_global.h
+//include moc_spi.h
+//include moc_WiFiNINA.h
+#else
 #include "global.h"
-
 #include <SPI.h>
 #include <WiFiNINA.h>
+#endif
 
 
 class InternetAccess {

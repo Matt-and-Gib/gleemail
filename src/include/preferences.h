@@ -1,9 +1,13 @@
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_ArduinoJson.hpp
+//include moc_global.h
+#else
 #include <ArduinoJson.h>
-
 #include "global.h"
+#endif
 
 
 //Remember: Preferences is a singleton! DO NOT waste memory.

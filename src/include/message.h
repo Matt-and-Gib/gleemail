@@ -1,11 +1,17 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_arduino.h
+//include moc_gleepal.h
+//include moc_idempotencytoken.h
+//include moc_messageerror.h
+#else
 #include "Arduino.h"
-
 #include "gleepal.h"
 #include "idempotencytoken.h"
 //#include "messageerror.h"
+#endif
 
 
 class Networking;

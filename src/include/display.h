@@ -1,9 +1,13 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-
+#ifdef UNIT_TEST_MODE
+//include moc_hd44780.h
+//include moc_hd44780ioClass/hd44780_pinIO.h
+#else
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_pinIO.h>
+#endif
 
 
 namespace DisplayData {

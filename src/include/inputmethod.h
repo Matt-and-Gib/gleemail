@@ -1,8 +1,11 @@
 #ifndef INPUTMETHOD_H
 #define INPUTMETHOD_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_global.h
+#else
 #include "global.h"
-//#include "Arduino.h" //REMOVE ME
+#endif
 
 
 class InputMethod {

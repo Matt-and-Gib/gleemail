@@ -1,7 +1,12 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_debuglog.h
+#else
 #include "debuglog.h"
+#endif
+
 
 
 static const constexpr char GLEEMAIL_VERSION[] = "alpha 5";

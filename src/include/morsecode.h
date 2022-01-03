@@ -1,10 +1,15 @@
 #ifndef MORSECODE_H
 #define MORSECODE_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_inputmethod.h
+//include moc_morsecodetree.h
+//include moc_ArduinoJson.h
+#else
 #include "inputmethod.h"
 #include "morsecodetree.h"
-
 #include <ArduinoJson.h>
+#endif
 
 
 //https://morsecode.world/international/morse2.html

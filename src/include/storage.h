@@ -1,9 +1,13 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-#include <SD.h>
-
+#ifdef UNIT_TEST_MODE
+//include moc_SD.h
+//include moc_global.h
+#else
+#include <SdFat.h>
 #include "global.h"
+#endif
 
 
 class Storage {
