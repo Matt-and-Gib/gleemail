@@ -1,7 +1,11 @@
 #ifndef MORSECODE_H
 #define MORSECODE_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_inputmethod.h
+#else
 #include "inputmethod.h"
+#endif
 
 
 namespace GLEEMAIL_MORSE_CODE {

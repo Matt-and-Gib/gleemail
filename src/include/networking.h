@@ -1,15 +1,21 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
+#ifdef UNIT_TEST_MODE
+//#include "moc_WiFiUdp.h"
+//#include "moc_global.h"
+//#include "moc_queue.h"
 
+//#include "moc_LiteChaCha/moc_keyinfrastructure.h"
+//#include "moc_LiteChaCha/moc_authenticatedencrypt.h"
+#else
 #include <WiFiUdp.h>
-
 #include "global.h"
 #include "queue.h"
 
 #include "LiteChaCha/keyinfrastructure.h" //Could be in source if objects were pointers
 #include "LiteChaCha/authenticatedencrypt.h" //Could be in source if objects were pointers
-
+#endif
 
 class glEEpal;
 class Message;

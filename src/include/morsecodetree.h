@@ -1,7 +1,12 @@
 #ifndef MORSECODETREE_H
 #define MORSECODETREE_H
 
+#ifdef UNIT_TEST_MODE
+//include moc_binarysearchtree.h
+#else
 #include "binarysearchtree.h"
+#endif
+
 
 /*
 	#Definitions

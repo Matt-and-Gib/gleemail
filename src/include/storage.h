@@ -1,7 +1,13 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
+
+#ifdef UNIT_TEST_MODE
+//include moc_startupcodehandler.h
+#else
 #include "startupcodehandler.h"
+#endif
+
 
 class SdFat32;
 
