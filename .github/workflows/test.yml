@@ -1,4 +1,4 @@
-name: Run Tests
+name: Test
 
 on: [workflow_dispatch]
 #  workflow_dispatch:
@@ -18,6 +18,9 @@ jobs:
     - uses: lukka/get-cmake@latest
     - name: run-cmake
       uses: lukka/run-cmake@v10.0
+      with:
+          configurePreset: 'default'
+          buildPreset: 'default'
     - name: make
       run: make
 #    - name: make check
