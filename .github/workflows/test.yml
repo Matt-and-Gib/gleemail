@@ -15,17 +15,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: lukka/get-cmake@latest
-    - name: run-cmake
-      uses: lukka/run-cmake@v10.0
-      with:
-          configurePreset: 'default'
-          buildPreset: 'default'
-    - name: make
-      run: make
+    - uses: jwlawson/actions-setup-cmake@v1.9
+    - name: Run CMake
+      run: cmake --version
+#    - name: make
+#      run: make
 #    - name: make check
 #      run: make check
 #    - name: make distcheck
 #      run: make distcheck
-    - name: ctests
-      run: ctest
+#    - name: ctests
+#      run: ctest
