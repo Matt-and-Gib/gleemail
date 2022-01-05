@@ -52,11 +52,11 @@ public:
 	QueueNode<T>* dequeue();
 	QueueNode<T>* peek();
 
-	QueueNode<T>* find(T&);
+	QueueNode<T>* find(const T&);
 
 	//QueueNode<T>* remove(T&, QueueNode<T>*);
-	QueueNode<T>* remove(T&);
-	QueueNode<T>* remove(QueueNode<T>&);
+	QueueNode<T>* remove(const T&);
+	QueueNode<T>* remove(const QueueNode<T>&);
 
 	bool empty() const {return root == nullptr;}
 	unsigned short length() const {return !root ? 0 : root->countChildren() + 1;}
@@ -98,17 +98,17 @@ inline QueueNode<T>* Queue<T>::peek() {
 
 
 template <class T>
-inline QueueNode<T>* Queue<T>::find(T& f) {
+inline QueueNode<T>* Queue<T>::find(const T& f) {
 	QueueNode<T>* currentNode = root;
 	while(currentNode != nullptr) {
 		if(*currentNode->getData() == f) {
-			return currentNode;
+			break;
 		}
 
 		currentNode = currentNode->getNode();
 	}
 
-	return nullptr;
+	return currentNode;
 }
 
 
@@ -130,7 +130,7 @@ inline QueueNode<T>* Queue<T>::remove(T& match, QueueNode<T>* parent = nullptr) 
 
 
 template <class T>
-inline QueueNode<T>* Queue<T>::remove(T& match) {
+inline QueueNode<T>* Queue<T>::remove(const T& match) {
 	QueueNode<T>* parentNode = nullptr;
 	QueueNode<T>* currentNode = root;
 	while(currentNode) {
@@ -156,7 +156,7 @@ inline QueueNode<T>* Queue<T>::remove(T& match) {
 
 
 template <class T>
-inline QueueNode<T>* Queue<T>::remove(QueueNode<T>& match) {
+inline QueueNode<T>* Queue<T>::remove(const QueueNode<T>& match) {
 	//return remove(*match.getData());
 	
 	QueueNode<T>* parentNode = nullptr;
