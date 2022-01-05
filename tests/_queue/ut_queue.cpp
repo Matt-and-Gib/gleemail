@@ -90,6 +90,51 @@ int test_queue_enqueue_dequeue_order() {
 }
 
 
+int test_queue_dequeue_empty() {
+	Queue<TestingObject> testQ;
+	if(testQ.dequeue() == nullptr) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+
+int test_queue_dequeue_last() {
+	Queue<TestingObject> testQ;
+	testQ.enqueue(new TestingObject(69));
+
+	QueueNode<TestingObject>* retObj = nullptr;
+	retObj = testQ.dequeue();
+	if(retObj != nullptr && testQ.peek() == nullptr) {
+		delete retObj;
+		return 0;
+	} else {
+		delete retObj;
+		return 1;
+	}
+}
+
+
+int test_queue_dequeue_not_last() {
+	const unsigned short REMAINING_OBJECT_VALUE = 96;
+
+	Queue<TestingObject> testQ;
+	testQ.enqueue(new TestingObject(69));
+	testQ.enqueue(new TestingObject(REMAINING_OBJECT_VALUE));
+
+	QueueNode<TestingObject>* retObj = nullptr;
+	retObj = testQ.dequeue();
+	if(retObj != nullptr && testQ.peek() != nullptr && testQ.peek()->getData()->getData() == REMAINING_OBJECT_VALUE) {
+		delete retObj;
+		return 0;
+	} else {
+		delete retObj;
+		return 1;
+	}
+}
+
+
 int main(int argc, char* argv[]) {
 	if(argc < 2) {
 		std::cout << "No test ID provided! Expecting unsigned int" << std::endl;
@@ -116,6 +161,18 @@ int main(int argc, char* argv[]) {
 
 	case 4:
 		return test_queue_enqueue_dequeue_order();
+	break;
+
+	case 5:
+		return test_queue_dequeue_empty();
+	break;
+
+	case 6:
+		return test_queue_dequeue_last();
+	break;
+
+	case 7:
+		return test_queue_dequeue_not_last();
 	break;
 
 	default:
