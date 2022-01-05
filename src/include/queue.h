@@ -82,13 +82,7 @@ inline QueueNode<T>* Queue<T>::dequeue() {
 	}
 
 	QueueNode<T>* oldRoot = root;
-
-	if(root->getNode() == nullptr) {
-		root = nullptr;
-		return oldRoot;
-	}
-
-	root = root->getNode();
+	root = oldRoot->getNode();
 	oldRoot->setNode(nullptr);
 	return oldRoot;
 }
