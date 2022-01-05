@@ -17,6 +17,7 @@ add_test(enqueue_dequeue_order ${testname} 4)
 add_test(dequeue_empty ${testname} 5)
 add_test(dequeue_last ${testname} 6)
 add_test(dequeue_not_last ${testname} 7)
+add_test(enqueue_nullptr ${testname} 8)
 
 #add_test(success_test ${testname} 0)
 #set_tests_properties(success_test PROPERTIES PASS_REGULAR_EXPRESSION "SUCCESS")

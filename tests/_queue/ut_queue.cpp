@@ -24,10 +24,14 @@ int test_queue_no_children_count() {
 
 
 int test_queue_add_node() {
-	Queue<TestingObject> testQ;
-	testQ.enqueue(new TestingObject(69));
+	const unsigned short NQDOBJ_VALUE = 69;
 
-	if(testQ.empty() == false) {
+	Queue<TestingObject> testQ;
+
+	QueueNode<TestingObject>* nqdObj = nullptr;
+	nqdObj = testQ.enqueue(new TestingObject(NQDOBJ_VALUE));
+
+	if(nqdObj != nullptr && nqdObj->getData()->getData() == NQDOBJ_VALUE && testQ.empty() == false && testQ.peek()->getData()->getData() == NQDOBJ_VALUE) {
 		return 0;
 	} else {
 		return 1;
@@ -135,6 +139,16 @@ int test_queue_dequeue_not_last() {
 }
 
 
+int test_queue_enqueue_nullptr() {
+	Queue<TestingObject> testQ;
+	if(testQ.enqueue(nullptr) == nullptr && testQ.empty() == true) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+
 int main(int argc, char* argv[]) {
 	if(argc < 2) {
 		std::cout << "No test ID provided! Expecting unsigned int" << std::endl;
@@ -173,6 +187,10 @@ int main(int argc, char* argv[]) {
 
 	case 7:
 		return test_queue_dequeue_not_last();
+	break;
+
+	case 8:
+		return test_queue_enqueue_nullptr();
 	break;
 
 	default:
