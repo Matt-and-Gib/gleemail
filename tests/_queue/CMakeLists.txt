@@ -9,11 +9,15 @@ add_executable(${testname} ${testsource})
 target_include_directories(${testname} PRIVATE "${PROJECT_SOURCE_DIR}/src/include")
 set_target_properties(${testname} PROPERTIES LINKER_LANGUAGE CXX)
 
-add_test(0_no_children_count_test ${testname} 0)
+add_test(no_children_count ${testname} 0)
 
-add_test(1_add_node ${testname} 1)
+add_test(add_node ${testname} 1)
 
-add_test(2_child_count_test ${testname} 2)
+add_test(one_child_count ${testname} 2)
+
+add_test(multiple_children_count ${testname} 3)
+
+add_test(enqueue_dequeue_order ${testname} 4)
 
 #add_test(success_test ${testname} 0)
 #set_tests_properties(success_test PROPERTIES PASS_REGULAR_EXPRESSION "SUCCESS")
