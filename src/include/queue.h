@@ -59,7 +59,6 @@ public:
 	QueueNode<T>* remove(QueueNode<T>&);
 
 	bool empty() const {return root == nullptr;}
-
 	unsigned short length() const {return !root ? 0 : root->countChildren() + 1;}
 };
 
