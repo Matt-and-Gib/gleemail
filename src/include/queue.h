@@ -56,7 +56,7 @@ public:
 	QueueNode<T>* remove(T&);
 	QueueNode<T>* remove(QueueNode<T>&);
 
-	bool empty() {return root == nullptr;}
+	bool empty() const {return root == nullptr;}
 };
 
 
