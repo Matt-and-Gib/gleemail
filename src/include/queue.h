@@ -31,6 +31,8 @@ public:
 			return node->enqueue(o);
 		}
 	}
+
+	unsigned short countChildren() const {return !node ? 0 : node->countChildren() + 1;}
 };
 
 
@@ -46,9 +48,9 @@ public:
 		delete root; //Note: All children will be recursively deleted. This could be expected behavior, or it could do bad things. Just, be aware.
 	}
 
-	QueueNode<T>* enqueue(T*); //puts node at end of queue
-	QueueNode<T>* dequeue(); //take first node
-	QueueNode<T>* peek(); //returns first node
+	QueueNode<T>* enqueue(T*);
+	QueueNode<T>* dequeue();
+	QueueNode<T>* peek();
 
 	QueueNode<T>* find(T&);
 
@@ -57,6 +59,8 @@ public:
 	QueueNode<T>* remove(QueueNode<T>&);
 
 	bool empty() const {return root == nullptr;}
+
+	unsigned short length() const {return !root ? 0 : root->countChildren() + 1;}
 };
 
 
