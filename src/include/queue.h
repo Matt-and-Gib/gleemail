@@ -66,6 +66,10 @@ public:
 
 template <class T>
 inline QueueNode<T>* Queue<T>::enqueue(T* o) {
+	if(o == nullptr) {
+		return nullptr;
+	}
+
 	if(root == nullptr) {
 		root = new QueueNode<T>(o);
 		return root;
