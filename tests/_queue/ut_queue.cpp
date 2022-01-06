@@ -182,10 +182,8 @@ int test_queue_find_match() {
 	retObj = testQ.find(findMe);
 
 	if(retObj != nullptr && retObj->getData() == findMe) {
-		delete findMe;
 		return 0;
 	} else {
-		delete findMe;
 		return 1;
 	}
 }
@@ -202,6 +200,8 @@ int test_queue_find_from_empty() {
 		delete unknownObj;
 		return 1;
 	}
+
+	return 0;
 }
 
 
