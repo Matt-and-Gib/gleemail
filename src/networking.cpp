@@ -401,7 +401,7 @@ void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingConfirmation(QueueNode<Message>& msg) {
-	messageOutWithMatchingIdempotencyToken = messagesOut.find(*msg.getData());
+	messageOutWithMatchingIdempotencyToken = messagesOut.find(msg.getData());
 	if(messageOutWithMatchingIdempotencyToken) {
 		messageOutWithMatchingIdempotencyToken->getData()->doConfirmedPostProcess(*this, messagesOut, msg); //In the case of a handshake, this is connectionEstablished(). In the case of a chat or confirmation, this is removeFromQueue()
 	} else {
@@ -444,7 +444,7 @@ char* Networking::decryptChat(Message& msg) {
 void Networking::processIncomingChat(QueueNode<Message>& msg) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
 
-	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
+	if(!messagesInIdempotencyTokens.find(msg.getData()->getIdempotencyToken())) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
 		char* tempDecryptedChat = decryptChat(*msg.getData()); //once decryption is verified, use the function as the parameter for the chat callback and don't create this pointer.
 		(*chatMessageReceivedCallback)(tempDecryptedChat);
@@ -455,7 +455,7 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
 	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
 
-	if(!messagesInIdempotencyTokens.find(*(msg.getData()->getIdempotencyToken()))) {
+	if(!messagesInIdempotencyTokens.find(msg.getData()->getIdempotencyToken())) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
 
 		QueueNode<Message>* messageOutNode = messagesOut.peek();
