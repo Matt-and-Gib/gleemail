@@ -33,14 +33,14 @@ namespace GLEEMAIL_MORSE_CODE {
 		explicit MorseChar() {value = MORSE_CHAR_STATE::NOTHING;}
 		explicit MorseChar(const MORSE_CHAR_STATE v) {value = v;}
 
-		bool operator==(const MorseChar& o) {return value == o.value;}
-		bool operator!=(const MorseChar& o) {return value != o.value;}
-		bool operator>(const MorseChar& o) {
+		bool operator==(const MorseChar& o) const {return value == o.value;}
+		bool operator!=(const MorseChar& o) const {return value != o.value;}
+		bool operator>(const MorseChar& o) const {
 			if(value == o.value) return false;
 			if(o.value == MORSE_CHAR_STATE::NOTHING) return true;
 			return (value == MORSE_CHAR_STATE::DASH);
 		};
-		bool operator<(const MorseChar& o) {
+		bool operator<(const MorseChar& o) const {
 			if(value == o.value) return false;
 			if(value == MORSE_CHAR_STATE::NOTHING) return true;
 			return (value == MORSE_CHAR_STATE::DOT);
@@ -97,11 +97,9 @@ namespace GLEEMAIL_MORSE_CODE {
 
 		~MorsePhrase() {delete[] phraseArray;}
 
-		MorseChar& operator[](const unsigned short index) {return phraseArray[index];}
-
-		bool operator==(MorsePhrase& o) {
+		bool operator==(const MorsePhrase& o) const {
 			for(unsigned short i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-				if(phraseArray[i] != o[i]) {
+				if(phraseArray[i] != o.phraseArray[i]) {
 					return false;
 				}
 
@@ -113,9 +111,9 @@ namespace GLEEMAIL_MORSE_CODE {
 			return true;
 		}
 
-		bool operator<(MorsePhrase&o) {
+		bool operator<(const MorsePhrase&o) const {
 			for(unsigned short i = 0; i < MAX_MORSE_PHRASE_LENGTH; i += 1) {
-				if(o[i] == NOTHING) {
+				if(o.phraseArray[i] == NOTHING) {
 					if(phraseArray[i] == DOT) {
 						return true;
 					} else {
@@ -123,7 +121,7 @@ namespace GLEEMAIL_MORSE_CODE {
 					}
 				}
 
-				if(phraseArray[i] != o[i]) {
+				if(phraseArray[i] != o.phraseArray[i]) {
 					if(phraseArray[i] == DOT) {
 						return true;
 					}
@@ -135,6 +133,14 @@ namespace GLEEMAIL_MORSE_CODE {
 
 		unsigned short getSize() const {return MAX_MORSE_PHRASE_LENGTH;}
 		unsigned short getLength() const {return firstOpenIndex;}
+
+		const MorseChar& readAt(const unsigned short index) const {
+			if(index < firstOpenIndex) {
+				return phraseArray[index];
+			} else {
+				return NOTHING;
+			}
+		}
 
 		bool push(const MorseChar& morseCharacterToAdd) {
 			if(!phraseFull()) {
@@ -163,8 +169,19 @@ namespace GLEEMAIL_MORSE_CODE {
 			morsePhrase = p;
 		}
 
-		bool operator==(MorsePhraseCharPair& o) {return morsePhrase == o.morsePhrase;}
-		bool isLessThan(unsigned short depth) {return morsePhrase[depth] == DOT ? true : false;}
+		bool operator==(const MorsePhraseCharPair& o) const {return morsePhrase == o.morsePhrase;}
+		bool isLessThan(const unsigned short depth) const {return morsePhrase.readAt(depth) == DOT ? true : false;}
+		bool operator<(const MorsePhraseCharPair& o) const {
+			if(morsePhrase.getLength() == o.morsePhrase.getLength()) {
+				for(unsigned short i = 0; i < o.morsePhrase.getLength(); i += 1) {
+					if(morsePhrase.readAt(i) == DOT && o.morsePhrase.readAt(i) != DOT) {
+						return true;
+					}
+				}
+			} else {
+				return morsePhrase.getLength() < o.morsePhrase.getLength();
+			}
+		}
 
 		char character;
 		MorsePhrase morsePhrase;
@@ -172,8 +189,9 @@ namespace GLEEMAIL_MORSE_CODE {
 
 
 	class MorseCodeTreeNode final : protected BinarySearchTreeNode<MorsePhraseCharPair> {
-	/*private:
-		void printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
+	private:
+		MorseCodeTreeNode* insert(MorsePhraseCharPair& d) override {return nullptr;} //= delete;
+		/*void printSubtree(const short spacingIndex, const MorseCodeTreeNode* node, bool lesser) {
 			if(node) {
 				for(short i = 0; i < spacingIndex; i += 1) {
 					Serial.print(' ');
@@ -185,8 +203,7 @@ namespace GLEEMAIL_MORSE_CODE {
 				printSubtree(spacingIndex + 4, node->lesserNode, true);
 				printSubtree(spacingIndex + 4, node->greaterNode, false);
 			}
-		}
-	*/
+		}*/
 
 	public:
 		MorseCodeTreeNode(MorsePhraseCharPair& newData, MorseCodeTreeNode* newParent) {
@@ -196,7 +213,7 @@ namespace GLEEMAIL_MORSE_CODE {
 			greaterNode = nullptr;
 		}
 
-		MorseCodeTreeNode* insert(MorsePhraseCharPair& dataToInsert, unsigned short depth = 0) {
+		MorseCodeTreeNode* addNode(MorsePhraseCharPair& dataToInsert, unsigned short depth = 0) {
 			if (dataToInsert == *data) {
 				return nullptr; //No duplicates allowed!
 			}
@@ -206,20 +223,20 @@ namespace GLEEMAIL_MORSE_CODE {
 					lesserNode = new MorseCodeTreeNode(dataToInsert, this);
 					return (MorseCodeTreeNode*) lesserNode;
 				} else {
-					return ((MorseCodeTreeNode*) lesserNode)->insert(dataToInsert, depth + 1);
+					return ((MorseCodeTreeNode*) lesserNode)->addNode(dataToInsert, depth + 1);
 				}
 			} else {
 				if(greaterNode == nullptr) {
 					greaterNode = new MorseCodeTreeNode(dataToInsert, this);
 					return (MorseCodeTreeNode*) greaterNode;
 				} else {
-					return ((MorseCodeTreeNode*) greaterNode)->insert(dataToInsert, depth + 1);
+					return ((MorseCodeTreeNode*) greaterNode)->addNode(dataToInsert, depth + 1);
 				}
 			}
 		}
 
 		MorsePhraseCharPair* lookup(MorsePhrase& phraseToConvert) {
-			if(phraseToConvert[0] == NOTHING) {
+			if(phraseToConvert.readAt(0) == NOTHING) {
 				return nullptr;
 			}
 
