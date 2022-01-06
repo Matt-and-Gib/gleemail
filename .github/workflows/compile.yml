@@ -1,4 +1,4 @@
-name: Compile
+name: Compile and Test
 
 on: [push, pull_request]
 
@@ -24,3 +24,17 @@ jobs:
             - name: hd44780
             - name: SdFat
           sketch-paths: 'gleemail.ino'
+
+  test:
+    needs: compile
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: jwlawson/actions-setup-cmake@v1.9
+    - name: Run CMake
+      run: cmake .
+    - name: make
+      run: make
+    - name: ctests
+      run: ctest
