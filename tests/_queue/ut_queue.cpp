@@ -9,6 +9,10 @@ private:
 public:
 	TestingObject(const int d) : data{d} {}
 	int getData() {return data;}
+
+	bool operator==(const TestingObject& o) const {
+		return data == o.data;
+	}
 };
 
 
@@ -149,6 +153,58 @@ int test_queue_enqueue_nullptr() {
 }
 
 
+int test_queue_find_nonexistant() {
+	Queue<TestingObject> testQ;
+	testQ.enqueue(new TestingObject(12));
+	testQ.enqueue(new TestingObject(18));
+	testQ.enqueue(new TestingObject(29));
+
+	TestingObject* findMe = new TestingObject(69);
+	if(testQ.find(findMe) == nullptr) {
+		delete findMe;
+		return 0;
+	} else {
+		delete findMe;
+		return 1;
+	}
+}
+
+
+int test_queue_find_match() {
+	Queue<TestingObject> testQ;
+	testQ.enqueue(new TestingObject(12));
+	testQ.enqueue(new TestingObject(18));
+	testQ.enqueue(new TestingObject(29));
+	TestingObject* findMe = new TestingObject(69);
+	testQ.enqueue(findMe);
+
+	QueueNode<TestingObject>* retObj = nullptr;
+	retObj = testQ.find(findMe);
+
+	if(retObj != nullptr && retObj->getData() == findMe) {
+		delete findMe;
+		return 0;
+	} else {
+		delete findMe;
+		return 1;
+	}
+}
+
+
+int test_queue_find_from_empty() {
+	Queue<TestingObject> testQ;
+	TestingObject* unknownObj = new TestingObject(69);
+
+	if(testQ.find(unknownObj) == nullptr && testQ.empty() == true) {
+		delete unknownObj;
+		return 0;
+	} else {
+		delete unknownObj;
+		return 1;
+	}
+}
+
+
 int main(int argc, char* argv[]) {
 	if(argc < 2) {
 		std::cout << "No test ID provided! Expecting unsigned int" << std::endl;
@@ -191,6 +247,18 @@ int main(int argc, char* argv[]) {
 
 	case 8:
 		return test_queue_enqueue_nullptr();
+	break;
+
+	case 9:
+		return test_queue_find_nonexistant();
+	break;
+
+	case 10:
+		return test_queue_find_match();
+	break;
+
+	case 11:
+		return test_queue_find_from_empty();
 	break;
 
 	default:
