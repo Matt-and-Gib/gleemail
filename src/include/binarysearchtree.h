@@ -7,13 +7,13 @@ class BinarySearchTreeNode {
 public:
 	BinarySearchTreeNode();
 	BinarySearchTreeNode(T* d, BinarySearchTreeNode<T>* p);
-	~BinarySearchTreeNode(); //WARNING: destructor will attempt to delete all linked children nodes!
+	virtual ~BinarySearchTreeNode(); //WARNING: destructor will attempt to delete all linked children nodes!
 
 	BinarySearchTreeNode<T>* getParentNode() {return parentNode;}
 	BinarySearchTreeNode<T>* getLesserNode() {return lesserNode;}
 	BinarySearchTreeNode<T>* getGreaterNode() {return greaterNode;}
 
-	BinarySearchTreeNode<T>* insert(T& d);
+	virtual BinarySearchTreeNode<T>* insert(T& d);
 	BinarySearchTreeNode<T>* remove(); //NOTE: Never remove from Morse Code tree
 
 	T* getData() {return data;}
@@ -49,7 +49,10 @@ inline BinarySearchTreeNode<T>::BinarySearchTreeNode(T* d, BinarySearchTreeNode<
 template <class T>
 inline BinarySearchTreeNode<T>::~BinarySearchTreeNode() {
 	delete lesserNode;
+	lesserNode = nullptr;
+
 	delete greaterNode;
+	greaterNode = nullptr;
 }
 
 
