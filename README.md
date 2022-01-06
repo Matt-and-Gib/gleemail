@@ -1,4 +1,4 @@
-![Latest Build Status](https://github.com/Matt-and-Gib/gleemail/actions/workflows/compile.yml/badge.svg?branch=main)
+![Latest Build Status](https://github.com/Matt-and-Gib/gleemail/actions/workflows/compile.yml/badge.svg)
 
 ![glEEmail Banner](resources/glEEmail_social_media_final.png)
 
