@@ -76,13 +76,13 @@ public:
 		//delete error;
 	}
 
-	bool operator==(Message& o) {return (*idempotencyToken == *o.getIdempotencyToken());}
+	bool operator==(const Message& o) const {return (*idempotencyToken == *(o.getIdempotencyToken()));}
 
 	const glEEpal& getSender() const {return sender;}
 	MESSAGE_TYPE getMessageType() const {return messageType;}
-	IdempotencyToken* getIdempotencyToken() {return idempotencyToken;}
-	const char* getChat() {return chat;}
-	const char* getAuthentication() {return authentication;}
+	IdempotencyToken* getIdempotencyToken() const {return idempotencyToken;}
+	const char* getChat() const {return chat;}
+	const char* getAuthentication() const {return authentication;}
 	unsigned short getChatLength() {
 		if(chatLength == 0) {
 			const char* ptr = chat;
