@@ -52,7 +52,7 @@ public:
 	QueueNode<T>* dequeue();
 	QueueNode<T>* peek();
 
-	QueueNode<T>* find(const T&);
+	QueueNode<T>* find(const T*);
 
 	//QueueNode<T>* remove(T&, QueueNode<T>*);
 	QueueNode<T>* remove(const T&);
@@ -98,10 +98,10 @@ inline QueueNode<T>* Queue<T>::peek() {
 
 
 template <class T>
-inline QueueNode<T>* Queue<T>::find(const T& f) {
+inline QueueNode<T>* Queue<T>::find(const T* f) {
 	QueueNode<T>* currentNode = root;
 	while(currentNode != nullptr) {
-		if(*currentNode->getData() == f) {
+		if(*(currentNode->getData()) == *f) {
 			break;
 		}
 
