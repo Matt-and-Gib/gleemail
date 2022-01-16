@@ -3,7 +3,7 @@
 
 
 #ifdef UNIT_TEST_MODE
-//include moc_startupcodehandler.h
+#include mock_startupcodehandler.h
 #else
 #include "startupcodehandler.h"
 #endif

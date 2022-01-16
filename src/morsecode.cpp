@@ -65,7 +65,7 @@ MorseCodeInput::~MorseCodeInput() {
 
 bool MorseCodeInput::setNetworkData(const char* payload) {
 	if(!payload) {
-		DebugLog::getLog().logError(JSON_NULLPTR_PAYLOAD);
+		DebugLog::getLog().logError(MORSE_NULLPTR_PAYLOAD);
 		return false;
 	}
 

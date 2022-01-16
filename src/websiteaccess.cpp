@@ -15,7 +15,7 @@ bool WebsiteAccess::writeHeadersToServer(InternetAccess& net, const char* const*
 	int headerIndex = 0;
 	while(headerLine != nullptr) {
 		if(headerIndex > 16) { //Replace magic number
-			DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_HEADER_TERMINATION_OMITTED);
+			DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_REQUEST_HEADER_TERMINATION_OMITTED);
 			return false;
 		}
 
@@ -80,6 +80,7 @@ char* WebsiteAccess::downloadFromServer(InternetAccess& net) {
 			} else {
 				DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_OVERFLOW);
 				delete[] dataBuffer;
+				dataBuffer = nullptr;
 				return nullptr;
 			}
 		}
@@ -88,20 +89,31 @@ char* WebsiteAccess::downloadFromServer(InternetAccess& net) {
 	dataBuffer[bufferIndex] = '\0';
 
 	if(bufferIndex < DOWNLOADED_PACKET_BUFFER_SIZE/2) {
-		DebugLog::getLog().logWarning(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED);
+		if(bufferIndex > 0) {
+			DebugLog::getLog().logWarning(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_UNDERUTILIZED);
+		} else {
+			DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_EMPTY);
+			delete[] dataBuffer;
+			dataBuffer = nullptr;
+			return nullptr;
+		}
 	}
 
 	//Print full response
-	/*for(int i = 0; i < bufferIndex; i += 1) {
+	/*
+	for(int i = 0; i < bufferIndex; i += 1) {
 		Serial.print(dataBuffer[i]);
 	}
-	Serial.println('\n');*/
+	Serial.println('\n');
+	*/
 
-	/*//Print buffer utilization
+	//Print buffer utilization
+	/*
 	Serial.print("Used ");
 	Serial.print(bufferIndex);
 	Serial.print(" out of max ");
-	Serial.println(DOWNLOADED_PACKET_BUFFER_SIZE);*/
+	Serial.println(DOWNLOADED_PACKET_BUFFER_SIZE);
+	*/
 
 	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
 	if(endOfHeaderIndex != -1) {
@@ -118,8 +130,11 @@ char* WebsiteAccess::downloadFromServer(InternetAccess& net) {
 
 		delete[] dataBuffer;
 		return payloadData;
+	} else {
+		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_RESPONSE_HEADER_TERMINATION_NOT_FOUND);
+		delete[] dataBuffer;
+		dataBuffer = nullptr;
+		return nullptr;
 	}
-
-	delete[] dataBuffer;
-	return nullptr;
+	
 }
