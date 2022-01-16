@@ -63,37 +63,49 @@ MorseCodeInput::~MorseCodeInput() {
 }
 
 
-bool MorseCodeInput::setNetworkData(const char* payload) {
-	if(!payload) {
-		DebugLog::getLog().logError(MORSE_NULLPTR_PAYLOAD);
-		return false;
-	}
-
+unsigned short MorseCodeInput::filterJsonPayloadSize(const char* payload) const {
 	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> filter;
 	filter["size"] = true;
 
 	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
 	DeserializationError error = deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
 	if(error) {
-		Serial.println(error.c_str()); //Remove Me!!!!! For debugging purposes.
+		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_FILTER_DESERIALIZATION_ERROR);
+		//Serial.println(error.c_str()); //For debugging purposes.
+		return 0;
 	}
-	const unsigned short mccpSize = sizeDoc["size"];
 
-	DynamicJsonDocument mccpDoc(mccpSize);
-	error = deserializeJson(mccpDoc, payload);
+	return sizeDoc["size"]; //If you're having issues, this may be a good place to look. Make sure the return type is being properly cast.
+}
 
+
+bool MorseCodeInput::setNetworkData(const char* payload) {
+	if(!payload) {
+		DebugLog::getLog().logError(MORSE_NULLPTR_PAYLOAD);
+		return false;
+	}
+
+	DynamicJsonDocument mccpDoc = DynamicJsonDocument(filterJsonPayloadSize(payload)); //Dynamic because ArduinoJSON recommends using dynamic documents to store items greater than 1 kB.
+	DeserializationError error = deserializeJson(mccpDoc, payload);
 	if(error) {
 		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_NETWORK_DATA_DESERIALIZATION_ERROR);
-		//Serial.println(error.f_str());
+		//Serial.println(error.f_str()); //For debugging purposes.
+		return false;
+	} else if(mccpDoc.capacity() <= 0) {
+		DebugLog::getLog().logError(ERROR_CODE::MORSE_FILTERED_JSON_PAYLOAD_SIZE_ZERO);
 		return false;
 	}
 
 	const char* letter;
 	const char* phrase;
-	for (ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
+	for(ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
 		letter = elem["symbol"];
 		phrase = elem["phrase"];
-		if(morseCodeTreeRoot.addNode(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase))) == nullptr) {
+		/*if(!morseCodeTreeRoot.addNode(new MorsePhraseCharPair(letter, phrase))) { //THIS IS WHAT WE WANT!
+			DebugLog::getLog().logError(ERROR_CODE::MORSE_INSERTING_INTO_TREE_FAILED);
+		}*/
+
+		if(morseCodeTreeRoot.addNode(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase))) == nullptr) { //THIS IS WHAT WE HAVE!
 			DebugLog::getLog().logError(ERROR_CODE::MORSE_INSERTING_INTO_TREE_FAILED);
 		}
 	}

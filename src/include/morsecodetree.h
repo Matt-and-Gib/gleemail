@@ -21,6 +21,16 @@
 	morsePhraseStarted : true when input received, false after WORD_FINISHED_THRESHOLD exceeded
 */
 
+/*
+{"phrase": "---...", "symbol": ":"}
+111000
+111111 = 63
+"111111"
+
+char goboValueOfPhrase = 0b00111000;
+char lengthOfPhrase = 6;
+*/
+
 namespace GLEEMAIL_MORSE_CODE {
 	enum MORSE_CODE_STATE : bool {SWITCH_CLOSED = 1, SWITCH_OPEN = 0};
 	enum class MORSE_CHAR_STATE : char {NOTHING = '0', DOT = '1', DASH = '2'};

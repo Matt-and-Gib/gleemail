@@ -73,6 +73,8 @@ private:
 	void checkPhraseElapsedThreshold();
 	void checkMessageElapsedThresholds();
 	void resetMorsePhrase();
+
+	unsigned short filterJsonPayloadSize(const char*) const;
 public:
 	MorseCodeInput(const unsigned short, void (*)(char*), void (*)(char*));
 	~MorseCodeInput();
