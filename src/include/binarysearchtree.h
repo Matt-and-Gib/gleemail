@@ -4,138 +4,64 @@
 
 template <class T>
 class BinarySearchTreeNode {
+private:
+	const T& data;
+	BinarySearchTreeNode* lesserChild = nullptr;
+	BinarySearchTreeNode* greaterChild = nullptr;
 public:
-	BinarySearchTreeNode();
-	BinarySearchTreeNode(T* d, BinarySearchTreeNode<T>* p);
-	virtual ~BinarySearchTreeNode(); //WARNING: destructor will attempt to delete all linked children nodes!
+	explicit BinarySearchTreeNode(const T&) : data{d} {}
+	virtual ~BinarySearchTreeNode();;
 
-	BinarySearchTreeNode<T>* getParentNode() {return parentNode;}
-	BinarySearchTreeNode<T>* getLesserNode() {return lesserNode;}
-	BinarySearchTreeNode<T>* getGreaterNode() {return greaterNode;}
+	T& getData() {return data;}
+	BinarySearchTreeNode* getLesserChild() {return lesserChild;}
+	void setLesserChild(const BinarySearchTreeNode& l) {lesserChild = &l;}
+	BinarySearchTreeNode* getGreaterChild() {return greaterChild;}
+	void setGreaterChild(const BinarySearchTreeNode& g) {greaterChild = &g;}
 
-	virtual BinarySearchTreeNode<T>* insert(T& d);
-	BinarySearchTreeNode<T>* remove(); //NOTE: Never remove from Morse Code tree
-
-	T* getData() {return data;}
-protected:
-	BinarySearchTreeNode<T>* parentNode;
-	BinarySearchTreeNode<T>* lesserNode;
-	BinarySearchTreeNode<T>* greaterNode;
-
-	BinarySearchTreeNode<T>* getSmallest();
-
-	T* data;
+	virtual BinarySearchTreeNode* addNode(BinarySearchTreeNode*);
 };
 
 
-template <class T>
-inline BinarySearchTreeNode<T>::BinarySearchTreeNode() {
-	data = nullptr;
-	parentNode = nullptr;
-	lesserNode = nullptr;
-	greaterNode = nullptr;
+BinarySearchTreeNode::~BinarySearchTreeNode() {
+	delete greaterChild;
+	greaterChild = nullptr;
+
+	delete lesserChild;
+	lesserChild = nullptr;
+
+	delete &data; //This may not be necessary!
 }
 
 
-template <class T>
-inline BinarySearchTreeNode<T>::BinarySearchTreeNode(T* d, BinarySearchTreeNode<T>* p) {
-	data = d;
-	parentNode = p;
-	lesserNode = nullptr;
-	greaterNode = nullptr;
-}
-
-
-template <class T>
-inline BinarySearchTreeNode<T>::~BinarySearchTreeNode() {
-	delete lesserNode;
-	lesserNode = nullptr;
-
-	delete greaterNode;
-	greaterNode = nullptr;
-}
-
-
-template <class T>
-inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::insert(T& d) {
-	if (d == *data) {
-		return nullptr; //No duplicates allowed!
+BinarySearchTreeNode* BinarySearchTreeNode::addNode(BinarySearchTreeNode* n) {
+	if(!n) {
+		return nullptr;
 	}
 
-	if(d < *data) {
-		if(lesserNode == nullptr) {
-			lesserNode = new BinarySearchTreeNode(&d, this);
-			return lesserNode;
-		} else {
-			return lesserNode->insert(d);
+	BinarySearchTreeNode* currentNode = this;
+	while(currentNode != nullptr) {
+		if(n == currentNode || n->getData() == currentNode->getData()) {
+			return nullptr;
 		}
-	} else {
-		if(greaterNode == nullptr) {
-			greaterNode = new BinarySearchTreeNode(&d, this);
-			return greaterNode;
+
+		if(n->getData() < currentNode->getData()) {
+			if(currentNode->getLesserChild()) {
+				currentNode = currentNode->getLesserChild();
+			} else {
+				currentNode->setLesserChild(n);
+				return n;
+			}
 		} else {
-			return greaterNode->insert(d);
+			if(currentNode->getGreaterChild()) {
+				currentNode = currentNode->getGreaterChild();
+			} else {
+				currentNode->setGreaterChild(n);
+				return n;
+			}
 		}
 	}
-}
 
-
-template <class T>
-inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::remove() {
-	if(parentNode == nullptr) {
-		return nullptr; //shouldn't delete root node this way. delete root instead
-	}
-
-	if(!lesserNode && !greaterNode) {
-		if(parentNode->lesserNode == this) {
-			parentNode->lesserNode = nullptr;
-		} else {
-			parentNode->greaterNode = nullptr;
-		}
-		return this;
-	}
-
-	if(lesserNode && !greaterNode) {
-		if(parentNode->lesserNode == this) {
-			parentNode->lesserNode = lesserNode;
-		} else {
-			parentNode->greaterNode = lesserNode;
-		}
-		return this;
-	}
-
-	if(!lesserNode && greaterNode) {
-		if(parentNode->lesserNode == this) {
-			parentNode->lesserNode = greaterNode;
-		} else {
-			parentNode->greaterNode = greaterNode;
-		}
-		return this;
-	}
-
-	if(lesserNode && greaterNode) { //two children
-		//find smallest node from all nodes on greaterNode side
-		BinarySearchTreeNode<T>* smallestChild = greaterNode->getSmallest();
-		//replace this node with found node
-			//create copy of found node
-			
-			//assign lesser and greater nodes from this node to new copy of smallest
-			//assign nullptr to this node's children
-			//find whether this node is greater or lesser in parent
-			//assign new copy of smallest as parent's child, replacing this node
-		//remove original smallest node
-		//return this now-removed node
-	}
-}
-
-
-template <class T>
-inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::getSmallest() {
-	if(lesserNode == nullptr) {
-		return this;
-	}
-
-	return lesserNode->getSmallest();
+	return nullptr;
 }
 
 #endif

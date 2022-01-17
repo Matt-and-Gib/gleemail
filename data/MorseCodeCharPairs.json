@@ -1,13 +1,13 @@
 {
 	"size": 4096,
 	"morsecodetreedata": [
-		{"phrase": ".", "symbol": "E"},
-		{"phrase": "-", "symbol": "T"},
+		{"phrase": ".", "symbol": "E"}, 0b0000000|0
+		{"phrase": "-", "symbol": "T"}, 0b0000000|1
 
-		{"phrase": "..", "symbol": "I"},
-		{"phrase": ".-", "symbol": "A"},
-		{"phrase": "-.", "symbol": "N"},
-		{"phrase": "--", "symbol": "M"},
+		{"phrase": "..", "symbol": "I"}, 0b000000|00
+		{"phrase": ".-", "symbol": "A"}, 0b000000|01
+		{"phrase": "-.", "symbol": "N"}, 0b000000|10
+		{"phrase": "--", "symbol": "M"}, 0b000000|11
 
 		{"phrase": "...", "symbol": "S"},
 		{"phrase": "..-", "symbol": "U"},
