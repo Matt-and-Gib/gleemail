@@ -101,13 +101,13 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 	for(ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
 		letter = elem["symbol"];
 		phrase = elem["phrase"];
-		/*if(!morseCodeTreeRoot.addNode(new MorsePhraseCharPair(letter, phrase))) { //THIS IS WHAT WE WANT!
-			DebugLog::getLog().logError(ERROR_CODE::MORSE_INSERTING_INTO_TREE_FAILED);
-		}*/
-
-		if(morseCodeTreeRoot.addNode(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase))) == nullptr) { //THIS IS WHAT WE HAVE!
+		if(!morseCodeTreeRoot.addNode(letter, phrase)) { //THIS IS WHAT WE WANT!
 			DebugLog::getLog().logError(ERROR_CODE::MORSE_INSERTING_INTO_TREE_FAILED);
 		}
+
+		/*if(morseCodeTreeRoot.addNode(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase))) == nullptr) { //THIS IS WHAT WE HAVE!
+			DebugLog::getLog().logError(ERROR_CODE::MORSE_INSERTING_INTO_TREE_FAILED);
+		}*/
 	}
 
 	return true;
