@@ -22,7 +22,8 @@ public:
 };
 
 
-BinarySearchTreeNode::~BinarySearchTreeNode() {
+template <class T>
+inline BinarySearchTreeNode<T>::~BinarySearchTreeNode() {
 	delete greaterChild;
 	greaterChild = nullptr;
 
@@ -33,7 +34,8 @@ BinarySearchTreeNode::~BinarySearchTreeNode() {
 }
 
 
-BinarySearchTreeNode* BinarySearchTreeNode::addNode(BinarySearchTreeNode* n) {
+template <class T>
+inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::addNode(BinarySearchTreeNode* n) {
 	if(!n) {
 		return nullptr;
 	}
