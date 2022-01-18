@@ -16,15 +16,15 @@
 */
 
 
-/*			KILL ME			*/
+/*			KILL ME
 {"phrase": "---...", "symbol": ":"}
 
 "---..." -> 111000 -> 0b00111000
-/*		Little Endian!		*/
+		Little Endian!		
 		  0b00000111
 
-// Phrase length of 6, depth of 6. Root has a depth of 0.
-/*			KILL ME			*/
+Phrase length of 6, depth of 6. Root has a depth of 0.
+			KILL ME			*/
 
 
 namespace GLEEMAIL_MORSE_CODE {
@@ -50,7 +50,7 @@ namespace GLEEMAIL_MORSE_CODE {
 		binaryPhrase = 0b00000000; //Is this redundant? Really need to make sure it is initialized as 0!
 
 		for(char i = 0; i < length; i += 1) {
-			if(phrase[i] == '.') {
+			if(phrase[(length - 1) - i] == '.') {
 				binaryPhrase <<= 1; //Magic number simply represents one bit shift.
 			} else { //fragile else statement.
 				binaryPhrase = (binaryPhrase << 1) | 0x01; //Magic number simply represents the ones bit.
@@ -86,8 +86,31 @@ namespace GLEEMAIL_MORSE_CODE {
 
 		char phraseLength = calculatePhraseLength(phrase); //This will need to be calculated eventually. May as well do it here as it speeds future processes up. Can be moved or even removed.
 
-		MorsePhraseCharPair* pairToAdd = new MorsePhraseCharPair(letter, phrase, phraseLength); //We need to know the length of the phrase after this point!
+		MorsePhraseCharPair* newPair = new MorsePhraseCharPair(letter, phrase, phraseLength); //We need to know the length of the phrase after this point!
+		MorseCodeTreeNode* newNode = new MorseCodeTreeNode(newPair);
 
+		MorseCodeTreeNode* currentNode = this;
+
+		char depth = 0;
+		while(currentNode != nullptr) {
+			if((((newNode->getData()->binaryPhrase) >> i) & 0b00000001) == 0b00000000) { //This is where the realization that we really never compare anything becomes handy. '.' means left, '-' means right.
+				if(currentNode->getLesserChild()) {
+					currentNode = currentNode->getLesserChild();
+					depth += 1;
+				} else {
+					currentNode->setLesserChild(newNode);
+					return newNode;
+				}
+			} else {
+				if(currentNode->getGreaterChild()) {
+					currentNode = currentNode->getGreaterChild();
+					depth += 1;
+				} else {
+					currentNode->setGreaterChild(newNode);
+					return newNode;
+				}
+			}
+		}
 	}
 }
 
