@@ -26,17 +26,17 @@ What is glEEmail? Welcome to the future, kid. glEEmail is like sending your uncl
 
 glEEmail allows you to securely‡ send messages to peers over the Internet via that old Morse Code switch that you have installed next to your computer terminal. Just hook it up and get flyin'!
 
-Okay, for real, glEEmail is a side project while we're waiting for 200 SMD LEDs to arrive from China. The project allows you to test input and output from your Arduino, and to send messages to an Arduino at a different IP address as long as both can connect to the Internet.
+Okay, for real, glEEmail started as a side project while we were waiting for 200 SMD LEDs to arrive from China. The plan was to whip up some test code allowing us to work with input and output from an Arduino, and to send messages to an Arduino over the Internet. As development went on, glEEmail because significantly more interesting than that excessive-LED project, and we shifted focus to making glEEmail into it's best self. It's fair to say at this point that glEEmail is an incredibly over-engineered curio at best, or a social-networking-service-for-two at worst.
 ___
 
 ### <a name="parts"></a>**Components**
 
-We're testing glEEmail on an Arduino Nano 33 IoT, however it should work on any Arduino with WiFi capabilities (or any Arduino connected to a WiFi radio module, with minor modifications). If you're considering using glEEmail on a different Arduino, please make sure that it has sufficient space; glEEmail uses ~72,000 bytes of program storage space (27% on Nano 33 IoT) and ~15,000 bytes of dynamic memory with global variables (45% on Nano 33 IoT). Additionally, please note that the Adafruit 4682 must be powered with 3.3V (it **cannot** run on 5V).
+We're actively testing glEEmail for the Arduino Nano 33 IoT, however it should work on any Arduino with WiFi capabilities (or any Arduino connected to a WiFi radio module, with minor code modifications). If you're considering running glEEmail on a different Arduino, please make sure that it has sufficient space; glEEmail uses ~72,000 bytes of program storage space (27% on Nano 33 IoT) and ~15,000 bytes of dynamic memory with global variables (45% on Nano 33 IoT). Additionally, please note that the Adafruit 4682 must be powered with 3.3V (it **cannot** run on 5V).
 
-For the full parts list that we used (for a single user), please see the table below:
+For the full parts list for a single user, please see the table below:
 
 |Quantity|Component|
-|-------------|:---|
+|:-------|:--------|
 |1x|Nano 33 IoT|
 |1x|Breadboard|
 |1x|54-410 Switch|
@@ -221,9 +221,9 @@ ___
 
 ### <a name="gettingstarted"></a>**Getting Started in the Code**
 
-The first step to becoming a glEEveloper is understanding the project structure. Now, you may think that you already understand the structure because you saw that "src" folder, and you know what that's all about, but I'm here to tell you that there's more to the story. See, Arduino requires a .ino file with the same name as the project to live in the root folder. Now, again, you're like "I already know this," but hang on; if you open the .ino, you may eventually notice that it's completely empty. Yeah, like, what? Well, there's also a main.cpp file in the root of the project, and _that's_ where the magic happens. Our main.cpp overwrites the implicit main.cpp created by Arduino so that we can control the main loop.
+The first step to becoming a glEEveloper is understanding the project structure. Now, you may think that you already understand the structure because you saw that "src" folder, and you know what that's all about, but I'm here to tell you that there's more to the story. See, Arduino requires a .ino file with the same name as the project to live in the root folder. Now, again, you're like "I already know this," but hang on; if you open the .ino, you might eventually notice that it's entirely empty. Yeah, like, what? Well, there's also a main.cpp file in the root of the project, and _that's_ where the magic happens. Our main.cpp overwrites the implicit main.cpp created by Arduino so that we can control the main loop. Why did we do this? Red-hot performance gains.
 
-Aside from that, all other code files may be found inside `src`. The folder `src` itself is for source files, `src/include` is for headers, and `src/include/LiteChaCha` is for the encryption library [written by DualJustice](https://github.com/DualJustice/LiteChaCha). We've separated as many files as possible into definition and implementation, but several important files are exclusive to `src/include`, such as data structures like our queue and binary search tree.
+Aside from that, all other code files may be found inside `src`. The root folder `src` itself is for source files, `src/include` is for headers, and `src/include/LiteChaCha` is for the encryption library [written by DualJustice](https://github.com/DualJustice/LiteChaCha). We've separated as many files as possible into definition and implementation, but several important files are exclusive to `src/include`, such as data structures like our queue and binary search tree.
 
 Most work will be done on implementation files in the base `src` folder. For an idea of what glEEmail does at runtime, please take a look at our flow diagram below, however for a basic overview, see the following:
 
@@ -282,12 +282,12 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 #### How to Connect with Your Friend
 
-If you've configured the hardware correctly, simply upload the code to your Arduino, open the serial monitor, and follow the prompts on screen (the LCD and serial monitor). If you haven't yet wired the hardware, refer to the [Wiring Diagram](#diagram).
+If you've configured the hardware correctly, simply upload the code to your Arduino, open the serial monitor, and follow the prompts on screen (the LCD and serial monitor). If you haven't yet wired the hardware, first refer to the [Wiring Diagram](#diagram).
 
 #### Unexpected Behavior?
 
 Experiencing unexpected behavior? Maybe we've run into your problem before you!
-The first step we'd advise you take if anything unexpected happens is to turn on Verbose Mode. Please see [startup codes](#startup-codes) for further instructions.
+The first step we'd advise you take if anything unexpected happens is to turn on Verbose Mode and try it again. Please see [startup codes](#startup-codes) for further instructions.
 
 If that doesn't solve your problem, submit an [issue on GitHub](https://github.com/Matt-and-Gib/gleemail/issues) and we will take a look at it (*should the stars align*).
 
@@ -308,15 +308,18 @@ ___
 
 ### <a name="startup-codes"></a>**Startup Codes**
 
-At launch, send **-A** via Serial to trigger the Startup Code Prompt. Once directed, provide a string consisting of single-letter, case-sensitive arguments to alter or enable additional behavior in glEEmail. The built-in arguments are listed below:
+As soon as possible at launch, send **-A** via Serial to trigger the startup code prompt. Once directed, provide a string consisting of single-letter, case-sensitive arguments to alter or enable additional behavior in glEEmail. The built-in arguments are listed below:
+
+<!-- Keep this list in alphabetical order with lowercase first -->
 
 |Code|Behavior|Component|Notes|
 |----|--------|---------|-----|
-|[DEL]|None|glEEmail|Reserved for system use|
-|t|Startup code test|glEEmail|Confirmations that startup code was received|
-|v|Enable Verbose Debug Mode|glEEmail|Warnings will be sent via Serial in addition to errors|
+|[DEL]|None|_core_|Reserved for system use|
+|t|Startup code test|_core_|Receive confirmation that your startup code was received and processed|
+|v|Enable Verbose Debug Mode|_core_|Warnings will be sent via Serial in addition to errors|
+|I|Enable Incoming-Only Mode|Display|Only incoming messages will be displayed (hide your output)|
+|O|Enable Offline Mode|??? (todo)|No network connections will be made (there's no shame in a solo glEEmail session)|
 |R|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
-|O|Enable Offline Mode|glEEmail|No network connections will be made (there's no shame in a solo glEEmail session)|
 
 A usage example is provided below. Note that `-A` is entered as soon as glEEmail launches, then the desired arguments, `tvR`, are entered after "Enter startup codes:" arrives via Serial.
 
