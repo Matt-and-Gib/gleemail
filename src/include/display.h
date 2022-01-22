@@ -43,7 +43,7 @@ private:
 public:
 	explicit Display();
 
-	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&, StartupCodeHandler* const) override;
+	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&) override;
 	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
 
 	void updateReading(const char* message, const bool retainScreen = false);

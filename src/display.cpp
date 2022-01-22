@@ -16,7 +16,7 @@ Display::Display() {
 }
 
 
-void Display::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>& startupCodeHandlers, StartupCodeHandler* const object) {
+void Display::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>& startupCodeHandlers) {
 	startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerData*>(INCOMING_ONLY_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Display::enableIncomingOnlyMode))));
 }
 
