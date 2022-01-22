@@ -9,6 +9,9 @@
 #endif
 
 
+
+#include "Arduino.h" //delete me!
+
 class SdFat32;
 
 
@@ -17,20 +20,21 @@ private:
 	const unsigned short SLAVE_SELECT_PIN = 10;
 
 	const char RESET_STARTUP_CODE = 'R';
-	bool resetStartupCodeReceived() {return eraseAll(133769);}
-	
+	bool resetStartupCodeReceived() {Serial.println(F("reset SD called!"));/*return eraseAll(133769);*/}
+
 	const char GLEEMAIL_ROOT_PATH[9] = "GLEEMAIL";
 
 	unsigned int dataLength = 0;
 
 	SdFat32* sd = nullptr;
 public:
-	Storage();
+	explicit Storage() = default;
+	~Storage() = default;
 
 	bool begin();
 
-	void registerNewStartupCodes(StartupCodeHandler*, Queue<KVPair<char, StartupCodeHandlerInfo*>>&) const;
-	void startupCodeReceived(bool (StartupCodeHandler::*)(void));
+	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&, StartupCodeHandler* const) override;
+	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
 
 	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
 	

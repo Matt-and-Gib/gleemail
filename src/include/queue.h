@@ -39,11 +39,9 @@ public:
 template <class T>
 class Queue {
 private:
-	QueueNode<T>* root;
+	QueueNode<T>* root = nullptr;
 public:
-	Queue() {
-		root = nullptr;
-	}
+	explicit Queue() = default;
 	~Queue() {
 		delete root; //Note: All children will be recursively deleted. This could be expected behavior, or it could do bad things. Just, be aware.
 	}

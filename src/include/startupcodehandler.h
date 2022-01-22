@@ -10,17 +10,18 @@ class KVPair;
 class StartupCodeHandler;
 
 
-struct StartupCodeHandlerInfo {
-	StartupCodeHandler* instance = nullptr;
+class StartupCodeHandlerData {
+public:
+	StartupCodeHandler* const instance;
 	bool (StartupCodeHandler::*callback)(void);
 
-	StartupCodeHandlerInfo(StartupCodeHandler* i, bool (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {}
+	explicit StartupCodeHandlerData(StartupCodeHandler* const i, bool (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {}
 };
 
 
 class StartupCodeHandler {
 public:
-	virtual void registerNewStartupCodes(StartupCodeHandler*, Queue<KVPair<char, StartupCodeHandlerInfo*>>&) const = 0;
+	virtual void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&, StartupCodeHandler* const) = 0;
 	virtual void startupCodeReceived(bool (StartupCodeHandler::*)(void)) = 0;
 };
 

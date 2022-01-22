@@ -1,13 +1,23 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include "startupcodehandler.h"
+
+
+#include "Arduino.h" //delete me!
+
+
 class hd44780_pinIO;
 
 
-class Display {
+class Display final : public StartupCodeHandler {
 private:
 	const char BLANK_LINE[17] = "                ";
 	const unsigned short MAX_LINE_LENGTH = 40; //HD44780 RAM size for each line
+
+	bool incomingOnly = false;
+	const char INCOMING_ONLY_STARTUP_CODE = 'I';
+	bool enableIncomingOnlyMode() {incomingOnly = true; Serial.println(F("incoming only enabled!"));}
 
 	static const constexpr unsigned short DISPLAY_ROW_LENGTH = 16;
 	static const constexpr unsigned short DISPLAY_COLUMN_LENGTH = 2;
@@ -31,7 +41,10 @@ private:
 	bool scrollReading = false;
 	bool scrollWriting = false;
 public:
-	Display();
+	explicit Display();
+
+	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&, StartupCodeHandler* const) override;
+	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
 
 	void updateReading(const char* message, const bool retainScreen = false);
 	void updateWriting(const char* message, const bool retainScreen = false);

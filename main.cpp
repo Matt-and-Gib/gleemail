@@ -35,8 +35,8 @@ extern "C" void __libc_init_array(void);
 
 
 const constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
-const constexpr unsigned short MAX_STARTUP_CODES = 8;
-const constexpr char EMPTY_STARTUP_CODE = 127;
+const unsigned short MAX_STARTUP_CODES = 7;
+const unsigned short STARTUP_CODE_PROCESSED = 127;
 
 bool quit = false;
 
@@ -180,7 +180,7 @@ bool checkEnableStartupCodes() {
 	if(Serial.available() > 1) {
 		if(Serial.peek() == '-') {
 			Serial.read();
-			if(Serial.read() == 'A') {
+			if(Serial.read() == 'A') { //Make 'A' a const variable to eliminate magic char
 				if(Serial.peek() < ' ') {
 					clearSerialInputBuffer();
 				}
@@ -195,7 +195,7 @@ bool checkEnableStartupCodes() {
 		}
 	}	
 
-	return false;	
+	return false;
 }
 
 
@@ -205,7 +205,7 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 	}
 
 	unsigned short codesCount = 0;
-	char currentCode = '\0';
+	char currentCode = 0;
 	do {
 		if(codesCount == MAX_STARTUP_CODES) {
 			DebugLog::getLog().logError(ERROR_CODE::STARTUP_CODE_TOO_MANY_CODES_PROVIDED);
@@ -221,7 +221,7 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 			continue;
 		} else {
 			for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
-				if(startupCodes[index] == EMPTY_STARTUP_CODE) {
+				if(startupCodes[index] == 0) {
 					startupCodes[index] = currentCode;
 					codesCount += 1;
 					break;
@@ -239,12 +239,10 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 }
 
 
-void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerInfo*>>& handlers) {
-	Serial.println(F("checkStartupCodes: top"));
+inline void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerData*>>& handlers) {
 	for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
-		if(codes[index] == '\0') {
-			Serial.println(F("checkStartupCodes: found EOF"));
-			break;
+		if(codes[index] == STARTUP_CODE_PROCESSED) {
+			continue;
 		}
 
 		if(codes[index] == EMPTY_STARTUP_CODE) {
@@ -264,25 +262,9 @@ void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVP
 			registeredHandler = registeredHandler->getNode();
 		}
 
-		if(!registeredHandler) {
-			Serial.println(F("checkStartupCodes: no match for code"));
-			continue;
-		} else {
-			if(registeredHandler->getData()->getValue()->instance == nullptr) {
-				Serial.println(F("checkStartupCodes: instance is nullptr"));
-			} else {
-				Serial.println(F("checkStartupCodes: instance is not a nullptr"));
-			}
-
-			if(registeredHandler->getData()->getValue()->callback == nullptr) {
-				Serial.println(F("checkStartupCodes: callback is nullptr"));
-			} else {
-				Serial.println(F("checkStartupCodes: callback is not a nullptr"));
-			}
-
-			Serial.println(F("checkStartupCodes: calling match"));
+		if(registeredHandler != nullptr) {
 			registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
-			codes[index] = EMPTY_STARTUP_CODE;
+			codes[index] = STARTUP_CODE_PROCESSED;
 		}
 	}
 
@@ -617,6 +599,7 @@ void setup() {
 
 		case SETUP_LEVEL::LCD:
 			display = new Display;
+			display->registerNewStartupCodes(startupCodeHandlers, display);
 
 			setupState = SETUP_LEVEL::WELCOME;
 		break;
@@ -651,7 +634,7 @@ void setup() {
 
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
-				storage->registerNewStartupCodes(storage, startupCodeHandlers);
+				storage->registerNewStartupCodes(startupCodeHandlers, storage);
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;

@@ -7,9 +7,6 @@
 #include "include/queue.h"
 
 
-Storage::Storage() : StartupCodeHandler() {}
-
-
 bool Storage::begin() {
 	if(!sd) {
 		sd = new SdFat32;
@@ -31,13 +28,13 @@ bool Storage::begin() {
 }
 
 
-void Storage::registerNewStartupCodes(StartupCodeHandler* instance, Queue<KVPair<char, StartupCodeHandlerInfo*>>& startupCodeHandlers) const {
-	startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerInfo*>(RESET_STARTUP_CODE, new StartupCodeHandlerInfo(instance, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived))));
+void Storage::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>& startupCodeHandlers, StartupCodeHandler* const object) {
+	startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerData*>(RESET_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived))));
 }
 
 
 void Storage::startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
-	(this->*reinterpret_cast<bool (Storage::*)(void)>(memberFunction))();
+	(this->*(reinterpret_cast<bool (Storage::*)(void)>(memberFunction)))();
 }
 
 

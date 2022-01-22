@@ -1,6 +1,9 @@
 #include "include/display.h"
 #include "include/global.h"
 
+#include "include/keyvaluepair.h"
+#include "include/queue.h"
+
 #include <hd44780.h>
 #include <hd44780ioClass/hd44780_pinIO.h>
 
@@ -10,6 +13,16 @@ Display::Display() {
 
 	lcd->begin(16, 2);
 	clearAll();
+}
+
+
+void Display::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>& startupCodeHandlers, StartupCodeHandler* const object) {
+	startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerData*>(INCOMING_ONLY_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Display::enableIncomingOnlyMode))));
+}
+
+
+void Display::startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
+	(this->*(reinterpret_cast<bool (Display::*)(void)>(memberFunction)))();
 }
 
 
