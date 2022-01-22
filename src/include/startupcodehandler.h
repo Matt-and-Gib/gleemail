@@ -19,7 +19,7 @@ public:
 	StartupCodeHandler* const instance;
 	bool (StartupCodeHandler::*callback)(void);
 
-	explicit StartupCodeHandlerData(StartupCodeHandler* i, bool (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {
+	explicit StartupCodeHandlerData(StartupCodeHandler* const i, bool (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {
 		if(instance == nullptr) {
 			Serial.println(F("just created instance as a nullptr"));
 		} else {
@@ -27,7 +27,6 @@ public:
 		}
 	}
 	~StartupCodeHandlerData() {Serial.println(F("startupciodehandlerdata descrtuctor"));}
-
 };
 
 
