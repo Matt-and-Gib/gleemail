@@ -207,63 +207,23 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 
 
 inline void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerData*>>& handlers) {
-	//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("2"));} else {Serial.println(F("!2"));}
-
 	for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
-		//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("3"));} else {Serial.println(F("!3"));}
 		if(codes[index] == STARTUP_CODE_PROCESSED) {
-			//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("4"));} else {Serial.println(F("!4"));}
 			continue;
 		}
-		//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("5"));} else {Serial.println(F("!5"));}
 
-		unsigned short tempSearchIndex = 0;
-		//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("6"));} else {Serial.println(F("!6"));}
 		QueueNode<KVPair<char, StartupCodeHandlerData*>>* registeredHandler = handlers.peek();
-		//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("7"));} else {Serial.println(F("!7"));}
 		while(registeredHandler != nullptr) {
-		//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("8"));} else {Serial.println(F("!8"));}
-			tempSearchIndex += 1; //delete me!
-			//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("9"));} else {Serial.println(F("!9"));}
 			if(*(registeredHandler->getData()) == codes[index]) {
-				//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("10"));} else {Serial.println(F("!10"));}
-				Serial.print(F("Found handler for "));
-				Serial.println(codes[index]);
 				break;
 			}
-			//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("11"));} else {Serial.println(F("!11"));}
 
 			registeredHandler = registeredHandler->getNode();
-			//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("12"));} else {Serial.println(F("!12"));}
 		}
 
-		//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("13"));} else {Serial.println(F("!13"));}
 		if(registeredHandler != nullptr) {
-			//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("14"));} else {Serial.println(F("!14"));}
-			Serial.print(F("Before handler call. Found handler on search: "));
-			Serial.println(tempSearchIndex);
-
-			KVPair<char, StartupCodeHandlerData*>* handlerPair = registeredHandler->getData();
-			StartupCodeHandlerData* handlerValue = registeredHandler->getData()->getValue();
-			const StartupCodeHandler* handlerInstance = registeredHandler->getData()->getValue()->instance;
-
-			//if(handlers.peek()->getData()->getValue()->instance == nullptr) {Serial.println(F("15"));} else {Serial.println(F("!15"));}
-
-			if(handlerPair == nullptr) {
-				Serial.println(F("pair nullptr"));
-			}
-			
-			if(handlerValue == nullptr) {
-				Serial.println(F("value nullptr"));
-			}
-
-			if(handlerInstance == nullptr) {
-				Serial.println(F("instance nullptr"));
-			}
-
-			//registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
-			registeredHandler->getData()->getValue()->instance->test_only_delete_me_asap();
-			//codes[index] = STARTUP_CODE_PROCESSED; //DO NOT FORGET ABOUT THIS! UNCOMMEnT ME
+			registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
+			codes[index] = STARTUP_CODE_PROCESSED;
 		}
 	}
 }
@@ -624,38 +584,6 @@ void setup() {
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
 				storage->registerNewStartupCodes(startupCodeHandlers, storage);
-				if(startupCodeHandlers.peek()->getData()->getValue() == nullptr) {
-					Serial.println(F("MAIN: value in the queue already nullptr!"));
-				} else {
-					if(startupCodeHandlers.peek()->getData()->getValue()->instance == nullptr) {
-						Serial.println(F("MAIN: instance from handler in queue is a nullptr despite the fact that we just created it. UGH"));
-					} else {
-						if(startupCodeHandlers.peek()->getData()->getValue()->instance == storage) {
-							Serial.println(F("instance is == storage"));
-						} else {
-							Serial.println(F("instance != storage"));
-						}
-
-						Serial.println(F("MAIN: sanity check passed"));
-						Serial.println(F("Check #1"));
-
-						if(startupCodeHandlers.peek()->getData()->getValue()->instance == nullptr) {
-							Serial.println(F("1"));
-						} else {
-							Serial.println(F("!1"));
-						}
-						checkStartupCodes(startupCodes, startupCodeHandlers);
-						if(startupCodeHandlers.peek()->getData()->getValue()->instance == nullptr) {
-							Serial.println(F("X"));
-						} else {
-							Serial.println(F("!X"));
-						}
-					}
-				}
-
-				Serial.println(F("check #2"));
-				checkStartupCodes(startupCodes, startupCodeHandlers);
-				
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;
@@ -742,31 +670,6 @@ void setup() {
 		default:
 			DebugLog::getLog().logError(ERROR_CODE::UNKNOWN_SETUP_STATE);
 		break;
-		}
-
-		Serial.println(F("Going to check bottom of main now..."));
-		if(&startupCodeHandlers == nullptr) {
-			Serial.println(F("oops!"));
-		}
-		if(startupCodeHandlers.peek() == nullptr) {
-			Serial.println(F("peek == nullptr"));
-		} else {
-			Serial.println(F("peek is not a nullptr"));
-			if(startupCodeHandlers.peek()->getData() == nullptr) {
-				Serial.println(F("MAIN 2: peek data nullptr"));
-			} else {
-				Serial.println(F("getData is not a nullptr"));
-				if(startupCodeHandlers.peek()->getData()->getValue() == nullptr) {
-					Serial.println(F("MAIN 2: value in the queue already nullptr!"));
-				} else {
-					Serial.println(F("getValue is not a nullptr"));
-					if(startupCodeHandlers.peek()->getData()->getValue()->instance == nullptr) { //Accessing instance is a segfault here!
-						Serial.println(F("MAIN 2: instance from handler in queue is a nullptr despite the fact that we just created it. UGH"));
-					} else {
-						Serial.println(F("MAIN 2: sanity check passed"));
-					}
-				}
-			}
 		}
 
 		checkStartupCodes(startupCodes, startupCodeHandlers);

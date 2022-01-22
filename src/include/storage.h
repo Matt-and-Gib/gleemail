@@ -3,8 +3,8 @@
 
 #include "startupcodehandler.h"
 
-//delete me
-#include "Arduino.h"
+
+#include "Arduino.h" //delete me!
 
 class SdFat32;
 
@@ -15,7 +15,7 @@ private:
 
 	const char RESET_STARTUP_CODE = 'R';
 	bool resetStartupCodeReceived() {Serial.println(F("reset SD called!"));/*return eraseAll(133769);*/}
-	
+
 	const char GLEEMAIL_ROOT_PATH[9] = "GLEEMAIL";
 
 	unsigned int dataLength = 0;
@@ -29,8 +29,6 @@ public:
 
 	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&, StartupCodeHandler* const) override;
 	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
-
-	void test_only_delete_me_asap() override {Serial.println(F("storage: here"));}
 
 	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
 	

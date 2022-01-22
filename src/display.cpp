@@ -22,7 +22,6 @@ void Display::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*
 
 
 void Display::startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
-	Serial.println(F("inside display before reinterpret"));
 	(this->*(reinterpret_cast<bool (Display::*)(void)>(memberFunction)))();
 }
 

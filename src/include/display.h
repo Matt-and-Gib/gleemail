@@ -3,8 +3,9 @@
 
 #include "startupcodehandler.h"
 
-//delete me!
-#include "Arduino.h"
+
+#include "Arduino.h" //delete me!
+
 
 class hd44780_pinIO;
 
@@ -44,8 +45,6 @@ public:
 
 	void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&, StartupCodeHandler* const) override;
 	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
-
-	void test_only_delete_me_asap() override {Serial.println(F("display: here"));}
 
 	void updateReading(const char* message, const bool retainScreen = false);
 	void updateWriting(const char* message, const bool retainScreen = false);
