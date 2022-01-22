@@ -7,11 +7,6 @@
 #include "include/queue.h"
 
 
-Storage::Storage() : StartupCodeHandler() {
-
-}
-
-
 bool Storage::begin() {
 	if(!sd) {
 		sd = new SdFat32;
@@ -33,13 +28,41 @@ bool Storage::begin() {
 }
 
 
-void Storage::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>& startupCodeHandlers) {
-	startupCodeHandlers.enqueue(new KVPair<char, StartupCodeHandlerData*>(RESET_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived))));
+void Storage::registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>& startupCodeHandlers, StartupCodeHandler* const object) {
+	StartupCodeHandlerData* handler = new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived));
+
+	startupCodeHandlers.enqueue(
+		new KVPair<char, StartupCodeHandlerData*>(
+			RESET_STARTUP_CODE,
+			handler
+		)
+	);
+
+	if(handler == nullptr) {
+		Serial.println(F("handler is a nullptr. HOW?!"));
+	} else {
+		if(&(handler->instance) == nullptr) {
+			Serial.println(F("the instance that we just assigned in handler is a nullptr somehow... WHAT"));
+		} else {
+			Serial.println(F("handler is valid and so is instance"));
+		}
+	}
+
+	if(startupCodeHandlers.peek()->getData()->getValue() != handler) {
+		Serial.println(F("value in the queue already doesn't equal handler!"));
+	} else {
+		if(&(startupCodeHandlers.peek()->getData()->getValue()->instance) == nullptr) {
+			Serial.println(F("instance from handler in queue is a nullptr despite the fact that we just created it. UGH"));
+		} else {
+			Serial.println(F("sanity check passed"));
+		}
+	}
 }
 
 
 void Storage::startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
-	(this->*reinterpret_cast<bool (Storage::*)(void)>(memberFunction))();
+	Serial.println(F("inside storage before reinterpret"));
+	(this->*(reinterpret_cast<bool (Storage::*)(void)>(memberFunction)))();
 }
 
 

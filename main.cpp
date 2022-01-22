@@ -35,7 +35,8 @@ extern "C" void __libc_init_array(void);
 
 
 const constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
-const unsigned short MAX_STARTUP_CODES = 8;
+const unsigned short MAX_STARTUP_CODES = 7;
+const unsigned short STARTUP_CODE_PROCESSED = 127;
 
 bool quit = false;
 
@@ -205,26 +206,48 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 }
 
 
-void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerData*>>& handlers) {
+inline void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerData*>>& handlers) {
 	for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
-		if(codes[index] == '\0') {
-			break;
+		if(codes[index] == STARTUP_CODE_PROCESSED) {
+			continue;
 		}
 
+		unsigned short tempSearchIndex = 0;
 		QueueNode<KVPair<char, StartupCodeHandlerData*>>* registeredHandler = handlers.peek();
 		while(registeredHandler != nullptr) {
+			tempSearchIndex += 1; //delete me!
 			if(*(registeredHandler->getData()) == codes[index]) {
+				Serial.print(F("Found handler for "));
+				Serial.println(codes[index]);
 				break;
 			}
 
 			registeredHandler = registeredHandler->getNode();
 		}
 
-		if(!registeredHandler) {
-			break;
-		} else {
-			registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
-			codes[index] = '\0';
+		if(registeredHandler != nullptr) {
+			Serial.print(F("Before handler call. Found handler on search: "));
+			Serial.println(tempSearchIndex);
+
+			KVPair<char, StartupCodeHandlerData*>* handlerPair = registeredHandler->getData();
+			StartupCodeHandlerData* handlerValue = registeredHandler->getData()->getValue();
+			const StartupCodeHandler* handlerInstance = registeredHandler->getData()->getValue()->instance;
+
+			if(handlerPair == nullptr) {
+				Serial.println(F("pair nullptr"));
+			}
+			
+			if(handlerValue == nullptr) {
+				Serial.println(F("value nullptr"));
+			}
+
+			if(handlerInstance == nullptr) {
+				Serial.println(F("instance nullptr"));
+			}
+
+			//registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
+			registeredHandler->getData()->getValue()->instance->test_only_delete_me_asap();
+			codes[index] = STARTUP_CODE_PROCESSED;
 		}
 	}
 }
@@ -552,6 +575,7 @@ void setup() {
 
 		case SETUP_LEVEL::LCD:
 			display = new Display;
+			//display->registerNewStartupCodes(startupCodeHandlers, display);
 
 			setupState = SETUP_LEVEL::WELCOME;
 		break;
@@ -583,7 +607,16 @@ void setup() {
 
 				setupState = SETUP_LEVEL::NETWORK;
 			} else {
-				storage->registerNewStartupCodes(startupCodeHandlers);
+				storage->registerNewStartupCodes(startupCodeHandlers, storage);
+				if(startupCodeHandlers.peek()->getData()->getValue() == nullptr) {
+					Serial.println(F("MAIN: value in the queue already nullptr!"));
+				} else {
+					if(&(startupCodeHandlers.peek()->getData()->getValue()->instance) == nullptr) {
+						Serial.println(F("MAIN: instance from handler in queue is a nullptr despite the fact that we just created it. UGH"));
+					} else {
+						Serial.println(F("MAIN: sanity check passed"));
+					}
+				}
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;
@@ -670,6 +703,16 @@ void setup() {
 		default:
 			DebugLog::getLog().logError(ERROR_CODE::UNKNOWN_SETUP_STATE);
 		break;
+		}
+
+		if(startupCodeHandlers.peek()->getData()->getValue() == nullptr) {
+			Serial.println(F("MAIN 2: value in the queue already nullptr!"));
+		} else {
+			if(&(startupCodeHandlers.peek()->getData()->getValue()->instance) == nullptr) {
+				Serial.println(F("MAIN 2: instance from handler in queue is a nullptr despite the fact that we just created it. UGH"));
+			} else {
+				Serial.println(F("MAIN 2: sanity check passed"));
+			}
 		}
 
 		checkStartupCodes(startupCodes, startupCodeHandlers);
