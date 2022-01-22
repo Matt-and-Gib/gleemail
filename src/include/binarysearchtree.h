@@ -5,14 +5,14 @@
 template <class T>
 class BinarySearchTreeNode {
 private:
-	const T& data;
+	T* const data;
 	BinarySearchTreeNode* lesserChild = nullptr;
 	BinarySearchTreeNode* greaterChild = nullptr;
 public:
-	explicit BinarySearchTreeNode(const T&) : data{d} {}
-	virtual ~BinarySearchTreeNode();;
+	explicit BinarySearchTreeNode(const T& d) : data{&d} {}
+	virtual ~BinarySearchTreeNode();
 
-	T& getData() {return data;}
+	T* getData() {return data;}
 	BinarySearchTreeNode* getLesserChild() {return lesserChild;}
 	void setLesserChild(const BinarySearchTreeNode& l) {lesserChild = &l;}
 	BinarySearchTreeNode* getGreaterChild() {return greaterChild;}
@@ -30,7 +30,7 @@ inline BinarySearchTreeNode<T>::~BinarySearchTreeNode() {
 	delete lesserChild;
 	lesserChild = nullptr;
 
-	delete &data; //This may not be necessary!
+	delete data;
 }
 
 
@@ -42,11 +42,11 @@ inline BinarySearchTreeNode<T>* BinarySearchTreeNode<T>::addNode(BinarySearchTre
 
 	BinarySearchTreeNode* currentNode = this;
 	while(currentNode != nullptr) {
-		if(n == currentNode || n->getData() == currentNode->getData()) {
+		if(n == currentNode || *(n->getData()) == *(currentNode->getData())) {
 			return nullptr;
 		}
 
-		if(n->getData() < currentNode->getData()) {
+		if(*(n->getData()) < *(currentNode->getData())) {
 			if(currentNode->getLesserChild()) {
 				currentNode = currentNode->getLesserChild();
 			} else {

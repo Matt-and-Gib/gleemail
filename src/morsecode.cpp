@@ -41,7 +41,7 @@ namespace {
 }
 
 
-MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage), currentMorsePhrase{*new MorsePhrase()}, morseCodeTreeRoot{*new MorseCodeTreeNode(*new MorsePhraseCharPair('\0', *new MorsePhrase()), nullptr)} {
+MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage), morseCodeTreeRoot{*new MorseCodeTreeNode(*new MorsePhraseCharPair(nullptr, nullptr))} {
 	pins[0] = &NULL_PIN;
 	pins[1] = &NULL_PIN;
 	pins[2] = &NULL_PIN;

@@ -29,13 +29,16 @@ Phrase length of 6, depth of 6. Root has a depth of 0.
 
 namespace GLEEMAIL_MORSE_CODE {
 	class MorsePhraseCharPair {
-	public:
-		static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6; //Copied from the old version. Could be a maximum of 8 before we would need to switch data types.
+	private:
+		static constexpr unsigned short MAX_MORSE_PHRASE_LENGTH = 6; //This number should be equal to the longest supported morse phrase for your . Could be a maximum of 8 before we would need to switch data types.
 
 		char binaryPhrase = 0b00000000; //A binary representation of a morse phrase, in little endian.
 		const char symbol;
+	public:
+		explicit MorsePhraseCharPair(const char*, const char*);
 
-		MorsePhraseCharPair(const char*, const char*);
+		char getBinaryPhrase() {return binaryPhrase;}
+		char getSymbol() {return symbol;}
 
 		bool operator==(const MorsePhraseCharPair& rhs) const {
 			//todo
@@ -49,7 +52,7 @@ namespace GLEEMAIL_MORSE_CODE {
 
 	MorsePhraseCharPair::MorsePhraseCharPair(const char* letter, const char* phrase) : symbol{letter[0]} {
 		char length = 0;
-		while((phrase[length] != '\0') && (length < (MAX_MORSE_PHRASE_LENGTH + 1))) {
+		while((phrase[length] != '\0') && (length < MAX_MORSE_PHRASE_LENGTH)) {
 			length += 1;
 		}
 
@@ -65,25 +68,19 @@ namespace GLEEMAIL_MORSE_CODE {
 
 
 	class MorseCodeTreeNode final : public BinarySearchTreeNode<MorsePhraseCharPair> {
-	private:
-		//BinarySearchTreeNode* addNode(BinarySearchTreeNode*) = delete;
 	public:
-		MorseCodeTreeNode(const MorsePhraseCharPair& d) : BinarySearchTreeNode(d) {}
+		explicit MorseCodeTreeNode(const MorsePhraseCharPair& d) : BinarySearchTreeNode(d) {}
+		~MorseCodeTreeNode() = default;
 		BinarySearchTreeNode* addNode(const char*, const char*);
+		BinarySearchTreeNode* addNode(BinarySearchTreeNode*) override;
 	};
 
 
-	BinarySearchTreeNode<MorsePhraseCharPair>* MorseCodeTreeNode::addNode(const char* letter, const char* phrase) { //This function requires that nodes be added in a certain order!
-		if(!letter || !phrase) {
-			return nullptr;
-		}
-
-		BinarySearchTreeNode* newNode = new MorseCodeTreeNode(new MorsePhraseCharPair(letter, phrase));
-
+	BinarySearchTreeNode<MorsePhraseCharPair>* MorseCodeTreeNode::addNode(BinarySearchTreeNode* newNode) { //This is where it is useful to recognize that we are never comparing anything. '.' means go left, '-' means go right.
 		BinarySearchTreeNode* currentNode = this;
 		char depth = 0;
 		while(currentNode != nullptr) {
-			if(((newNode->getData().binaryPhrase) >> depth) & 0b00000001) {
+			if(((newNode->getData()->getBinaryPhrase()) >> depth) & 0b00000001) { //Todo: if(!...) {getLesserChild()...}
 				if(currentNode->getGreaterChild()) {
 					currentNode = currentNode->getGreaterChild();
 					depth += 1;
@@ -102,7 +99,17 @@ namespace GLEEMAIL_MORSE_CODE {
 			}
 		}
 
+		delete newNode;
 		return nullptr;
+	}
+
+
+	BinarySearchTreeNode<MorsePhraseCharPair>* MorseCodeTreeNode::addNode(const char* letter, const char* phrase) { //This function requires that nodes be added in a certain order!
+		if(!letter || !phrase) {
+			return nullptr;
+		}
+
+		return addNode(new MorseCodeTreeNode(*new MorsePhraseCharPair(letter, phrase)));
 	}
 }
 
