@@ -9,9 +9,6 @@
 #endif
 
 
-
-#include "Arduino.h" //delete me!
-
 class SdFat32;
 
 
@@ -20,7 +17,7 @@ private:
 	const unsigned short SLAVE_SELECT_PIN = 10;
 
 	const char RESET_STARTUP_CODE = 'R';
-	bool resetStartupCodeReceived() {Serial.println(F("reset SD called!"));/*return eraseAll(133769);*/}
+	bool resetStartupCodeReceived() {return eraseAll(133769);}
 
 	const char GLEEMAIL_ROOT_PATH[9] = "GLEEMAIL";
 
