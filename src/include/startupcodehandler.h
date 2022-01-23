@@ -21,7 +21,7 @@ public:
 
 class StartupCodeHandler {
 public:
-	virtual void registerNewStartupCodes(Queue<KVPair<char, StartupCodeHandlerData*>>&) = 0;
+	virtual void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) = 0;
 	virtual void startupCodeReceived(bool (StartupCodeHandler::*)(void)) = 0;
 };
 

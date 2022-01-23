@@ -204,13 +204,13 @@ void setStartupCodes(char (& startupCodes)[MAX_STARTUP_CODES + TERMINATOR]) {
 }
 
 
-inline void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<char, StartupCodeHandlerData*>>& handlers) {
+inline void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Queue<KVPair<const char&, StartupCodeHandlerData* const>>& handlers) {
 	for(unsigned short index = 0; index < MAX_STARTUP_CODES; index += 1) {
 		if(codes[index] == STARTUP_CODE_PROCESSED) {
 			continue;
 		}
 
-		QueueNode<KVPair<char, StartupCodeHandlerData*>>* registeredHandler = handlers.peek();
+		QueueNode<KVPair<const char&, StartupCodeHandlerData* const>>* registeredHandler = handlers.peek();
 		while(registeredHandler != nullptr) {
 			if(*(registeredHandler->getData()) == codes[index]) {
 				break;
@@ -221,6 +221,7 @@ inline void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Qu
 
 		if(registeredHandler != nullptr) {
 			registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
+			Serial.print(F("Called handler for ")); Serial.println(codes[index]);
 			codes[index] = STARTUP_CODE_PROCESSED;
 		}
 	}
@@ -501,8 +502,8 @@ void setup() {
 
 	const unsigned short BAUD_RATE = 9600;
 
-	Queue<KVPair<char, StartupCodeHandlerData*>> startupCodeHandlers;
 	char startupCodes[MAX_STARTUP_CODES + TERMINATOR] {0};
+	Queue<KVPair<const char&, StartupCodeHandlerData* const>> startupCodeHandlers;
 
 	char* desiredWiFiSSID = nullptr;
 	char* desiredWiFiPassword = nullptr;
