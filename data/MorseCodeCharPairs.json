@@ -1,5 +1,5 @@
 {
-	"size": 2257,
+	"size": 4096,
 	"morsecodetreedata": [
 		{"phrase": ".", "symbol": "E"},
 		{"phrase": "-", "symbol": "T"},
@@ -38,12 +38,31 @@
 		{"phrase": ".....", "symbol": "5"},
 		{"phrase": "....-", "symbol": "4"},
 		{"phrase": "...--", "symbol": "3"},
+		{"phrase": "..--.", "symbol": " "},
 		{"phrase": "..---", "symbol": "2"},
+		{"phrase": ".-...", "symbol": "&"},
+		{"phrase": ".-..-", "symbol": " "},
+		{"phrase": ".-.-.", "symbol": "+"},
+		{"phrase": ".--.-", "symbol": " "},
 		{"phrase": ".----", "symbol": "1"},
 		{"phrase": "-....", "symbol": "6"},
+		{"phrase": "-...-", "symbol": "="},
+		{"phrase": "-..-.", "symbol": "/"},
+		{"phrase": "-.--.", "symbol": "("},
 		{"phrase": "--...", "symbol": "7"},
+		{"phrase": "--..-", "symbol": " "},
 		{"phrase": "---..", "symbol": "8"},
 		{"phrase": "----.", "symbol": "9"},
-		{"phrase": "-----", "symbol": "0"}
+		{"phrase": "-----", "symbol": "0"},
+
+		{"phrase": "..--..", "symbol": "?"},
+		{"phrase": ".-..-.", "symbol": "\""},
+		{"phrase": ".-.-.-", "symbol": "."},
+		{"phrase": ".--.-.", "symbol": "@"},
+		{"phrase": ".----.", "symbol": "'"},
+		{"phrase": "-....-", "symbol": "-"},
+		{"phrase": "-.--.-", "symbol": ")"},
+		{"phrase": "--..--", "symbol": ","},
+		{"phrase": "---...", "symbol": ":"}
 	]
 }

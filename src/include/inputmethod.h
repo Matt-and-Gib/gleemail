@@ -47,7 +47,7 @@ public:
 	bool messageNotEmpty() const {return userMessageFirstEmptyIndex > 0;} //userMessage[0] != '\0';}
 	bool isLastCharSpace() const;
 
-	void pushCharacterToMessage(const char c);
+	void pushCharacterToMessage(const char& c);
 };
 
 #endif

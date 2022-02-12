@@ -51,7 +51,7 @@ void InputMethod::peekUserMessage(char *messageOut) {
 }*/
 
 
-void InputMethod::pushCharacterToMessage(const char c) {
+void InputMethod::pushCharacterToMessage(const char& c) {
 	if(c != CANCEL_CHAR) {
 		//messageChanged = true;
 		//messageComplete = false;

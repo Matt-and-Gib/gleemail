@@ -1,14 +1,10 @@
 #include "include/morsecode.h"
 
 #include "include/global.h"
-#include "include/morsecodetree.h"
 #include "include/websiteaccess.h"
-
-#include <ArduinoJson.h>
 
 
 using namespace GLEEMAIL_DEBUG;
-using namespace GLEEMAIL_MORSE_CODE;
 
 
 namespace {
@@ -38,10 +34,13 @@ namespace {
 	const constexpr unsigned short CALCULATED_MESSAGE_FINISHED_THRESHOLD = 3 * CALCULATED_WORD_FINISHED_THRESHOLD;
 	const constexpr unsigned short MESSAGE_FINISIHED_THRESHOLD_BUFFER = 500;
 	const constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_FINISHED_THRESHOLD + MESSAGE_FINISIHED_THRESHOLD_BUFFER;
+
+	static const char DOT = '.';
+	static const char DASH = '-';
 }
 
 
-MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage), morseCodeTreeRoot{*new MorseCodeTreeNode(*new MorsePhraseCharPair(nullptr, nullptr))} {
+MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage) {
 	pins[0] = &NULL_PIN;
 	pins[1] = &NULL_PIN;
 	pins[2] = &NULL_PIN;
@@ -58,8 +57,7 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 
 
 MorseCodeInput::~MorseCodeInput() {
-	delete &currentMorsePhrase;
-	delete &morseCodeTreeRoot;
+	delete morsePhraseSymbols;
 }
 
 
@@ -76,6 +74,38 @@ unsigned short MorseCodeInput::filterJsonPayloadSize(const char* payload) const 
 	}
 
 	return sizeDoc["size"]; //If you're having issues, this may be a good place to look. Make sure the return type is being properly cast.
+}
+
+
+unsigned short MorseCodeInput::calculateMorsePhraseSymbolsSize(const ArduinoJson::JsonArrayConst& rawMorseCodeTreeData) const { //This function ASSUMES that the ingested JSON document's last phrase's length is the longest used phrase length.
+	ArduinoJson::JsonObjectConst lastElement = rawMorseCodeTreeData.getElement(rawMorseCodeTreeData.size() - 1);
+	const char* const lastPhrase = lastElement["phrase"];
+
+	unsigned short arraySize = 0;
+	for(unsigned short index = strlen(lastPhrase); index > 0; index -= 1) {
+		arraySize += (1 << index); //Used in lieu of pow(). Can be done because we are working with powers of 2.
+	}
+
+	return arraySize;
+}
+
+
+unsigned short MorseCodeInput::calculateMorsePhraseIndex(const char* const phrase) const {
+	unsigned char i = 0;
+	unsigned char binaryPhrase = 0;
+	while(phrase[i]) {
+		if(phrase[i] == '.') {
+			binaryPhrase <<= 1;
+		} else {
+			binaryPhrase = (binaryPhrase << 1) | 0b00000001;
+		}
+
+		i += 1;
+	}
+
+	binaryPhrase += (1 << i) - 2; //The bitshifted one is to represent powers of two, and the 2 is simply a constant offset due to indexing and the fact that 2^0 = 1.
+
+	return binaryPhrase;
 }
 
 
@@ -96,18 +126,12 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 		return false;
 	}
 
-	const char* letter;
-	const char* phrase;
-	for(ArduinoJson::JsonObject elem : mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArray>()) {
-		letter = elem["symbol"];
-		phrase = elem["phrase"];
-		if(!morseCodeTreeRoot.addNode(letter, phrase)) { //THIS IS WHAT WE WANT!
-			DebugLog::getLog().logError(ERROR_CODE::MORSE_INSERTING_INTO_TREE_FAILED);
-		}
+	ArduinoJson::JsonArrayConst rawMorseCodeTreeData = mccpDoc["morsecodetreedata"].as<ArduinoJson::JsonArrayConst>();
 
-		/*if(morseCodeTreeRoot.addNode(*new MorsePhraseCharPair(*letter, *new MorsePhrase(phrase))) == nullptr) { //THIS IS WHAT WE HAVE!
-			DebugLog::getLog().logError(ERROR_CODE::MORSE_INSERTING_INTO_TREE_FAILED);
-		}*/
+	morsePhraseSymbols = new char[calculateMorsePhraseSymbolsSize(rawMorseCodeTreeData)] {0};
+
+	for(ArduinoJson::JsonObjectConst elem : rawMorseCodeTreeData) {
+		morsePhraseSymbols[calculateMorsePhraseIndex(elem["phrase"])] = elem["symbol"];
 	}
 
 	return true;
@@ -119,29 +143,37 @@ unsigned short MorseCodeInput::getDebounceThreshold() {
 }
 
 
-char MorseCodeInput::convertPhraseToCharacter() {
-	MorsePhraseCharPair* lookupResult = morseCodeTreeRoot.lookup(currentMorsePhrase);
+void MorseCodeInput::resetMorsePhrase() {
+	char* c = currentMorsePhrase;
+	while(c) {
+		*(c++) = 0;
+	}
+}
+
+
+const char& MorseCodeInput::convertPhraseToCharacter() {
+	const char& lookupResult = morsePhraseSymbols[calculateMorsePhraseIndex(currentMorsePhrase)];
 	if(!lookupResult) {
 		DebugLog::getLog().logWarning(MORSE_CODE_LOOKUP_FAILED);
 		return CANCEL_CHAR;
 	}
 
-	return lookupResult->character;
+	return lookupResult;
 }
 
 
-void MorseCodeInput::pushMorseCharacter(const MorseChar& morseCharacter) {
-	if(currentMorsePhrase.phraseFull()) {
-		DebugLog::getLog().logError(ERROR_CODE::MORSE_PHRASE_IMMINENT_OVERFLOW);
-		pushCharacterToMessage(convertPhraseToCharacter());
-		currentMorsePhrase.resetPhrase();
-	}
-
-	currentMorsePhrase.push(morseCharacter);
-	if(currentMorsePhrase.phraseFull()) {
-		pushCharacterToMessage(convertPhraseToCharacter());
-		currentMorsePhrase.resetPhrase();
-	}
+void MorseCodeInput::pushMorseCharacter(const char& morseCharacter) {
+	unsigned short index = 0;
+	do {
+		if(!currentMorsePhrase[index]) {
+			currentMorsePhrase[index] = morseCharacter;
+			if(index == 5) {
+				pushCharacterToMessage(convertPhraseToCharacter());
+				resetMorsePhrase();
+			}
+			return;
+		}
+	} while(index++ < 6);
 }
 
 
@@ -180,10 +212,10 @@ void MorseCodeInput::updateElapsedTime(const unsigned long currentCycleTime) {
 
 
 void MorseCodeInput::checkPhraseElapsedThreshold() {
-	if(currentMorsePhrase.phraseStarted()) {
+	if(currentMorsePhrase[0] != '\0') {
 		if(elapsedCycleTime >= PHRASE_FINISHED_THRESHOLD) {
 			pushCharacterToMessage(convertPhraseToCharacter());
-			currentMorsePhrase.resetPhrase();
+			resetMorsePhrase();
 		}
 	}
 }
