@@ -5,34 +5,11 @@
 //include moc_inputmethod.h
 #else
 #include "inputmethod.h"
+#include <ArduinoJson.h>
 #endif
 
 
-#include <ArduinoJson.h>
-
-
 struct Pin;
-
-
-//https://morsecode.world/international/morse2.html
-//https://morsecode.world/international/timing.html
-
-//https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf
-
-
-/*
-	#Logic
-	______
-
-	• Input MORSE_CHAR::NOTHING : convert morsePhrase to char, reset morsePhrase
-	• If period of time between opeing and closing swtich > PHRASE_FINISHED_THRESHOLD : convert moresePhrase to char, reset moresePhrase, input MORSE_CHAR at index 0
-	• If period of time between opening and closing switch > WORD_FINISHED_THRESHOLD : add space to message
-
-	• Message sent if timeout reached or 32 char limit reached
-*/
-
-
-//static const constexpr unsigned short CALCULATED_MCCP_DOCUMENT_SIZE_IN_BYTES = 4096;
 
 
 class MorseCodeInput final : public InputMethod {
@@ -54,12 +31,12 @@ private:
 	char currentMorsePhrase[7] {0};
 
 	static const constexpr unsigned short DEBOUNCE_THRESHOLD = 25;
+	unsigned long lastDebounceTime = 0;
 
 	MORSE_CODE_STATE lastInputState;
-	MORSE_CODE_STATE inputState;
-	short typingDelayState = -1;
-	unsigned long lastChangeTime = 0;
-	long long elapsedCycleTime = 0;
+	MORSE_CODE_STATE currentInputState;
+	unsigned long lastStateChangeTime = 0;
+	unsigned long long elapsedCycleTime = 0;
 	void updateElapsedTime(const unsigned long);
 
 	void processClosedToOpen(const unsigned long);
@@ -88,8 +65,6 @@ public:
 
 	Pin** getPins() {return pins;}
 	void processInput(const unsigned long);
-
-	unsigned short getDebounceThreshold();
 };
 
 #endif

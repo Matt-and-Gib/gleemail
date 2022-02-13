@@ -8,8 +8,6 @@ struct Pin;
 
 class InputMethod {
 private:
-	unsigned long lastDebounceTime = 0;
-
 	//bool messageChanged = false;
 	//bool messageComplete = false;
 	//bool messageRetrieved = false;
@@ -33,11 +31,6 @@ public:
 
 	virtual Pin** getPins() = 0;
 	virtual void processInput(const unsigned long) = 0;
-
-	virtual unsigned short getDebounceThreshold() = 0;
-
-	unsigned long getLastDebounceTime() const {return lastDebounceTime;}
-	void setLastDebounceTime(const unsigned long t) {lastDebounceTime = t;}
 
 	//void getUserMessage(char *);
 	//void peekUserMessage(char *);

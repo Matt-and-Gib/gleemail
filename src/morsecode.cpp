@@ -51,8 +51,8 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 	pins[PINS_INDEX_SWITCH] = switchDigitalPin;
 	pins[PINS_INDEX_LED] = ledDigitalPin;
 
-	inputState = (pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_OPEN ? MORSE_CODE_STATE::SWITCH_OPEN : MORSE_CODE_STATE::SWITCH_CLOSED);
-	lastInputState = inputState;
+	currentInputState = (pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_OPEN ? MORSE_CODE_STATE::SWITCH_OPEN : MORSE_CODE_STATE::SWITCH_CLOSED);
+	lastInputState = currentInputState;
 }
 
 
@@ -146,11 +146,6 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 }
 
 
-unsigned short MorseCodeInput::getDebounceThreshold() {
-	return DEBOUNCE_THRESHOLD;
-}
-
-
 void MorseCodeInput::resetMorsePhrase() {
 	char* c = currentMorsePhrase;
 	while(*c) {
@@ -198,8 +193,8 @@ void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 		pushMorseCharacter(DASH);
 	}
 
-	lastChangeTime = currentCycleTime;
-	inputState = MORSE_CODE_STATE::SWITCH_OPEN;
+	lastStateChangeTime = currentCycleTime;
+	currentInputState = MORSE_CODE_STATE::SWITCH_OPEN;
 }
 
 
@@ -207,16 +202,13 @@ void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 void MorseCodeInput::processOpenToClosed(const unsigned long currentCycleTime) {
 	pins[PINS_INDEX_LED]->value = LED_STATUS::ON;
 
-	lastChangeTime = currentCycleTime;
-	inputState = MORSE_CODE_STATE::SWITCH_CLOSED;
+	lastStateChangeTime = currentCycleTime;
+	currentInputState = MORSE_CODE_STATE::SWITCH_CLOSED;
 }
 
 
 void MorseCodeInput::updateElapsedTime(const unsigned long currentCycleTime) {
-	if(lastChangeTime > currentCycleTime) {
-		lastChangeTime = 0; //TODO: FIX ME
-	}
-	elapsedCycleTime = currentCycleTime - lastChangeTime;
+	elapsedCycleTime = currentCycleTime - lastStateChangeTime; //Caution! After ~50 days of glEEmailing, currentCycleTime will overflow. Brief unintended behavior will result!
 }
 
 
@@ -255,18 +247,18 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long currentCycleTime) 
 
 void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
 	if(pins[PINS_INDEX_SWITCH]->value != lastInputState) {
-		setLastDebounceTime(currentCycleTime);
+		lastDebounceTime = currentCycleTime;
 	}
 
-	if(currentCycleTime - getLastDebounceTime() > getDebounceThreshold()) {
+	if(currentCycleTime - lastDebounceTime > DEBOUNCE_THRESHOLD) {
 		if(pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_OPEN) {
-			if(inputState == MORSE_CODE_STATE::SWITCH_CLOSED) {
+			if(currentInputState == MORSE_CODE_STATE::SWITCH_CLOSED) {
 				processClosedToOpen(currentCycleTime);
 			}
 
 			checkOpenElapsedTime(currentCycleTime);
 		} else {
-			if(inputState == MORSE_CODE_STATE::SWITCH_OPEN) {
+			if(currentInputState == MORSE_CODE_STATE::SWITCH_OPEN) {
 				processOpenToClosed(currentCycleTime);
 			}
 		}

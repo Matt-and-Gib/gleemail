@@ -284,6 +284,16 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 If you've configured the hardware correctly, simply upload the code to your Arduino, open the serial monitor, and follow the prompts on screen (the LCD and serial monitor). If you haven't yet wired the hardware, refer to the [Wiring Diagram](#diagram).
 
+#### How to Morse Like a Pro
+
+To do...
+
+[How to input](https://morsecode.world/international/morse2.html)
+
+[How to stay on beat](https://morsecode.world/international/timing.html)
+
+[THE Standard](https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf)
+
 #### Unexpected Behavior?
 
 Experiencing unexpected behavior? Maybe we've run into your problem before you!
