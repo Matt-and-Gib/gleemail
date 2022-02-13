@@ -45,8 +45,8 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 	pins[1] = &NULL_PIN;
 	pins[2] = &NULL_PIN;
 
-	Pin *switchDigitalPin = new Pin(SWITCH_PIN_LOCATION, PIN_MODE::READ, MORSE_CODE_STATE::SWITCH_OPEN);
-	Pin *ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
+	Pin* const switchDigitalPin = new Pin(SWITCH_PIN_LOCATION, PIN_MODE::READ, MORSE_CODE_STATE::SWITCH_OPEN);
+	Pin* const ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
 
 	pins[PINS_INDEX_SWITCH] = switchDigitalPin;
 	pins[PINS_INDEX_LED] = ledDigitalPin;
@@ -59,8 +59,8 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 MorseCodeInput::~MorseCodeInput() {
 	delete morsePhraseSymbols;
 
-	delete ledDigitalPin;
-	delete switchDigitalPin;
+	delete pins[PINS_INDEX_LED];
+	delete pins[PINS_INDEX_SWITCH];
 }
 
 
