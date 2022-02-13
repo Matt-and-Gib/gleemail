@@ -14,16 +14,11 @@ bool WebsiteAccess::writeHeadersToServer(InternetAccess& net, const char* const*
 
 	int headerIndex = 0;
 	while(headerLine != nullptr) {
-		if(headerIndex > 16) { //Replace magic number
-			DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_REQUEST_HEADER_TERMINATION_OMITTED);
-			return false;
-		}
-
 		net.writeHeaderLine(headerLine);
 		headerLine = headers[++headerIndex];
 	}
 
-	return true;
+	return true; //There currently is no check for if a terminator is somehow omitted from the headers that are passed in.
 }
 
 
@@ -99,29 +94,9 @@ char* WebsiteAccess::downloadFromServer(InternetAccess& net) {
 		}
 	}
 
-	//Print full response
-	/*
-	for(int i = 0; i < bufferIndex; i += 1) {
-		Serial.print(dataBuffer[i]);
-	}
-	Serial.println('\n');
-	*/
-
-	//Print buffer utilization
-	/*
-	Serial.print("Used ");
-	Serial.print(bufferIndex);
-	Serial.print(" out of max ");
-	Serial.println(DOWNLOADED_PACKET_BUFFER_SIZE);
-	*/
-
 	short endOfHeaderIndex = findEndOfHeaderIndex(dataBuffer, bufferIndex);
 	if(endOfHeaderIndex != -1) {
 		const unsigned short LENGTH_OF_JSON_BODY = bufferIndex - endOfHeaderIndex;
-
-		//Serial.print(F("length of body: "));
-		//Serial.println(LENGTH_OF_JSON_BODY);
-
 		char* payloadData = new char[LENGTH_OF_JSON_BODY];
 		for(int i = 0; i < LENGTH_OF_JSON_BODY; i += 1) {
 			payloadData[i] = dataBuffer[endOfHeaderIndex + i];

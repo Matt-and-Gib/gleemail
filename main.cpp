@@ -24,17 +24,6 @@
 using namespace GLEEMAIL_DEBUG;
 
 
-/*
-	To-Do: Startup code enabling DSA key printout
-	[v] Make Network object a pointer
-	[v] Construct Networking object in Setup()
-	[v] Inherit from StartupCodeHandler in Networking
-	[v] Implement pure virtual functions in Netowkring
-	[v] Add functionality for printing DSA keys if enabled
-	[_] Register networking with handlers
-*/
-
-
 //Weak empty variant initialization function.
 //May be redefined by variant files.
 void initVariant() __attribute__((weak));
@@ -124,7 +113,6 @@ void sendChatMessage(char* chat) {
 
 
 void updateDisplayWithPeerChat(char* messageBody) {
-	//Serial.println(messageBody);
 	messageToPrint = messageBody;
 }
 
@@ -229,7 +217,6 @@ inline void checkStartupCodes(char (& codes)[MAX_STARTUP_CODES + TERMINATOR], Qu
 
 		if(registeredHandler != nullptr) {
 			registeredHandler->getData()->getValue()->instance->startupCodeReceived(registeredHandler->getData()->getValue()->callback);
-			Serial.print(F("Called handler for ")); Serial.println(codes[index]);
 			codes[index] = STARTUP_CODE_PROCESSED;
 		}
 	}
@@ -697,26 +684,6 @@ int main(void) {
 
 	setup();
 
-//NOTE: The below timing calculations are probably incorrect now that chat messages are encrypted/decrypted
-/*
-Estimated max time for single message processing: 4ms
-
-	Debounce time: 25ms
-	Dot/Dash Threshold: 265ms
-
-
-	180ms: totally unusable
-	90ms: completely unusable
-	45ms: unusable
-	25ms: okay
-	30ms: fine
-	35ms: fine
-	40ms: fine
-	44ms: mostly unusable
-	43ms: not really usable
-	* 42ms: alright *
-*/
-
 	while(!quit) {
 		cycleStartTime = millis();
 
@@ -752,7 +719,7 @@ Estimated max time for single message processing: 4ms
 		arduino::serialEventRun();
 	}
 
-	delay(5000);
+	delay(4000);
 	display->clearAll();
 	return 0;
 }
