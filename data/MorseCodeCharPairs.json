@@ -3,10 +3,12 @@
 	"morsecodetreedata": [
 		{"phrase": ".", "symbol": "E"},
 		{"phrase": "-", "symbol": "T"},
+
 		{"phrase": "..", "symbol": "I"},
 		{"phrase": ".-", "symbol": "A"},
 		{"phrase": "-.", "symbol": "N"},
 		{"phrase": "--", "symbol": "M"},
+
 		{"phrase": "...", "symbol": "S"},
 		{"phrase": "..-", "symbol": "U"},
 		{"phrase": ".-.", "symbol": "R"},
@@ -15,6 +17,7 @@
 		{"phrase": "-.-", "symbol": "K"},
 		{"phrase": "--.", "symbol": "G"},
 		{"phrase": "---", "symbol": "O"},
+
 		{"phrase": "....", "symbol": "H"},
 		{"phrase": "...-", "symbol": "V"},
 		{"phrase": "..-.", "symbol": "F"},
@@ -27,6 +30,7 @@
 		{"phrase": "-.--", "symbol": "Y"},
 		{"phrase": "--..", "symbol": "Z"},
 		{"phrase": "--.-", "symbol": "Q"},
+
 		{"phrase": ".....", "symbol": "5"},
 		{"phrase": "....-", "symbol": "4"},
 		{"phrase": "...--", "symbol": "3"},
@@ -42,6 +46,7 @@
 		{"phrase": "---..", "symbol": "8"},
 		{"phrase": "----.", "symbol": "9"},
 		{"phrase": "-----", "symbol": "0"},
+
 		{"phrase": "..--..", "symbol": "?"},
 		{"phrase": ".-..-.", "symbol": "\""},
 		{"phrase": ".-.-.-", "symbol": "."},
