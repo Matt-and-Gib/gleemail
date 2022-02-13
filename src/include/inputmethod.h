@@ -30,7 +30,7 @@ public:
 	virtual const char* getCachedDataPath() const = 0;
 
 	virtual Pin** getPins() = 0;
-	virtual void processInput(const unsigned long) = 0;
+	virtual void processInput(const unsigned long&) = 0;
 
 	//void getUserMessage(char *);
 	//void peekUserMessage(char *);

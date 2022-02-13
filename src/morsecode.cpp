@@ -8,6 +8,9 @@ using namespace GLEEMAIL_DEBUG;
 
 
 namespace {
+	static const char DOT = '.';
+	static const char DASH = '-';
+
 	/*
 		WARNING: STATISTICS BELOW:
 
@@ -34,9 +37,6 @@ namespace {
 	const constexpr unsigned short CALCULATED_MESSAGE_FINISHED_THRESHOLD = 3 * CALCULATED_WORD_FINISHED_THRESHOLD;
 	const constexpr unsigned short MESSAGE_FINISIHED_THRESHOLD_BUFFER = 500;
 	const constexpr unsigned short MESSAGE_FINISHED_THRESHOLD = CALCULATED_MESSAGE_FINISHED_THRESHOLD + MESSAGE_FINISIHED_THRESHOLD_BUFFER;
-
-	static const char DOT = '.';
-	static const char DASH = '-';
 }
 
 
@@ -45,11 +45,8 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 	pins[1] = &NULL_PIN;
 	pins[2] = &NULL_PIN;
 
-	Pin* const switchDigitalPin = new Pin(SWITCH_PIN_LOCATION, PIN_MODE::READ, MORSE_CODE_STATE::SWITCH_OPEN);
-	Pin* const ledDigitalPin = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
-
-	pins[PINS_INDEX_SWITCH] = switchDigitalPin;
-	pins[PINS_INDEX_LED] = ledDigitalPin;
+	pins[PINS_INDEX_SWITCH] = new Pin(SWITCH_PIN_LOCATION, PIN_MODE::READ, MORSE_CODE_STATE::SWITCH_OPEN);
+	pins[PINS_INDEX_LED] = new Pin(ledPinLocation, PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
 
 	currentInputState = (pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_OPEN ? MORSE_CODE_STATE::SWITCH_OPEN : MORSE_CODE_STATE::SWITCH_CLOSED);
 	lastInputState = currentInputState;
@@ -72,11 +69,11 @@ unsigned short MorseCodeInput::filterJsonPayloadSize(const char* payload) const 
 	DeserializationError error = deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
 	if(error) {
 		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_FILTER_DESERIALIZATION_ERROR);
-		//Serial.println(error.c_str()); //For debugging purposes.
+
 		return 0;
 	}
 
-	return sizeDoc["size"]; //If you're having issues, this may be a good place to look. Make sure the return type is being properly cast.
+	return sizeDoc["size"];
 }
 
 
@@ -86,7 +83,7 @@ unsigned short MorseCodeInput::calculateMorsePhraseSymbolsSize(const ArduinoJson
 
 	unsigned short arraySize = 0;
 	for(unsigned short index = strlen(lastPhrase); index > 0; index -= 1) {
-		arraySize += (1 << index); //Used in lieu of pow(). Can be done because we are working with powers of 2.
+		arraySize += (1 << index);
 	}
 
 	return arraySize;
@@ -94,19 +91,19 @@ unsigned short MorseCodeInput::calculateMorsePhraseSymbolsSize(const ArduinoJson
 
 
 unsigned short MorseCodeInput::calculateMorsePhraseIndex(const char* const phrase) const {
-	unsigned char i = 0;
+	unsigned char index = 0;
 	unsigned char binaryPhrase = 0;
-	while(phrase[i]) {
-		if(phrase[i] == '.') {
+	while(phrase[index]) {
+		if(phrase[index] == '.') {
 			binaryPhrase <<= 1;
 		} else {
 			binaryPhrase = (binaryPhrase << 1) | 0b00000001;
 		}
 
-		i += 1;
+		index += 1;
 	}
 
-	binaryPhrase += (1 << i) - 2; //The bitshifted one is to represent powers of two, and the 2 is simply a constant offset due to indexing and the fact that 2^0 = 1.
+	binaryPhrase += (1 << index) - 2; //The bitshifted one is to represent powers of two, and the 2 is simply a constant offset due to indexing and the fact that 2^0 = 1.
 
 	return binaryPhrase;
 }
@@ -122,7 +119,6 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 	DeserializationError error = deserializeJson(mccpDoc, payload);
 	if(error) {
 		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_NETWORK_DATA_DESERIALIZATION_ERROR);
-		//Serial.println(error.f_str()); //For debugging purposes.
 		return false;
 	} else if(mccpDoc.capacity() <= 0) {
 		DebugLog::getLog().logError(ERROR_CODE::MORSE_FILTERED_JSON_PAYLOAD_SIZE_ZERO);
@@ -133,13 +129,10 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 
 	morsePhraseSymbols = new char[calculateMorsePhraseSymbolsSize(rawMorseCodeTreeData)] {0};
 
-	const char* phrase;
 	const char* symbol;
 	for(ArduinoJson::JsonObjectConst elem : rawMorseCodeTreeData) {
-		phrase = elem["phrase"];
 		symbol = elem["symbol"];
-
-		morsePhraseSymbols[calculateMorsePhraseIndex(phrase)] = *symbol;
+		morsePhraseSymbols[calculateMorsePhraseIndex(elem["phrase"])] = *symbol;
 	}
 
 	return true;
@@ -149,7 +142,7 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 void MorseCodeInput::resetMorsePhrase() {
 	char* c = currentMorsePhrase;
 	while(*c) {
-		*(c++) = 0;
+		*c++ = 0;
 	}
 }
 
@@ -182,7 +175,7 @@ void MorseCodeInput::pushMorseCharacter(const char& morseCharacter) {
 
 
 //					***BUTTON RELEASED***
-void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
+void MorseCodeInput::processClosedToOpen(const unsigned long& currentCycleTime) {
 	pins[PINS_INDEX_LED]->value = LED_STATUS::OFF;
 
 	updateElapsedTime(currentCycleTime);
@@ -199,7 +192,7 @@ void MorseCodeInput::processClosedToOpen(const unsigned long currentCycleTime) {
 
 
 //					***BUTTON PRESSED***
-void MorseCodeInput::processOpenToClosed(const unsigned long currentCycleTime) {
+void MorseCodeInput::processOpenToClosed(const unsigned long& currentCycleTime) {
 	pins[PINS_INDEX_LED]->value = LED_STATUS::ON;
 
 	lastStateChangeTime = currentCycleTime;
@@ -207,7 +200,7 @@ void MorseCodeInput::processOpenToClosed(const unsigned long currentCycleTime) {
 }
 
 
-void MorseCodeInput::updateElapsedTime(const unsigned long currentCycleTime) {
+void MorseCodeInput::updateElapsedTime(const unsigned long& currentCycleTime) {
 	elapsedCycleTime = currentCycleTime - lastStateChangeTime; //Caution! After ~50 days of glEEmailing, currentCycleTime will overflow. Brief unintended behavior will result!
 }
 
@@ -237,7 +230,7 @@ void MorseCodeInput::checkMessageElapsedThresholds() {
 }
 
 
-void MorseCodeInput::checkOpenElapsedTime(const unsigned long currentCycleTime) {
+void MorseCodeInput::checkOpenElapsedTime(const unsigned long& currentCycleTime) {
 	updateElapsedTime(currentCycleTime);
 
 	checkPhraseElapsedThreshold();
@@ -245,7 +238,7 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long currentCycleTime) 
 }
 
 
-void MorseCodeInput::processInput(const unsigned long currentCycleTime) {
+void MorseCodeInput::processInput(const unsigned long& currentCycleTime) {
 	if(pins[PINS_INDEX_SWITCH]->value != lastInputState) {
 		lastDebounceTime = currentCycleTime;
 	}
