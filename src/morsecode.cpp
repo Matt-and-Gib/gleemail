@@ -105,6 +105,9 @@ unsigned short MorseCodeInput::calculateMorsePhraseIndex(const char* const phras
 
 	binaryPhrase += (1 << i) - 2; //The bitshifted one is to represent powers of two, and the 2 is simply a constant offset due to indexing and the fact that 2^0 = 1.
 
+	Serial.print(F("phrase calculated to: "));
+	Serial.println(binaryPhrase);
+
 	return binaryPhrase;
 }
 
@@ -130,8 +133,13 @@ bool MorseCodeInput::setNetworkData(const char* payload) {
 
 	morsePhraseSymbols = new char[calculateMorsePhraseSymbolsSize(rawMorseCodeTreeData)] {0};
 
+	const char* phrase;
+	const char* symbol;
 	for(ArduinoJson::JsonObjectConst elem : rawMorseCodeTreeData) {
-		morsePhraseSymbols[calculateMorsePhraseIndex(elem["phrase"])] = elem["symbol"];
+		phrase = elem["phrase"];
+		symbol = elem["symbol"];
+
+		morsePhraseSymbols[calculateMorsePhraseIndex(phrase)] = *symbol;
 	}
 
 	return true;
@@ -145,7 +153,7 @@ unsigned short MorseCodeInput::getDebounceThreshold() {
 
 void MorseCodeInput::resetMorsePhrase() {
 	char* c = currentMorsePhrase;
-	while(c) {
+	while(*c) {
 		*(c++) = 0;
 	}
 }
@@ -153,6 +161,10 @@ void MorseCodeInput::resetMorsePhrase() {
 
 const char& MorseCodeInput::convertPhraseToCharacter() {
 	const char& lookupResult = morsePhraseSymbols[calculateMorsePhraseIndex(currentMorsePhrase)];
+
+	Serial.print(F("lookup result: "));
+	Serial.println(lookupResult, DEC);
+
 	if(!lookupResult) {
 		DebugLog::getLog().logWarning(MORSE_CODE_LOOKUP_FAILED);
 		return CANCEL_CHAR;
@@ -212,7 +224,7 @@ void MorseCodeInput::updateElapsedTime(const unsigned long currentCycleTime) {
 
 
 void MorseCodeInput::checkPhraseElapsedThreshold() {
-	if(currentMorsePhrase[0] != '\0') {
+	if(currentMorsePhrase[0] != 0) {
 		if(elapsedCycleTime >= PHRASE_FINISHED_THRESHOLD) {
 			pushCharacterToMessage(convertPhraseToCharacter());
 			resetMorsePhrase();
