@@ -76,8 +76,8 @@ void connectedToPeerClearDisplay() {
 void updateInputMethod() {
 	pinIndex = 0;
 
-	Pin **allPins = input->getPins();
-	Pin *currentPin = allPins[pinIndex];
+	Pin** allPins = input->getPins();
+	Pin* currentPin = allPins[pinIndex];
 	while(*currentPin != NULL_PIN) {
 		if(currentPin->mode == PIN_MODE::READ) {
 			currentPin->value = digitalRead(currentPin->pinLocation);
