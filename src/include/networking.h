@@ -9,6 +9,7 @@
 //#include "moc_LiteChaCha/moc_keyinfrastructure.h"
 //#include "moc_LiteChaCha/moc_authenticatedencrypt.h"
 #else
+#include "startupcodehandler.h"
 #include <WiFiUdp.h>
 #include "global.h"
 #include "queue.h"
@@ -22,8 +23,13 @@ class Message;
 class IdempotencyToken;
 
 
-class Networking final {
+class Networking final : public StartupCodeHandler {
 private:
+	const char MAN_IN_THE_MIDDLE_DETECTION_MODE_STARTUP_CODE = 'k';
+	bool printDSAKeys = false;
+	//bool doPrintDSAKeys() const {return}
+	bool enablePrintDSAKeysStartupCodeReceived() {printDSAKeys = true;}
+
 	bool& shutdownFlag;
 
 	WiFiUDP udp;
@@ -158,6 +164,9 @@ private:
 public:
 	Networking(unsigned long (*)(), void (*)(char*), void (*)(), const long u, bool& quit);
 	~Networking();
+
+	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
+	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
 
 	void processNetwork();
 	void sendChatMessage(const char*);

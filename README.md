@@ -91,7 +91,6 @@ Last updated: 12/29/2021
 |20|Message Only Whitespace||Low|
 |21|Data Version Download Failed||Low|
 |22|Data Download Failed||Low|
-|23|Inserting Into Tree Failed|Error building Morse Code data (did you try to insert a duplicate?)|High|
 </details>
 
 <details>
@@ -223,7 +222,7 @@ ___
 
 The first step to becoming a glEEveloper is understanding the project structure. Now, you may think that you already understand the structure because you saw that "src" folder, and you know what that's all about, but I'm here to tell you that there's more to the story. See, Arduino requires a .ino file with the same name as the project to live in the root folder. Now, again, you're like "I already know this," but hang on; if you open the .ino, you might eventually notice that it's entirely empty. Yeah, like, what? Well, there's also a main.cpp file in the root of the project, and _that's_ where the magic happens. Our main.cpp overwrites the implicit main.cpp created by Arduino so that we can control the main loop. Why did we do this? Red-hot performance gains.
 
-Aside from that, all other code files may be found inside `src`. The root folder `src` itself is for source files, `src/include` is for headers, and `src/include/LiteChaCha` is for the encryption library [written by DualJustice](https://github.com/DualJustice/LiteChaCha). We've separated as many files as possible into definition and implementation, but several important files are exclusive to `src/include`, such as data structures like our queue and binary search tree.
+Aside from that, all other code files may be found inside `src`. The root folder `src` itself is for source files, `src/include` is for headers, and `src/include/LiteChaCha` is for the encryption library [written by DualJustice](https://github.com/DualJustice/LiteChaCha). We've separated as many files as possible into definition and implementation, but several important files are exclusive to `src/include`, such as data structures like our queue.
 
 Most work will be done on implementation files in the base `src` folder. For an idea of what glEEmail does at runtime, please take a look at our flow diagram below, however for a basic overview, see the following:
 
@@ -266,7 +265,7 @@ ___
 
 Important!
 
-In order to use glEEmail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses a binary tree populated with JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the WiFi Module).
+In order to use glEEmail's Morse Code functionality, you will need to install the SSL certificate for `raw.githubusercontent.com` because the Morse-Code-to-character conversion uses JSON data hosted in this repository. To install the certificate, open the Arduino IDE, click on tools, then `WiFi101 / WiFiNINA Firmware Updater`, and make sure that your Arduino is selected in Step 1 of the Firmware Updater (Select the port of the WiFi Module).
 
 ![Install Certificate Picture One.png](resources/InstallCertificatePictureOne.png)
 
@@ -325,6 +324,7 @@ As soon as possible at launch, send **-A** via Serial to trigger the startup cod
 |Code|Behavior|Component|Notes|
 |----|--------|---------|-----|
 |[DEL]|None|_core_|Reserved for system use|
+|k|Print DSA keys|Networking|Confirm your keys out-of-band to ensure a secure connection|
 |t|Startup code test|_core_|Receive confirmation that your startup code was received and processed|
 |v|Enable Verbose Debug Mode|_core_|Warnings will be sent via Serial in addition to errors|
 |I|Enable Incoming-Only Mode|Display|Only incoming messages will be displayed (hide your output)|

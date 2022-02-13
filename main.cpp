@@ -24,6 +24,17 @@
 using namespace GLEEMAIL_DEBUG;
 
 
+/*
+	To-Do: Startup code enabling DSA key printout
+	[v] Make Network object a pointer
+	[v] Construct Networking object in Setup()
+	[v] Inherit from StartupCodeHandler in Networking
+	[v] Implement pure virtual functions in Netowkring
+	[v] Add functionality for printing DSA keys if enabled
+	[_] Register networking with handlers
+*/
+
+
 //Weak empty variant initialization function.
 //May be redefined by variant files.
 void initVariant() __attribute__((weak));
@@ -40,16 +51,13 @@ const unsigned short STARTUP_CODE_PROCESSED = 127;
 
 bool quit = false;
 
+char* messageToPrint = nullptr;
+
 Display* display = nullptr;
 Storage* storage = nullptr;
-
-InternetAccess internet;
-WebsiteAccess websiteAccess;
-
-char* messageToPrint = nullptr;
-void connectedToPeerClearDisplay();
-void updateDisplayWithPeerChat(char*);
-Networking network(&millis, &updateDisplayWithPeerChat, &connectedToPeerClearDisplay, 0, quit);
+InternetAccess internet; //make me a pointer
+WebsiteAccess websiteAccess; //make me a pointer
+Networking* network = nullptr;
 
 InputMethod* input = nullptr;
 unsigned short pinIndex = 0;
@@ -101,7 +109,7 @@ void updateInputMethod() {
 
 
 void updateNetwork() {
-	network.processNetwork();
+	network->processNetwork();
 }
 
 
@@ -111,7 +119,7 @@ void userMessageChanged(char* chat) {
 
 
 void sendChatMessage(char* chat) {
-	network.sendChatMessage(chat);
+	network->sendChatMessage(chat);
 }
 
 
@@ -439,19 +447,11 @@ bool setupInputMethod() {
 
 
 void setupPins() {
-	Pin **pins = input->getPins();
+	Pin** pins = input->getPins();
+	
 	unsigned short i = 0;
-	Pin *currentPin = pins[i];
-
+	Pin* currentPin = pins[i];
 	while (*currentPin != NULL_PIN) {
-		/*Important debug messages. Check here first if something seems broken with hardware!
-		Serial.print("Index: ");
-		Serial.println(i);
-
-		Serial.print(currentPin->pinLocation);
-		Serial.print(" : ");
-		Serial.println(currentPin->mode);*/
-
 		pinMode(currentPin->pinLocation, currentPin->mode);
 		currentPin = pins[++i];
 	}
@@ -487,7 +487,7 @@ void connectToPeer() {
 	display->updateReading("Initializing");
 	display->updateWriting("  Authentication");
 
-	network.connectToPeer(friendsIP);
+	network->connectToPeer(friendsIP);
 
 	Serial.print(F("Waiting for gleepal at "));
 	Serial.println(friendsIP);
@@ -599,6 +599,11 @@ void setup() {
 
 
 		case SETUP_LEVEL::NETWORK:
+			if(!network) {
+				network = new Networking(&millis, &updateDisplayWithPeerChat, &connectedToPeerClearDisplay, 0, quit);
+				network->registerNewStartupCodes(startupCodeHandlers);
+			}
+
 			Serial.println(F("Joining WiFi"));
 			display->updateWriting("Joining WiFi");
 			delay(SETUP_STEP_DELAY_MS);

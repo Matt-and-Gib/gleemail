@@ -1,11 +1,9 @@
 #include "include/networking.h"
-
 #include "Arduino.h"
-
-
 #include <ArduinoJson.hpp>
-
 #include "include/message.h"
+#include "include/keyvaluepair.h"
+#include "include/queue.h"
 
 
 using namespace GLEEMAIL_DEBUG;
@@ -24,6 +22,16 @@ Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(char*)
 
 Networking::~Networking() {
 	delete glEEpalInfo;
+}
+
+
+void Networking::registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>& startupCodeHandlers) {
+	startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(MAN_IN_THE_MIDDLE_DETECTION_MODE_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Networking::enablePrintDSAKeysStartupCodeReceived))));
+}
+
+
+void Networking::startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
+	(this->*(reinterpret_cast<bool (Networking::*)(void)>(memberFunction)))();
 }
 
 
@@ -68,7 +76,7 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 		n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
 		//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
 
-		if(DebugLog::getLog().verboseMode()) {
+		if(n.printDSAKeys) {
 			Serial.print(F("Peer DSA Public Key:"));
 			for(unsigned short i = 0; i < keyBytes; i += 1) {
 				Serial.print(' ');
@@ -171,7 +179,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	createuuid(userID);
 	buildEncryptionInfoPayload(encryptionInfo, userDSAPubKey, userEphemeralPubKey, userSignature, userID);
 
-	if(DebugLog::getLog().verboseMode()) {
+	if(printDSAKeys) {
 		Serial.print(F("User DSA Public Key:"));
 		for(unsigned short i = 0; i < keyBytes; i += 1) {
 			Serial.print(' ');
