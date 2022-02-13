@@ -58,6 +58,9 @@ MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messa
 
 MorseCodeInput::~MorseCodeInput() {
 	delete morsePhraseSymbols;
+
+	delete ledDigitalPin;
+	delete switchDigitalPin;
 }
 
 
@@ -104,9 +107,6 @@ unsigned short MorseCodeInput::calculateMorsePhraseIndex(const char* const phras
 	}
 
 	binaryPhrase += (1 << i) - 2; //The bitshifted one is to represent powers of two, and the 2 is simply a constant offset due to indexing and the fact that 2^0 = 1.
-
-	Serial.print(F("phrase calculated to: "));
-	Serial.println(binaryPhrase);
 
 	return binaryPhrase;
 }
@@ -161,9 +161,6 @@ void MorseCodeInput::resetMorsePhrase() {
 
 const char& MorseCodeInput::convertPhraseToCharacter() {
 	const char& lookupResult = morsePhraseSymbols[calculateMorsePhraseIndex(currentMorsePhrase)];
-
-	Serial.print(F("lookup result: "));
-	Serial.println(lookupResult, DEC);
 
 	if(!lookupResult) {
 		DebugLog::getLog().logWarning(MORSE_CODE_LOOKUP_FAILED);
