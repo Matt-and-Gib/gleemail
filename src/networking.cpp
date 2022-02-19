@@ -550,6 +550,7 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 
 
 bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
+	delay(24); //DELETE ME!
 	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
 		udp.read(messageFromUDPBuffer, packetSize);
@@ -581,6 +582,8 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 
 
 unsigned short Networking::doTimeSensitiveProcess(const unsigned int previousProcessElapsedTime, const unsigned short MAX_PROCESSING_TIME, bool (Networking::*doProcess)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*passProcess)(Queue<Message>&, QueueNode<Message>*), Queue<Message>& onQueue) {
+	Serial.print(F("How much time we got (ms): ")); //DELETE ME!
+	Serial.println(MAX_PROCESSING_TIME + (MAX_PROCESSING_TIME - previousProcessElapsedTime)); //DELETE ME!
 	processStartTime = nowMS();
 	while(nowMS() - processStartTime < MAX_PROCESSING_TIME + (MAX_PROCESSING_TIME - previousProcessElapsedTime)) { //This bothers me... What if previousProcessElapsedTime > MAX_PROCESSING_TIME? Do we want to reduce the time a process has if the previous process took longer than its max time?
 		if(!(this->*doProcess)(passProcess, onQueue)) {
