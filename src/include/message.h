@@ -48,10 +48,10 @@ public:
 		idempotencyToken = new IdempotencyToken(tempIdempVal, currentTimeMS);
 
 		const char* tempChat = parsedDocument["C"];
-		chat = (const unsigned char*)copyString(tempChat, MAX_MESSAGE_LENGTH); //NOTE: Now that max message length has been increased, this is a less-trivial copy.
+		chat = copyAndConvertString(tempChat, MAX_MESSAGE_LENGTH); //NOTE: Now that max message length has been increased, this is a less-trivial copy.
 
 		const char* tempAuthentication = parsedDocument["G"];
-		authentication = (const unsigned char*)copyString(tempAuthentication, AUTHENTICATION_PAYLOAD_SIZE);
+		authentication = copyAndConvertString(tempAuthentication, AUTHENTICATION_PAYLOAD_SIZE);
 
 		//error = new MessageError(parsedDocument);
 

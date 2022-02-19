@@ -103,7 +103,7 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 
 
 void Networking::sendChatMessage(const char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), (unsigned char*)copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyAndConvertString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
 }
 
 
@@ -196,7 +196,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
 	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), (unsigned char*)copyString((char*)encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
 
 	return true;
@@ -249,11 +249,11 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Op
 	message[8 + tagBytes + length] = '\0';
 }
 
-
+/*
 void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) { //Is this used anywhere? Possibly delete me!
-	ae.encryptAndTagMessage(messageCount, tag, (unsigned char*)outputBuffer, length); //Unnecessary static cast if this function is never called!
+	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length); //Unnecessary static cast if this function is never called!
 }
-
+*/
 
 void Networking::buildAuthenticationPayload(unsigned char* authPayload) {
 	unsigned short i;
@@ -435,17 +435,20 @@ char* Networking::decryptChat(Message& msg) {
 	unsigned short decryptedMessageLength = msg.getChatLength() / 2;
 
 	unsigned char* chatDecryptionBuffer = new unsigned char[msg.getChatLength() + TERMINATOR]; //delete[]'ed by updateDispaly() in main
+	char* decryptedString = new char[msg.getChatLength() + TERMINATOR] {0}; //There is probably a better way to do this. Also, above comment is no longer true. decryptedString is now the relevant variable being delete[]'ed
 	stringToHex(chatDecryptionBuffer, msg.getChat(), 0, msg.getChatLength());
 	chatDecryptionBuffer[decryptedMessageLength] = '\0';
 
 	if(ae.messageAuthentic(chatDecryptionBuffer, decryptedMessageLength, messageCount, tag)) { // Authenticates the message with the MAC tag.
 		ae.decryptAuthenticatedMessage(chatDecryptionBuffer, decryptedMessageLength, messageCount); // Decrypts message, overwriting it with the plaintext.
+		overwriteBytes(chatDecryptionBuffer, msg.getChatLength(), decryptedString);
 	} else {
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_RECEIVED_UNAUTHENTIC_MESSAGE);
-		chatDecryptionBuffer[0] = '\0';
 	}
 
-	return (char*)chatDecryptionBuffer;
+	delete[] chatDecryptionBuffer;
+
+	return decryptedString;
 }
 
 
@@ -461,7 +464,7 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
-	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), (unsigned char*)copyString((char*)encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
+	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
 
 	if(!messagesInIdempotencyTokens.find(msg.getData()->getIdempotencyToken())) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));

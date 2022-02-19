@@ -64,6 +64,26 @@ inline char* copyString(const char* original, const unsigned short LEN) {
 }
 
 
+inline unsigned char* copyString(const unsigned char* original, const unsigned short LEN) { //Not sure if this is the best way to do this
+	unsigned char* duplicate = new unsigned char[LEN];
+	for(short i = 0; i < LEN; i += 1) {
+		duplicate[i] = original[i];
+	}
+
+	return duplicate;
+}
+
+
+inline unsigned char* copyAndConvertString(const char* original, const unsigned short LEN) { //Not sure about this one either
+	unsigned char* duplicate = new unsigned char[LEN];
+	for(short i = 0; i < LEN; i += 1) {
+		duplicate[i] = original[i];
+	}
+
+	return duplicate;
+}
+
+
 inline char* copyAndTerminateString(const char* original, const unsigned short LEN) {
 	char* duplicate = new char[LEN + TERMINATOR];
 	for(short i = 0; i < LEN; i += 1) {
@@ -75,9 +95,16 @@ inline char* copyAndTerminateString(const char* original, const unsigned short L
 }
 
 
-inline void overwriteBytes(const unsigned char* originalString, const unsigned short originalLength, unsigned char* modifiableString) {
-	for(unsigned short i = 0; i < originalLength; i += 1) {
-		modifiableString[i] = originalString[i];
+inline void overwriteBytes(const unsigned char* originalBytes, const unsigned short LEN, unsigned char* modifiableBytes) {
+	for(unsigned short i = 0; i < LEN; i += 1) {
+		modifiableBytes[i] = originalBytes[i];
+	}
+}
+
+
+inline void overwriteBytes(const unsigned char* originalBytes, const unsigned short LEN, char* modifiableString) { //Or this one...
+	for(unsigned short i = 0; i < LEN; i += 1) {
+		modifiableString[i] = originalBytes[i];
 	}
 }
 
