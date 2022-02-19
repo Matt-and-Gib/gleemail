@@ -45,7 +45,7 @@ private:
 	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator //Don't forget to move me if the rest of encryption is moved
 
 	unsigned short uuid;
-	void createuuid(char*);
+	void createuuid(unsigned char*);
 	unsigned short messagesSentCount = 0;
 
 	unsigned long (*nowMS)();
@@ -54,7 +54,7 @@ private:
 	CipherManagement ae;
 	static const constexpr size_t tagBytes = 16; //CipherManagement::getTagBytes();
 	unsigned long long messageCount; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
-	char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
+	unsigned char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
 	//char* tag;
 
 
@@ -65,26 +65,26 @@ private:
 	static const constexpr size_t signatureBytes = 64; //pki.getSignatureBytes();
 	static const constexpr size_t IDBytes = 4; //pki.getIDBytes();
 
-	char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
-	char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
-	char peerDSAPubKey[keyBytes];
+	unsigned char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
+	unsigned char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
+	unsigned char peerDSAPubKey[keyBytes];
 
-	char userEphemeralPubKey[keyBytes];
-	char peerEphemeralPubKey[keyBytes];
+	unsigned char userEphemeralPubKey[keyBytes];
+	unsigned char peerEphemeralPubKey[keyBytes];
 
-	char userSignature[signatureBytes];
-	char peerSignature[signatureBytes];
+	unsigned char userSignature[signatureBytes];
+	unsigned char peerSignature[signatureBytes];
 
-	char userID[IDBytes]; // IDs are used for a fixed portion of a nonce.
-	char peerID[IDBytes];
+	unsigned char userID[IDBytes]; // IDs are used for a fixed portion of a nonce.
+	unsigned char peerID[IDBytes];
 
-	char encryptionInfo[SIZE_OF_ENCRYPTION_INFO_PAYLOAD];
+	unsigned char encryptionInfo[SIZE_OF_ENCRYPTION_INFO_PAYLOAD];
 //	MOVE ME!
 
 
-	void buildEncryptionInfoPayload(char*, const char*, const char*, const char*, const char*); // REMOVE ME?
-	void stringToHex(char*, const char*, const unsigned short, const unsigned short); // REMOVE ME?
-	void convertEncryptionInfoPayload(char*, char*, char*, char*, const char*); // REMOVE ME?
+	void buildEncryptionInfoPayload(unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*); // REMOVE ME?
+	void stringToHex(unsigned char*, const unsigned char*, const unsigned short, const unsigned short); // REMOVE ME?
+	void convertEncryptionInfoPayload(unsigned char*, unsigned char*, unsigned char*, unsigned char*, const unsigned char*); // REMOVE ME?
 	void stringToULL();
 
 	void clearAllQueues();
@@ -148,8 +148,8 @@ private:
 	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
 
-	void buildAuthenticationPayload(char*);
-	void prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes);
+	void buildAuthenticationPayload(unsigned char*);
+	void prepareOutgoingEncryptedChat(unsigned char* cipherText, unsigned short chatBytes);
 	char outgoingMessageBuffer[MESSAGE_BUFFER_SIZE] = {0};
 	Message& sendOutgoingMessage(Message&);
 

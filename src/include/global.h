@@ -75,7 +75,7 @@ inline char* copyAndTerminateString(const char* original, const unsigned short L
 }
 
 
-inline void overwriteString(const char* originalString, const unsigned short originalLength, char* modifiableString) {
+inline void overwriteBytes(const unsigned char* originalString, const unsigned short originalLength, unsigned char* modifiableString) {
 	for(unsigned short i = 0; i < originalLength; i += 1) {
 		modifiableString[i] = originalString[i];
 	}

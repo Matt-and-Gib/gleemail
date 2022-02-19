@@ -25,8 +25,8 @@ private:
 
 	MESSAGE_TYPE messageType;
 	IdempotencyToken* idempotencyToken;
-	const char* chat;
-	const char* authentication;
+	const unsigned char* chat;
+	const unsigned char* authentication;
 	unsigned short chatLength = 0;
 	//MessageError* error;
 
@@ -48,10 +48,10 @@ public:
 		idempotencyToken = new IdempotencyToken(tempIdempVal, currentTimeMS);
 
 		const char* tempChat = parsedDocument["C"];
-		chat = copyString(tempChat, MAX_MESSAGE_LENGTH); //NOTE: Now that max message length has been increased, this is a less-trivial copy.
+		chat = (const unsigned char*)copyString(tempChat, MAX_MESSAGE_LENGTH); //NOTE: Now that max message length has been increased, this is a less-trivial copy.
 
 		const char* tempAuthentication = parsedDocument["G"];
-		authentication = copyString(tempAuthentication, AUTHENTICATION_PAYLOAD_SIZE);
+		authentication = (const unsigned char*)copyString(tempAuthentication, AUTHENTICATION_PAYLOAD_SIZE);
 
 		//error = new MessageError(parsedDocument);
 
@@ -60,7 +60,7 @@ public:
 	}
 
 	//Outgoing Message Constructor
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) : sender{*glEEself} {
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, unsigned char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) : sender{*glEEself} {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
@@ -81,11 +81,11 @@ public:
 	const glEEpal& getSender() const {return sender;}
 	MESSAGE_TYPE getMessageType() const {return messageType;}
 	IdempotencyToken* getIdempotencyToken() const {return idempotencyToken;}
-	const char* getChat() const {return chat;}
-	const char* getAuthentication() const {return authentication;}
+	const unsigned char* getChat() const {return chat;}
+	const unsigned char* getAuthentication() const {return authentication;}
 	unsigned short getChatLength() {
 		if(chatLength == 0) {
-			const char* ptr = chat;
+			const unsigned char* ptr = chat;
 			while(*ptr++) {
 				chatLength += 1;
 			}

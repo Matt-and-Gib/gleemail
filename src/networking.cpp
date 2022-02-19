@@ -103,17 +103,17 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 
 
 void Networking::sendChatMessage(const char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), (unsigned char*)copyString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
 }
 
 
-void Networking::createuuid(char* userID) {
+void Networking::createuuid(unsigned char* userID) {
 	uuid |= userID[0] << 8;
 	uuid |= userID[1];
 }
 
 
-void Networking::buildEncryptionInfoPayload(char* encryptionInfoOut, const char* DSAPubKey, const char* ephemeralPubKey, const char* signature, const char* ID) {
+void Networking::buildEncryptionInfoPayload(unsigned char* encryptionInfoOut, const unsigned char* DSAPubKey, const unsigned char* ephemeralPubKey, const unsigned char* signature, const unsigned char* ID) {
 	unsigned short i = 0;
 	for(i = 0; i < keyBytes; i += 1) {
 		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
@@ -147,7 +147,7 @@ void Networking::buildEncryptionInfoPayload(char* encryptionInfoOut, const char*
 
 
 //Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
-void Networking::stringToHex(char* out, const char* s, const unsigned short start, const unsigned short length) {
+void Networking::stringToHex(unsigned char* out, const unsigned char* s, const unsigned short start, const unsigned short length) {
 	for(unsigned short i = 0; i < length; i += 1) {
 		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
 			out[i] = (s[(i*2) + start] - 48) << 4;
@@ -165,7 +165,7 @@ void Networking::stringToHex(char* out, const char* s, const unsigned short star
 
 
 //Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
-void Networking::convertEncryptionInfoPayload(char* DSAPubKeyOut, char* ephemeralPubKeyOut, char* signatureOut, char* IDOut, const char* encryptionInfo) {
+void Networking::convertEncryptionInfoPayload(unsigned char* DSAPubKeyOut, unsigned char* ephemeralPubKeyOut, unsigned char* signatureOut, unsigned char* IDOut, const unsigned char* encryptionInfo) {
 	stringToHex(DSAPubKeyOut, encryptionInfo, 0, keyBytes);
 	stringToHex(ephemeralPubKeyOut, encryptionInfo, (keyBytes*2), keyBytes);
 	stringToHex(signatureOut, encryptionInfo, (keyBytes*4), signatureBytes);
@@ -196,7 +196,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
 	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), (unsigned char*)copyString((char*)encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
 
 	return true;
@@ -250,12 +250,12 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Op
 }
 
 
-void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) {
-	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length);
+void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) { //Is this used anywhere? Possibly delete me!
+	ae.encryptAndTagMessage(messageCount, tag, (unsigned char*)outputBuffer, length); //Unnecessary static cast if this function is never called!
 }
 
 
-void Networking::buildAuthenticationPayload(char* authPayload) {
+void Networking::buildAuthenticationPayload(unsigned char* authPayload) {
 	unsigned short i;
 
 	for(i = 0; i < 16; i += 1) {
@@ -277,7 +277,7 @@ void Networking::buildAuthenticationPayload(char* authPayload) {
 }
 
 
-void Networking::prepareOutgoingEncryptedChat(char* cipherText, unsigned short chatBytes) {
+void Networking::prepareOutgoingEncryptedChat(unsigned char* cipherText, unsigned short chatBytes) {
 	unsigned short i;
 
 	for(i = 0; i < chatBytes; i += 1) {
@@ -303,17 +303,17 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	doc["T"] = static_cast<unsigned short>(msg.getMessageType());
 	doc["I"] = msg.getIdempotencyToken()->getValue();
 
-	char* encryptedChat = nullptr;
-	char* authenticationPayload = nullptr;
+	unsigned char* encryptedChat = nullptr;
+	unsigned char* authenticationPayload = nullptr;
 	if((msg.getMessageType() == MESSAGE_TYPE::CHAT) && connected) { //the && connected might be redundant.
-		encryptedChat = new char[(2 * msg.getChatLength()) + TERMINATOR];
-		overwriteString(msg.getChat(), msg.getChatLength(), encryptedChat);
+		encryptedChat = new unsigned char[(2 * msg.getChatLength()) + TERMINATOR];
+		overwriteBytes(msg.getChat(), msg.getChatLength(), encryptedChat);
 		ae.encryptAndTagMessage(messageCount, tag, encryptedChat, msg.getChatLength());
 		prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
 
 		doc["C"] = encryptedChat;
 
-		authenticationPayload = new char[AUTHENTICATION_PAYLOAD_SIZE];
+		authenticationPayload = new unsigned char[AUTHENTICATION_PAYLOAD_SIZE];
 		buildAuthenticationPayload(authenticationPayload);
 		doc["G"] = authenticationPayload; // This is messageCount (16 bytes) and tag (32 bytes), as equivalent string values, and a null terminator.
 	} else {
@@ -434,7 +434,7 @@ char* Networking::decryptChat(Message& msg) {
 
 	unsigned short decryptedMessageLength = msg.getChatLength() / 2;
 
-	char* chatDecryptionBuffer = new char[msg.getChatLength() + TERMINATOR]; //delete[]'ed by updateDispaly() in main
+	unsigned char* chatDecryptionBuffer = new unsigned char[msg.getChatLength() + TERMINATOR]; //delete[]'ed by updateDispaly() in main
 	stringToHex(chatDecryptionBuffer, msg.getChat(), 0, msg.getChatLength());
 	chatDecryptionBuffer[decryptedMessageLength] = '\0';
 
@@ -445,7 +445,7 @@ char* Networking::decryptChat(Message& msg) {
 		chatDecryptionBuffer[0] = '\0';
 	}
 
-	return chatDecryptionBuffer;
+	return (char*)chatDecryptionBuffer;
 }
 
 
@@ -461,7 +461,7 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
-	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
+	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), (unsigned char*)copyString((char*)encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
 
 	if(!messagesInIdempotencyTokens.find(msg.getData()->getIdempotencyToken())) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
