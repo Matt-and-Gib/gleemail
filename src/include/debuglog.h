@@ -126,7 +126,7 @@ namespace GLEEMAIL_DEBUG {
 
 	class DebugLog final {
 	private:
-		const bool VERBOSE_DEBUG_LOG = true;
+		bool verboseMode = false; //This should default to false
 		static constexpr unsigned short MAX_ERROR_CODES = 16;
 		ERROR_CODE* errorCodes;
 		unsigned short errorCodesFirstOpenIndex = 0;
@@ -140,8 +140,8 @@ namespace GLEEMAIL_DEBUG {
 		}
 
 
-		void log(ERROR_CODE e, bool critical) {
-			if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
+		void log(ERROR_CODE e, const bool critical) {
+			if(critical || (!critical && verboseMode)) {
 				if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
 					errorCodes[++errorCodesFirstOpenIndex] = e;
 				} else {
@@ -159,15 +159,14 @@ namespace GLEEMAIL_DEBUG {
 			return log;
 		}
 
+		void enableVerboseMode() {verboseMode = true;}
 
-		bool verboseMode() const {return VERBOSE_DEBUG_LOG;}
-
-		void logError(ERROR_CODE e) {log(e, true);}
-		void logWarning(ERROR_CODE e) {log(e, false);}
+		void logError(const ERROR_CODE e) {log(e, true);}
+		void logWarning(const ERROR_CODE e) {log(e, false);}
 
 		ERROR_CODE getNextError() {
 			if(errorCodesFirstOpenIndex > 0) {
-				return errorCodes[--errorCodesFirstOpenIndex];
+				return errorCodes[errorCodesFirstOpenIndex--];
 			} else if(overflowErrorsLost == true) {
 				overflowErrorsLost = false;
 				return ERROR_CODE::DEBUG_OVERFLOW_ERRORS_LOST;

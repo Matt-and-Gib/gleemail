@@ -24,6 +24,25 @@
 using namespace GLEEMAIL_DEBUG;
 
 
+class VerboseModeEmissary final : public StartupCodeHandler {
+private:
+	const char VERBOSE_MODE_STARTUP_CODE = 'v';
+	bool verboseModeStartupCodeReceived() {DebugLog::getLog().enableVerboseMode();}
+public:
+	explicit VerboseModeEmissary() = default;
+	~VerboseModeEmissary() = default;
+
+	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>& startupCodeHandlers) override {
+		startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(VERBOSE_MODE_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&VerboseModeEmissary::verboseModeStartupCodeReceived))));
+	}
+
+
+	void startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) override {
+		(this->*(reinterpret_cast<bool (VerboseModeEmissary::*)(void)>(memberFunction)))();
+	}
+};
+
+
 //Weak empty variant initialization function.
 //May be redefined by variant files.
 void initVariant() __attribute__((weak));
@@ -486,10 +505,12 @@ void connectToPeer() {
 
 
 void setup() {
-	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORK, INPUT_METHOD, PINS, PEER, DONE};
+	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, DEBUG_LOG, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORK, INPUT_METHOD, PINS, PEER, DONE};
 	SETUP_LEVEL setupState = SETUP_LEVEL::BEGIN;
 
 	const unsigned short BAUD_RATE = 9600;
+
+	VerboseModeEmissary verboseModeEmissary;
 
 	char startupCodes[MAX_STARTUP_CODES + TERMINATOR] {0};
 	Queue<KVPair<const char&, StartupCodeHandlerData* const>> startupCodeHandlers;
@@ -519,6 +540,13 @@ void setup() {
 			}
 
 			clearSerialInputBuffer();
+
+			setupState = SETUP_LEVEL::DEBUG_LOG;
+		break;
+
+
+		case SETUP_LEVEL::DEBUG_LOG:
+			verboseModeEmissary.registerNewStartupCodes(startupCodeHandlers);
 
 			setupState = SETUP_LEVEL::STARTUP_CODES;
 		break;
@@ -685,6 +713,10 @@ int main(void) {
 #endif
 
 	setup();
+
+	Serial.println(F("test"));
+
+	DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::DEBUG_DEBUG_LOG);
 
 	while(!quit) {
 		cycleStartTime = millis();
