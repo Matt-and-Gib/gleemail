@@ -714,10 +714,6 @@ int main(void) {
 
 	setup();
 
-	Serial.println(F("test"));
-
-	DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::DEBUG_DEBUG_LOG);
-
 	while(!quit) {
 		cycleStartTime = millis();
 
