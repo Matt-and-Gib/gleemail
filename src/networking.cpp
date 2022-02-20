@@ -554,7 +554,7 @@ bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, Queue
 	if(packetSize > 0) {
 		udp.read(messageFromUDPBuffer, packetSize);
 #warning "remove this terminator once we can send a message based on length instead of \0"
-		messageFromUDPBuffer[++packetSize] = '\0'; // Is this writing a null terminator somewhere it shouldn't with handshakes? Also, shouldn't a null terminator be put at the end of every packet by us anyways?
+		messageFromUDPBuffer[packetSize++] = '\0'; // Is this writing a null terminator somewhere it shouldn't with handshakes? Also, shouldn't a null terminator be put at the end of every packet by us anyways?
 		if(*glEEpalInfo == udp.remoteIP()) { //group chat: search through list of glEEpals to find match
 			messageReceivedCount += 1;
 

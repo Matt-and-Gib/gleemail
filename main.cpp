@@ -485,7 +485,7 @@ void connectToPeer() {
 
 	ipAddressInputSubstringBuffer = strtok(ipAddressInputBuffer, ".");
 	while(ipAddressInputSubstringBuffer != nullptr) {
-		ipAddressParts[++ipAddressPartsIndex] = atoi(ipAddressInputSubstringBuffer);
+		ipAddressParts[ipAddressPartsIndex++] = atoi(ipAddressInputSubstringBuffer);
 		ipAddressInputSubstringBuffer = strtok(NULL, ".");
 	}
 
