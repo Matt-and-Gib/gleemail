@@ -166,7 +166,7 @@ namespace GLEEMAIL_DEBUG {
 
 		ERROR_CODE getNextError() {
 			if(errorCodesFirstOpenIndex > 0) {
-				return errorCodes[errorCodesFirstOpenIndex--];
+				return errorCodes[--errorCodesFirstOpenIndex];
 			} else if(overflowErrorsLost == true) {
 				overflowErrorsLost = false;
 				return ERROR_CODE::DEBUG_OVERFLOW_ERRORS_LOST;
