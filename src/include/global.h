@@ -112,7 +112,7 @@ inline void overwriteBytes(const unsigned char* originalBytes, const unsigned sh
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};
 enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};
 
-struct Pin {
+struct Pin final {
 	Pin(const short i, const PIN_MODE m, const unsigned short v) {pinLocation = i; mode = m; value = v;}
 	~Pin() {}
 
@@ -128,7 +128,6 @@ struct Pin {
 		return this->pinLocation != rhs.pinLocation;
 	}
 };
-
 static Pin NULL_PIN = Pin(-1, PIN_MODE::READ, 0);
 
 #endif

@@ -124,7 +124,7 @@ namespace GLEEMAIL_DEBUG {
 	};
 
 
-	class DebugLog {
+	class DebugLog final {
 	private:
 		const bool VERBOSE_DEBUG_LOG = true;
 		static constexpr unsigned short MAX_ERROR_CODES = 16;

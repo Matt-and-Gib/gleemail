@@ -5,7 +5,7 @@
 class WiFiClient;
 
 
-class InternetAccess {
+class InternetAccess final {
 private:
 	char* ssid;
 	char* password;
@@ -14,7 +14,8 @@ private:
 
 	WiFiClient* client;
 public:
-	InternetAccess();
+	explicit InternetAccess();
+	~InternetAccess() = default;
 
 	static unsigned char getMaxSSIDLength() {return MAX_SSID_LENGTH;}
 	static unsigned char getMaxPasswordLength() {return MAX_PASSWORD_LENGTH;}

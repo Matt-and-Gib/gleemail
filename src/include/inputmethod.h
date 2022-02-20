@@ -17,7 +17,7 @@ private:
 	void (*sendMessage)(char*);
 public:
 	explicit InputMethod(void (*)(char*), void (*)(char*));
-	~InputMethod();
+	virtual ~InputMethod();
 
 	virtual const char* getDataVersionRequestEndpoint() const = 0;
 	virtual const char* getDataRequestEndpoint() const = 0;

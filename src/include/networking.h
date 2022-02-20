@@ -162,7 +162,7 @@ private:
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
 public:
-	Networking(unsigned long (*)(), void (*)(char*), void (*)(), const long u, bool& quit);
+	explicit Networking(unsigned long (*)(), void (*)(char*), void (*)(), const long u, bool& quit);
 	~Networking();
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;

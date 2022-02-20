@@ -19,7 +19,7 @@
 class Networking;
 
 
-class Message {
+class Message final {
 private:
 	const glEEpal& sender;
 
@@ -36,10 +36,10 @@ private:
 	static void noConfirmedProcess(Networking& n, Queue<Message>& messagesOut, QueueNode<Message>& messageIn, Message& messageOut) {}
 	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&); //Used for establishing connection and 
 public:
-	Message() : sender{*glEEself} {}
+	explicit Message() : sender{*glEEself} {}
 	
 	//Incoming Message Constructor
-	Message(const ArduinoJson::StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) : sender{from} {
+	explicit Message(const ArduinoJson::StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) : sender{from} {
 
 		const unsigned short tempMessageType = parsedDocument["T"];
 		messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
@@ -60,7 +60,7 @@ public:
 	}
 
 	//Outgoing Message Constructor
-	Message(MESSAGE_TYPE t, IdempotencyToken* i, unsigned char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) : sender{*glEEself} {
+	explicit Message(MESSAGE_TYPE t, IdempotencyToken* i, unsigned char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) : sender{*glEEself} {
 		messageType = t;
 		idempotencyToken = i;
 		chat = c;
@@ -69,6 +69,7 @@ public:
 		outgoingPostProcess = !op ? &noOutgoingProcess : op; //Remove conditional check by relocating noOutgoingProcess?
 		confirmedPostProcess = !cp ? &noConfirmedProcess : cp; //Remove conditional check by relocating noIncomingProcess?
 	}
+	
 	~Message() {
 		delete idempotencyToken;
 		delete[] authentication;

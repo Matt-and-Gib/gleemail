@@ -3,12 +3,12 @@
 
 
 template <class T>
-class QueueNode {
+class QueueNode final {
 private:
 	QueueNode<T>* node;
 	T* data;
 public:
-	QueueNode(T* d) {
+	explicit QueueNode(T* d) {
 		data = d;
 		node = nullptr;
 	}
@@ -37,7 +37,7 @@ public:
 
 
 template <class T>
-class Queue {
+class Queue final {
 private:
 	QueueNode<T>* root = nullptr;
 public:

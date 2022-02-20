@@ -4,7 +4,7 @@
 #include "internetaccess.h"
 
 
-class WebsiteAccess {
+class WebsiteAccess final {
 private:
 	char* server = nullptr;
 
@@ -15,6 +15,9 @@ private:
 
 	bool writeHeadersToServer(InternetAccess&, const char* const*);
 public:
+	explicit WebsiteAccess() = default;
+	~WebsiteAccess() = default;
+
 	bool connectToServer(InternetAccess& net, const char* address) {return net.connectToWeb(address);}
 	bool sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers);
 	char* downloadFromServer(InternetAccess&);

@@ -2,14 +2,15 @@
 #define KEY_VALUE_PAIR_H
 
 template <class K, class V>
-class KVPair {
+class KVPair final {
 private:
 	K key;
 	V value;
 
 public:
-	KVPair(K k, V v) : key{k}, value{v} {}
-	//~KVPair() {} //Implement this! This is important!
+	explicit KVPair(K k, V v) : key{k}, value{v} {}
+	~KVPair() = default;
+	
 	K getKey() {return key;}
 	V getValue() {return value;}
 

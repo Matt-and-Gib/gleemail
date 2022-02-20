@@ -16,11 +16,15 @@ public:
 	bool (StartupCodeHandler::*callback)(void);
 
 	explicit StartupCodeHandlerData(StartupCodeHandler* const i, bool (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {}
+	~StartupCodeHandlerData() = default;
 };
 
 
 class StartupCodeHandler {
 public:
+	explicit StartupCodeHandler() = default;
+	virtual ~StartupCodeHandler() = default;
+
 	virtual void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) = 0;
 	virtual void startupCodeReceived(bool (StartupCodeHandler::*)(void)) = 0;
 };

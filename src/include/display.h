@@ -42,6 +42,7 @@ private:
 	bool scrollWriting = false;
 public:
 	explicit Display();
+	~Display() = default;
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
 	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;

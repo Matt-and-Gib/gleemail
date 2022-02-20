@@ -3,7 +3,7 @@
 
 
 //Remember: Preferences is a singleton! DO NOT waste memory.
-class Preferences {
+class Preferences final {
 private:
 	Preferences() {}
 
@@ -17,8 +17,11 @@ private:
 	char* wifiPassword = nullptr;
 public:
 	static Preferences& getPrefs();
-	Preferences(Preferences const&) = delete;
+
+	explicit Preferences(Preferences const&) = delete;
 	void operator=(Preferences const&) = delete;
+
+	~Preferences() = default;
 
 	const char* getPrefsPath() const {return PREFERENCES_PATH;}
 
