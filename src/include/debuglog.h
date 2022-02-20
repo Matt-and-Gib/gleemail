@@ -126,7 +126,7 @@ namespace GLEEMAIL_DEBUG {
 
 	class DebugLog final {
 	private:
-		bool verboseMode = false; //This should default to false
+		bool verboseMode = true; //This should default to false
 		static constexpr unsigned short MAX_ERROR_CODES = 16;
 		ERROR_CODE* errorCodes;
 		unsigned short errorCodesFirstOpenIndex = 0;
