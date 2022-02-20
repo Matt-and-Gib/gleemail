@@ -143,7 +143,7 @@ namespace GLEEMAIL_DEBUG {
 		void log(ERROR_CODE e, bool critical) {
 			if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
 				if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
-					errorCodes[errorCodesFirstOpenIndex++] = e;
+					errorCodes[++errorCodesFirstOpenIndex] = e;
 				}
 			}
 		}

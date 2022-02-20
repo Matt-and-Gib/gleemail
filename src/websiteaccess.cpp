@@ -50,7 +50,7 @@ short WebsiteAccess::findEndOfHeaderIndex(const char* const rawData, const unsig
 		if(rawData[beginningSubstringIndex] == '\r') {
 			headerEndSearchIndex = 0;
 			for(unsigned short endSubstringIndex = 0; endSubstringIndex < LENGTH_OF_HEADER_TERMINATION; endSubstringIndex += 1) {
-				if(rawData[beginningSubstringIndex + endSubstringIndex] != NETWORK_HEADER_TERMINATION[headerEndSearchIndex++]) {
+				if(rawData[beginningSubstringIndex + endSubstringIndex] != NETWORK_HEADER_TERMINATION[++headerEndSearchIndex]) {
 					goto headerEndMismatch;
 				}
 			}
@@ -71,7 +71,7 @@ char* WebsiteAccess::downloadFromServer(InternetAccess& net) {
 	while(net.activeWebConnection()) {
 		while(net.responseAvailableFromWeb()) {
 			if(bufferIndex < DOWNLOADED_PACKET_BUFFER_SIZE) {
-				dataBuffer[bufferIndex++] = net.nextCharInWebResponse();
+				dataBuffer[++bufferIndex] = net.nextCharInWebResponse();
 			} else {
 				DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DATA_BUFFER_OVERFLOW);
 				delete[] dataBuffer;
