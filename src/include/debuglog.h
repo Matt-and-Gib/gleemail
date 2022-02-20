@@ -20,6 +20,7 @@ namespace GLEEMAIL_DEBUG {
 		UNKNOWN_SETUP_STATE = 2,
 		CONTINUOUS_FRAME_LATENCY = 3,
 		ALL_FUNCTIONS_SUCCEEDED = 4,
+		DEBUG_OVERFLOW_ERRORS_LOST = 5,
 
 		//InputMethod range: 10 - 49
 		//MORSE_PHRASE_IMMINENT_OVERFLOW = DEBUG_LOG_INPUT_METHOD_OFFSET + 0, //unused
@@ -130,6 +131,7 @@ namespace GLEEMAIL_DEBUG {
 		static constexpr unsigned short MAX_ERROR_CODES = 16;
 		ERROR_CODE* errorCodes;
 		unsigned short errorCodesFirstOpenIndex = 0;
+		bool overflowErrorsLost = false;
 
 		explicit DebugLog() {
 			errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
@@ -143,6 +145,8 @@ namespace GLEEMAIL_DEBUG {
 			if(critical || (!critical && VERBOSE_DEBUG_LOG)) {
 				if(errorCodesFirstOpenIndex < MAX_ERROR_CODES) {
 					errorCodes[++errorCodesFirstOpenIndex] = e;
+				} else {
+					overflowErrorsLost = true;
 				}
 			}
 		}
@@ -165,6 +169,9 @@ namespace GLEEMAIL_DEBUG {
 		ERROR_CODE getNextError() {
 			if(errorCodesFirstOpenIndex > 0) {
 				return errorCodes[--errorCodesFirstOpenIndex];
+			} else if(overflowErrorsLost == true) {
+				overflowErrorsLost = false;
+				return ERROR_CODE::DEBUG_OVERFLOW_ERRORS_LOST;
 			} else {
 				return ERROR_CODE::NONE;
 			}
