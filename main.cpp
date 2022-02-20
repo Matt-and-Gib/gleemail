@@ -127,12 +127,14 @@ void updateDisplay() {
 
 
 void printErrorCodes() {
-	ERROR_CODE e = DebugLog::getLog().getNextError();
-	while(e != ERROR_CODE::NONE) {
-		Serial.print(F("\nError Code: "));
-		Serial.println(e);
+	if(DebugLog::getLog().getPendingErrors() > 0) {
+		ERROR_CODE e = DebugLog::getLog().getNextError();
+		do {
+			Serial.print(F("\nError Code: "));
+			Serial.println(e);
 
-		e = DebugLog::getLog().getNextError();
+			e = DebugLog::getLog().getNextError();
+		} while(e != ERROR_CODE::NONE);
 	}
 }
 

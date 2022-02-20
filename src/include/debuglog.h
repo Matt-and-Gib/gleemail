@@ -131,8 +131,7 @@ namespace GLEEMAIL_DEBUG {
 		ERROR_CODE* errorCodes;
 		unsigned short errorCodesFirstOpenIndex = 0;
 
-
-		DebugLog() {
+		explicit DebugLog() {
 			errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
 			for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
 				errorCodes[i] = ERROR_CODE::NONE;
@@ -148,9 +147,9 @@ namespace GLEEMAIL_DEBUG {
 			}
 		}
 	public:
-		DebugLog(DebugLog const&) = delete;
+		explicit DebugLog(DebugLog const&) = delete;
 		void operator=(DebugLog const&) = delete;
-
+		~DebugLog() = default;
 
 		static DebugLog& getLog() {
 			static DebugLog log;
@@ -160,10 +159,8 @@ namespace GLEEMAIL_DEBUG {
 
 		bool verboseMode() const {return VERBOSE_DEBUG_LOG;}
 
-
 		void logError(ERROR_CODE e) {log(e, true);}
 		void logWarning(ERROR_CODE e) {log(e, false);}
-
 
 		ERROR_CODE getNextError() {
 			if(errorCodesFirstOpenIndex > 0) {
@@ -171,6 +168,11 @@ namespace GLEEMAIL_DEBUG {
 			} else {
 				return ERROR_CODE::NONE;
 			}
+		}
+
+
+		unsigned short getPendingErrors() const {
+			return errorCodesFirstOpenIndex;
 		}
 	};
 }
