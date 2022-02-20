@@ -62,7 +62,7 @@ ___
 
 ### <a name="errortable"></a>**Error Codes**
 
-Last updated: 12/29/2021
+Last updated: 2/19/2022
 <details>
 <summary>0 - 9: General</summary>
 
@@ -72,7 +72,7 @@ Last updated: 12/29/2021
 |1|Debug Debug Log|Verified that debug log is functional||
 |2|Unknown Setup State|An unknown step was specified in setup|High|
 |3|Continuous Frame Latency|Lag may cause inaccuracies in input|High|
-|4|All Functions Succeeded|||
+|4|Overflow Errors Lost|Too many errors were received in one cycle|High|
 </details>
 
 <details>
