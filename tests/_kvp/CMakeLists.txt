@@ -1,6 +1,6 @@
 #Unit tests for kvp.h
 
-SET(testname "vkp")
+SET(testname "kvp")
 SET(testsource "ut_kvp.cpp")
 
 add_executable(${testname} ${testsource})
