@@ -103,7 +103,7 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 
 
 void Networking::sendChatMessage(const char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyAndConvertString(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString<const char, unsigned char>(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
 }
 
 
@@ -196,7 +196,7 @@ bool Networking::connectToPeer(IPAddress& connectToIP) {
 	udp.begin(CONNECTION_PORT);
 
 	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString<unsigned char, unsigned char>(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
 
 	return true;
@@ -307,7 +307,7 @@ Message& Networking::sendOutgoingMessage(Message& msg) {
 	unsigned char* authenticationPayload = nullptr;
 	if((msg.getMessageType() == MESSAGE_TYPE::CHAT) && connected) { //the && connected might be redundant.
 		encryptedChat = new unsigned char[(2 * msg.getChatLength()) + TERMINATOR];
-		overwriteBytes(msg.getChat(), msg.getChatLength(), encryptedChat);
+		overwriteBytes<unsigned char>(msg.getChat(), msg.getChatLength(), encryptedChat);
 		ae.encryptAndTagMessage(messageCount, tag, encryptedChat, msg.getChatLength());
 		prepareOutgoingEncryptedChat(encryptedChat, msg.getChatLength());
 
@@ -441,7 +441,7 @@ char* Networking::decryptChat(Message& msg) {
 
 	if(ae.messageAuthentic(chatDecryptionBuffer, decryptedMessageLength, messageCount, tag)) { // Authenticates the message with the MAC tag.
 		ae.decryptAuthenticatedMessage(chatDecryptionBuffer, decryptedMessageLength, messageCount); // Decrypts message, overwriting it with the plaintext.
-		overwriteBytes(chatDecryptionBuffer, msg.getChatLength(), decryptedString);
+		overwriteBytes<char>(chatDecryptionBuffer, msg.getChatLength(), decryptedString);
 	} else {
 		DebugLog::getLog().logError(ERROR_CODE::NETWORK_RECEIVED_UNAUTHENTIC_MESSAGE);
 	}
@@ -464,7 +464,7 @@ void Networking::processIncomingChat(QueueNode<Message>& msg) {
 
 
 void Networking::processIncomingHandshake(QueueNode<Message>& msg) {
-	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
+	delete &sendOutgoingMessage(*new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), copyString<unsigned char, unsigned char>(encryptionInfo, MAX_MESSAGE_LENGTH), /*nullptr,*/ /*&removeFromQueue*/ nullptr /*Note: message is deleted here- outgoingPostProcess will never be called*/, nullptr)); //Not immediately logical, but this is correct.
 
 	if(!messagesInIdempotencyTokens.find(msg.getData()->getIdempotencyToken())) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));

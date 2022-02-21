@@ -54,6 +54,17 @@ const constexpr unsigned short JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES = 64; //This 
 const constexpr char CANCEL_CHAR = (char)24;
 
 
+template<typename TIn, typename TOut>
+inline TOut* copyString(TIn* original, const unsigned short LEN) {
+	TOut* duplicate = new TOut[LEN];
+	for(unsigned short i = 0; i < LEN; i += 1) {
+		duplicate[i] = original[i];
+	}
+
+	return duplicate;
+}
+
+/*
 inline char* copyString(const char* original, const unsigned short LEN) {
 	char* duplicate = new char[LEN];
 	for(short i = 0; i < LEN; i += 1) {
@@ -82,11 +93,11 @@ inline unsigned char* copyAndConvertString(const char* original, const unsigned 
 
 	return duplicate;
 }
-
+*/
 
 inline char* copyAndTerminateString(const char* original, const unsigned short LEN) {
 	char* duplicate = new char[LEN + TERMINATOR];
-	for(short i = 0; i < LEN; i += 1) {
+	for(unsigned short i = 0; i < LEN; i += 1) {
 		duplicate[i] = original[i];
 	}
 	duplicate[LEN] = '\0';
@@ -95,6 +106,14 @@ inline char* copyAndTerminateString(const char* original, const unsigned short L
 }
 
 
+template<typename TOut>
+inline void overwriteBytes(const unsigned char* originalBytes, const unsigned short LEN, TOut* modifiableBytes) {
+	for(unsigned short i = 0; i < LEN; i += 1) {
+		modifiableBytes[i] = originalBytes[i];
+	}
+}
+
+/*
 inline void overwriteBytes(const unsigned char* originalBytes, const unsigned short LEN, unsigned char* modifiableBytes) {
 	for(unsigned short i = 0; i < LEN; i += 1) {
 		modifiableBytes[i] = originalBytes[i];
@@ -107,7 +126,7 @@ inline void overwriteBytes(const unsigned char* originalBytes, const unsigned sh
 		modifiableString[i] = originalBytes[i];
 	}
 }
-
+*/
 
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};
 enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};
