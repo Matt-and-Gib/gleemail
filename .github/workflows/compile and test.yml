@@ -24,6 +24,9 @@ jobs:
             - name: WiFiNINA
             - name: hd44780
             - name: SdFat
+            - name: LiteChaCha
+              source-url: https://github.com/DualJustice/LiteChaCha.git
+              source-path: src/include/
           sketch-paths: 'gleemail.ino'
 
   test:
