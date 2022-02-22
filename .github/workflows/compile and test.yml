@@ -25,7 +25,7 @@ jobs:
             - name: hd44780
             - name: SdFat
             - name: LiteChaCha
-              source-url: https://github.com/DualJustice/LiteChaCha.git
+              source-url: https://github.com/AVividLight/LiteChaCha.git
           sketch-paths: 'gleemail.ino'
 
   test:
