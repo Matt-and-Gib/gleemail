@@ -16,8 +16,8 @@
 
 //#include "LiteChaCha/keyinfrastructure.h" //Could be in source if objects were pointers
 //#include "LiteChaCha/authenticatedencrypt.h" //Could be in source if objects were pointers
-#include "LiteChaCha/src/include/authenticatedencrypt.h"
-#include "LiteChaCha/src/include/keyinfrastructure.h"
+#include <authenticatedencrypt.h>
+#include <keyinfrastructure.h>
 #endif
 
 class glEEpal;
