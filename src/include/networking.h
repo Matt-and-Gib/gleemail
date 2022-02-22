@@ -17,7 +17,6 @@
 //#include "LiteChaCha/keyinfrastructure.h" //Used if we make a local copy of LiteChaCha
 //#include "LiteChaCha/authenticatedencrypt.h" //Used if we make a local copy of LiteChaCha
 #include <authenticatedencrypt.h> //Could be in source if objects were pointers
-#include <authenticatedencrypt.h> //Could be in source if objects were pointers
 #include <keyinfrastructure.h> 
 #endif
 
