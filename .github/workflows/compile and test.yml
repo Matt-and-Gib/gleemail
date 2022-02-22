@@ -27,6 +27,7 @@ jobs:
             - name: LiteChaCha
               source-url: https://github.com/DualJustice/LiteChaCha.git
               source-path: src/include/
+              destination-name: LiteChaCha
           sketch-paths: 'gleemail.ino'
 
   test:

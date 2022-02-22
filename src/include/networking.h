@@ -14,8 +14,10 @@
 #include "global.h"
 #include "queue.h"
 
-#include "LiteChaCha/keyinfrastructure.h" //Could be in source if objects were pointers
-#include "LiteChaCha/authenticatedencrypt.h" //Could be in source if objects were pointers
+//#include "LiteChaCha/keyinfrastructure.h" //Could be in source if objects were pointers
+//#include "LiteChaCha/authenticatedencrypt.h" //Could be in source if objects were pointers
+#include <LiteChaCha/authenticatedencrypt.h>
+#include <LiteChaCha/keyinfrastructure.h>
 #endif
 
 class glEEpal;
