@@ -26,7 +26,7 @@ jobs:
             - name: SdFat
             - name: LiteChaCha
               source-url: https://github.com/DualJustice/LiteChaCha.git
-              source-path: src/include/
+              source-path: ./
               destination-name: LiteChaCha
           sketch-paths: 'gleemail.ino'
 
