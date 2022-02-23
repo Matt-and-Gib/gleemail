@@ -298,7 +298,7 @@ To do...
 Experiencing unexpected behavior? Maybe we've run into your problem before you!
 The first step we'd advise you take if anything unexpected happens is to turn on Verbose Mode and try it again. Please see [startup codes](#startup-codes) for further instructions.
 
-If that doesn't solve your problem, submit an [issue on GitHub](https://github.com/Matt-and-Gib/gleemail/issues) and we will take a look at it (*should the stars align*).
+If that doesn't solve your problem, submit an [issue on GitHub](https://github.com/Matt-and-Gib/gleemail/issues) and we will take a look at it (_should the stars align_).
 
 #### Features
 
@@ -325,7 +325,6 @@ As soon as possible at launch, send **-A** via Serial to trigger the startup cod
 |----|--------|---------|-----|
 |[DEL]|None|_core_|Reserved for system use|
 |k|Print DSA keys|Networking|Confirm your keys out-of-band to ensure a secure connection|
-|t|Startup code test|_core_|Receive confirmation that your startup code was received and processed|
 |v|Enable Verbose Debug Mode|_core_|Warnings will be sent via Serial in addition to errors|
 |I|Enable Incoming-Only Mode|Display|Only incoming messages will be displayed (hide your output)|
 |O|Enable Offline Mode|??? (todo)|No network connections will be made (there's no shame in a solo glEEmail session)|
