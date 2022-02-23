@@ -319,16 +319,16 @@ ___
 
 As soon as possible at launch, send **-A** via Serial to trigger the startup code prompt. Once directed, provide a string consisting of single-letter, case-sensitive arguments to alter or enable additional behavior in glEEmail. The built-in arguments are listed below:
 
-<!-- Keep this list in alphabetical order with lowercase first -->
+<!-- NOTE: Keep the following list in alphabetical order with all lowercase first -->
 
 |Code|Behavior|Component|Notes|
 |----|--------|---------|-----|
-|[DEL]|None|_core_|Reserved for system use|
-|k|Print DSA keys|Networking|Confirm your keys out-of-band to ensure a secure connection|
-|v|Enable Verbose Debug Mode|_core_|Warnings will be sent via Serial in addition to errors|
-|I|Enable Incoming-Only Mode|Display|Only incoming messages will be displayed (hide your output)|
-|O|Enable Offline Mode|??? (todo)|No network connections will be made (there's no shame in a solo glEEmail session)|
-|R|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
+|`[DEL]`|None|_core_|Reserved for system use|
+|`k`|Print DSA keys|Networking|Confirm your keys out-of-band to ensure a secure connection|
+|`v`|Enable Verbose Debug Mode|_core_|Warnings will be sent via Serial in addition to errors|
+|`I`|Enable Incoming-Only Mode|Display|Only incoming messages will be displayed (hide your output)|
+|`O`|Enable Offline Mode|??? (todo)|No network connections will be made (there's no shame in a solo glEEmail session)|
+|`R`|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
 
 A usage example is provided below. Note that `-A` is entered as soon as glEEmail launches, then the desired arguments, `tvR`, are entered after "Enter startup codes:" arrives via Serial.
 
@@ -336,7 +336,7 @@ A usage example is provided below. Note that `-A` is entered as soon as glEEmail
 Welcome to glEEmail!
 Version alpha 6
 -A
-Enter Startup Codes: Ov
+Enter Startup Codes: Iv
 Joining WiFi
 ...
 ```
@@ -368,4 +368,4 @@ glEEmail is Open Source with no promise of support! Please feel free to contribu
 
 `**Arduino`
 
-`‡use at your own risk`
+`‡use this novel toy at your own risk and only for entertainment purposes - do not use glEEmail in emergency situations!`
