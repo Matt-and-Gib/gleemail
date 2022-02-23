@@ -26,12 +26,12 @@ Networking::~Networking() {
 
 
 void Networking::registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>& startupCodeHandlers) {
-	startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(MAN_IN_THE_MIDDLE_DETECTION_MODE_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Networking::enablePrintDSAKeysStartupCodeReceived))));
+	startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(MAN_IN_THE_MIDDLE_DETECTION_MODE_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<void (StartupCodeHandler::*)(void)>(&Networking::enablePrintDSAKeysStartupCodeReceived))));
 }
 
 
-void Networking::startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
-	(this->*(reinterpret_cast<bool (Networking::*)(void)>(memberFunction)))();
+void Networking::startupCodeReceived(void (StartupCodeHandler::*memberFunction)(void)) {
+	(this->*(reinterpret_cast<void (Networking::*)(void)>(memberFunction)))();
 }
 
 

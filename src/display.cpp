@@ -17,12 +17,12 @@ Display::Display() {
 
 
 void Display::registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>& startupCodeHandlers) {
-	startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(INCOMING_ONLY_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Display::enableIncomingOnlyMode))));
+	startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(INCOMING_ONLY_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<void (StartupCodeHandler::*)(void)>(&Display::enableIncomingOnlyMode))));
 }
 
 
-void Display::startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
-	(this->*(reinterpret_cast<bool (Display::*)(void)>(memberFunction)))();
+void Display::startupCodeReceived(void (StartupCodeHandler::*memberFunction)(void)) {
+	(this->*(reinterpret_cast<void (Display::*)(void)>(memberFunction)))();
 }
 
 

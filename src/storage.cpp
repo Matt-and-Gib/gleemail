@@ -29,12 +29,12 @@ bool Storage::begin() {
 
 
 void Storage::registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>& startupCodeHandlers) {
-	startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(RESET_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived))));
+	startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(RESET_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<void (StartupCodeHandler::*)(void)>(&Storage::resetStartupCodeReceived))));
 }
 
 
-void Storage::startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) {
-	(this->*(reinterpret_cast<bool (Storage::*)(void)>(memberFunction)))();
+void Storage::startupCodeReceived(void (StartupCodeHandler::*memberFunction)(void)) {
+	(this->*(reinterpret_cast<void (Storage::*)(void)>(memberFunction)))();
 }
 
 

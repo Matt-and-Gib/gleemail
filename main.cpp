@@ -27,18 +27,18 @@ using namespace GLEEMAIL_DEBUG;
 class VerboseModeEmissary final : public StartupCodeHandler {
 private:
 	const char VERBOSE_MODE_STARTUP_CODE = 'v';
-	bool verboseModeStartupCodeReceived() {DebugLog::getLog().enableVerboseMode();}
+	void verboseModeStartupCodeReceived() {DebugLog::getLog().enableVerboseMode();}
 public:
 	explicit VerboseModeEmissary() = default;
 	~VerboseModeEmissary() = default;
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>& startupCodeHandlers) override {
-		startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(VERBOSE_MODE_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<bool (StartupCodeHandler::*)(void)>(&VerboseModeEmissary::verboseModeStartupCodeReceived))));
+		startupCodeHandlers.enqueue(new KVPair<const char&, StartupCodeHandlerData* const>(VERBOSE_MODE_STARTUP_CODE, new StartupCodeHandlerData(this, reinterpret_cast<void (StartupCodeHandler::*)(void)>(&VerboseModeEmissary::verboseModeStartupCodeReceived))));
 	}
 
 
-	void startupCodeReceived(bool (StartupCodeHandler::*memberFunction)(void)) override {
-		(this->*(reinterpret_cast<bool (VerboseModeEmissary::*)(void)>(memberFunction)))();
+	void startupCodeReceived(void (StartupCodeHandler::*memberFunction)(void)) override {
+		(this->*(reinterpret_cast<void (VerboseModeEmissary::*)(void)>(memberFunction)))();
 	}
 };
 

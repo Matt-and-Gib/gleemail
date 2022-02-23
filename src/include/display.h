@@ -17,7 +17,7 @@ private:
 
 	bool incomingOnly = false;
 	const char INCOMING_ONLY_STARTUP_CODE = 'I';
-	bool enableIncomingOnlyMode() {incomingOnly = true;} //TODO: Finish me
+	void enableIncomingOnlyMode() {incomingOnly = true;} //TODO: Finish me
 
 	static const constexpr unsigned short DISPLAY_ROW_LENGTH = 16;
 	static const constexpr unsigned short DISPLAY_COLUMN_LENGTH = 2;
@@ -45,7 +45,7 @@ public:
 	~Display() = default;
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
-	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
+	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;
 
 	void updateReading(const char* message, const bool retainScreen = false);
 	void updateWriting(const char* message, const bool retainScreen = false);

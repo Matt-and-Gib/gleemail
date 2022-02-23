@@ -17,7 +17,7 @@
 //#include "LiteChaCha/keyinfrastructure.h" //Used if we make a local copy of LiteChaCha
 //#include "LiteChaCha/authenticatedencrypt.h" //Used if we make a local copy of LiteChaCha
 #include <authenticatedencrypt.h> //Could be in source if objects were pointers
-#include <keyinfrastructure.h> 
+#include <keyinfrastructure.h> //Could be in source if objects were pointers
 #endif
 
 class glEEpal;
@@ -30,7 +30,7 @@ private:
 	const char MAN_IN_THE_MIDDLE_DETECTION_MODE_STARTUP_CODE = 'k';
 	bool printDSAKeys = false;
 	//bool doPrintDSAKeys() const {return}
-	bool enablePrintDSAKeysStartupCodeReceived() {printDSAKeys = true;}
+	void enablePrintDSAKeysStartupCodeReceived() {printDSAKeys = true;}
 
 	bool& shutdownFlag;
 
@@ -168,7 +168,7 @@ public:
 	~Networking();
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
-	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
+	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;
 
 	void processNetwork();
 	void sendChatMessage(const char*);

@@ -13,9 +13,9 @@ class StartupCodeHandler;
 class StartupCodeHandlerData {
 public:
 	StartupCodeHandler* const instance;
-	bool (StartupCodeHandler::*callback)(void);
+	void (StartupCodeHandler::*callback)(void);
 
-	explicit StartupCodeHandlerData(StartupCodeHandler* const i, bool (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {}
+	explicit StartupCodeHandlerData(StartupCodeHandler* const i, void (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {}
 	~StartupCodeHandlerData() = default;
 };
 
@@ -26,7 +26,7 @@ public:
 	virtual ~StartupCodeHandler() = default;
 
 	virtual void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) = 0;
-	virtual void startupCodeReceived(bool (StartupCodeHandler::*)(void)) = 0;
+	virtual void startupCodeReceived(void (StartupCodeHandler::*)(void)) = 0;
 };
 
 #endif

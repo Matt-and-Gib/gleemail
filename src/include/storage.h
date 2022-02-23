@@ -17,7 +17,7 @@ private:
 	const unsigned short SLAVE_SELECT_PIN = 10;
 
 	const char RESET_STARTUP_CODE = 'R';
-	bool resetStartupCodeReceived() {return eraseAll(133769);}
+	void resetStartupCodeReceived() {eraseAll(133769);}
 
 	const char GLEEMAIL_ROOT_PATH[9] = "GLEEMAIL";
 
@@ -31,7 +31,7 @@ public:
 	bool begin();
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
-	void startupCodeReceived(bool (StartupCodeHandler::*)(void)) override;
+	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;
 
 	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
 	
