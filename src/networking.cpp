@@ -56,7 +56,7 @@ void Networking::removeFromQueue(Queue<Message>& fromQueue, Message& node) {
 }
 
 
-void Networking::removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut) {
+void Networking::removeFromQueue(Networking&, Queue<Message>& messagesOutQueue, QueueNode<Message>&, Message& messageOut) {
 	removeFromQueue(messagesOutQueue, messageOut);
 }
 
@@ -397,7 +397,7 @@ void Networking::processIncomingError(QueueNode<Message>& msg) {
 }
 
 
-void Networking::processIncomingHeartbeat(QueueNode<Message>& msg) {
+void Networking::processIncomingHeartbeat(QueueNode<Message>&) {
 	if(checkHeartbeatThreshold == &Networking::checkHeartbeatStillborn) {
 		checkHeartbeatThreshold = &Networking::checkHeartbeatFlatline;
 		Serial.println(F("Connected to Peer!"));
@@ -549,7 +549,7 @@ bool Networking::processQueue(bool (Networking::*processMessage)(Queue<Message>&
 }
 
 
-bool Networking::getMessages(bool (Networking::*callback)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
+bool Networking::getMessages(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&intoQueue) {
 	packetSize = udp.parsePacket(); //destroys body of HTTPS responses (╯°□°）╯︵ ┻━┻
 	if(packetSize > 0) {
 		udp.read(messageFromUDPBuffer, packetSize);

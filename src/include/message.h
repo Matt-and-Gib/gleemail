@@ -30,10 +30,10 @@ private:
 	unsigned short chatLength = 0;
 	//MessageError* error;
 
-	static void noOutgoingProcess(Queue<Message>& q, Message& n) {}
+	static void noOutgoingProcess(Queue<Message>&, Message&) {}
 	void (*outgoingPostProcess)(Queue<Message>&, Message&); //Used for removing confirmation messages once sent
 
-	static void noConfirmedProcess(Networking& n, Queue<Message>& messagesOut, QueueNode<Message>& messageIn, Message& messageOut) {}
+	static void noConfirmedProcess(Networking&, Queue<Message>&, QueueNode<Message>&, Message&) {}
 	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&); //Used for establishing connection and 
 public:
 	explicit Message() : sender{*glEEself} {}
