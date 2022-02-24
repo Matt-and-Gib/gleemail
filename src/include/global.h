@@ -132,7 +132,7 @@ enum LED_STATUS : unsigned short {OFF = 0, ON = 1};
 enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};
 
 struct Pin final {
-	Pin(const short i, const PIN_MODE m, const unsigned short v) {pinLocation = i; mode = m; value = v;}
+	Pin(const short i, const PIN_MODE m, const unsigned short v) : pinLocation{i}, mode{m}, value{v} {}
 	~Pin() {}
 
 	short pinLocation;

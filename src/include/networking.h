@@ -29,7 +29,6 @@ class Networking final : public StartupCodeHandler {
 private:
 	const char MAN_IN_THE_MIDDLE_DETECTION_MODE_STARTUP_CODE = 'k';
 	bool printDSAKeys = false;
-	//bool doPrintDSAKeys() const {return}
 	void enablePrintDSAKeysStartupCodeReceived() {printDSAKeys = true;}
 
 	bool& shutdownFlag;
@@ -165,6 +164,10 @@ private:
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
 public:
 	explicit Networking(unsigned long (*)(), void (*)(char*), void (*)(), const long u, bool& quit);
+	Networking(const Networking&) = delete;
+	Networking(Networking&&) = delete;
+	Networking& operator=(const Networking&) = delete;
+	Networking& operator=(Networking&&) = delete;
 	~Networking();
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;

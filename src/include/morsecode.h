@@ -55,6 +55,10 @@ private:
 	unsigned short calculateMorsePhraseIndex(const char* const) const;
 public:
 	explicit MorseCodeInput(const unsigned short, void (*)(char*), void (*)(char*));
+	MorseCodeInput(const MorseCodeInput&) = delete;
+	MorseCodeInput(MorseCodeInput&&) = delete;
+	MorseCodeInput& operator=(const MorseCodeInput&) = delete;
+	MorseCodeInput& operator=(MorseCodeInput&&) = delete;
 	~MorseCodeInput();
 
 	const char* getDataVersionRequestEndpoint() const override {return MCCP_DATA_VERSION_SERVER_ENDPOINT;}

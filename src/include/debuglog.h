@@ -132,8 +132,7 @@ namespace GLEEMAIL_DEBUG {
 		unsigned short errorCodesFirstOpenIndex = 0;
 		bool overflowErrorsLost = false;
 
-		explicit DebugLog() {
-			errorCodes = new ERROR_CODE[MAX_ERROR_CODES];
+		explicit DebugLog() : errorCodes{new ERROR_CODE[MAX_ERROR_CODES]} {
 			for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
 				errorCodes[i] = ERROR_CODE::NONE;
 			}

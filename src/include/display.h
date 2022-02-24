@@ -42,6 +42,10 @@ private:
 	bool scrollWriting = false;
 public:
 	explicit Display();
+	Display(const Display&) = delete;
+	Display(Display&&) = delete;
+	Display& operator=(const Display&) = delete;
+	Display& operator=(Display&&) = delete;
 	~Display() = default;
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;

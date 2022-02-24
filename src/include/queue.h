@@ -5,14 +5,15 @@
 template <class T>
 class QueueNode final {
 private:
-	QueueNode<T>* node;
 	T* data;
-public:
-	explicit QueueNode(T* d) {
-		data = d;
-		node = nullptr;
-	}
+	QueueNode<T>* node;
 
+public:
+	explicit QueueNode(T* d) : data{d}, node{nullptr} {}
+	QueueNode(const QueueNode&) = delete;
+	QueueNode(QueueNode&&) = delete;
+	QueueNode& operator=(const QueueNode&) = delete;
+	QueueNode& operator=(QueueNode&&) = delete;
 	~QueueNode() {
 		delete data;
 		delete node; //Note: This will cascade-delete all children if called on a node with children. Always use in tandem with remove() or dequeue()
@@ -40,8 +41,13 @@ template <class T>
 class Queue final {
 private:
 	QueueNode<T>* root = nullptr;
+
 public:
-	explicit Queue() = default;
+	explicit Queue() : root{nullptr} {}
+	Queue(const Queue&) = delete;
+	Queue(Queue&&) = delete;
+	Queue& operator=(const Queue&) = delete;
+	Queue& operator=(Queue&&) = delete;
 	~Queue() {
 		delete root; //Note: All children will be recursively deleted. This could be expected behavior, or it could do bad things. Just, be aware.
 	}

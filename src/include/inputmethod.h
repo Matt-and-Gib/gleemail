@@ -17,6 +17,10 @@ private:
 	void (*sendMessage)(char*);
 public:
 	explicit InputMethod(void (*)(char*), void (*)(char*));
+	InputMethod(const InputMethod&) = delete;
+	InputMethod(InputMethod&&) = delete;
+	InputMethod& operator=(const InputMethod&) = delete;
+	InputMethod& operator=(InputMethod&&) = delete;
 	virtual ~InputMethod();
 
 	virtual const char* getDataVersionRequestEndpoint() const = 0;
