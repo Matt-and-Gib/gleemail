@@ -18,7 +18,7 @@ jobs:
           fqbn: 'arduino:samd:nano_33_iot'
           cli-compile-flags: |
             - --build-property
-            - compiler.cpp.extra_flags="-Wno-unused-parameter"
+            - compiler.cpp.extra_flags="-Werror -Wall -Wextra -pedantic"
           libraries: |
             - name: ArduinoJson
             - name: WiFiNINA
