@@ -36,7 +36,6 @@ private:
 	void print(const char*, const PRINT_ROW, const bool);
 
 	unsigned short wroteLength = 0;
-	char* remainingLine;
 
 	bool scrollReading = false;
 	bool scrollWriting = false;

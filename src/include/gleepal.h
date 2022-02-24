@@ -7,16 +7,13 @@ private:
 	IPAddress palIPAddress;
 	unsigned short outgoingHandshakeIdempotencyTokenValue;
 public:
-	explicit glEEpal(const IPAddress ip, const unsigned short h) {
-		palIPAddress = ip;
-		outgoingHandshakeIdempotencyTokenValue = h;
-	}
-
+	explicit glEEpal(const IPAddress ip, const unsigned short h) : palIPAddress{ip}, outgoingHandshakeIdempotencyTokenValue{h} {}
 	~glEEpal() = default;
 
 	bool operator==(glEEpal& o) {
 		return palIPAddress == o.getIPAddress();
 	}
+	
 	bool operator==(IPAddress a) {
 		return palIPAddress == a;
 	}

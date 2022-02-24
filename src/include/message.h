@@ -28,7 +28,6 @@ private:
 	const unsigned char* chat;
 	const unsigned char* authentication;
 	unsigned short chatLength = 0;
-	//MessageError* error;
 
 	static void noOutgoingProcess(Queue<Message>&, Message&) {}
 	void (*outgoingPostProcess)(Queue<Message>&, Message&); //Used for removing confirmation messages once sent
@@ -36,10 +35,14 @@ private:
 	static void noConfirmedProcess(Networking&, Queue<Message>&, QueueNode<Message>&, Message&) {}
 	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&); //Used for establishing connection and 
 public:
-	explicit Message() : sender{*glEEself} {}
+	explicit Message() : sender{*glEEself}, messageType{MESSAGE_TYPE::NONE}, idempotencyToken{0}, chat{nullptr}, authentication{nullptr}, outgoingPostProcess{noOutgoingProcess}, confirmedPostProcess{noConfirmedProcess} {}
+	Message(const Message&) = delete;
+	Message(Message&&) = delete;
+	Message& operator=(const Message&) = delete;
+	Message& operator=(Message&&) = delete;
 	
 	//Incoming Message Constructor
-	explicit Message(const ArduinoJson::StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) : sender{from} {
+	Message(const ArduinoJson::StaticJsonDocument<INCOMING_JSON_DOCUMENT_SIZE>& parsedDocument, const unsigned long currentTimeMS, glEEpal& from) : sender{from} {
 
 		const unsigned short tempMessageType = parsedDocument["T"];
 		messageType = static_cast<MESSAGE_TYPE>(tempMessageType);
@@ -53,19 +56,12 @@ public:
 		const char* tempAuthentication = parsedDocument["G"];
 		authentication = copyString<const char, unsigned char>(tempAuthentication, AUTHENTICATION_PAYLOAD_SIZE);
 
-		//error = new MessageError(parsedDocument);
-
 		outgoingPostProcess = &noOutgoingProcess;
 		confirmedPostProcess = &noConfirmedProcess;
 	}
 
 	//Outgoing Message Constructor
-	explicit Message(MESSAGE_TYPE t, IdempotencyToken* i, unsigned char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) : sender{*glEEself} {
-		messageType = t;
-		idempotencyToken = i;
-		chat = c;
-		authentication = nullptr;
-		//error = e;
+	Message(MESSAGE_TYPE t, IdempotencyToken* i, unsigned char* c, /*MessageError* e,*/ void (*op)(Queue<Message>&, Message&), void (*cp)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&)) : sender{*glEEself}, messageType{t}, idempotencyToken{i}, chat{c}, authentication{nullptr} {
 		outgoingPostProcess = !op ? &noOutgoingProcess : op; //Remove conditional check by relocating noOutgoingProcess?
 		confirmedPostProcess = !cp ? &noConfirmedProcess : cp; //Remove conditional check by relocating noIncomingProcess?
 	}

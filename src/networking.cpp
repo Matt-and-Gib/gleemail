@@ -10,14 +10,20 @@ using namespace GLEEMAIL_DEBUG;
 using namespace ArduinoJson;
 
 
-Networking::Networking(unsigned long (*millis)(), void (*chatMsgCallback)(char*), void (*connectedUpdateDisplay)(), const long u, bool& quit) : shutdownFlag{quit} {
-	nowMS = millis;
-	uuid = u + nowMS(); //CHANGE ME!
-	chatMessageReceivedCallback = chatMsgCallback;
-	connectedToPeerClearDisplay = connectedUpdateDisplay;
-
-	heartbeat = new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken(0, 0), nullptr, /*nullptr,*/ nullptr, nullptr);
-}
+Networking::Networking(
+	unsigned long (* const millis)(),
+	void (*chatMsgCallback)(char*),
+	void (*connectedUpdateDisplay)(),
+	const long u,
+	bool& quit
+) :
+	shutdownFlag{quit},
+	nowMS{millis},
+	uuid{u + nowMS()}, //Warning: shortening from 'long unsigned int' to 'short unsigned int'
+	connectedToPeerClearDisplay{connectedUpdateDisplay},
+	heartbeat{new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken, nullptr, /*nullptr,*/ nullptr, nullptr)},
+	chatMessageReceivedCallback{chatMsgCallback}
+{}
 
 
 Networking::~Networking() {

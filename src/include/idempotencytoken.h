@@ -7,23 +7,8 @@ private:
 	unsigned long timestamp;
 	unsigned short retryCount;
 public:
-	explicit IdempotencyToken() {
-		value = 0;
-		timestamp = 0;
-		retryCount = 0;
-	}
-
-	explicit IdempotencyToken(const unsigned short v, const unsigned long t) {
-		value = v;
-		timestamp = t;
-		retryCount = 0;
-	}
-
-	explicit IdempotencyToken(const IdempotencyToken& i) {
-		value = i.getValue();
-		timestamp = i.getTimestamp();
-		retryCount = i.getRetryCount();
-	}
+	IdempotencyToken(const unsigned short v = 0, const unsigned long t = 0) : value{v}, timestamp{t}, retryCount{0} {}
+	IdempotencyToken(const IdempotencyToken& i) : value{i.getValue()}, timestamp{i.getTimestamp()}, retryCount{i.getRetryCount()} {}
 	
 	~IdempotencyToken() = default;
 

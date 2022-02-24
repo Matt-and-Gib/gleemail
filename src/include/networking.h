@@ -33,6 +33,13 @@ private:
 
 	bool& shutdownFlag;
 
+	unsigned long (* const nowMS)();
+	unsigned long approxCurrentTime;
+
+	unsigned short uuid;
+	void createuuid(unsigned char*);
+	unsigned short messagesSentCount = 0;
+
 	WiFiUDP udp;
 	glEEpal* glEEpalInfo;
 
@@ -45,16 +52,9 @@ private:
 	static const constexpr unsigned short INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS = (MAX_OUTGOING_MESSAGE_RETRY_COUNT * RESEND_OUTGOING_MESSAGE_THRESHOLD_MS) + RESEND_OUTGOING_MESSAGE_THRESHOLD_MS;
 	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator //Don't forget to move me if the rest of encryption is moved
 
-	unsigned short uuid;
-	void createuuid(unsigned char*);
-	unsigned short messagesSentCount = 0;
-
-	unsigned long (*nowMS)();
-	unsigned long approxCurrentTime;
-
 	CipherManagement ae;
 	static const constexpr size_t tagBytes = 16; //CipherManagement::getTagBytes();
-	unsigned long long messageCount; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
+	unsigned long long messageCount = 0; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
 	unsigned char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
 	//char* tag;
 

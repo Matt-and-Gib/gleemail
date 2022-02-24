@@ -8,8 +8,7 @@
 using namespace GLEEMAIL_DEBUG;
 
 
-InternetAccess::InternetAccess() {
-	client = new WiFiClient;
+InternetAccess::InternetAccess() : client{new WiFiClient} {
 }
 
 

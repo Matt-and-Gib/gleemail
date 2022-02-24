@@ -8,9 +8,7 @@
 #include <hd44780ioClass/hd44780_pinIO.h>
 
 
-Display::Display() {
-	lcd = new hd44780_pinIO(RS, EN, D4, D5, D6, D7);
-
+Display::Display() : lcd{new hd44780_pinIO(RS, EN, D4, D5, D6, D7)} {
 	lcd->begin(16, 2);
 	clearAll();
 }
