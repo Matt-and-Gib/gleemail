@@ -18,7 +18,11 @@ jobs:
           fqbn: 'arduino:samd:nano_33_iot'
           cli-compile-flags: |
             - --build-property
-            - compiler.cpp.extra_flags="-ansi -pedantic -Wall -Wextra -Weffc++"
+            - compiler.cpp.extra_flags="-ansi"
+            - compiler.cpp.extra_flags="-pedantic"
+            - compiler.cpp.extra_flags="-Wall"
+            - compiler.cpp.extra_flags="-Wextra"
+            - compiler.cpp.extra_flags="-Weffc++"
           libraries: |
             - name: ArduinoJson
             - name: WiFiNINA
