@@ -13,6 +13,12 @@ InternetAccess::InternetAccess() :
 {}
 
 
+#warning this will probably cause a crash or something like that. Cannot delete client because it is missing a virtual destructor (memory leak at best)
+InternetAccess::~InternetAccess() {
+	delete client;
+}
+
+
 bool InternetAccess::connectToWeb(const char* address) {
 	return client->connectSSL(address, 443);
 }

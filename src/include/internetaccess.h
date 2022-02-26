@@ -19,7 +19,7 @@ public:
 	InternetAccess(InternetAccess&&) = delete;
 	InternetAccess& operator=(const InternetAccess&) = delete;
 	InternetAccess& operator=(InternetAccess&&) = delete;
-	~InternetAccess() = default;
+	~InternetAccess();
 
 	static unsigned char getMaxSSIDLength() {return MAX_SSID_LENGTH;}
 	static unsigned char getMaxPasswordLength() {return MAX_PASSWORD_LENGTH;}
