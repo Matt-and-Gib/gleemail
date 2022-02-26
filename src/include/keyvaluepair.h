@@ -8,7 +8,11 @@ private:
 	V value;
 
 public:
-	explicit KVPair(K k, V v) : key{k}, value{v} {}
+	KVPair(K k, V v) : key{k}, value{v} {}
+	KVPair(const KVPair&) = delete;
+	KVPair(KVPair&&) = delete;
+	KVPair& operator=(const KVPair&) = delete;
+	KVPair& operator=(KVPair&&) = delete;
 	~KVPair() = default;
 	
 	K getKey() {return key;}

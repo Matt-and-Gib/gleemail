@@ -14,7 +14,11 @@ private:
 
 	WiFiClient* client;
 public:
-	explicit InternetAccess();
+	InternetAccess();
+	InternetAccess(const InternetAccess&) = delete;
+	InternetAccess(InternetAccess&&) = delete;
+	InternetAccess& operator=(const InternetAccess&) = delete;
+	InternetAccess& operator=(InternetAccess&&) = delete;
 	~InternetAccess() = default;
 
 	static unsigned char getMaxSSIDLength() {return MAX_SSID_LENGTH;}

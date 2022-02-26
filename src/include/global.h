@@ -64,36 +64,6 @@ inline TOut* copyString(TIn* original, const unsigned short LEN) {
 	return duplicate;
 }
 
-/*
-inline char* copyString(const char* original, const unsigned short LEN) {
-	char* duplicate = new char[LEN];
-	for(short i = 0; i < LEN; i += 1) {
-		duplicate[i] = original[i];
-	}
-
-	return duplicate;
-}
-
-
-inline unsigned char* copyString(const unsigned char* original, const unsigned short LEN) { //Not sure if this is the best way to do this
-	unsigned char* duplicate = new unsigned char[LEN];
-	for(short i = 0; i < LEN; i += 1) {
-		duplicate[i] = original[i];
-	}
-
-	return duplicate;
-}
-
-
-inline unsigned char* copyAndConvertString(const char* original, const unsigned short LEN) { //Not sure about this one either
-	unsigned char* duplicate = new unsigned char[LEN];
-	for(short i = 0; i < LEN; i += 1) {
-		duplicate[i] = original[i];
-	}
-
-	return duplicate;
-}
-*/
 
 inline char* copyAndTerminateString(const char* original, const unsigned short LEN) {
 	char* duplicate = new char[LEN + TERMINATOR];
@@ -113,27 +83,17 @@ inline void overwriteBytes(const unsigned char* originalBytes, const unsigned sh
 	}
 }
 
-/*
-inline void overwriteBytes(const unsigned char* originalBytes, const unsigned short LEN, unsigned char* modifiableBytes) {
-	for(unsigned short i = 0; i < LEN; i += 1) {
-		modifiableBytes[i] = originalBytes[i];
-	}
-}
-
-
-inline void overwriteBytes(const unsigned char* originalBytes, const unsigned short LEN, char* modifiableString) { //Or this one...
-	for(unsigned short i = 0; i < LEN; i += 1) {
-		modifiableString[i] = originalBytes[i];
-	}
-}
-*/
 
 enum LED_STATUS : unsigned short {OFF = 0, ON = 1};
 enum PIN_MODE : unsigned int {WRITE = 1, READ = 0};
 
 struct Pin final {
 	Pin(const short i, const PIN_MODE m, const unsigned short v) : pinLocation{i}, mode{m}, value{v} {}
-	~Pin() {}
+	Pin(const Pin&) = delete;
+	Pin(Pin&&) = delete;
+	Pin& operator=(const Pin&) = delete;
+	Pin& operator=(Pin&&) = delete;
+	~Pin() = default;
 
 	short pinLocation;
 	PIN_MODE mode;
@@ -147,6 +107,6 @@ struct Pin final {
 		return this->pinLocation != rhs.pinLocation;
 	}
 };
-static Pin NULL_PIN = Pin(-1, PIN_MODE::READ, 0);
+static Pin NULL_PIN(-1, PIN_MODE::READ, 0);
 
 #endif

@@ -7,7 +7,11 @@ private:
 	IPAddress palIPAddress;
 	unsigned short outgoingHandshakeIdempotencyTokenValue;
 public:
-	explicit glEEpal(const IPAddress ip, const unsigned short h) : palIPAddress{ip}, outgoingHandshakeIdempotencyTokenValue{h} {}
+	glEEpal(const IPAddress ip, const unsigned short h) : palIPAddress{ip}, outgoingHandshakeIdempotencyTokenValue{h} {}
+	glEEpal(const glEEpal&) = delete;
+	glEEpal(glEEpal&&) = delete;
+	glEEpal& operator=(const glEEpal&) = delete;
+	glEEpal& operator=(glEEpal&&) = delete;
 	~glEEpal() = default;
 
 	bool operator==(glEEpal& o) {

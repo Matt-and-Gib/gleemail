@@ -31,6 +31,9 @@ private:
 	bool printDSAKeys = false;
 	void enablePrintDSAKeysStartupCodeReceived() {printDSAKeys = true;}
 
+	WiFiUDP udp;
+	glEEpal* glEEpalInfo;
+
 	bool& shutdownFlag;
 
 	unsigned long (* const nowMS)();
@@ -39,9 +42,6 @@ private:
 	unsigned short uuid;
 	void createuuid(unsigned char*);
 	unsigned short messagesSentCount = 0;
-
-	WiFiUDP udp;
-	glEEpal* glEEpalInfo;
 
 	bool connected = false;
 	unsigned long connectedMS;
@@ -163,7 +163,7 @@ private:
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
 public:
-	explicit Networking(unsigned long (*)(), void (*)(char*), void (*)(), const long u, bool& quit);
+	Networking(unsigned long (* const)(), void (* const)(char*), void (* const)(), const long u, bool& quit);
 	Networking(const Networking&) = delete;
 	Networking(Networking&&) = delete;
 	Networking& operator=(const Networking&) = delete;

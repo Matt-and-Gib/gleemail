@@ -12,16 +12,17 @@ using namespace ArduinoJson;
 
 Networking::Networking(
 	unsigned long (* const millis)(),
-	void (*chatMsgCallback)(char*),
-	void (*connectedUpdateDisplay)(),
+	void (* const chatMsgCallback)(char*),
+	void (* const connectedUpdateDisplay)(),
 	const long u,
 	bool& quit
 ) :
+	udp(),
 	shutdownFlag{quit},
 	nowMS{millis},
 	uuid{u + nowMS()}, //Warning: shortening from 'long unsigned int' to 'short unsigned int'
 	connectedToPeerClearDisplay{connectedUpdateDisplay},
-	heartbeat{new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken, nullptr, /*nullptr,*/ nullptr, nullptr)},
+	heartbeat{new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken, nullptr, nullptr, nullptr)},
 	chatMessageReceivedCallback{chatMsgCallback}
 {}
 

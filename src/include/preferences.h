@@ -5,7 +5,7 @@
 //Remember: Preferences is a singleton! DO NOT waste memory.
 class Preferences final {
 private:
-	Preferences() {}
+	Preferences() = default;
 
 	const char PREFERENCES_PATH[19] = "GLEEMAIL/PREFS.GMD";
 
@@ -16,12 +16,13 @@ private:
 	char* wifiSSID = nullptr;
 	char* wifiPassword = nullptr;
 public:
-	static Preferences& getPrefs();
-
-	explicit Preferences(Preferences const&) = delete;
-	void operator=(Preferences const&) = delete;
-
+	Preferences(const Preferences&) = delete;
+	Preferences(Preferences&&) = delete;
+	Preferences& operator=(const Preferences&) = delete;
+	Preferences& operator=(Preferences&&) = delete;
 	~Preferences() = default;
+
+	static Preferences& getPrefs();
 
 	const char* getPrefsPath() const {return PREFERENCES_PATH;}
 

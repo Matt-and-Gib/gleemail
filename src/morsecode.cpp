@@ -40,7 +40,13 @@ namespace {
 }
 
 
-MorseCodeInput::MorseCodeInput(const unsigned short ledPinLocation, void (*messageChanged)(char*), void (*sendMessage)(char*)) : InputMethod(messageChanged, sendMessage) {
+MorseCodeInput::MorseCodeInput(
+	const unsigned short ledPinLocation,
+	void (* const messageChanged)(char*),
+	void (* const sendMessage)(char*)
+) :
+	InputMethod(messageChanged, sendMessage)
+{
 	pins[0] = &NULL_PIN;
 	pins[1] = &NULL_PIN;
 	pins[2] = &NULL_PIN;

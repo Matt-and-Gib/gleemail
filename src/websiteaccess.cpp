@@ -22,7 +22,7 @@ bool WebsiteAccess::writeHeadersToServer(InternetAccess& net, const char* const*
 }
 
 
-bool WebsiteAccess::sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers) {
+bool WebsiteAccess::sendRequestToServer(InternetAccess& net, const char* const server, const char* const* headers) {
 	if(WiFi.status() != WL_CONNECTED) {
 		DebugLog::getLog().logError(ERROR_CODE::WEB_ACCESS_DOWNLOAD_IMPOSSIBLE_NOT_CONNECTED);
 		return false;

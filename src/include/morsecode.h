@@ -54,7 +54,7 @@ private:
 	unsigned short calculateMorsePhraseSymbolsSize(const ArduinoJson::JsonArrayConst&) const;
 	unsigned short calculateMorsePhraseIndex(const char* const) const;
 public:
-	explicit MorseCodeInput(const unsigned short, void (*)(char*), void (*)(char*));
+	MorseCodeInput(const unsigned short, void (* const)(char*), void (* const)(char*));
 	MorseCodeInput(const MorseCodeInput&) = delete;
 	MorseCodeInput(MorseCodeInput&&) = delete;
 	MorseCodeInput& operator=(const MorseCodeInput&) = delete;

@@ -25,7 +25,7 @@ private:
 
 	SdFat32* sd = nullptr;
 public:
-	explicit Storage() = default;
+	Storage() = default;
 	Storage(const Storage&) = delete;
 	Storage(Storage&&) = delete;
 	Storage& operator=(const Storage&) = delete;

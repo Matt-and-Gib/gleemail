@@ -43,7 +43,7 @@ private:
 	QueueNode<T>* root = nullptr;
 
 public:
-	explicit Queue() : root{nullptr} {}
+	Queue() : root{nullptr} {}
 	Queue(const Queue&) = delete;
 	Queue(Queue&&) = delete;
 	Queue& operator=(const Queue&) = delete;

@@ -15,14 +15,22 @@ public:
 	StartupCodeHandler* const instance;
 	void (StartupCodeHandler::*callback)(void);
 
-	explicit StartupCodeHandlerData(StartupCodeHandler* const i, void (StartupCodeHandler::*c)(void)) : instance{i}, callback{c} {}
+	StartupCodeHandlerData(StartupCodeHandler* const i, void (StartupCodeHandler::* const c)(void)) : instance{i}, callback{c} {}
+	StartupCodeHandlerData(const StartupCodeHandlerData&) = delete;
+	StartupCodeHandlerData(StartupCodeHandlerData&&) = delete;
+	StartupCodeHandlerData& operator=(const StartupCodeHandlerData&) = delete;
+	StartupCodeHandlerData& operator=(StartupCodeHandlerData&&) = delete;
 	~StartupCodeHandlerData() = default;
 };
 
 
 class StartupCodeHandler {
 public:
-	explicit StartupCodeHandler() = default;
+	StartupCodeHandler() = default;
+	StartupCodeHandler(const StartupCodeHandler&) = delete;
+	StartupCodeHandler(StartupCodeHandler&&) = delete;
+	StartupCodeHandler& operator=(const StartupCodeHandler&) = delete;
+	StartupCodeHandler& operator=(StartupCodeHandler&&) = delete;
 	virtual ~StartupCodeHandler() = default;
 
 	virtual void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) = 0;

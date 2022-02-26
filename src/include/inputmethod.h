@@ -16,7 +16,7 @@ private:
 	void (*messageChanged)(char*);
 	void (*sendMessage)(char*);
 public:
-	explicit InputMethod(void (*)(char*), void (*)(char*));
+	InputMethod(void (* const)(char*), void (* const)(char*));
 	InputMethod(const InputMethod&) = delete;
 	InputMethod(InputMethod&&) = delete;
 	InputMethod& operator=(const InputMethod&) = delete;

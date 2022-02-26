@@ -15,14 +15,18 @@ private:
 
 	bool writeHeadersToServer(InternetAccess&, const char* const*);
 public:
-	explicit WebsiteAccess() = default;
+	WebsiteAccess() = default;
+	WebsiteAccess(const WebsiteAccess&) = delete;
+	WebsiteAccess(WebsiteAccess&&) = delete;
+	WebsiteAccess& operator=(const WebsiteAccess&) = delete;
+	WebsiteAccess& operator=(WebsiteAccess&&) = delete;
 	~WebsiteAccess() = default;
 
-	bool connectToServer(InternetAccess& net, const char* address) {return net.connectToWeb(address);}
-	bool sendRequestToServer(InternetAccess& net, const char* server, const char* const* headers);
+	bool connectToServer(InternetAccess& net, const char* const address) {return net.connectToWeb(address);}
+	bool sendRequestToServer(InternetAccess& net, const char* const server, const char* const* headers);
 	char* downloadFromServer(InternetAccess&);
 
-	static short findEndOfHeaderIndex(const char*, const unsigned short);
+	static short findEndOfHeaderIndex(const char* const, const unsigned short);
 };
 
 #endif

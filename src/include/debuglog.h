@@ -149,8 +149,10 @@ namespace GLEEMAIL_DEBUG {
 			}
 		}
 	public:
-		explicit DebugLog(DebugLog const&) = delete;
-		void operator=(DebugLog const&) = delete;
+		DebugLog(const DebugLog&) = delete;
+		DebugLog(DebugLog&&) = delete;
+		DebugLog& operator=(const DebugLog &) = delete;
+		DebugLog& operator=(DebugLog&&) = delete;
 		~DebugLog() = default;
 
 		static DebugLog& getLog() {

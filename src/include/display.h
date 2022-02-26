@@ -40,7 +40,7 @@ private:
 	bool scrollReading = false;
 	bool scrollWriting = false;
 public:
-	explicit Display();
+	Display();
 	Display(const Display&) = delete;
 	Display(Display&&) = delete;
 	Display& operator=(const Display&) = delete;
