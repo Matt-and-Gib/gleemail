@@ -36,7 +36,7 @@ jobs:
           sketch-paths: 'gleemail.ino'
 
   test:
-    #needs: compile
+    needs: compile
     runs-on: ubuntu-latest
 
     steps:
