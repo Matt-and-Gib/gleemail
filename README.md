@@ -312,7 +312,7 @@ If that doesn't solve your problem, submit an [issue on GitHub](https://github.c
 - Be social
 - Be a glEEpal
 
-***IMPORTANT NOTE:*** You are limited to sending no more than ~32,768 messages per session due to the size of the idempotency token (unsigned short- i.e. 2 bytes) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glEEware every once in a while.
+**_IMPORTANT NOTE:_** You are limited to sending no more than ~32,768 messages per session due to the size of the idempotency token (unsigned short- i.e. 2 bytes) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glEEware every once in a while.
 ___
 
 ### <a name="startup-codes"></a>**Startup Codes**
@@ -347,14 +347,16 @@ ___
 
 We'd like to implement additional input methods, including (but not limited to):
 
-1. Phone app that connects directly to the Arduino, which also stores past messages.
+1. Phone app that connects directly to the Arduino, which can also import/export saved data.
 2. Speech-to-text
-3. Light-level
+3. Light-level (?)
 4. Web app
-5. Dance-dance-revolution input
+5. Dance-dance-revolution
 6. Game controller
 7. Touch screen keyboard
 8. Single-button random messages (magic 8 ball style)
+
+Other than that, please view [our project board](https://github.com/orgs/Matt-and-Gib/projects/4/views/1) for an idea of what's next.
 
 ___
 
