@@ -53,7 +53,7 @@ extern USBDeviceClass USBDevice;
 extern "C" void __libc_init_array(void);
 
 
-const constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
+const static constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
 const unsigned short MAX_STARTUP_CODES = 7;
 const unsigned short STARTUP_CODE_PROCESSED = 127;
 
@@ -63,8 +63,6 @@ char* messageToPrint = nullptr;
 
 Display* display = nullptr;
 Storage* storage = nullptr;
-InternetAccess internet; //make me a pointer
-WebsiteAccess websiteAccess; //make me a pointer
 Networking* network = nullptr;
 
 InputMethod* input = nullptr;
@@ -360,11 +358,11 @@ bool promptForNewWiFiCredentials(char** desiredWiFiSSID, char** desiredWiFiPassw
 }
 
 
-bool connectToWiFi(char* desiredWiFiSSID, char* desiredWiFiPassword) {
+bool connectToWiFi(InternetAccess* const internet, const char* const desiredWiFiSSID, const char* const desiredWiFiPassword) {
 	Serial.println(F("Attempting connection..."));
 	display->updateWriting("Connecting...");
 
-	if(!internet.connectToNetwork(desiredWiFiSSID, desiredWiFiPassword)) {
+	if(!internet->connectToNetwork(desiredWiFiSSID, desiredWiFiPassword)) {
 		display->updateWriting("Failed");
 		Serial.print(F("Unable to connect to "));
 		Serial.println(desiredWiFiSSID);
@@ -379,7 +377,7 @@ bool connectToWiFi(char* desiredWiFiSSID, char* desiredWiFiPassword) {
 }
 
 
-const char* getDataFromInternet(const char* requestEndpoint) {
+const char* getDataFromInternet(const char* const requestEndpoint, InternetAccess* const internet) {
 	const char* headers[7] = {
 		requestEndpoint,
 		NETWORK_HEADER_USER_AGENT,
@@ -390,18 +388,18 @@ const char* getDataFromInternet(const char* requestEndpoint) {
 		nullptr
 	};
 
-	if(!websiteAccess.sendRequestToServer(internet, SERVER, headers)) {
+	if(!WebsiteAccess::sendRequestToServer(*internet, SERVER, headers)) {
 		return nullptr;
 	}
 
-	return websiteAccess.downloadFromServer(internet);
+	return WebsiteAccess::downloadFromServer(*internet);
 }
 
 
-bool setupInputMethod() {
+bool setupInputMethod(InternetAccess* const internet) {
 	display->updateWriting("Downloading Data");
 
-	const char* rawVersionData = getDataFromInternet(input->getDataVersionRequestEndpoint());
+	const char* rawVersionData = getDataFromInternet(input->getDataVersionRequestEndpoint(), internet);
 	if(!rawVersionData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::INPUT_METHOD_DATA_VERSION_DOWNLOAD_FAILED);
 		return false;
@@ -425,7 +423,7 @@ bool setupInputMethod() {
 		Serial.println(F("Downloading Input Method data..."));
 
 		delete[] data;
-		data = getDataFromInternet(input->getDataRequestEndpoint());
+		data = getDataFromInternet(input->getDataRequestEndpoint(), internet);
 		if(!data) {
 			DebugLog::getLog().logWarning(ERROR_CODE::INPUT_METHOD_DATA_DOWNLOAD_FAILED);
 			return false;
@@ -505,7 +503,7 @@ void connectToPeer() {
 
 
 void setup() {
-	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, DEBUG_LOG, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORK, INPUT_METHOD, PINS, PEER, DONE};
+	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, DEBUG_LOG, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORKING, INPUT_METHOD, PINS, PEER, DONE};
 	SETUP_LEVEL setupState = SETUP_LEVEL::BEGIN;
 
 	const unsigned short BAUD_RATE = 9600;
@@ -525,6 +523,8 @@ void setup() {
 	const unsigned short STARTUP_CODE_INPUT_TIME_MS = 1500;
 	const unsigned short HELLO_GLEEMAIL_DELAY_MS = 1000;
 	const unsigned short NETWORK_FAILED_DELAY_MS = 3600; //Smallest GitHub rate limit is 1000/hour, and there are 3600000ms in one hour, therefore sending one request per 3600ms will hopefully ensure we dont' exceed any limits
+
+	InternetAccess internet;
 
 	do {
 		switch(setupState) {
@@ -598,7 +598,7 @@ void setup() {
 				delete storage;
 				storage = nullptr;
 
-				setupState = SETUP_LEVEL::NETWORK;
+				setupState = SETUP_LEVEL::NETWORKING;
 			} else {
 				storage->registerNewStartupCodes(startupCodeHandlers);
 				setupState = SETUP_LEVEL::PREFERENCES;
@@ -611,11 +611,11 @@ void setup() {
 				initializeNetworkCredentialsFromPreferences(&desiredWiFiSSID, &desiredWiFiPassword);
 			}
 
-			setupState = SETUP_LEVEL::NETWORK;
+			setupState = SETUP_LEVEL::NETWORKING;
 		break;
 
 
-		case SETUP_LEVEL::NETWORK:
+		case SETUP_LEVEL::NETWORKING:
 			if(!network) {
 				network = new Networking(&millis, &updateDisplayWithPeerChat, &connectedToPeerClearDisplay, 0, quit);
 				network->registerNewStartupCodes(startupCodeHandlers);
@@ -634,7 +634,7 @@ void setup() {
 				networkCredentialsChanged = promptForNewWiFiCredentials(&desiredWiFiSSID, &desiredWiFiPassword, !networkCredentialsExist);
 			}
 
-			if(connectToWiFi(desiredWiFiSSID, desiredWiFiPassword)) {
+			if(connectToWiFi(&internet, desiredWiFiSSID, desiredWiFiPassword)) {
 				if(networkCredentialsChanged && storage) {
 					Preferences::getPrefs().setWiFiSSID(desiredWiFiSSID);
 					Preferences::getPrefs().setWiFiPassword(desiredWiFiPassword);
@@ -657,7 +657,7 @@ void setup() {
 				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment must be manually changed if a different input method is desired
 			}
 
-			if(setupInputMethod()) {
+			if(setupInputMethod(&internet)) {
 				for(unsigned short i = 0; i < (MAX_MESSAGE_LENGTH + TERMINATOR); i += 1) {
 					userMessage[i] = '\0';
 					peerMessage[i] = '\0';
