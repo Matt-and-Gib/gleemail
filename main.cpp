@@ -60,7 +60,6 @@ const unsigned short STARTUP_CODE_PROCESSED = 127;
 char* messageToPrint = nullptr;
 
 Display* display = nullptr;
-Storage* storage = nullptr;
 Networking* network = nullptr;
 
 InputMethod* input = nullptr;
@@ -256,7 +255,7 @@ void initializeNetworkCredentialsFromPreferences(char** desiredWiFiSSID, char** 
 }
 
 
-bool preparePreferences() {
+bool preparePreferences(Storage* const storage) {
 	if(!storage) {
 		DebugLog::getLog().logError(ERROR_CODE::STORAGE_OBJECT_UNSUCCESSFULLY_ALLOCATED);
 		return false;
@@ -394,7 +393,7 @@ const char* getDataFromInternet(const char* const requestEndpoint, InternetAcces
 }
 
 
-bool setupInputMethod(InternetAccess* const internet) {
+bool setupInputMethod(InternetAccess* const internet, Storage* const storage) {
 	display->updateWriting("Downloading Data");
 
 	const char* rawVersionData = getDataFromInternet(input->getDataVersionRequestEndpoint(), internet);
@@ -500,7 +499,7 @@ void connectToPeer() {
 }
 
 
-void setup(bool& quit) {
+void setup(bool& quit, Storage*& storage) {
 	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, DEBUG_LOG, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORKING, INPUT_METHOD, PINS, PEER, DONE};
 	SETUP_LEVEL setupState = SETUP_LEVEL::BEGIN;
 
@@ -605,7 +604,7 @@ void setup(bool& quit) {
 
 
 		case SETUP_LEVEL::PREFERENCES:
-			if(preparePreferences()) {
+			if(preparePreferences(storage)) {
 				initializeNetworkCredentialsFromPreferences(&desiredWiFiSSID, &desiredWiFiPassword);
 			}
 
@@ -655,7 +654,7 @@ void setup(bool& quit) {
 				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment must be manually changed if a different input method is desired
 			}
 
-			if(setupInputMethod(&internet)) {
+			if(setupInputMethod(&internet, storage)) {
 				for(unsigned short i = 0; i < (MAX_MESSAGE_LENGTH + TERMINATOR); i += 1) {
 					userMessage[i] = '\0';
 					peerMessage[i] = '\0';
@@ -712,7 +711,9 @@ int main(void) {
 
 	bool quit = false;
 
-	setup(quit);
+	Storage* storage = nullptr;
+
+	setup(quit, storage);
 
 	while(!quit) {
 		cycleStartTime = millis();
