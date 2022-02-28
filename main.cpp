@@ -61,7 +61,6 @@ char* messageToPrint = nullptr;
 
 Display* display = nullptr;
 Networking* network = nullptr;
-
 InputMethod* input = nullptr;
 unsigned short pinIndex = 0;
 char* userMessage = new char[MAX_MESSAGE_LENGTH + TERMINATOR];
