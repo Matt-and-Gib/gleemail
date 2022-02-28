@@ -29,7 +29,7 @@ private:
 	const char VERBOSE_MODE_STARTUP_CODE = 'v';
 	void verboseModeStartupCodeReceived() {DebugLog::getLog().enableVerboseMode();}
 public:
-	explicit VerboseModeEmissary() = default;
+	VerboseModeEmissary() = default;
 	~VerboseModeEmissary() = default;
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>& startupCodeHandlers) override {
