@@ -57,8 +57,6 @@ const static constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
 const unsigned short MAX_STARTUP_CODES = 7;
 const unsigned short STARTUP_CODE_PROCESSED = 127;
 
-bool quit = false;
-
 char* messageToPrint = nullptr;
 
 Display* display = nullptr;
@@ -502,7 +500,7 @@ void connectToPeer() {
 }
 
 
-void setup() {
+void setup(bool& quit) {
 	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, DEBUG_LOG, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORKING, INPUT_METHOD, PINS, PEER, DONE};
 	SETUP_LEVEL setupState = SETUP_LEVEL::BEGIN;
 
@@ -712,7 +710,9 @@ int main(void) {
 	USBDevice.attach();
 #endif
 
-	setup();
+	bool quit = false;
+
+	setup(quit);
 
 	while(!quit) {
 		cycleStartTime = millis();
