@@ -325,7 +325,7 @@ As soon as possible at launch, send **-A** via Serial to trigger the startup cod
 |----|--------|---------|-----|
 |`[DEL]`|None|_core_|Reserved for system use|
 |`k`|Print DSA keys|Networking|Confirm your keys out-of-band to ensure a secure connection|
-|`v`|Enable Verbose Debug Mode|_core_|Warnings will be sent via Serial in addition to errors|
+|`v`|Enable Verbose Debug Mode|_core_|Low-severity errors will be sent via Serial (high-severity errors will always be sent)|
 |`I`|Enable Incoming-Only Mode|Display|Only incoming messages will be displayed (hide your output)|
 |`O`|Enable Offline Mode|??? (todo)|No network connections will be made (there's no shame in a solo glEEmail session)|
 |`R`|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
