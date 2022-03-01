@@ -8,13 +8,13 @@ struct Pin;
 
 class InputMethod {
 private:
-	char *userMessage;
+	char* userMessage;
 	unsigned short int userMessageFirstEmptyIndex = 0;
 
 	void clearUserMessage();
 
-	void (*messageChanged)(char*);
-	void (*sendMessage)(char*);
+	void (* const messageChanged)(char*);
+	void (* const sendMessage)(char*);
 public:
 	InputMethod(void (* const)(char*), void (* const)(char*));
 	InputMethod(const InputMethod&) = delete;
