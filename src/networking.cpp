@@ -233,7 +233,7 @@ bool Networking::exceededMaxOutgoingTokenRetryCount() {
 }
 
 
-void Networking::createMessagePayload(char* message, const size_t length) {// Optimize me!?
+void Networking::createMessagePayload(char* message, const unsigned char length) {// Optimize me!?
 	unsigned short i;
 	char tempMessageBuffer[length]; // Really don't want to have to do this!
 
@@ -257,7 +257,7 @@ void Networking::createMessagePayload(char* message, const size_t length) {// Op
 }
 
 /*
-void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const size_t length) { //Is this used anywhere? Possibly delete me!
+void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const unsigned char length) { //Is this used anywhere? Possibly delete me!
 	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length); //Unnecessary static cast if this function is never called!
 }
 */

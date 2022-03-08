@@ -53,7 +53,7 @@ private:
 	static const constexpr unsigned short SIZE_OF_ENCRYPTION_INFO_PAYLOAD = 265; //32: DSAPubKey + 32: EphemeralPubKey + 64: signature + 4: ID + 1: nullterminator //Don't forget to move me if the rest of encryption is moved
 
 	CipherManagement ae;
-	static const constexpr size_t tagBytes = 16; //CipherManagement::getTagBytes();
+	static const constexpr unsigned char tagBytes = 16; //CipherManagement::getTagBytes();
 	unsigned long long messageCount = 0; // Used to increment a nonce for each new message sent. Will be sent with each encrypted message.
 	unsigned char tag[tagBytes]; // Used to authenticate encrypted messages. Will be sent with each encrypted message.
 	//char* tag;
@@ -62,9 +62,9 @@ private:
 //	MOVE ME!
 	KeyManagement pki; // What is this doing here, I mean, really?
 
-	static const constexpr size_t keyBytes = 32; //pki.getKeyBytes();
-	static const constexpr size_t signatureBytes = 64; //pki.getSignatureBytes();
-	static const constexpr size_t IDBytes = 4; //pki.getIDBytes();
+	static const constexpr unsigned char keyBytes = 32; //pki.getKeyBytes();
+	static const constexpr unsigned char signatureBytes = 64; //pki.getSignatureBytes();
+	static const constexpr unsigned char IDBytes = 4; //pki.getIDBytes();
 
 	unsigned char userDSAPrivateKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
 	unsigned char userDSAPubKey[keyBytes]; // Used as either an input or an output depending on whether the user would like to generate a new key pair.
@@ -114,8 +114,8 @@ private:
 	Queue<Message> messagesOut;
 	MESSAGE_TYPE searchMessageType;
 
-	void createMessagePayload(char*, const size_t);
-	void encryptBufferAndPrepareMessagePayload(char*, const size_t);
+	void createMessagePayload(char*, const unsigned char);
+	void encryptBufferAndPrepareMessagePayload(char*, const unsigned char);
 
 	unsigned long processStartTime = 0;
 	unsigned short processElapsedTime = 0;
@@ -162,6 +162,7 @@ private:
 	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
+
 public:
 	Networking(unsigned long (* const)(), void (* const)(char*), void (* const)(), const long u, bool& quit);
 	Networking(const Networking&) = delete;
