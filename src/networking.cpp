@@ -131,8 +131,8 @@ void Networking::buildEncryptionInfoPayload(unsigned char* encryptionInfoOut, co
 	}
 
 	for(i = 0; i < IDBytes; i += 1) {
-		encryptionInfoOut[(i * 2) + (keyBytes * 4) + (signatureBytes*2)] = ID[i] >> 4;
-		encryptionInfoOut[(i * 2) + (keyBytes * 4) + (signatureBytes*2) + 1] = ID[i] & 0x0f;
+		encryptionInfoOut[(i * 2) + (keyBytes * 4) + (signatureBytes * 2)] = ID[i] >> 4;
+		encryptionInfoOut[(i * 2) + (keyBytes * 4) + (signatureBytes * 2) + 1] = ID[i] & 0x0f;
 	}
 
 	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
