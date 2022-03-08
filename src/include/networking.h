@@ -40,7 +40,7 @@ private:
 	unsigned long approxCurrentTime;
 
 	unsigned short uuid;
-	void createuuid(unsigned char*);
+	void createuuid(unsigned char* const);
 	unsigned short messagesSentCount = 0;
 
 	bool connected = false;
@@ -89,7 +89,7 @@ private:
 	void stringToULL();
 
 	void clearAllQueues();
-	void dropConnection();
+	void dropConnection() {shutdownFlag = true;}
 
 	Message* heartbeat;
 	unsigned long lastHeartbeatSentMS = 0;
@@ -105,7 +105,7 @@ private:
 	void (Networking::*checkHeartbeatThreshold)() = &Networking::checkHeartbeatStillborn;
 	void (Networking::*processHeartbeat)() = &Networking::dontCheckHeartbeat; //Switch to checkHeartbeat() on first heartbeat received
 
-#warning "This is probably too big for most messages. Maybe create second buffer for handshakes?"
+	#warning "This is probably too big for most messages. Maybe create second buffer for handshakes?"
 	char messageFromUDPBuffer[MESSAGE_BUFFER_SIZE] = {0};
 	unsigned short packetSize = 0;
 
@@ -114,7 +114,7 @@ private:
 	Queue<Message> messagesOut;
 	MESSAGE_TYPE searchMessageType;
 
-	void createMessagePayload(char*, const unsigned char);
+	void createMessagePayload(char* const, const unsigned char);
 	void encryptBufferAndPrepareMessagePayload(char*, const unsigned char);
 
 	unsigned long processStartTime = 0;
@@ -149,8 +149,8 @@ private:
 	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
 
-	void buildAuthenticationPayload(unsigned char*);
-	void prepareOutgoingEncryptedChat(unsigned char* cipherText, unsigned short chatBytes);
+	void buildAuthenticationPayload(unsigned char* const);
+	void prepareOutgoingEncryptedChat(unsigned char* const, unsigned short);
 	char outgoingMessageBuffer[MESSAGE_BUFFER_SIZE] = {0};
 	Message& sendOutgoingMessage(Message&);
 
@@ -177,7 +177,7 @@ public:
 	void processNetwork();
 	void sendChatMessage(const char*);
 
-	bool connectToPeer(IPAddress&);
+	bool connectToPeer(const IPAddress&);
 };
 
 #endif

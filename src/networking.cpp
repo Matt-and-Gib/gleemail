@@ -53,11 +53,6 @@ void Networking::clearAllQueues() {
 }
 
 
-void Networking::dropConnection() {
-	shutdownFlag = true;
-}
-
-
 void Networking::removeFromQueue(Queue<Message>& fromQueue, Message& node) {
 	delete fromQueue.remove(node);
 }
@@ -110,11 +105,11 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 
 
 void Networking::sendChatMessage(const char* chat) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString<const char, unsigned char>(chat, MAX_MESSAGE_LENGTH)/*, nullptr*/, nullptr, &removeFromQueue));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString<const char, unsigned char>(chat, MAX_MESSAGE_LENGTH), nullptr, &removeFromQueue));
 }
 
 
-void Networking::createuuid(unsigned char* userID) {
+void Networking::createuuid(unsigned char* const userID) {
 	uuid |= userID[0] << 8;
 	uuid |= userID[1];
 }
@@ -123,21 +118,21 @@ void Networking::createuuid(unsigned char* userID) {
 void Networking::buildEncryptionInfoPayload(unsigned char* encryptionInfoOut, const unsigned char* DSAPubKey, const unsigned char* ephemeralPubKey, const unsigned char* signature, const unsigned char* ID) {
 	unsigned short i = 0;
 	for(i = 0; i < keyBytes; i += 1) {
-		encryptionInfoOut[i*2] = DSAPubKey[i] >> 4;
-		encryptionInfoOut[(i*2) + 1] = DSAPubKey[i] & 0x0f;
+		encryptionInfoOut[i * 2] = DSAPubKey[i] >> 4;
+		encryptionInfoOut[(i * 2) + 1] = DSAPubKey[i] & 0x0f;
 
-		encryptionInfoOut[(i*2) + (keyBytes*2)] = ephemeralPubKey[i] >> 4;
-		encryptionInfoOut[(i*2) + (keyBytes*2) + 1] = ephemeralPubKey[i] & 0x0f;
+		encryptionInfoOut[(i * 2) + (keyBytes * 2)] = ephemeralPubKey[i] >> 4;
+		encryptionInfoOut[(i * 2) + (keyBytes * 2) + 1] = ephemeralPubKey[i] & 0x0f;
 	}
 
 	for(i = 0; i < signatureBytes; i += 1) {
-		encryptionInfoOut[(i*2) + (keyBytes*4)] = signature[i] >> 4;
-		encryptionInfoOut[(i*2) + (keyBytes*4) + 1] = signature[i] & 0x0f;
+		encryptionInfoOut[(i * 2) + (keyBytes * 4)] = signature[i] >> 4;
+		encryptionInfoOut[(i * 2) + (keyBytes * 4) + 1] = signature[i] & 0x0f;
 	}
 
 	for(i = 0; i < IDBytes; i += 1) {
-		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2)] = ID[i] >> 4;
-		encryptionInfoOut[(i*2) + (keyBytes*4) + (signatureBytes*2) + 1] = ID[i] & 0x0f;
+		encryptionInfoOut[(i * 2) + (keyBytes * 4) + (signatureBytes*2)] = ID[i] >> 4;
+		encryptionInfoOut[(i * 2) + (keyBytes * 4) + (signatureBytes*2) + 1] = ID[i] & 0x0f;
 	}
 
 	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
@@ -156,16 +151,16 @@ void Networking::buildEncryptionInfoPayload(unsigned char* encryptionInfoOut, co
 //Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
 void Networking::stringToHex(unsigned char* out, const unsigned char* s, const unsigned short start, const unsigned short length) {
 	for(unsigned short i = 0; i < length; i += 1) {
-		if(48 <= s[(i*2) + start] && s[(i*2) + start] <= 57) {
-			out[i] = (s[(i*2) + start] - 48) << 4;
+		if(48 <= s[(i * 2) + start] && s[(i * 2) + start] <= 57) {
+			out[i] = (s[(i * 2) + start] - 48) << 4;
 		} else {
-			out[i] = (s[(i*2) + start] - 87) << 4;
+			out[i] = (s[(i * 2) + start] - 87) << 4;
 		}
 
-		if(48 <= s[(i*2) + start + 1] && s[(i*2) + start + 1] <= 57) {
-			out[i] |= (s[(i*2) + start + 1] - 48);
+		if(48 <= s[(i * 2) + start + 1] && s[(i * 2) + start + 1] <= 57) {
+			out[i] |= (s[(i * 2) + start + 1] - 48);
 		} else {
-			out[i] |= (s[(i*2) + start + 1] - 87);
+			out[i] |= (s[(i * 2) + start + 1] - 87);
 		}
 	}
 }
@@ -174,13 +169,13 @@ void Networking::stringToHex(unsigned char* out, const unsigned char* s, const u
 //Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
 void Networking::convertEncryptionInfoPayload(unsigned char* DSAPubKeyOut, unsigned char* ephemeralPubKeyOut, unsigned char* signatureOut, unsigned char* IDOut, const unsigned char* encryptionInfo) {
 	stringToHex(DSAPubKeyOut, encryptionInfo, 0, keyBytes);
-	stringToHex(ephemeralPubKeyOut, encryptionInfo, (keyBytes*2), keyBytes);
-	stringToHex(signatureOut, encryptionInfo, (keyBytes*4), signatureBytes);
-	stringToHex(IDOut, encryptionInfo, ((keyBytes*4) + (signatureBytes*2)), IDBytes);
+	stringToHex(ephemeralPubKeyOut, encryptionInfo, (keyBytes * 2), keyBytes);
+	stringToHex(signatureOut, encryptionInfo, (keyBytes * 4), signatureBytes);
+	stringToHex(IDOut, encryptionInfo, ((keyBytes * 4) + (signatureBytes * 2)), IDBytes);
 }
 
 
-bool Networking::connectToPeer(IPAddress& connectToIP) {
+bool Networking::connectToPeer(const IPAddress& connectToIP) {
 	const bool GENERATE_NEW_KEY = true;
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, GENERATE_NEW_KEY);
 	createuuid(userID);
@@ -233,7 +228,7 @@ bool Networking::exceededMaxOutgoingTokenRetryCount() {
 }
 
 
-void Networking::createMessagePayload(char* message, const unsigned char length) {// Optimize me!?
+void Networking::createMessagePayload(char* const message, const unsigned char length) {// Optimize me!?
 	unsigned short i;
 	char tempMessageBuffer[length]; // Really don't want to have to do this!
 
@@ -242,7 +237,7 @@ void Networking::createMessagePayload(char* message, const unsigned char length)
 	}
 
 	for(i = 0; i < 8; i += 1) {
-		message[i] = messageCount >> ((7 - i)*8);
+		message[i] = messageCount >> ((7 - i) * 8);
 	}
 
 	for(i = 0; i < tagBytes; i += 1) {
@@ -256,19 +251,14 @@ void Networking::createMessagePayload(char* message, const unsigned char length)
 	message[8 + tagBytes + length] = '\0';
 }
 
-/*
-void Networking::encryptBufferAndPrepareMessagePayload(char* outputBuffer, const unsigned char length) { //Is this used anywhere? Possibly delete me!
-	ae.encryptAndTagMessage(messageCount, tag, outputBuffer, length); //Unnecessary static cast if this function is never called!
-}
-*/
 
-void Networking::buildAuthenticationPayload(unsigned char* authPayload) {
+void Networking::buildAuthenticationPayload(unsigned char* const authPayload) {
 	unsigned short i;
 
 	for(i = 0; i < 16; i += 1) {
-		authPayload[i] = (messageCount >> ((15 - i)*4)) & 0x0f;
-		authPayload[(i*2) + 16] = tag[i] >> 4;
-		authPayload[(i*2) + 16 + 1] = tag[i] & 0x0f;
+		authPayload[i] = (messageCount >> ((15 - i) * 4)) & 0x0f;
+		authPayload[(i * 2) + 16] = tag[i] >> 4;
+		authPayload[(i * 2) + 16 + 1] = tag[i] & 0x0f;
 	}
 
 	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
@@ -284,16 +274,16 @@ void Networking::buildAuthenticationPayload(unsigned char* authPayload) {
 }
 
 
-void Networking::prepareOutgoingEncryptedChat(unsigned char* cipherText, unsigned short chatBytes) {
+void Networking::prepareOutgoingEncryptedChat(unsigned char* const cipherText, unsigned short chatBytes) {
 	unsigned short i;
 
 	for(i = 0; i < chatBytes; i += 1) {
-		cipherText[((chatBytes*2) - 1) - (i*2)] = cipherText[((chatBytes - i) - 1)] & 0x0f;
-		cipherText[((chatBytes*2) - 2) - (i*2)] = cipherText[((chatBytes - i) - 1)] >> 4;
+		cipherText[((chatBytes * 2) - 1) - (i * 2)] = cipherText[(chatBytes - i) - 1] & 0x0f;
+		cipherText[((chatBytes * 2) - 2) - (i * 2)] = cipherText[(chatBytes - i) - 1] >> 4;
 	}
 
 	//Necessary because ArduinoJSON is too wimpy to handle a mid-stream null-terminator
-	for(i = 0; i < chatBytes*2; i += 1) {
+	for(i = 0; i < chatBytes * 2; i += 1) {
 		if(cipherText[i] < 0x0a) {
 			cipherText[i] += 48;
 		} else {
@@ -301,7 +291,7 @@ void Networking::prepareOutgoingEncryptedChat(unsigned char* cipherText, unsigne
 		}
 	}
 
-	cipherText[chatBytes*2] = '\0';
+	cipherText[chatBytes * 2] = '\0';
 }
 
 
