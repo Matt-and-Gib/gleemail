@@ -104,7 +104,7 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 }
 
 
-void Networking::sendChatMessage(const char* chat) {
+void Networking::sendChatMessage(const char* const chat) {
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::CHAT, new IdempotencyToken(uuid + messagesSentCount, nowMS()), copyString<const char, unsigned char>(chat, MAX_MESSAGE_LENGTH), nullptr, &removeFromQueue));
 }
 

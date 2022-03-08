@@ -175,7 +175,7 @@ public:
 	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;
 
 	void processNetwork();
-	void sendChatMessage(const char*);
+	void sendChatMessage(const char* const);
 
 	bool connectToPeer(const IPAddress&);
 };
