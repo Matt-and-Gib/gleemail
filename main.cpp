@@ -133,15 +133,6 @@ void updateDisplayWithPeerChat(char* messageBody) {
 }
 
 
-void updateDisplay() {
-	if(messageToPrint != nullptr) {
-		display->updateReading(messageToPrint);
-		delete[] messageToPrint;
-		messageToPrint = nullptr;
-	}
-}
-
-
 void printErrorCodes() {
 	if(DebugLog::getLog().getPendingErrors() > 0) {
 		ERROR_CODE e = DebugLog::getLog().getNextError();
@@ -724,7 +715,15 @@ int main(void) {
 
 		updateInputMethod();
 		network->Update();
-		updateDisplay();
+
+		{ //Display->Update();
+			if(messageToPrint != nullptr) {
+				display->updateReading(messageToPrint);
+				delete[] messageToPrint;
+				messageToPrint = nullptr;
+			}
+		}
+
 		printErrorCodes();
 
 #ifdef GLEEMAIL_FRAME_TIMER
