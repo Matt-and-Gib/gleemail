@@ -7,6 +7,8 @@
 #include "src/include/queue.h"
 #include "src/include/keyvaluepair.h"
 
+#include "src/include/corecomponent.h"
+
 #include "src/include/display.h"
 #include "src/include/storage.h"
 
@@ -51,6 +53,11 @@ void initVariant() {}
 extern USBDeviceClass USBDevice;
 
 extern "C" void __libc_init_array(void);
+
+
+#define COUNT_OF_CORE_COMPONENTS 2
+#define CC_STORAGE_INDEX 0
+#define CC_NETWORKING_INDEX 1
 
 
 const static constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
@@ -110,7 +117,7 @@ void updateInputMethod() {
 }
 
 
-void updateNetwork() {
+void updateNetwork() { //remove
 	network->processNetwork();
 }
 
@@ -120,7 +127,7 @@ void userMessageChanged(char* chat) {
 }
 
 
-void sendChatMessage(char* chat) {
+void sendChatMessage(char* chat) { //remove
 	network->sendChatMessage(chat);
 }
 
@@ -460,7 +467,7 @@ void setupPins() {
 }
 
 
-void connectToPeer() {
+void connectToPeer(Networking& network) {
 	char* ipAddressInputBuffer = new char[MAX_IP_ADDRESS_LENGTH + TERMINATOR];
 	char* ipAddressInputSubstringBuffer;
 	uint8_t ipAddressParts[4];
@@ -489,7 +496,7 @@ void connectToPeer() {
 	display->updateReading("Initializing");
 	display->updateWriting("  Authentication");
 
-	network->connectToPeer(friendsIP);
+	network.connectToPeer(friendsIP);
 
 	Serial.print(F("Waiting for gleepal at "));
 	Serial.println(friendsIP);
@@ -498,7 +505,7 @@ void connectToPeer() {
 }
 
 
-void setup(bool& quit, Storage*& storage) {
+void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) {
 	enum class SETUP_LEVEL {BEGIN, SERIAL_COMM, DEBUG_LOG, STARTUP_CODES, LCD, WELCOME, STORAGE, PREFERENCES, NETWORKING, INPUT_METHOD, PINS, PEER, DONE};
 	SETUP_LEVEL setupState = SETUP_LEVEL::BEGIN;
 
@@ -520,6 +527,7 @@ void setup(bool& quit, Storage*& storage) {
 	const unsigned short HELLO_GLEEMAIL_DELAY_MS = 1000;
 	const unsigned short NETWORK_FAILED_DELAY_MS = 3600; //Smallest GitHub rate limit is 1000/hour, and there are 3600000ms in one hour, therefore sending one request per 3600ms will hopefully ensure we dont' exceed any limits
 
+	Storage* storage = nullptr;
 	InternetAccess internet;
 
 	do {
@@ -597,6 +605,7 @@ void setup(bool& quit, Storage*& storage) {
 				setupState = SETUP_LEVEL::NETWORKING;
 			} else {
 				storage->registerNewStartupCodes(startupCodeHandlers);
+				coreComponents[CC_STORAGE_INDEX] = storage;
 				setupState = SETUP_LEVEL::PREFERENCES;
 			}
 		break;
@@ -676,7 +685,7 @@ void setup(bool& quit, Storage*& storage) {
 			if(!OFFLINE_MODE) {
 				display->clearWriting();
 				display->updateReading("Enter glEEpal IP");
-				connectToPeer();
+				connectToPeer(*network);
 				display->clearWriting();
 				display->updateReading("Wait for glEEpal");
 			}
@@ -710,9 +719,8 @@ int main(void) {
 
 	bool quit = false;
 
-	Storage* storage = nullptr;
-
-	setup(quit, storage);
+	CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS] = {nullptr};
+	setup(quit, coreComponents);
 
 	while(!quit) {
 		cycleStartTime = millis();
@@ -720,7 +728,6 @@ int main(void) {
 		updateInputMethod();
 		updateNetwork();
 		updateDisplay();
-		//doAsynchronousProcess();
 		printErrorCodes();
 
 #ifdef GLEEMAIL_FRAME_TIMER
