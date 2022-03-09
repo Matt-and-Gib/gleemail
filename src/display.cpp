@@ -63,3 +63,8 @@ void Display::clearAll() {
 void Display::scrollDisplay() {
 	//How to do this without adding significant processing every frame (comparing against millis, for example)?
 }
+
+
+void Display::Update() {
+	
+}

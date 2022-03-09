@@ -1,6 +1,7 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include "corecomponent.h"
 #include "startupcodehandler.h"
 
 
@@ -10,7 +11,7 @@
 class hd44780_pinIO;
 
 
-class Display final : public StartupCodeHandler {
+class Display final : public CoreComponent, public StartupCodeHandler {
 private:
 	const char BLANK_LINE[17] = "                ";
 	const unsigned short MAX_LINE_LENGTH = 40; //HD44780 RAM size for each line
@@ -46,6 +47,8 @@ public:
 	Display& operator=(const Display&) = delete;
 	Display& operator=(Display&&) = delete;
 	~Display() = default;
+
+	void Update() override;
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
 	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;

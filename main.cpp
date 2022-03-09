@@ -55,9 +55,10 @@ extern USBDeviceClass USBDevice;
 extern "C" void __libc_init_array(void);
 
 
-#define COUNT_OF_CORE_COMPONENTS 2
+#define COUNT_OF_CORE_COMPONENTS 3
 #define CC_STORAGE_INDEX 0
-#define CC_NETWORKING_INDEX 1
+#define CC_DISPLAY_INDEX 1
+#define CC_NETWORKING_INDEX 2
 
 
 const static constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
@@ -567,7 +568,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 		case SETUP_LEVEL::LCD:
 			display = new Display;
 			display->registerNewStartupCodes(startupCodeHandlers);
-
+			coreComponents[CC_DISPLAY_INDEX] = display;
 			setupState = SETUP_LEVEL::WELCOME;
 		break;
 
