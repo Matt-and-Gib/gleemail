@@ -6,13 +6,14 @@
 #include mock_startupcodehandler.h
 #else
 #include "startupcodehandler.h"
+#include "corecomponent.h"
 #endif
 
 
 class SdFat32;
 
 
-class Storage final : public StartupCodeHandler {
+class Storage final : public StartupCodeHandler, public CoreComponent {
 private:
 	const unsigned short SLAVE_SELECT_PIN = 10;
 
@@ -33,6 +34,8 @@ public:
 	~Storage() = default;
 
 	bool begin();
+
+	void Update() override {} //No Update Behavior
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
 	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;
