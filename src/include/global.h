@@ -8,7 +8,6 @@
 #endif
 
 
-
 const constexpr char GLEEMAIL_VERSION[] = "alpha 5";
 const constexpr bool OFFLINE_MODE = false;
 
