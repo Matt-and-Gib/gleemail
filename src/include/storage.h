@@ -5,15 +5,15 @@
 #ifdef UNIT_TEST_MODE
 #include mock_startupcodehandler.h
 #else
-#include "startupcodehandler.h"
 #include "corecomponent.h"
+#include "startupcodehandler.h"
 #endif
 
 
 class SdFat32;
 
 
-class Storage final : public StartupCodeHandler, public CoreComponent {
+class Storage final : public CoreComponent, public StartupCodeHandler {
 private:
 	const unsigned short SLAVE_SELECT_PIN = 10;
 

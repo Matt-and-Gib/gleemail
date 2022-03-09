@@ -644,6 +644,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 					delete[] prefsData;
 				}
 
+				coreComponents[CC_NETWORKING_INDEX] = network;
 				setupState = SETUP_LEVEL::INPUT_METHOD;
 			} else {
 				promptForNewNetworkCredentials = true;

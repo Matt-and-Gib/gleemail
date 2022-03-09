@@ -9,8 +9,8 @@
 //#include "moc_LiteChaCha/moc_keyinfrastructure.h"
 //#include "moc_LiteChaCha/moc_authenticatedencrypt.h"
 #else
-#include "startupcodehandler.h"
 #include "corecomponent.h"
+#include "startupcodehandler.h"
 #include <WiFiUdp.h>
 #include "global.h"
 #include "queue.h"
@@ -26,7 +26,7 @@ class Message;
 class IdempotencyToken;
 
 
-class Networking final : public StartupCodeHandler, public CoreComponent {
+class Networking final : public CoreComponent, public StartupCodeHandler {
 private:
 	const char MAN_IN_THE_MIDDLE_DETECTION_MODE_STARTUP_CODE = 'k';
 	bool printDSAKeys = false;
