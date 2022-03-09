@@ -117,11 +117,6 @@ void updateInputMethod() {
 }
 
 
-void updateNetwork() { //remove
-	network->processNetwork();
-}
-
-
 void userMessageChanged(char* chat) {
 	display->updateWriting(chat);
 }
@@ -726,7 +721,7 @@ int main(void) {
 		cycleStartTime = millis();
 
 		updateInputMethod();
-		updateNetwork();
+		network->Update();
 		updateDisplay();
 		printErrorCodes();
 
