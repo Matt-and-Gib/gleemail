@@ -460,7 +460,7 @@ void connectToPeer(Networking& network) {
 	display->updateReading("Initializing");
 	display->updateWriting("  Authentication");
 
-	network.connectToPeer(friendsIP);
+	network.initiateHandshake(friendsIP);
 
 	Serial.print(F("Waiting for gleepal at "));
 	Serial.println(friendsIP);

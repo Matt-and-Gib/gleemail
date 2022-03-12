@@ -73,10 +73,10 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 			n.pki.createSessionKey(n.peerEphemeralPubKey); // Creates a shared private session key, overwriting peerEphemeralPubKey, if both users have different IDs and the peer's signature is valid.
 		} else {
 			DebugLog::getLog().logError(ERROR_CODE::NETWORK_AUTHENTICATION_FAILED);
+			//Go back to initiateHandshake()
 		}
 
 		n.ae.initialize(n.peerEphemeralPubKey, n.userID, n.peerID);
-		//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
 
 		if(n.printDSAKeys) {
 			Serial.print(F("Peer DSA Public Key:"));
@@ -91,6 +91,8 @@ void Networking::connectionEstablished(Networking& n, Queue<Message>& messagesOu
 			}
 			Serial.println();
 		}
+
+		//Free to delete pki, keyBytes, signatureBytes, IDBytes, userDSAPrivateKey, userDSAPublicKey, peerDSAPublicKey, userEphemeralPubKey, peerEphemeralPubKey, userSignature, peerSignature, userID, peerID, encryptionInfo
 
 		delete messagesOutQueue.remove(messageOut); //removes outgoing handshake from queue
 
@@ -175,7 +177,7 @@ void Networking::convertEncryptionInfoPayload(unsigned char* DSAPubKeyOut, unsig
 }
 
 
-void Networking::connectToPeer(const IPAddress& connectToIP) {
+void Networking::initiateHandshake(const IPAddress& connectToIP) {
 	const bool GENERATE_NEW_KEY = true;
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, GENERATE_NEW_KEY);
 	createuuid(userID);

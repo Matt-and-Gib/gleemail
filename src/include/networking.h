@@ -179,7 +179,7 @@ public:
 
 	void sendChatMessage(const char* const);
 
-	void connectToPeer(const IPAddress&); //Rename to clarify that we're just preparing for a connection and enqueuing a handshake?
+	void initiateHandshake(const IPAddress&);
 };
 
 #endif
