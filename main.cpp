@@ -91,33 +91,6 @@ void connectedToPeerClearDisplay() {
 }
 
 
-void updateInputMethod() {
-	pinIndex = 0;
-
-	Pin** allPins = input->getPins();
-	Pin* currentPin = allPins[pinIndex];
-	while(*currentPin != NULL_PIN) {
-		if(currentPin->mode == PIN_MODE::READ) {
-			currentPin->value = digitalRead(currentPin->pinLocation);
-		}
-
-		currentPin = allPins[++pinIndex];
-	}
-
-	input->processInput(cycleStartTime);
-
-	pinIndex = 0;
-	currentPin = allPins[pinIndex];
-	while(*currentPin != NULL_PIN) {
-		if(currentPin->mode == PIN_MODE::WRITE) {
-			digitalWrite(currentPin->pinLocation, currentPin->value);
-		}
-
-		currentPin = allPins[++pinIndex];
-	}
-}
-
-
 void userMessageChanged(char* chat) {
 	display->updateWriting(chat);
 }
@@ -719,7 +692,32 @@ int main(void) {
 	while(!quit) {
 		cycleStartTime = millis();
 
-		updateInputMethod();
+		{ //InputMethod->Update();
+			pinIndex = 0;
+
+			Pin** allPins = input->getPins();
+			Pin* currentPin = allPins[pinIndex];
+			while(*currentPin != NULL_PIN) {
+				if(currentPin->mode == PIN_MODE::READ) {
+					currentPin->value = digitalRead(currentPin->pinLocation);
+				}
+
+				currentPin = allPins[++pinIndex];
+			}
+
+			input->processInput(cycleStartTime);
+
+			pinIndex = 0;
+			currentPin = allPins[pinIndex];
+			while(*currentPin != NULL_PIN) {
+				if(currentPin->mode == PIN_MODE::WRITE) {
+					digitalWrite(currentPin->pinLocation, currentPin->value);
+				}
+
+				currentPin = allPins[++pinIndex];
+			}
+		}
+		
 		network->Update();
 
 		{ //Display->Update();
