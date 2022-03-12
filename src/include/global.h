@@ -54,7 +54,7 @@ const constexpr char CANCEL_CHAR = (char)24;
 
 
 template<typename TIn, typename TOut>
-inline TOut* copyString(TIn* original, const unsigned short LEN) {
+[[nodiscard]] inline TOut* copyString(TIn* original, const unsigned short LEN) {
 	TOut* duplicate = new TOut[LEN];
 	for(unsigned short i = 0; i < LEN; i += 1) {
 		duplicate[i] = original[i];
@@ -64,7 +64,7 @@ inline TOut* copyString(TIn* original, const unsigned short LEN) {
 }
 
 
-inline char* copyAndTerminateString(const char* original, const unsigned short LEN) {
+[[nodiscard]] inline char* copyAndTerminateString(const char* original, const unsigned short LEN) {
 	char* duplicate = new char[LEN + TERMINATOR];
 	for(unsigned short i = 0; i < LEN; i += 1) {
 		duplicate[i] = original[i];
@@ -98,11 +98,11 @@ struct Pin final {
 	PIN_MODE mode;
 	unsigned short value;
 
-	bool operator==(const Pin &rhs) {
+	bool operator==(const Pin &rhs) const {
 		return this->pinLocation == rhs.pinLocation;
 	}
 
-	bool operator!=(const Pin &rhs) {
+	bool operator!=(const Pin &rhs) const {
 		return this->pinLocation != rhs.pinLocation;
 	}
 };

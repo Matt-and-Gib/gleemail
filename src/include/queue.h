@@ -20,9 +20,10 @@ public:
 	}
 
 	void setNode(QueueNode<T>* n) {node = n;} //possible memory leak
-	QueueNode<T>* getNode() {return node;}
+	[[nodiscard]] QueueNode<T>* getNode() {return node;}
 	void setData(T* d) {data = d;} //possible memory leak
-	T* getData() {return data;}
+	[[nodiscard]] T* getData() {return data;}
+	[[nodiscard]] T* readData() const {return data;}
 
 	QueueNode<T>* enqueue(T* o) {
 		if(node == nullptr) {
@@ -33,7 +34,7 @@ public:
 		}
 	}
 
-	unsigned short countChildren() const {return !node ? 0 : node->countChildren() + 1;}
+	[[nodiscard]] unsigned short countChildren() const {return !node ? 0 : node->countChildren() + 1;}
 };
 
 
@@ -53,17 +54,17 @@ public:
 	}
 
 	QueueNode<T>* enqueue(T*);
-	QueueNode<T>* dequeue();
-	QueueNode<T>* peek();
+	[[nodiscard]] QueueNode<T>* dequeue();
+	[[nodiscard]] QueueNode<T>* peek();
 
 	QueueNode<T>* find(const T*);
 
 	//QueueNode<T>* remove(T&, QueueNode<T>*);
-	QueueNode<T>* remove(const T&);
+	[[nodiscard]] QueueNode<T>* remove(const T&);
 	QueueNode<T>* remove(const QueueNode<T>&);
 
-	bool empty() const {return root == nullptr;}
-	unsigned short length() const {return !root ? 0 : root->countChildren() + 1;}
+	[[nodiscard]] bool empty() const {return root == nullptr;}
+	[[nodiscard]] unsigned short length() const {return !root ? 0 : root->countChildren() + 1;}
 };
 
 
@@ -161,9 +162,9 @@ inline QueueNode<T>* Queue<T>::remove(const T& match) {
 
 template <class T>
 inline QueueNode<T>* Queue<T>::remove(const QueueNode<T>& match) {
-	//return remove(*match.getData());
+	return remove(*match.readData());
 	
-	QueueNode<T>* parentNode = nullptr;
+	/*QueueNode<T>* parentNode = nullptr;
 	QueueNode<T>* currentNode = root;
 	while(currentNode) {
 		if(currentNode == &match) {
@@ -183,7 +184,7 @@ inline QueueNode<T>* Queue<T>::remove(const QueueNode<T>& match) {
 		currentNode->setNode(nullptr);
 	}
 
-	return currentNode;
+	return currentNode;*/
 }
 
 #endif

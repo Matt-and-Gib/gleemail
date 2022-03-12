@@ -33,19 +33,19 @@ public:
 	Storage& operator=(Storage&&) = delete;
 	~Storage() = default;
 
-	bool begin();
+	[[nodiscard]] bool begin();
 
 	void Update() override {} //No Update Behavior
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
 	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;
 
-	const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
+	[[nodiscard]] const char* getRootPath() const {return GLEEMAIL_ROOT_PATH;}
 	
-	bool writeFile(const char* data, const char* filePath) const;
+	[[nodiscard]] bool writeFile(const char* data, const char* filePath) const;
 
-	const char* readFile(const char* filePath); //Remember to delete! Stores on heap
-	unsigned int lastReadFileLength() const {return dataLength;}
+	[[nodiscard]] const char* readFile(const char* filePath); //Remember to delete! Stores on heap
+	[[nodiscard]] unsigned int lastReadFileLength() const {return dataLength;}
 
 	bool eraseFile(const char* removeAtPath) const;
 	bool eraseAll(const unsigned int confirmationCode);

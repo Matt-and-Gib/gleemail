@@ -15,8 +15,8 @@ public:
 	KVPair& operator=(KVPair&&) = delete;
 	~KVPair() = default;
 	
-	K getKey() {return key;}
-	V getValue() {return value;}
+	[[nodiscard]] K getKey() {return key;}
+	[[nodiscard]] V getValue() {return value;}
 
 	bool operator==(KVPair<K, V>& o) const {return key == o.getKey();}
 	bool operator==(const K& o) const {return key == o;}

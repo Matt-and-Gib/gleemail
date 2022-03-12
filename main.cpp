@@ -254,7 +254,7 @@ bool preparePreferences(Storage* const storage) {
 		return false;
 	}
 
-	const char* preferencesData = storage->readFile(Preferences::getPrefs().getPrefsPath());
+	const char* const preferencesData = storage->readFile(Preferences::getPrefs().getPrefsPath());
 
 	if(!preferencesData) {
 		DebugLog::getLog().logWarning(ERROR_CODE::PREFERENCES_LOAD_FAILED);
@@ -262,10 +262,10 @@ bool preparePreferences(Storage* const storage) {
 
 		return false;
 	} else {
-		Preferences::getPrefs().deserializePrefs(preferencesData, storage->lastReadFileLength());
+		const bool deserializeResult = Preferences::getPrefs().deserializePrefs(preferencesData, storage->lastReadFileLength());
 		delete[] preferencesData;
 
-		return true;
+		return deserializeResult;
 	}
 }
 
@@ -427,11 +427,15 @@ bool setupInputMethod(InternetAccess* const internet, Storage* const storage) {
 		}
 
 		if(storage != nullptr) {
-			storage->writeFile(data, input->getCachedDataPath());
+			if(!storage->writeFile(data, input->getCachedDataPath())) {
+				DebugLog::getLog().logError(ERROR_CODE::STORAGE_WRITE_UNEXPECTEDLY_FAILED);
+			}
 
 			if(inputMethodDataVersion > Preferences::getPrefs().getMorseCodeCharPairsVersion()) {
 				const char* prefsData = Preferences::getPrefs().serializePrefs();
-				storage->writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
+				if(!storage->writeFile(prefsData, Preferences::getPrefs().getPrefsPath())) {
+					DebugLog::getLog().logError(ERROR_CODE::STORAGE_WRITE_UNEXPECTEDLY_FAILED);
+				}
 				delete[] prefsData;
 			}
 		}
@@ -632,7 +636,9 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 					Preferences::getPrefs().setWiFiPassword(desiredWiFiPassword);
 
 					const char* prefsData = Preferences::getPrefs().serializePrefs();
-					storage->writeFile(prefsData, Preferences::getPrefs().getPrefsPath());
+					if(!storage->writeFile(prefsData, Preferences::getPrefs().getPrefsPath())) {
+						DebugLog::getLog().logError(ERROR_CODE::STORAGE_WRITE_UNEXPECTEDLY_FAILED);
+					}
 					delete[] prefsData;
 				}
 
@@ -694,7 +700,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 }
 
 
-int main(void) {
+int main(void) {	
 	init();
 	__libc_init_array();
 	initVariant();

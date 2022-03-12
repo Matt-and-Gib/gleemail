@@ -23,18 +23,18 @@ public:
 	InputMethod& operator=(InputMethod&&) = delete;
 	virtual ~InputMethod();
 
-	virtual const char* getDataVersionRequestEndpoint() const = 0;
-	virtual const char* getDataRequestEndpoint() const = 0;
-	virtual bool setNetworkData(const char*) = 0;
+	[[nodiscard]] virtual const char* getDataVersionRequestEndpoint() const = 0;
+	[[nodiscard]] virtual const char* getDataRequestEndpoint() const = 0;
+	[[nodiscard]] virtual bool setNetworkData(const char*) = 0;
 
-	virtual const char* getCachedDataPath() const = 0;
+	[[nodiscard]] virtual const char* getCachedDataPath() const = 0;
 
-	virtual Pin** getPins() = 0;
+	[[nodiscard]] virtual Pin** getPins() = 0;
 	virtual void processInput(const unsigned long&) = 0;
 
 	void commitMessage();
-	bool messageNotEmpty() const {return userMessageFirstEmptyIndex > 0;}
-	bool isLastCharSpace() const;
+	[[nodiscard]] bool messageNotEmpty() const {return userMessageFirstEmptyIndex > 0;}
+	[[nodiscard]] bool isLastCharSpace() const;
 
 	void pushCharacterToMessage(const char& c);
 };

@@ -175,7 +175,7 @@ void Networking::convertEncryptionInfoPayload(unsigned char* DSAPubKeyOut, unsig
 }
 
 
-bool Networking::connectToPeer(const IPAddress& connectToIP) {
+void Networking::connectToPeer(const IPAddress& connectToIP) {
 	const bool GENERATE_NEW_KEY = true;
 	pki.initialize(userDSAPrivateKey, userDSAPubKey, userEphemeralPubKey, userSignature, userID, GENERATE_NEW_KEY);
 	createuuid(userID);
@@ -200,8 +200,6 @@ bool Networking::connectToPeer(const IPAddress& connectToIP) {
 	const unsigned short outgoingPeerUniqueHandshakeValue = uuid + messagesSentCount;
 	messagesOut.enqueue(new Message(MESSAGE_TYPE::HANDSHAKE, new IdempotencyToken(outgoingPeerUniqueHandshakeValue, nowMS()), copyString<unsigned char, unsigned char>(encryptionInfo, MAX_MESSAGE_LENGTH), nullptr, &connectionEstablished));
 	glEEpalInfo = new glEEpal(connectToIP, outgoingPeerUniqueHandshakeValue);
-
-	return true;
 }
 
 
@@ -213,8 +211,8 @@ void Networking::removeExpiredIncomingIdempotencyToken() {
 	}
 
 	if(nowMS() > nextTokenNode->getData()->getTimestamp() + INCOMING_IDEMPOTENCY_TOKEN_EXPIRED_THRESHOLD_MS) {
-		messagesInIdempotencyTokens.dequeue();
-		delete nextTokenNode;
+		delete messagesInIdempotencyTokens.dequeue();
+		nextTokenNode = nullptr;
 	}
 }
 

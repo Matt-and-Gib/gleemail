@@ -16,9 +16,9 @@ public:
 
 	bool operator==(const IdempotencyToken& o) {return value == o.getValue();}
 
-	unsigned short getValue() const {return value;}
-	unsigned long getTimestamp() const {return timestamp;}
-	unsigned short getRetryCount() const {return retryCount;}
+	[[nodiscard]] unsigned short getValue() const {return value;}
+	[[nodiscard]] unsigned long getTimestamp() const {return timestamp;}
+	[[nodiscard]] unsigned short getRetryCount() const {return retryCount;}
 	void incrementRetryCount() {retryCount += 1;}
 };
 

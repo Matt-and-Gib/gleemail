@@ -121,19 +121,19 @@ private:
 	unsigned long processStartTime = 0;
 	unsigned short processElapsedTime = 0;
 
-	unsigned short doTimeSensitiveProcess(const unsigned int, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
+	[[nodiscard]] unsigned short doTimeSensitiveProcess(const unsigned int, const unsigned short, bool (Networking::*)(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&), bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 
 	QueueNode<Message>* queueStartNode;
 	QueueNode<Message>* holdingNode;
 	QueueNode<Message>* messageOutWithMatchingIdempotencyToken;
-	bool processQueue(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
-	bool processIncomingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
+	[[nodiscard]] bool processQueue(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
+	[[nodiscard]] bool processIncomingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
 	static const constexpr unsigned short MAX_PROCESS_INCOMING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
 	void processIncomingError(QueueNode<Message>& msg);
 	void processIncomingHeartbeat(QueueNode<Message>& msg);
 	void processIncomingConfirmation(QueueNode<Message>& msg);
-	char* decryptChat(Message& msg);
+	[[nodiscard]] char* decryptChat(Message& msg);
 	void processIncomingChat(QueueNode<Message>& msg);
 	void processIncomingHandshake(QueueNode<Message>& msg);
 
@@ -141,11 +141,11 @@ private:
 	
 	void (*chatMessageReceivedCallback)(char*);
 
-	unsigned long messageResendTime(QueueNode<Message>& msg);
-	bool processOutgoingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
+	[[nodiscard]] unsigned long messageResendTime(QueueNode<Message>& msg);
+	[[nodiscard]] bool processOutgoingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
 	static const constexpr unsigned short MAX_PROCESS_OUTGOING_MESSAGE_QUEUE_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 
-	bool getMessages(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
+	[[nodiscard]] bool getMessages(bool (Networking::*)(Queue<Message>&, QueueNode<Message>*), Queue<Message>&);
 	static const constexpr unsigned short MAX_GET_MESSAGES_PROCESS_DURATION_MS = MAX_NETWORKING_LOOP_DURATION_MS / 3;
 	unsigned short messageReceivedCount = 0;
 	static const constexpr unsigned short MAX_MESSAGE_RECEIVED_COUNT = 10;
@@ -153,9 +153,9 @@ private:
 	void buildAuthenticationPayload(unsigned char* const);
 	void prepareOutgoingEncryptedChat(unsigned char* const, unsigned short);
 	char outgoingMessageBuffer[MESSAGE_BUFFER_SIZE] = {0};
-	Message& sendOutgoingMessage(Message&);
+	[[nodiscard]] Message& sendOutgoingMessage(Message&);
 
-	bool exceededMaxOutgoingTokenRetryCount();
+	[[nodiscard]] bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyToken();
 
 	//These two functions are called from doConfirmedPostProcess()
@@ -179,7 +179,7 @@ public:
 
 	void sendChatMessage(const char* const);
 
-	bool connectToPeer(const IPAddress&);
+	void connectToPeer(const IPAddress&); //Rename to clarify that we're just preparing for a connection and enqueuing a handshake?
 };
 
 #endif

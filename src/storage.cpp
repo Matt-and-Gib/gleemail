@@ -119,7 +119,9 @@ bool Storage::eraseAll(const unsigned int confirmationCode) {
 
 	if(!sd) {
 		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_UNINITIALIZED_ERASE_ALL);
-		begin();
+		if(!begin()) {
+			GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(GLEEMAIL_DEBUG::ERROR_CODE::STORAGE_NOT_DETECTED);
+		}
 	}
 
 	File32 item;

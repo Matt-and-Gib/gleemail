@@ -98,12 +98,12 @@ public:
 
 	bool operator==(const Message& o) const {return (*idempotencyToken == *(o.getIdempotencyToken()));}
 
-	const glEEpal& getSender() const {return sender;}
-	MESSAGE_TYPE getMessageType() const {return messageType;}
-	IdempotencyToken* getIdempotencyToken() const {return idempotencyToken;}
-	const unsigned char* getChat() const {return chat;}
-	const unsigned char* getAuthentication() const {return authentication;}
-	unsigned short getChatLength() {
+	[[nodiscard]] const glEEpal& getSender() const {return sender;}
+	[[nodiscard]] MESSAGE_TYPE getMessageType() const {return messageType;}
+	[[nodiscard]] IdempotencyToken* getIdempotencyToken() const {return idempotencyToken;}
+	[[nodiscard]] const unsigned char* getChat() const {return chat;}
+	[[nodiscard]] const unsigned char* getAuthentication() const {return authentication;}
+	[[nodiscard]] unsigned short getChatLength() {
 		if(chatLength == 0) {
 			const unsigned char* ptr = chat;
 			while(*ptr++) {

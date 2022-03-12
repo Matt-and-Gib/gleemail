@@ -42,7 +42,7 @@ private:
 	void processClosedToOpen(const unsigned long&);
 	void processOpenToClosed(const unsigned long&);
 	void pushMorseCharacter(const char&);
-	const char& convertPhraseToCharacter();
+	[[nodiscard]] const char& convertPhraseToCharacter();
 
 	void checkOpenElapsedTime(const unsigned long&);
 	void checkPhraseElapsedThreshold();
@@ -61,13 +61,13 @@ public:
 	MorseCodeInput& operator=(MorseCodeInput&&) = delete;
 	~MorseCodeInput();
 
-	const char* getDataVersionRequestEndpoint() const override {return MCCP_DATA_VERSION_SERVER_ENDPOINT;}
-	const char* getDataRequestEndpoint() const override {return MCCP_DATA_SERVER_ENDPOINT;}
-	bool setNetworkData(const char*) override;
+	[[nodiscard]] const char* getDataVersionRequestEndpoint() const override {return MCCP_DATA_VERSION_SERVER_ENDPOINT;}
+	[[nodiscard]] const char* getDataRequestEndpoint() const override {return MCCP_DATA_SERVER_ENDPOINT;}
+	[[nodiscard]] bool setNetworkData(const char*) override;
 
-	const char* getCachedDataPath() const override {return MORSE_CODE_CHAR_PAIRS_PATH;}
+	[[nodiscard]] const char* getCachedDataPath() const override {return MORSE_CODE_CHAR_PAIRS_PATH;}
 
-	Pin** getPins() override {return pins;}
+	[[nodiscard]] Pin** getPins() override {return pins;}
 	void processInput(const unsigned long&) override;
 };
 

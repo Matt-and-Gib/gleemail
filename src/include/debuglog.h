@@ -107,6 +107,7 @@ namespace GLEEMAIL_DEBUG {
 		STORAGE_GLEEMAIL_ROOT_IS_FILE = DEBUG_LOG_STORAGE_OFFSET + 12,
 		STORAGE_UNINITIALIZED_ERASE = DEBUG_LOG_STORAGE_OFFSET + 13,
 		STORAGE_OBJECT_UNSUCCESSFULLY_ALLOCATED = DEBUG_LOG_STORAGE_OFFSET + 14,
+		STORAGE_WRITE_UNEXPECTEDLY_FAILED = DEBUG_LOG_STARTUP_CODE_OFFSET + 15,
 
 		//Display range: 290 - 329
 		DISPLAY_RAM_INTEGRITY_THREATENED = DEBUG_LOG_DISPLAY_OFFSET + 0,
@@ -132,12 +133,11 @@ namespace GLEEMAIL_DEBUG {
 		unsigned short errorCodesFirstOpenIndex = 0;
 		bool overflowErrorsLost = false;
 
-		explicit DebugLog() : errorCodes{new ERROR_CODE[MAX_ERROR_CODES]} {
+		DebugLog() : errorCodes{new ERROR_CODE[MAX_ERROR_CODES]} {
 			for(int i = 0; i < MAX_ERROR_CODES; i += 1) {
 				errorCodes[i] = ERROR_CODE::NONE;
 			}
 		}
-
 
 		void log(ERROR_CODE e, const bool critical) {
 			if(critical || (!critical && verboseMode)) {
@@ -155,7 +155,7 @@ namespace GLEEMAIL_DEBUG {
 		DebugLog& operator=(DebugLog&&) = delete;
 		~DebugLog() = default;
 
-		static DebugLog& getLog() {
+		[[nodiscard]] static DebugLog& getLog() {
 			static DebugLog log;
 			return log;
 		}
@@ -177,7 +177,7 @@ namespace GLEEMAIL_DEBUG {
 		}
 
 
-		unsigned short getPendingErrors() const {
+		[[nodiscard]] unsigned short getPendingErrors() const {
 			return errorCodesFirstOpenIndex;
 		}
 	};

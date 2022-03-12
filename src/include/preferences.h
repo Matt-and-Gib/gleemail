@@ -22,21 +22,21 @@ public:
 	Preferences& operator=(Preferences&&) = delete;
 	~Preferences() = default;
 
-	static Preferences& getPrefs();
+	[[nodiscard]] static Preferences& getPrefs();
 
-	const char* getPrefsPath() const {return PREFERENCES_PATH;}
+	[[nodiscard]] const char* getPrefsPath() const {return PREFERENCES_PATH;}
 
-	const char* getWiFiSSID() const {return wifiSSID;}
+	[[nodiscard]] const char* getWiFiSSID() const {return wifiSSID;}
 	void setWiFiSSID(char* s);
 
-	const char* getWiFiPassword() const {return wifiPassword;}
+	[[nodiscard]] const char* getWiFiPassword() const {return wifiPassword;}
 	void setWiFiPassword(char* p);
 
-	unsigned short getMorseCodeCharPairsVersion() const {return morseCodeCharPairsVersion;}
+	[[nodiscard]] unsigned short getMorseCodeCharPairsVersion() const {return morseCodeCharPairsVersion;}
 	void setMorseCodeCharPairsVersion(const unsigned short v) {morseCodeCharPairsVersion = v;}
 
-	const char* serializePrefs() const;
-	bool deserializePrefs(const char* input, const unsigned short length);
+	[[nodiscard]] const char* serializePrefs() const;
+	[[nodiscard]] bool deserializePrefs(const char* input, const unsigned short length);
 };
 
 #endif

@@ -13,7 +13,7 @@ private:
 	static const constexpr char HEADER_END_STRING[] = "\r\n\r\n";
 	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
 
-	static bool writeHeadersToServer(InternetAccess&, const char* const*);
+	[[nodiscard]] static bool writeHeadersToServer(InternetAccess&, const char* const*);
 public:
 	WebsiteAccess() = delete;
 	WebsiteAccess(const WebsiteAccess&) = delete;
@@ -23,10 +23,10 @@ public:
 	~WebsiteAccess() = default;
 
 	//bool connectToServer(InternetAccess& net, const char* const address) {return net.connectToWeb(address);}
-	static bool sendRequestToServer(InternetAccess& net, const char* const server, const char* const* headers);
-	static char* downloadFromServer(InternetAccess&);
+	[[nodiscard]] static bool sendRequestToServer(InternetAccess& net, const char* const server, const char* const* headers);
+	[[nodiscard]] static char* downloadFromServer(InternetAccess&);
 
-	static short findEndOfHeaderIndex(const char* const, const unsigned short);
+	[[nodiscard]] static short findEndOfHeaderIndex(const char* const, const unsigned short);
 };
 
 #endif

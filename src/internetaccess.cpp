@@ -29,7 +29,7 @@ void InternetAccess::writeHeaderLine(const char* header) {
 }
 
 
-bool InternetAccess::activeWebConnection() {
+bool InternetAccess::activeWebConnection() const {
 	return client->connected();
 }
 

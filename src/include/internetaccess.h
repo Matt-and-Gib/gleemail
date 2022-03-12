@@ -21,17 +21,17 @@ public:
 	InternetAccess& operator=(InternetAccess&&) = delete;
 	~InternetAccess();
 
-	static unsigned char getMaxSSIDLength() {return MAX_SSID_LENGTH;}
-	static unsigned char getMaxPasswordLength() {return MAX_PASSWORD_LENGTH;}
+	[[nodiscard]] static unsigned char getMaxSSIDLength() {return MAX_SSID_LENGTH;}
+	[[nodiscard]] static unsigned char getMaxPasswordLength() {return MAX_PASSWORD_LENGTH;}
 
-	bool connectToNetwork(const char* networkName, const char* networkPassword, bool retry = true);
+	[[nodiscard]] bool connectToNetwork(const char* networkName, const char* networkPassword, bool retry = true);
 	void disconnectFromNetwork();
 
-	bool connectToWeb(const char* address);
+	[[nodiscard]] bool connectToWeb(const char* address);
 	void writeHeaderLine(const char* header);
-	bool activeWebConnection();
-	bool responseAvailableFromWeb();
-	char nextCharInWebResponse();
+	[[nodiscard]] bool activeWebConnection() const;
+	[[nodiscard]] bool responseAvailableFromWeb();
+	[[nodiscard]] char nextCharInWebResponse();
 };
 
 #endif

@@ -22,8 +22,8 @@ public:
 		return palIPAddress == a;
 	}
 
-	const IPAddress getIPAddress() const {return palIPAddress;}
-	unsigned short getHandshakeIdempotencyTokenValue() const {return outgoingHandshakeIdempotencyTokenValue;}
+	[[nodiscard]] const IPAddress getIPAddress() const {return palIPAddress;}
+	[[nodiscard]] unsigned short getHandshakeIdempotencyTokenValue() const {return outgoingHandshakeIdempotencyTokenValue;}
 };
 glEEpal* glEEself = new glEEpal(IPAddress(), 0); //I don't think this is good design
 
