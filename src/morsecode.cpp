@@ -153,7 +153,7 @@ void MorseCodeInput::resetMorsePhrase() {
 }
 
 
-const char& MorseCodeInput::convertPhraseToCharacter() {
+const char& MorseCodeInput::convertPhraseToCharacter() { //Make static
 	const char& lookupResult = morsePhraseSymbols[calculateMorsePhraseIndex(currentMorsePhrase)];
 
 	if(!lookupResult) {
