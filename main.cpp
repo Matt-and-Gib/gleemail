@@ -693,36 +693,32 @@ int main(void) {
 		cycleStartTime = millis();
 
 		/*for(CoreComponent* c : coreComponents) {
-			c->Update();
+			c->Update(millis());
 		}*/
 
 		{ //InputMethod->Update();
-			pinIndex = 0;
-
-			Pin** allPins = input->getPins();
-			Pin* currentPin = allPins[pinIndex];
+			Pin* currentPin = input->getPins()[0];
 			while(*currentPin != NULL_PIN) {
 				if(currentPin->mode == Pin::PIN_MODE::READ) {
 					currentPin->value = digitalRead(currentPin->pinLocation);
 				}
 
-				currentPin = allPins[++pinIndex];
+				++currentPin;
 			}
 
 			input->processInput(cycleStartTime);
 
-			pinIndex = 0;
-			currentPin = allPins[pinIndex];
+			currentPin = input->getPins()[0];
 			while(*currentPin != NULL_PIN) {
 				if(currentPin->mode == Pin::PIN_MODE::WRITE) {
 					digitalWrite(currentPin->pinLocation, currentPin->value);
 				}
 
-				currentPin = allPins[++pinIndex];
+				++currentPin;
 			}
 		}
 		
-		network->Update();
+		network->Update(millis());
 
 		{ //Display->Update();
 			if(messageToPrint != nullptr) {

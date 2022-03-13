@@ -48,7 +48,7 @@ public:
 	Display& operator=(Display&&) = delete;
 	~Display() = default;
 
-	void Update() override;
+	void Update(const unsigned long long&) override;
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
 	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;

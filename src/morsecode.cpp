@@ -267,6 +267,6 @@ void MorseCodeInput::processInput(const unsigned long& currentCycleTime) {
 }
 
 
-void MorseCodeInput::Update() {
-	
+void MorseCodeInput::Update(const unsigned long long& STAR_TIME) {
+
 }

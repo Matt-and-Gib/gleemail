@@ -40,7 +40,7 @@ public:
 
 	void pushCharacterToMessage(const char& c);
 
-	virtual void Update() = 0;
+	virtual void Update(const unsigned long long&) = 0;
 };
 
 #endif

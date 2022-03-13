@@ -35,7 +35,7 @@ public:
 
 	[[nodiscard]] bool begin();
 
-	void Update() override {} //No Update Behavior
+	void Update(const unsigned long long&) override {} //No Update Behavior
 
 	void registerNewStartupCodes(Queue<KVPair<const char&, StartupCodeHandlerData* const>>&) override;
 	void startupCodeReceived(void (StartupCodeHandler::*)(void)) override;

@@ -70,7 +70,7 @@ public:
 	[[nodiscard]] Pin** getPins() override {return pins;}
 	void processInput(const unsigned long&) override;
 
-	void Update() override;
+	void Update(const unsigned long long&) override;
 };
 
 #endif

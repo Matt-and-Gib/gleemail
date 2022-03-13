@@ -65,6 +65,6 @@ void Display::scrollDisplay() {
 }
 
 
-void Display::Update() {
+void Display::Update(const unsigned long long& START_TIME) {
 	
 }
