@@ -585,7 +585,7 @@ unsigned short Networking::doTimeSensitiveProcess(const unsigned int previousPro
 }
 
 
-void Networking::Update(const unsigned long long& /*START_TIME*/) {
+void Networking::Update() {
 	if(doTimeSensitiveProcess(MAX_GET_MESSAGES_PROCESS_DURATION_MS, MAX_GET_MESSAGES_PROCESS_DURATION_MS, &Networking::getMessages, nullptr, messagesIn) > MAX_GET_MESSAGES_PROCESS_DURATION_MS) {
 		if(processElapsedTime > 2 * MAX_GET_MESSAGES_PROCESS_DURATION_MS) {
 			DebugLog::getLog().logError(NETWORK_GET_MESSAGES_EXCEEDED_ALLOCATED_TIME_SIGNIFICANT);

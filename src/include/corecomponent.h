@@ -10,7 +10,7 @@ public:
 	CoreComponent& operator=(CoreComponent&&) = delete;
 	virtual ~CoreComponent() = default;
 
-	virtual void Update(const unsigned long long&) = 0;
+	virtual void Update() = 0;
 };
 
 #endif
