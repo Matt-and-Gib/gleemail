@@ -673,7 +673,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 }
 
 
-int main(void) {	
+int main(void) {
 	init();
 	__libc_init_array();
 	initVariant();
@@ -692,13 +692,17 @@ int main(void) {
 	while(!quit) {
 		cycleStartTime = millis();
 
+		/*for(CoreComponent* c : coreComponents) {
+			c->Update();
+		}*/
+
 		{ //InputMethod->Update();
 			pinIndex = 0;
 
 			Pin** allPins = input->getPins();
 			Pin* currentPin = allPins[pinIndex];
 			while(*currentPin != NULL_PIN) {
-				if(currentPin->mode == PIN_MODE::READ) {
+				if(currentPin->mode == Pin::PIN_MODE::READ) {
 					currentPin->value = digitalRead(currentPin->pinLocation);
 				}
 
@@ -710,7 +714,7 @@ int main(void) {
 			pinIndex = 0;
 			currentPin = allPins[pinIndex];
 			while(*currentPin != NULL_PIN) {
-				if(currentPin->mode == PIN_MODE::WRITE) {
+				if(currentPin->mode == Pin::PIN_MODE::WRITE) {
 					digitalWrite(currentPin->pinLocation, currentPin->value);
 				}
 
