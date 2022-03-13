@@ -20,7 +20,7 @@ Networking::Networking(
 	udp(),
 	shutdownFlag{quit},
 	nowMS{millis},
-	uuid{u + nowMS()}, //Warning: shortening from 'long unsigned int' to 'short unsigned int'
+	uuid{u + nowMS()}, //Warning: shortening from 'long unsigned int' to 'short unsigned int' //Start as 0?
 	connectedToPeerClearDisplay{connectedUpdateDisplay},
 	heartbeat{new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken, nullptr, nullptr, nullptr)},
 	chatMessageReceivedCallback{chatMsgCallback}
@@ -111,7 +111,7 @@ void Networking::sendChatMessage(const char* const chat) {
 }
 
 
-void Networking::createuuid(unsigned char* const userID) {
+void Networking::createuuid(unsigned char* const userID) { //Come back to me! uuid is not being passed in as 0 here, so this is probably not the right way to do this.
 	uuid |= userID[0] << 8;
 	uuid |= userID[1];
 }
