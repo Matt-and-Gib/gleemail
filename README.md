@@ -1,3 +1,5 @@
+# glEEmail
+
 ![Latest Build Status](https://github.com/Matt-and-Gib/gleemail/actions/workflows/compile.yml/badge.svg)
 
 ![glEEmail Banner](resources/glEEmail_social_media_final.png)
@@ -20,7 +22,7 @@ ___
 
 ___
 
-### <a name="info"></a>**Basic Info**
+## <a name="info"></a>**Basic Info**
 
 What is glEEmail? Welcome to the future, kid. glEEmail is like sending your uncle a telegram, except it doesn't cost 25 cents per character. It's easy, and fun (some assembly required).
 
@@ -29,9 +31,9 @@ glEEmail allows you to securely‡ send messages to peers over the Internet via 
 Okay, for real, glEEmail started as a side project while we were waiting for 200 SMD LEDs to arrive from China. The plan was to whip up some test code allowing us to work with input and output from an Arduino, and to send messages to an Arduino over the Internet. As development went on, glEEmail because significantly more interesting than that excessive-LED project, and we shifted focus to making glEEmail into it's best self. It's fair to say at this point that glEEmail is an incredibly over-engineered curio at best, or a social-networking-service-for-two at worst.
 ___
 
-### <a name="parts"></a>**Components**
+## <a name="parts"></a>**Components**
 
-We're actively testing glEEmail for the Arduino Nano 33 IoT, however it should work on any Arduino with WiFi capabilities (or any Arduino connected to a WiFi radio module, with minor code modifications). If you're considering running glEEmail on a different Arduino, please make sure that it has sufficient space; glEEmail uses ~72,000 bytes of program storage space (27% on Nano 33 IoT) and ~15,000 bytes of dynamic memory with global variables (45% on Nano 33 IoT). Additionally, please note that the Adafruit 4682 must be powered with 3.3V (it **cannot** run on 5V).
+We're actively testing glEEmail for the Arduino Nano 33 IoT, however it should work on any Arduino with an Internet connection (with minor code modifications). If you're considering running glEEmail on a different Arduino, please make sure that it has sufficient space; glEEmail uses ~78,000 bytes of program storage space (30% on Nano 33 IoT) and ~4,000 bytes of dynamic memory with global variables (13% on Nano 33 IoT). Additionally, please note that the Adafruit 4682 must be powered with 3.3V (it **cannot** run on 5V); glEEmail will still function if the Adafruit 4682 component is omitted.
 
 For the full parts list for a single user, please see the table below:
 
@@ -45,24 +47,51 @@ For the full parts list for a single user, please see the table below:
 |1x|270 Ω Resistor|
 |1x|10k Ω Resistor|
 |1x|10k Ω Potentiometer|
-|1x|Adafruit 4682|
-|1x|Micro SD Card (Format as Fat32)|
-
-___
-
-### <a name="diagram"></a>**Wiring Diagram**
-
-[View Interactive Online Wiring Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2Fwiring%20diagram.drawio)
-
-![Wiring Diagram 5-3-2021](https://github.com/Matt-and-Gib/gleemail/raw/main/resources/Wiring%20Diagram%205-3-21.png)
+|1x|Adafruit 4682 - optional|
+|1x|Micro SD Card (Format as Fat32) - optional|
 
 For more information about wiring the LCD HD44780, we recommend [this tutorial from Ada Fruit](https://learn.adafruit.com/character-lcds/wiring-a-character-lcd)
 
 ___
 
-### <a name="errortable"></a>**Error Codes**
+## <a name="diagram"></a>**Wiring Diagram**
 
-Last updated: 2/19/2022
+[View Interactive Online Wiring Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2Fwiring%20diagram.drawio)
+
+[![Wiring Diagram 3-12-22](https://github.com/Matt-and-Gib/gleemail/raw/main/resources/Wiring%20Diagram%203-12-22.png)](https://github.com/Matt-and-Gib/gleemail/raw/main/resources/Wiring%20Diagram%203-12-22.png)
+
+### Configurable Pin Locations
+
+(_defaults are for Nano 33 IoT_)
+
+#### **Input Method**
+
+|Location|Name|Default|
+|--------|----|:-----:|
+|morsecode.h|SWITCH_PIN_LOCATION|9|
+
+#### **Display**
+
+|Location|Name|Default|
+|--------|----|:-----:|
+|display.h|RS|7|
+|display.h|EN|6|
+|display.h|D4|5|
+|display.h|D5|4|
+|display.h|D6|3|
+|display.h|D7|2|
+
+#### **Storage**
+
+|Location|Name|Default|
+|--------|----|:-----:|
+|storage.h|SLAVE_SELECT_PIN|10|
+
+___
+
+## <a name="errortable"></a>**Error Codes**
+
+Last updated: 3/12/2022
 <details>
 <summary>0 - 9: General</summary>
 
@@ -216,34 +245,54 @@ Last updated: 2/19/2022
 |373|Duplicate Codes Not Allowed||Low|
 </details>
 
+<details>
+<summary>410 - 449: LiteChaCha</summary>
+
+|Code|Title|Notes|Severity|
+|----|-----|-----|--------|
+|410|Curve 25519 All Zeros||High|
+|411|MPA 25519 Math Error||High|
+|412|MPA 252ED Math Error||High|
+|413|CHACHA Block Count Overflow||High|
+|414|User Nonce Overflow Imminent||High|
+|415|Peer Nonce Overflow Imminent||High|
+|416|Poly Block Count Overflow||High|
+|417|MPA 1305 Math Error||High|
+
+For more details, see the official LiteChaCha documentation: <a href="https://github.com/DualJustice/LiteChaCha#when-errors-arise">https://github.com/DualJustice/LiteChaCha#when-errors-arise</a>
+</details>
+
 ___
 
-### <a name="gettingstarted"></a>**Getting Started in the Code**
+## <a name="gettingstarted"></a>**Getting Started in the Code**
 
-The first step to becoming a glEEveloper is understanding the project structure. Now, you may think that you already understand the structure because you saw that "src" folder, and you know what that's all about, but I'm here to tell you that there's more to the story. See, Arduino requires a .ino file with the same name as the project to live in the root folder. Now, again, you're like "I already know this," but hang on; if you open the .ino, you might eventually notice that it's entirely empty. Yeah, like, what? Well, there's also a main.cpp file in the root of the project, and _that's_ where the magic happens. Our main.cpp overwrites the implicit main.cpp created by Arduino so that we can control the main loop. Why did we do this? Red-hot performance gains.
+The first step to becoming a glEEveloper is understanding the project structure. Now, you may think that you already understand the structure because you saw that "`src`" folder, and you know what that's all about, but I'm here to tell you that there's more to the story. See, Arduino requires that a `.ino` file with the same name as the project lives in the root folder. Now, again, you're like "I already know this," but hang on; if you open the `.ino`, you might eventually notice that it is entirely empty. Yeah, like, what? Well, there's also a `main.cpp` file in the root of the project, and _that's_ where the magic happens. Our `main.cpp` overwrites the implicit `main.cpp` created by Arduino so that we can control the main loop. Why did we do this? Red-hot performance gains. Do we recommend that you do it in your projects? No. Why? Stop asking questions.
 
-Aside from that, all other code files may be found inside `src`. The root folder `src` itself is for source files, `src/include` is for headers, and `src/include/LiteChaCha` is for the encryption library [written by DualJustice](https://github.com/DualJustice/LiteChaCha). We've separated as many files as possible into definition and implementation, but several important files are exclusive to `src/include`, such as data structures like our queue.
+Aside from that, all other code files may be found inside `src`. The root folder `src` itself is for source files, and `src/include` is for headers. We've separated as many files as possible into header and source, but several important files are exclusive to `src/include`, such as data structures like our queue.
 
-Most work will be done on implementation files in the base `src` folder. For an idea of what glEEmail does at runtime, please take a look at our flow diagram below, however for a basic overview, see the following:
+Most work will be done on source files in the base `src` folder. For an idea of what glEEmail does at runtime, please take a look at our flow diagram below, however for a basic overview, see the following:
 
-> main.cpp : initial setup, then loop control
+> main.cpp : initial setup and main loop
 >
-> morsecode.cpp : processInputMethod()
+> morsecode.cpp : process input
 >
-> networking.cpp : processNetwork()
+> networking.cpp : networking input and output
 >
-> display.cpp : updateDisplay()
+> display.cpp : display output
 >
-> main.cpp : printErrorCodes()
+> main.cpp : print errors
 
 [View Online Program Flow Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2FglEEmail%20flow.drawio)
 
-Required Libraries
+### Required Libraries
+
+(_for disambiguation, please note library author_)
 
 - ArduinoJson by Benoit Blanchon
 - hd44780 by Bill Perry
-- WiFiNINA
+- WiFiNINA by Arduino
 - SdFat by Bill Greiman
+- [LiteChaCha by DualJustice](https://github.com/DualJustice/LiteChaCha) (must be installed manually - for help, see [this Adafruit tutorial](https://learn.adafruit.com/adafruit-all-about-arduino-libraries-install-use/how-to-install-a-library))
 
 Note: Do not pass ASCII character 24 (cancel) to `InputMethod::pushCharacterToMessage`, it is reserved to prevent printing erroneous lines.
 
@@ -261,7 +310,7 @@ Note: Do not pass ASCII character 24 (cancel) to `InputMethod::pushCharacterToMe
 </details>
 ___
 
-### <a name="instructions"></a>**Usage Instructions**
+## <a name="instructions"></a>**Usage Instructions**
 
 Important!
 
@@ -279,28 +328,25 @@ Click OK, and you should see "raw.githubusercontent.com:443" in the table below 
 
 ![Install Certificate Picture Four.png](resources/InstallCertificatePictureFour.png)
 
-#### How to Connect with Your Friend
+### How to Connect with Your Friend
 
 If you've configured the hardware correctly, simply upload the code to your Arduino, open the serial monitor, and follow the prompts on screen (the LCD and serial monitor). If you haven't yet wired the hardware, first refer to the [Wiring Diagram](#diagram).
 
-#### How to Morse Like a Pro
+### How to Morse Like a Pro
 
-To do...
+- [How to know what to say](https://en.wikipedia.org/wiki/Morse_code)
+- [How to input](https://morsecode.world/international/morse2.html)
+- [How to stay on beat](https://morsecode.world/international/timing.html)
+- [THE Standard](https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf)
 
-[How to input](https://morsecode.world/international/morse2.html)
-
-[How to stay on beat](https://morsecode.world/international/timing.html)
-
-[THE Standard](https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf)
-
-#### Unexpected Behavior?
+### Unexpected Behavior?
 
 Experiencing unexpected behavior? Maybe we've run into your problem before you!
 The first step we'd advise you take if anything unexpected happens is to turn on Verbose Mode and try it again. Please see [startup codes](#startup-codes) for further instructions.
 
 If that doesn't solve your problem, submit an [issue on GitHub](https://github.com/Matt-and-Gib/gleemail/issues) and we will take a look at it (_should the stars align_).
 
-#### Features
+### Features
 
 - 57 ~~flavors~~ morse code characters
 - You can hold down the switch to pause input
@@ -312,10 +358,10 @@ If that doesn't solve your problem, submit an [issue on GitHub](https://github.c
 - Be social
 - Be a glEEpal
 
-**_IMPORTANT NOTE:_** You are limited to sending no more than ~32,768 messages per session due to the size of the idempotency token (unsigned short- i.e. 2 bytes) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glEEware every once in a while.
+_IMPORTANT NOTE:_ You are limited to sending no more than ~32,768 messages per session due to the size of the idempotency token (unsigned short- i.e. 2 bytes) and the necessity of confirmation messages. This decision was made to reduce message overhead and speed up encrypting and parsing. We understand that this limit will affect most users, and deeply apologize for the issue. There is simply nothing that we can do to change this, so just remember to power-cycle your glEEware every once in a while.
 ___
 
-### <a name="startup-codes"></a>**Startup Codes**
+## <a name="startup-codes"></a>**Startup Codes**
 
 As soon as possible at launch, send **-A** via Serial to trigger the startup code prompt. Once directed, provide a string consisting of single-letter, case-sensitive arguments to alter or enable additional behavior in glEEmail. The built-in arguments are listed below:
 
@@ -323,9 +369,9 @@ As soon as possible at launch, send **-A** via Serial to trigger the startup cod
 
 |Code|Behavior|Component|Notes|
 |----|--------|---------|-----|
-|`[DEL]`|None|_core_|Reserved for system use|
+|`[DEL]`|None||Reserved for system use|
 |`k`|Print DSA keys|Networking|Confirm your keys out-of-band to ensure a secure connection|
-|`v`|Enable Verbose Debug Mode|_core_|Low-severity errors will be sent via Serial (high-severity errors will always be sent)|
+|`v`|Enable Verbose Debug Mode||Low-severity errors will be sent via Serial (high-severity errors will always be sent)|
 |`I`|Enable Incoming-Only Mode|Display|Only incoming messages will be displayed (hide your output)|
 |`O`|Enable Offline Mode|??? (todo)|No network connections will be made (there's no shame in a solo glEEmail session)|
 |`R`|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
@@ -343,7 +389,7 @@ Joining WiFi
 
 ___
 
-### <a name="plans"></a>**Future Plans**
+## <a name="plans"></a>**Future Plans**
 
 We'd like to implement additional input methods, including (but not limited to):
 
@@ -360,7 +406,7 @@ Other than that, please view [our project board](https://github.com/orgs/Matt-an
 
 ___
 
-### <a name="legal"></a>**Legal Info**
+## <a name="legal"></a>**Legal Info**
 
 glEEmail is Open Source with no promise of support! Please feel free to contribute by submitting pull requests or issues. Contact us if you have any questions (or want to glEE-chat).
 
