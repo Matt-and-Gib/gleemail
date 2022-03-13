@@ -7,11 +7,13 @@ using namespace GLEEMAIL_DEBUG;
 
 InputMethod::InputMethod(
 	void (* const c)(char*),
-	void (* const s)(char*)
+	void (* const s)(char*),
+	unsigned long (* const t)()
 ) :
 	userMessage{new char[MAX_MESSAGE_LENGTH]},
 	messageChanged{c},
-	sendMessage{s}
+	sendMessage{s},
+	nowMS{t}
 {
 	clearUserMessage();
 }

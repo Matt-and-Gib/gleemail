@@ -17,8 +17,12 @@ private:
 
 	void (* const messageChanged)(char*);
 	void (* const sendMessage)(char*);
+
+protected:
+	unsigned long (* const nowMS)();
+
 public:
-	InputMethod(void (* const)(char*), void (* const)(char*));
+	InputMethod(void (* const)(char*), void (* const)(char*), unsigned long (* const)());
 	InputMethod(const InputMethod&) = delete;
 	InputMethod(InputMethod&&) = delete;
 	InputMethod& operator=(const InputMethod&) = delete;
@@ -32,7 +36,6 @@ public:
 	[[nodiscard]] virtual const char* getCachedDataPath() const = 0;
 
 	[[nodiscard]] virtual Pin** getPins() = 0;
-	virtual void processInput(const unsigned long&) = 0;
 
 	void commitMessage();
 	[[nodiscard]] bool messageNotEmpty() const {return userMessageFirstEmptyIndex > 0;}

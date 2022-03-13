@@ -41,18 +41,19 @@ namespace {
 
 
 MorseCodeInput::MorseCodeInput(
-	const unsigned short ledPinLocation,
+	const unsigned short LED_PIN_LOCATION,
 	void (* const messageChanged)(char*),
-	void (* const sendMessage)(char*)
+	void (* const sendMessage)(char*),
+	unsigned long (* const t)()
 ) :
-	InputMethod(messageChanged, sendMessage)
+	InputMethod(messageChanged, sendMessage, t)
 {
-	pins[0] = &NULL_PIN;
-	pins[1] = &NULL_PIN;
-	pins[2] = &NULL_PIN;
+	pins[0] = nullptr;
+	pins[1] = nullptr;
+	pins[2] = nullptr;
 
 	pins[PINS_INDEX_SWITCH] = new Pin(SWITCH_PIN_LOCATION, Pin::PIN_MODE::READ, MORSE_CODE_STATE::SWITCH_OPEN);
-	pins[PINS_INDEX_LED] = new Pin(ledPinLocation, Pin::PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
+	pins[PINS_INDEX_LED] = new Pin(LED_PIN_LOCATION, Pin::PIN_MODE::WRITE, MORSE_CODE_STATE::SWITCH_OPEN);
 
 	currentInputState = (pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_OPEN ? MORSE_CODE_STATE::SWITCH_OPEN : MORSE_CODE_STATE::SWITCH_CLOSED);
 	lastInputState = currentInputState;
@@ -244,7 +245,9 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long& currentCycleTime)
 }
 
 
-void MorseCodeInput::processInput(const unsigned long& currentCycleTime) {
+void MorseCodeInput::Update() {
+	currentCycleTime = nowMS();
+
 	if(pins[PINS_INDEX_SWITCH]->value != lastInputState) {
 		lastDebounceTime = currentCycleTime;
 	}
@@ -264,9 +267,4 @@ void MorseCodeInput::processInput(const unsigned long& currentCycleTime) {
 	}
 
 	lastInputState = pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_CLOSED ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
-}
-
-
-void MorseCodeInput::Update() {
-	
 }

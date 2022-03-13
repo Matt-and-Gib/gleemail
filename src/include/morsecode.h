@@ -23,15 +23,17 @@ private:
 
 	static const unsigned short SWITCH_PIN_LOCATION = 9;
 
-	Pin* pins[3];
-	const unsigned short PINS_INDEX_SWITCH = 0;
-	const unsigned short PINS_INDEX_LED = 1;
+	Pin* pins[3] = {nullptr};
+	static const unsigned short PINS_INDEX_SWITCH = 0;
+	static const unsigned short PINS_INDEX_LED = 1;
 
 	char* morsePhraseSymbols = nullptr;
 	char currentMorsePhrase[7] {0};
 
 	static const constexpr unsigned short DEBOUNCE_THRESHOLD = 25;
 	unsigned long lastDebounceTime = 0;
+
+	unsigned long long currentCycleTime = 0;
 
 	MORSE_CODE_STATE lastInputState;
 	MORSE_CODE_STATE currentInputState;
@@ -53,8 +55,9 @@ private:
 	unsigned short filterJsonPayloadSize(const char*) const;
 	unsigned short calculateMorsePhraseSymbolsSize(const ArduinoJson::JsonArrayConst&) const;
 	unsigned short calculateMorsePhraseIndex(const char* const) const;
+
 public:
-	MorseCodeInput(const unsigned short, void (* const)(char*), void (* const)(char*));
+	MorseCodeInput(const unsigned short, void (* const)(char*), void (* const)(char*), unsigned long (* const)());
 	MorseCodeInput(const MorseCodeInput&) = delete;
 	MorseCodeInput(MorseCodeInput&&) = delete;
 	MorseCodeInput& operator=(const MorseCodeInput&) = delete;
@@ -68,7 +71,6 @@ public:
 	[[nodiscard]] const char* getCachedDataPath() const override {return MORSE_CODE_CHAR_PAIRS_PATH;}
 
 	[[nodiscard]] Pin** getPins() override {return pins;}
-	void processInput(const unsigned long&) override;
 
 	void Update() override;
 };
