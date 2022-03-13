@@ -419,19 +419,13 @@ bool setupInputMethod(InternetAccess* const internet, Storage* const storage) {
 }
 
 
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
 void setupPins() {
-	Pin* currentPin = input->getPins()[0];
-	while(currentPin != nullptr) {
-		Serial.print(F("setup pin "));
-		Serial.println(currentPin->pinLocation);
-
-		pinMode(currentPin->pinLocation, currentPin->mode);
+	Pin** currentPin = input->getPins();
+	while(*currentPin) {
+		pinMode((*currentPin)->pinLocation, (*currentPin)->mode);
 		++currentPin;
 	}
 }
-#pragma GCC pop_options
 
 
 void connectToPeer(Networking& network) {
@@ -692,7 +686,7 @@ int main(void) {
 	CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS] = {nullptr};
 	setup(quit, coreComponents);
 
-	Pin* currentPin = nullptr;
+	Pin** currentPin = nullptr;
 
 	while(!quit) {
 		cycleStartTime = millis();
@@ -702,10 +696,10 @@ int main(void) {
 		}*/
 
 		{ //InputMethod->Update();
-			currentPin = input->getPins()[0];
-			while(currentPin) {
-				if(currentPin->mode == Pin::PIN_MODE::READ) {
-					currentPin->value = digitalRead(currentPin->pinLocation);
+			currentPin = input->getPins();
+			while(*currentPin) {
+				if((*currentPin)->mode == Pin::PIN_MODE::READ) {
+					(*currentPin)->value = digitalRead((*currentPin)->pinLocation);
 				}
 
 				++currentPin;
@@ -713,10 +707,10 @@ int main(void) {
 
 			input->Update();
 
-			currentPin = input->getPins()[0];
-			while(currentPin) {
-				if(currentPin->mode == Pin::PIN_MODE::WRITE) {
-					digitalWrite(currentPin->pinLocation, currentPin->value);
+			currentPin = input->getPins();
+			while(*currentPin) {
+				if((*currentPin)->mode == Pin::PIN_MODE::WRITE) {
+					digitalWrite((*currentPin)->pinLocation, (*currentPin)->value);
 				}
 
 				++currentPin;
