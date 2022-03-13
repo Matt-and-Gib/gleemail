@@ -419,16 +419,19 @@ bool setupInputMethod(InternetAccess* const internet, Storage* const storage) {
 }
 
 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 void setupPins() {
-	Pin** pins = input->getPins();
-	
-	unsigned short i = 0;
-	Pin* currentPin = pins[i];
-	while (*currentPin != NULL_PIN) {
+	Pin* currentPin = input->getPins()[0];
+	while(currentPin != nullptr) {
+		Serial.print(F("setup pin "));
+		Serial.println(currentPin->pinLocation);
+
 		pinMode(currentPin->pinLocation, currentPin->mode);
-		currentPin = pins[++i];
+		++currentPin;
 	}
 }
+#pragma GCC pop_options
 
 
 void connectToPeer(Networking& network) {
@@ -626,7 +629,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 		case SETUP_LEVEL::INPUT_METHOD:
 			display->updateReading("Setting Up Input");
 			if(!input) {
-				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage); //This assignment must be manually changed if a different input method is desired
+				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage, &millis); //This assignment must be manually changed if a different input method is desired
 			}
 
 			if(setupInputMethod(&internet, storage)) {
@@ -689,6 +692,8 @@ int main(void) {
 	CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS] = {nullptr};
 	setup(quit, coreComponents);
 
+	Pin* currentPin = nullptr;
+
 	while(!quit) {
 		cycleStartTime = millis();
 
@@ -697,28 +702,24 @@ int main(void) {
 		}*/
 
 		{ //InputMethod->Update();
-			pinIndex = 0;
-
-			Pin** allPins = input->getPins();
-			Pin* currentPin = allPins[pinIndex];
-			while(*currentPin != NULL_PIN) {
+			currentPin = input->getPins()[0];
+			while(currentPin) {
 				if(currentPin->mode == Pin::PIN_MODE::READ) {
 					currentPin->value = digitalRead(currentPin->pinLocation);
 				}
 
-				currentPin = allPins[++pinIndex];
+				++currentPin;
 			}
 
-			input->processInput(cycleStartTime);
+			input->Update();
 
-			pinIndex = 0;
-			currentPin = allPins[pinIndex];
-			while(*currentPin != NULL_PIN) {
+			currentPin = input->getPins()[0];
+			while(currentPin) {
 				if(currentPin->mode == Pin::PIN_MODE::WRITE) {
 					digitalWrite(currentPin->pinLocation, currentPin->value);
 				}
 
-				currentPin = allPins[++pinIndex];
+				++currentPin;
 			}
 		}
 		
