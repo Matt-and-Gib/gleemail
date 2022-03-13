@@ -138,7 +138,7 @@ namespace GLEEMAIL_DEBUG {
 
 	class DebugLog final {
 	private:
-#warning Don't forget to default verboseMode to false!
+#warning Remember to default verboseMode to false!
 		bool verboseMode = true; //This should default to false
 		static constexpr unsigned short MAX_ERROR_CODES = 16;
 		ERROR_CODE* const errorCodes;
