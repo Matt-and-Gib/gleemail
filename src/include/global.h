@@ -107,6 +107,6 @@ struct Pin final {
 		return this->pinLocation != rhs.pinLocation;
 	}
 };
-static Pin NULL_PIN(-1, Pin::PIN_MODE::READ, 0);
+//static Pin NULL_PIN(-1, Pin::PIN_MODE::READ, 0);
 
 #endif
