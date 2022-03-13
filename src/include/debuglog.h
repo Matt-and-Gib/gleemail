@@ -3,16 +3,17 @@
 
 
 namespace GLEEMAIL_DEBUG {
-	const constexpr unsigned short DEBUG_LOG_INPUT_METHOD_OFFSET = 10;
-	const constexpr unsigned short DEBUG_LOG_NETWORK_OFFSET = 50;
-	const constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
-	const constexpr unsigned short DEBUG_LOG_MESSAGE_ERROR_OFFSET = 130;
-	const constexpr unsigned short DEBUG_LOG_INTERNET_ACCESS_OFFSET = 170;
-	const constexpr unsigned short DEBUG_LOG_WEB_ACCESS_OFFSET = 210;
-	const constexpr unsigned short DEBUG_LOG_STORAGE_OFFSET = 250;
-	const constexpr unsigned short DEBUG_LOG_DISPLAY_OFFSET = 290;
-	const constexpr unsigned short DEBUG_LOG_PREFERENCES_OFFSET = 330;
-	const constexpr unsigned short DEBUG_LOG_STARTUP_CODE_OFFSET = 370;
+	const static constexpr unsigned short DEBUG_LOG_INPUT_METHOD_OFFSET = 10;
+	const static constexpr unsigned short DEBUG_LOG_NETWORK_OFFSET = 50;
+	const static constexpr unsigned short DEBUG_LOG_JSON_OFFSET = 90;
+	const static constexpr unsigned short DEBUG_LOG_MESSAGE_ERROR_OFFSET = 130;
+	const static constexpr unsigned short DEBUG_LOG_INTERNET_ACCESS_OFFSET = 170;
+	const static constexpr unsigned short DEBUG_LOG_WEB_ACCESS_OFFSET = 210;
+	const static constexpr unsigned short DEBUG_LOG_STORAGE_OFFSET = 250;
+	const static constexpr unsigned short DEBUG_LOG_DISPLAY_OFFSET = 290;
+	const static constexpr unsigned short DEBUG_LOG_PREFERENCES_OFFSET = 330;
+	const static constexpr unsigned short DEBUG_LOG_STARTUP_CODE_OFFSET = 370;
+	const static constexpr unsigned short DEBUG_LOG_LITE_CHA_CHA_OFFSET = 410;
 	enum ERROR_CODE: short {
 		//Meta range: 0 - 9
 		NONE = 0,
@@ -121,15 +122,26 @@ namespace GLEEMAIL_DEBUG {
 		STARTUP_CODE_UNEXPECTED_SERIAL_INPUT = DEBUG_LOG_STARTUP_CODE_OFFSET + 0, //WARNING
 		STARTUP_CODE_MALFORMED_PROMPT_TRIGGER = DEBUG_LOG_STARTUP_CODE_OFFSET + 1,
 		STARTUP_CODE_TOO_MANY_CODES_PROVIDED = DEBUG_LOG_STARTUP_CODE_OFFSET + 2,
-		STARTUP_CODE_DUPLICATE_CODES_NOT_ALLOWED = DEBUG_LOG_STARTUP_CODE_OFFSET + 3 //WARNING
+		STARTUP_CODE_DUPLICATE_CODES_NOT_ALLOWED = DEBUG_LOG_STARTUP_CODE_OFFSET + 3, //WARNING
+
+		//LiteChaCha range: 410 - 449
+		CURVE25519_ALL_ZEROS_CASE = DEBUG_LOG_LITE_CHA_CHA_OFFSET + 0,
+		MPA25519_MATH_ERROR = DEBUG_LOG_LITE_CHA_CHA_OFFSET + 1,
+		MPA252ED_MATH_ERROR = DEBUG_LOG_LITE_CHA_CHA_OFFSET + 2,
+		CHACHA_BLOCK_COUNT_OVERFLOW = DEBUG_LOG_LITE_CHA_CHA_OFFSET + 3,
+		USER_NONCE_OVERFLOW_IMMINENT = DEBUG_LOG_LITE_CHA_CHA_OFFSET + 4,
+		PEER_NONCE_OVERFLOW_IMMINENT = DEBUG_LOG_LITE_CHA_CHA_OFFSET + 5,
+		POLY_BLOCK_COUNT_OVERFLOW = DEBUG_LOG_LITE_CHA_CHA_OFFSET + 6,
+		MPA1305_MATH_ERROR = DEBUG_LOG_LITE_CHA_CHA_OFFSET + 7
 	};
 
 
 	class DebugLog final {
 	private:
+#warning Don't forget to default verboseMode to false!
 		bool verboseMode = true; //This should default to false
 		static constexpr unsigned short MAX_ERROR_CODES = 16;
-		ERROR_CODE* errorCodes;
+		ERROR_CODE* const errorCodes;
 		unsigned short errorCodesFirstOpenIndex = 0;
 		bool overflowErrorsLost = false;
 
@@ -153,7 +165,9 @@ namespace GLEEMAIL_DEBUG {
 		DebugLog(DebugLog&&) = delete;
 		DebugLog& operator=(const DebugLog &) = delete;
 		DebugLog& operator=(DebugLog&&) = delete;
-		~DebugLog() = default;
+		~DebugLog() {
+			delete[] errorCodes;
+		}
 
 		[[nodiscard]] static DebugLog& getLog() {
 			static DebugLog log;
