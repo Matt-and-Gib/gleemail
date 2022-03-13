@@ -14,11 +14,11 @@ public:
 	glEEpal& operator=(glEEpal&&) = delete;
 	~glEEpal() = default;
 
-	bool operator==(glEEpal& o) {
+	bool operator==(const glEEpal& o) {
 		return palIPAddress == o.getIPAddress();
 	}
 	
-	bool operator==(IPAddress a) {
+	bool operator==(const IPAddress& a) {
 		return palIPAddress == a;
 	}
 
