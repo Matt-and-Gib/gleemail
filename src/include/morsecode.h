@@ -69,6 +69,8 @@ public:
 
 	[[nodiscard]] Pin** getPins() override {return pins;}
 	void processInput(const unsigned long&) override;
+
+	void Update() override;
 };
 
 #endif

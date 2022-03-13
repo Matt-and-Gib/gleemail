@@ -265,3 +265,8 @@ void MorseCodeInput::processInput(const unsigned long& currentCycleTime) {
 
 	lastInputState = pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_CLOSED ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
 }
+
+
+void MorseCodeInput::Update() {
+	
+}

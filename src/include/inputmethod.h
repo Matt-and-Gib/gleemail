@@ -1,12 +1,14 @@
 #ifndef INPUTMETHOD_H
 #define INPUTMETHOD_H
 
+#include "corecomponent.h"
+
 
 class WebAccess;
 struct Pin;
 
 
-class InputMethod {
+class InputMethod : public CoreComponent {
 private:
 	char* userMessage;
 	unsigned short int userMessageFirstEmptyIndex = 0;
@@ -37,6 +39,8 @@ public:
 	[[nodiscard]] bool isLastCharSpace() const;
 
 	void pushCharacterToMessage(const char& c);
+
+	virtual void Update() = 0;
 };
 
 #endif
