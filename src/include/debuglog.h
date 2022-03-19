@@ -179,7 +179,7 @@ namespace GLEEMAIL_DEBUG {
 		void logError(const ERROR_CODE e) {log(e, true);}
 		void logWarning(const ERROR_CODE e) {log(e, false);}
 
-		ERROR_CODE getNextError() {
+		[[nodiscard]] ERROR_CODE getNextError() {
 			if(errorCodesFirstOpenIndex > 0) {
 				return errorCodes[--errorCodesFirstOpenIndex];
 			} else if(overflowErrorsLost == true) {
