@@ -672,14 +672,9 @@ int main(void) {
 	while(!quit) {
 		cycleStartTime = millis();
 
-		/*for(CoreComponent* c : coreComponents) {
+		for(CoreComponent* c : coreComponents) {
 			c->Update();
-		}*/
-		
-		input->Update();
-		network->Update();
-		display->Update();
-
+		}
 		printErrorCodes();
 
 #ifdef GLEEMAIL_FRAME_TIMER
