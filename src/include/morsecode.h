@@ -26,6 +26,7 @@ private:
 	Pin* pins[3] = {nullptr};
 	static const unsigned short PINS_INDEX_SWITCH = 0;
 	static const unsigned short PINS_INDEX_LED = 1;
+	Pin** currentPin = nullptr;
 
 	char* morsePhraseSymbols = nullptr;
 	char currentMorsePhrase[7] {0};
@@ -55,6 +56,8 @@ private:
 	unsigned short filterJsonPayloadSize(const char*) const;
 	unsigned short calculateMorsePhraseSymbolsSize(const ArduinoJson::JsonArrayConst&) const;
 	unsigned short calculateMorsePhraseIndex(const char* const) const;
+
+	void ProcessSwitch();
 
 public:
 	MorseCodeInput(const unsigned short, void (* const)(char*), void (* const)(char*), unsigned long (* const)());

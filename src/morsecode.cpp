@@ -2,6 +2,7 @@
 
 #include "include/global.h"
 #include "include/websiteaccess.h"
+#include <Arduino.h>
 
 
 using namespace GLEEMAIL_DEBUG;
@@ -245,7 +246,7 @@ void MorseCodeInput::checkOpenElapsedTime(const unsigned long& currentCycleTime)
 }
 
 
-void MorseCodeInput::Update() {
+void MorseCodeInput::ProcessSwitch() {
 	currentCycleTime = nowMS();
 
 	if(pins[PINS_INDEX_SWITCH]->value != lastInputState) {
@@ -267,4 +268,27 @@ void MorseCodeInput::Update() {
 	}
 
 	lastInputState = pins[PINS_INDEX_SWITCH]->value == MORSE_CODE_STATE::SWITCH_CLOSED ? MORSE_CODE_STATE::SWITCH_CLOSED : MORSE_CODE_STATE::SWITCH_OPEN;
+}
+
+
+void MorseCodeInput::Update() {
+	currentPin = pins;
+	while(*currentPin) {
+		if((*currentPin)->mode == Pin::PIN_MODE::READ) {
+			(*currentPin)->value = digitalRead((*currentPin)->pinLocation);
+		}
+
+		++currentPin;
+	}
+
+	ProcessSwitch();
+
+	currentPin = pins;
+	while(*currentPin) {
+		if((*currentPin)->mode == Pin::PIN_MODE::WRITE) {
+			digitalWrite((*currentPin)->pinLocation, (*currentPin)->value);
+		}
+
+		++currentPin;
+	}
 }

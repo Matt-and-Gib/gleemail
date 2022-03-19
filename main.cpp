@@ -668,37 +668,14 @@ int main(void) {
 	CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS] = {nullptr};
 	setup(quit, coreComponents);
 
-	Pin** currentPin = nullptr;
-
 	while(!quit) {
 		cycleStartTime = millis();
 
 		/*for(CoreComponent* c : coreComponents) {
 			c->Update();
 		}*/
-
-		{ //InputMethod->Update();
-			currentPin = input->getPins();
-			while(*currentPin) {
-				if((*currentPin)->mode == Pin::PIN_MODE::READ) {
-					(*currentPin)->value = digitalRead((*currentPin)->pinLocation);
-				}
-
-				++currentPin;
-			}
-
-			input->Update();
-
-			currentPin = input->getPins();
-			while(*currentPin) {
-				if((*currentPin)->mode == Pin::PIN_MODE::WRITE) {
-					digitalWrite((*currentPin)->pinLocation, (*currentPin)->value);
-				}
-
-				++currentPin;
-			}
-		}
 		
+		input->Update();
 		network->Update();
 		display->Update();
 
