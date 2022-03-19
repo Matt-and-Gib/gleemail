@@ -8,8 +8,9 @@
 #include <hd44780ioClass/hd44780_pinIO.h>
 
 
-Display::Display() : 
-	lcd{new hd44780_pinIO(RS, EN, D4, D5, D6, D7)}
+Display::Display(char*& topBuffer) : 
+	lcd{new hd44780_pinIO(RS, EN, D4, D5, D6, D7)},
+	topLineBuffer{topBuffer}
 {
 	lcd->begin(16, 2);
 	clearAll();
@@ -66,5 +67,9 @@ void Display::scrollDisplay() {
 
 
 void Display::Update() {
-	
+	if(topLineBuffer != nullptr) {
+		updateReading(topLineBuffer);
+		delete[] topLineBuffer;
+		topLineBuffer = nullptr;
+	}
 }
