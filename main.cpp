@@ -71,8 +71,6 @@ const static constexpr char STARTUP_CODES_TRIGGER_CHAR = 'A';
 char* messageToPrint = nullptr;
 
 Display* display = nullptr;
-Networking* network = nullptr;
-InputMethod* input = nullptr;
 unsigned short pinIndex = 0;
 char* userMessage = new char[MAX_MESSAGE_LENGTH + TERMINATOR];
 char* peerMessage = new char[MAX_MESSAGE_LENGTH + TERMINATOR];
@@ -342,7 +340,7 @@ const char* getDataFromInternet(const char* const requestEndpoint, InternetAcces
 }
 
 
-bool setupInputMethod(InternetAccess* const internet, Storage* const storage) {
+bool setupInputMethod(InputMethod* const input, InternetAccess* const internet, Storage* const storage) {
 	display->updateWriting("Downloading Data");
 
 	const char* rawVersionData = getDataFromInternet(input->getDataVersionRequestEndpoint(), internet);
@@ -402,7 +400,7 @@ bool setupInputMethod(InternetAccess* const internet, Storage* const storage) {
 }
 
 
-void setupPins() {
+void setupPins(InputMethod* const input) {
 	Pin** currentPin = input->getPins();
 	while(*currentPin) {
 		pinMode((*currentPin)->pinLocation, (*currentPin)->mode);
@@ -472,6 +470,8 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 	const unsigned short NETWORK_FAILED_DELAY_MS = 3600; //Smallest GitHub rate limit is 1000/hour, and there are 3600000ms in one hour, therefore sending one request per 3600ms will hopefully ensure we dont' exceed any limits
 
 	Storage* storage = nullptr;
+	Networking* network = nullptr;
+	InputMethod* input = nullptr;
 	InternetAccess internet;
 
 	do {
@@ -536,10 +536,6 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 
 		case SETUP_LEVEL::STORAGE:
 			storage = new Storage;
-			if(!storage) {
-				Serial.println(F("CRITICAL ALLOCATION FAILURE IN STORAGE SETUP"));
-			}
-
 			if(!storage->begin()) {
 				DebugLog::getLog().logWarning(ERROR_CODE::STORAGE_NOT_DETECTED);
 				delete storage;
@@ -609,7 +605,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 				coreComponents[CC_INPUT_INDEX] = input;
 			}
 
-			if(setupInputMethod(&internet, storage)) {
+			if(setupInputMethod(input, &internet, storage)) {
 				for(unsigned short i = 0; i < (MAX_MESSAGE_LENGTH + TERMINATOR); i += 1) {
 					userMessage[i] = '\0';
 					peerMessage[i] = '\0';
@@ -623,7 +619,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 
 
 		case SETUP_LEVEL::PINS:
-			setupPins();
+			setupPins(input);
 			setupState = SETUP_LEVEL::PEER;
 		break;
 
