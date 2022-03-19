@@ -12,7 +12,7 @@ using namespace ArduinoJson;
 
 Networking::Networking(
 	unsigned long (* const millis)(),
-	void (* const chatMsgCallback)(char*),
+	char*& peerMessageDisplayBuffer,
 	void (* const connectedUpdateDisplay)(),
 	const long u,
 	bool& quit
@@ -23,7 +23,7 @@ Networking::Networking(
 	uuid{u + nowMS()}, //Warning: shortening from 'long unsigned int' to 'short unsigned int' //Start as 0?
 	connectedToPeerClearDisplay{connectedUpdateDisplay},
 	heartbeat{new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken, nullptr, nullptr, nullptr)},
-	chatMessageReceivedCallback{chatMsgCallback}
+	chatMessageReceivedBuffer{peerMessageDisplayBuffer}
 {}
 
 
@@ -426,8 +426,8 @@ char* Networking::decryptChat(Message& msg) {
 
 	unsigned short decryptedMessageLength = msg.getChatLength() / 2;
 
-	unsigned char* chatDecryptionBuffer = new unsigned char[msg.getChatLength() + TERMINATOR]; //delete[]'ed by updateDispaly() in main
-	char* decryptedString = new char[msg.getChatLength() + TERMINATOR] {0}; //There is probably a better way to do this. Also, above comment is no longer true. decryptedString is now the relevant variable being delete[]'ed
+	unsigned char* chatDecryptionBuffer = new unsigned char[msg.getChatLength() + TERMINATOR];
+	char* decryptedString = new char[msg.getChatLength() + TERMINATOR] {0}; //There is probably a better way to do this.
 	stringToHex(chatDecryptionBuffer, msg.getChat(), 0, msg.getChatLength());
 	chatDecryptionBuffer[decryptedMessageLength] = '\0';
 
@@ -445,12 +445,16 @@ char* Networking::decryptChat(Message& msg) {
 
 
 void Networking::processIncomingChat(QueueNode<Message>& msg) {
-	messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, /*nullptr,*/ &removeFromQueue, nullptr));
+	messagesOut.enqueue(new Message(MESSAGE_TYPE::CONFIRMATION, new IdempotencyToken(msg.getData()->getIdempotencyToken()->getValue(), nowMS()), nullptr, &removeFromQueue, nullptr));
 
 	if(!messagesInIdempotencyTokens.find(msg.getData()->getIdempotencyToken())) {
 		messagesInIdempotencyTokens.enqueue(new IdempotencyToken(*(msg.getData()->getIdempotencyToken())));
-		char* tempDecryptedChat = decryptChat(*msg.getData()); //once decryption is verified, use the function as the parameter for the chat callback and don't create this pointer.
-		(*chatMessageReceivedCallback)(tempDecryptedChat);
+
+		if(chatMessageReceivedBuffer != nullptr) {
+			//Log something about loosing a message!
+			delete[] chatMessageReceivedBuffer;
+		}
+		chatMessageReceivedBuffer = decryptChat(*msg.getData());
 	}
 }
 

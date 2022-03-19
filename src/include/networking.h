@@ -15,8 +15,6 @@
 #include "global.h"
 #include "queue.h"
 
-//#include "LiteChaCha/keyinfrastructure.h" //Used if we make a local copy of LiteChaCha
-//#include "LiteChaCha/authenticatedencrypt.h" //Used if we make a local copy of LiteChaCha
 #include <authenticatedencrypt.h> //Could be in source if objects were pointers
 #include <keyinfrastructure.h> //Could be in source if objects were pointers
 #endif
@@ -139,7 +137,7 @@ private:
 
 	void processIncomingMessage(QueueNode<Message>&);
 	
-	void (*chatMessageReceivedCallback)(char*);
+	char*& chatMessageReceivedBuffer;
 
 	[[nodiscard]] unsigned long messageResendTime(QueueNode<Message>& msg);
 	[[nodiscard]] bool processOutgoingMessageQueueNode(Queue<Message>&, QueueNode<Message>*);
@@ -158,14 +156,13 @@ private:
 	[[nodiscard]] bool exceededMaxOutgoingTokenRetryCount();
 	void removeExpiredIncomingIdempotencyToken();
 
-	//These two functions are called from doConfirmedPostProcess()
-	static void removeFromQueue(Queue<Message>& fromQueue, Message& node);
-	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
+	static void removeFromQueue(Queue<Message>& fromQueue, Message& node); //Called from doConfirmedPostProcess()
+	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut); //Called from doConfirmedPostProcess()
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
 
 public:
-	Networking(unsigned long (* const)(), void (* const)(char*), void (* const)(), const long u, bool& quit);
+	Networking(unsigned long (* const)(), char*&, void (* const)(), const long u, bool& quit);
 	Networking(const Networking&) = delete;
 	Networking(Networking&&) = delete;
 	Networking& operator=(const Networking&) = delete;
