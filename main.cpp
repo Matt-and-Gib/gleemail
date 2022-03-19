@@ -55,10 +55,11 @@ extern USBDeviceClass USBDevice;
 extern "C" void __libc_init_array(void);
 
 
-#define COUNT_OF_CORE_COMPONENTS 3
+#define COUNT_OF_CORE_COMPONENTS 4
 #define CC_STORAGE_INDEX 0
 #define CC_DISPLAY_INDEX 1
 #define CC_NETWORKING_INDEX 2
+#define CC_INPUT_INDEX 3
 
 
 const static constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
@@ -521,7 +522,6 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 
 
 		case SETUP_LEVEL::WELCOME:
-
 			Serial.println();
 			Serial.println(F("Welcome to glEEmail!"));
 			Serial.print(F("Version "));
@@ -606,6 +606,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 			display->updateReading("Setting Up Input");
 			if(!input) {
 				input = new MorseCodeInput(LED_BUILTIN, [](char* const chat) -> void {display->updateWriting(chat);}, [](char* const chat) -> void {network->sendChatMessage(chat);}, &millis); //This assignment must be manually changed if a different input method is desired
+				coreComponents[CC_INPUT_INDEX] = input;
 			}
 
 			if(setupInputMethod(&internet, storage)) {
