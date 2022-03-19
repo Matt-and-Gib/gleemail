@@ -376,33 +376,11 @@ As soon as possible at launch, send **-A** via Serial to trigger the startup cod
 |`O`|Enable Offline Mode|??? (todo)|No network connections will be made (there's no shame in a solo glEEmail session)|
 |`R`|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
 
-A usage example is provided below. Note that `-A` is entered as soon as glEEmail launches, then the desired arguments, `tvR`, are entered after "Enter startup codes:" arrives via Serial.
-
-``` plaintext
-Welcome to glEEmail!
-Version alpha 6
--A
-Enter Startup Codes: Iv
-Joining WiFi
-...
-```
-
 ___
 
 ## <a name="plans"></a>**Future Plans**
 
-We'd like to implement additional input methods, including (but not limited to):
-
-1. Phone app that connects directly to the Arduino, which can also import/export saved data.
-2. Speech-to-text
-3. Light-level (?)
-4. Web app
-5. Dance-dance-revolution
-6. Game controller
-7. Touch screen keyboard
-8. Single-button random messages (magic 8 ball style)
-
-Other than that, please view [our project board](https://github.com/orgs/Matt-and-Gib/projects/4/views/1) for an idea of what's next.
+Please browse [our project board](https://github.com/orgs/Matt-and-Gib/projects/4/views/1) or [our milestones](https://github.com/Matt-and-Gib/gleemail/milestones) for an idea of what's next. Suggestions are always welcome via [feature requests](https://github.com/Matt-and-Gib/gleemail/issues)!
 
 ___
 
