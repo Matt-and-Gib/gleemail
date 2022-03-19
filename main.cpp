@@ -62,8 +62,10 @@ extern "C" void __libc_init_array(void);
 
 
 const static constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
+
 const static constexpr unsigned short MAX_STARTUP_CODES = 7;
 const static constexpr unsigned short STARTUP_CODE_PROCESSED = 127;
+const static constexpr char STARTUP_CODES_TRIGGER_CHAR = 'A';
 
 char* messageToPrint = nullptr;
 
@@ -86,16 +88,6 @@ void clearSerialInputBuffer() {
 }
 
 
-void userMessageChanged(char* chat) {
-	display->updateWriting(chat);
-}
-
-
-void sendChatMessage(char* chat) { //remove
-	network->sendChatMessage(chat);
-}
-
-
 void printErrorCodes() {
 	if(DebugLog::getLog().getPendingErrors() > 0) {
 		ERROR_CODE e = DebugLog::getLog().getNextError();
@@ -113,7 +105,7 @@ bool checkEnableStartupCodes() {
 	if(Serial.available() > 1) {
 		if(Serial.peek() == '-') {
 			Serial.read();
-			if(Serial.read() == 'A') { //Make 'A' a const variable to eliminate magic char
+			if(Serial.read() == STARTUP_CODES_TRIGGER_CHAR) {
 				if(Serial.peek() < ' ') {
 					clearSerialInputBuffer();
 				}
@@ -613,7 +605,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 		case SETUP_LEVEL::INPUT_METHOD:
 			display->updateReading("Setting Up Input");
 			if(!input) {
-				input = new MorseCodeInput(LED_BUILTIN, &userMessageChanged, &sendChatMessage, &millis); //This assignment must be manually changed if a different input method is desired
+				input = new MorseCodeInput(LED_BUILTIN, [](char* const chat) -> void {display->updateWriting(chat);}, [](char* const chat) -> void {network->sendChatMessage(chat);}, &millis); //This assignment must be manually changed if a different input method is desired
 			}
 
 			if(setupInputMethod(&internet, storage)) {
