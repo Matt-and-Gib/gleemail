@@ -62,8 +62,8 @@ extern "C" void __libc_init_array(void);
 
 
 const static constexpr unsigned short SERIAL_READ_LOOP_DELAY_MS = 250;
-const unsigned short MAX_STARTUP_CODES = 7;
-const unsigned short STARTUP_CODE_PROCESSED = 127;
+const static constexpr unsigned short MAX_STARTUP_CODES = 7;
+const static constexpr unsigned short STARTUP_CODE_PROCESSED = 127;
 
 char* messageToPrint = nullptr;
 
@@ -86,11 +86,6 @@ void clearSerialInputBuffer() {
 }
 
 
-void connectedToPeerClearDisplay() {
-	display->clearAll();
-}
-
-
 void userMessageChanged(char* chat) {
 	display->updateWriting(chat);
 }
@@ -98,11 +93,6 @@ void userMessageChanged(char* chat) {
 
 void sendChatMessage(char* chat) { //remove
 	network->sendChatMessage(chat);
-}
-
-
-void updateDisplayWithPeerChat(char* messageBody) {
-	messageToPrint = messageBody;
 }
 
 
@@ -531,7 +521,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 
 
 		case SETUP_LEVEL::LCD:
-			display = new Display;
+			display = new Display(messageToPrint);
 			display->registerNewStartupCodes(startupCodeHandlers);
 			coreComponents[CC_DISPLAY_INDEX] = display;
 			setupState = SETUP_LEVEL::WELCOME;
@@ -583,7 +573,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 
 		case SETUP_LEVEL::NETWORKING:
 			if(!network) {
-				network = new Networking(&millis, &updateDisplayWithPeerChat, &connectedToPeerClearDisplay, 0, quit);
+				network = new Networking(&millis, messageToPrint, []() -> void {display->clearAll();}, 0, quit);
 				network->registerNewStartupCodes(startupCodeHandlers);
 			}
 
@@ -718,14 +708,7 @@ int main(void) {
 		}
 		
 		network->Update();
-
-		{ //Display->Update();
-			if(messageToPrint != nullptr) {
-				display->updateReading(messageToPrint);
-				delete[] messageToPrint;
-				messageToPrint = nullptr;
-			}
-		}
+		display->Update();
 
 		printErrorCodes();
 
