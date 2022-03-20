@@ -613,6 +613,7 @@ void setup(bool& quit, CoreComponent* coreComponents[COUNT_OF_CORE_COMPONENTS]) 
 
 				setupState = SETUP_LEVEL::PINS;
 			} else {
+				display->updateWriting("Retrying...");
 				delay(NETWORK_FAILED_DELAY_MS); //Don't want to get blocked by GitHub when download is repeated
 			}
 		break;
