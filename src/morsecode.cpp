@@ -1,11 +1,7 @@
 #include "include/morsecode.h"
-
 #include "include/global.h"
 #include "include/websiteaccess.h"
 #include <Arduino.h>
-
-
-using namespace GLEEMAIL_DEBUG;
 
 
 namespace {
@@ -43,11 +39,11 @@ namespace {
 
 MorseCodeInput::MorseCodeInput(
 	const unsigned short LED_PIN_LOCATION,
-	void (* const messageChanged)(char*),
-	void (* const sendMessage)(char*),
+	void (* const c)(char*),
+	void (* const s)(char*),
 	unsigned long (* const t)()
 ) :
-	InputMethod(messageChanged, sendMessage, t)
+	InputMethod(c, s, t)
 {
 	pins[0] = nullptr;
 	pins[1] = nullptr;
@@ -76,7 +72,7 @@ unsigned short MorseCodeInput::filterJsonPayloadSize(const char* payload) const 
 	StaticJsonDocument<JSON_DOCUMENT_FILTER_FOR_SIZE_BYTES> sizeDoc;
 	DeserializationError error = deserializeJson(sizeDoc, payload, DeserializationOption::Filter(filter));
 	if(error) {
-		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_FILTER_DESERIALIZATION_ERROR);
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::JSON_MORSECODE_FILTER_DESERIALIZATION_ERROR);
 
 		return 0;
 	}
@@ -119,17 +115,17 @@ unsigned short MorseCodeInput::calculateMorsePhraseIndex(const char* const phras
 
 bool MorseCodeInput::setNetworkData(const char* payload) {
 	if(!payload) {
-		DebugLog::getLog().logError(MORSE_NULLPTR_PAYLOAD);
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(MORSE_NULLPTR_PAYLOAD);
 		return false;
 	}
 
 	DynamicJsonDocument mccpDoc = DynamicJsonDocument(filterJsonPayloadSize(payload)); //Dynamic because ArduinoJSON recommends using dynamic documents to store items greater than 1 kB.
 	DeserializationError error = deserializeJson(mccpDoc, payload);
 	if(error) {
-		DebugLog::getLog().logError(ERROR_CODE::JSON_MORSECODE_NETWORK_DATA_DESERIALIZATION_ERROR);
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::JSON_MORSECODE_NETWORK_DATA_DESERIALIZATION_ERROR);
 		return false;
 	} else if(mccpDoc.capacity() <= 0) {
-		DebugLog::getLog().logError(ERROR_CODE::MORSE_FILTERED_JSON_PAYLOAD_SIZE_ZERO);
+		GLEEMAIL_DEBUG::DebugLog::getLog().logError(GLEEMAIL_DEBUG::ERROR_CODE::MORSE_FILTERED_JSON_PAYLOAD_SIZE_ZERO);
 		return false;
 	}
 
@@ -159,7 +155,7 @@ const char& MorseCodeInput::convertPhraseToCharacter() { //Make static
 	const char& lookupResult = morsePhraseSymbols[calculateMorsePhraseIndex(currentMorsePhrase)];
 
 	if(!lookupResult) {
-		DebugLog::getLog().logWarning(MORSE_CODE_LOOKUP_FAILED);
+		GLEEMAIL_DEBUG::DebugLog::getLog().logWarning(MORSE_CODE_LOOKUP_FAILED);
 		return CANCEL_CHAR;
 	}
 
