@@ -1,6 +1,6 @@
-# We'd love to work together
+# So, you want to be a glEEveloper?
 
-## However, pull requests must meet the following basic guidelines
+## We'd love to work together! However, pull requests must meet the following basic guidelines
 
 - Please make an attempt to match our established programming style (in VS Code: `{BasedOnStyle: Google, UseTab: Always, IndentWidth: 4, TabWidth: 4}`)
 - Use verbose function and variable names so that your code can be easily read and understood without the need for unnecessary comments
