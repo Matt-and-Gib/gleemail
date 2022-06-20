@@ -32,7 +32,7 @@ ___
 
 ### <a name="parts"></a>**Components**
 
-We're actively testing glEEmail for the Arduino Nano 33 IoT, however it should work on any Arduino with WiFi capabilities (or any Arduino connected to a WiFi radio module, with minor code modifications). If you're considering running glEEmail on a different Arduino, please make sure that it has sufficient space; glEEmail uses ~72,000 bytes of program storage space (27% on Nano 33 IoT) and ~15,000 bytes of dynamic memory with global variables (45% on Nano 33 IoT). Additionally, please note that the Adafruit 4682 must be powered with 3.3V (it **cannot** run on 5V).
+We're actively testing glEEmail for the Arduino Nano 33 IoT, however it should work on any Arduino with WiFi capabilities (or any Arduino connected to a WiFi radio module, with minor code modifications). If you're considering running glEEmail on a different Arduino, please make sure that it has sufficient space; glEEmail uses ~78,500 bytes of program storage space (29% on Nano 33 IoT) and ~4,500 bytes of dynamic memory with global variables (13% on Nano 33 IoT). Additionally, please note that the Adafruit 4682 must be powered with 3.3V (it **cannot** run on 5V).
 
 For the full parts list for a single user, please see the table below:
 
