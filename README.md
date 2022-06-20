@@ -1,4 +1,5 @@
 ![Latest Build Status](https://github.com/Matt-and-Gib/gleemail/actions/workflows/compile.yml/badge.svg)
+[![CodeFactor](https://www.codefactor.io/repository/github/matt-and-gib/gleemail/badge/a6-cleanup)](https://www.codefactor.io/repository/github/matt-and-gib/gleemail/overview/a6-cleanup)
 
 ![glEEmail Banner](resources/glEEmail_social_media_final.png)
 
