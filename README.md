@@ -1,6 +1,6 @@
 ![Latest Build Status](https://github.com/Matt-and-Gib/gleemail/actions/workflows/compile.yml/badge.svg)
 
-![glEEmail Banner](resources/glEEmail_social_media_final.png)
+![glEEmail Banner](./resources/glEEmail_social_media_final.png)
 
 ## _Voted† 100% better than Discord!*_
 
@@ -54,7 +54,7 @@ ___
 
 [View Interactive Online Wiring Diagram (dark mode recommended)](https://app.diagrams.net/?src=about#HMatt-and-Gib%2Fgleemail%2Fmain%2Fwiring%20diagram.drawio)
 
-![Wiring Diagram 5-3-2021](https://github.com/Matt-and-Gib/gleemail/raw/main/resources/Wiring%20Diagram%205-3-21.png)
+![Wiring Diagram 6-19-2022](./resources/Wiring%20Diagram%206-19-22.png)
 
 For more information about wiring the LCD HD44780, we recommend [this tutorial from Ada Fruit](https://learn.adafruit.com/character-lcds/wiring-a-character-lcd)
 
