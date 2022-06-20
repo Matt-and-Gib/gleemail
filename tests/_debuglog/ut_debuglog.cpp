@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 
 	const unsigned short TEST_ID = atoi(argv[1]);
 	switch(TEST_ID) {
-
+		//Put tests here
 	default:
 		std::cout << "Unknown test ID!" << std::endl;
 		return 1;

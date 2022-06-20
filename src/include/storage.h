@@ -24,6 +24,7 @@ private:
 	unsigned int dataLength = 0;
 
 	SdFat32* sd = nullptr;
+
 public:
 	Storage() = default;
 	Storage(const Storage&) = delete;

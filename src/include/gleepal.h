@@ -6,6 +6,7 @@ class glEEpal final {
 private:
 	IPAddress palIPAddress;
 	unsigned short outgoingHandshakeIdempotencyTokenValue;
+
 public:
 	glEEpal(const IPAddress ip, const unsigned short h) : palIPAddress{ip}, outgoingHandshakeIdempotencyTokenValue{h} {}
 	glEEpal(const glEEpal&) = delete;

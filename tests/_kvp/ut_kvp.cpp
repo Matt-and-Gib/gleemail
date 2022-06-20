@@ -6,6 +6,7 @@
 class TestingObject {
 private:
 	char data = 0;
+
 public:
 	TestingObject(const char d) : data{d} {}
 	char getData() {return data;}

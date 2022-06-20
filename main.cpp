@@ -28,6 +28,7 @@ class VerboseModeEmissary final : public StartupCodeHandler {
 private:
 	const char VERBOSE_MODE_STARTUP_CODE = 'v';
 	void verboseModeStartupCodeReceived() {DebugLog::getLog().enableVerboseMode();}
+
 public:
 	VerboseModeEmissary() = default;
 	~VerboseModeEmissary() = default;

@@ -14,6 +14,7 @@ private:
 	static const constexpr unsigned short LENGTH_OF_HEADER_END_STRING = sizeof(HEADER_END_STRING)/sizeof(HEADER_END_STRING[0]) - 1;
 
 	static bool writeHeadersToServer(InternetAccess&, const char* const*);
+
 public:
 	WebsiteAccess() = delete;
 	WebsiteAccess(const WebsiteAccess&) = delete;

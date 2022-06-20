@@ -13,6 +13,7 @@ private:
 	static const unsigned char MAX_PASSWORD_LENGTH = 63; //Note: Serial buffer size is 64
 
 	WiFiClient* client;
+	
 public:
 	InternetAccess();
 	InternetAccess(const InternetAccess&) = delete;

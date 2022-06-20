@@ -15,6 +15,7 @@ private:
 	unsigned short morseCodeCharPairsVersion = 0;
 	char* wifiSSID = nullptr;
 	char* wifiPassword = nullptr;
+
 public:
 	Preferences(const Preferences&) = delete;
 	Preferences(Preferences&&) = delete;

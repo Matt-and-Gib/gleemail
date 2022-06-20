@@ -39,6 +39,7 @@ private:
 
 	bool scrollReading = false;
 	bool scrollWriting = false;
+
 public:
 	Display();
 	Display(const Display&) = delete;
