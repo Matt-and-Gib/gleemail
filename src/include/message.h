@@ -32,6 +32,7 @@ private:
 
 	static void noConfirmedProcess(Networking&, Queue<Message>&, QueueNode<Message>&, Message&) {}
 	void (*confirmedPostProcess)(Networking&, Queue<Message>&, QueueNode<Message>&, Message&); //Used for establishing connection and 
+
 public:
 	Message() :
 		sender{*glEEself},

@@ -20,7 +20,7 @@ Networking::Networking(
 	udp(),
 	shutdownFlag{quit},
 	nowMS{millis},
-	uuid{u + nowMS()}, //Warning: shortening from 'long unsigned int' to 'short unsigned int'
+	uuid{static_cast<unsigned short>(u + nowMS())}, //Warning: shortening from 'long unsigned int' to 'short unsigned int'
 	connectedToPeerClearDisplay{connectedUpdateDisplay},
 	heartbeat{new Message(MESSAGE_TYPE::HEARTBEAT, new IdempotencyToken, nullptr, nullptr, nullptr)},
 	chatMessageReceivedCallback{chatMsgCallback}

@@ -148,6 +148,7 @@ namespace GLEEMAIL_DEBUG {
 				}
 			}
 		}
+
 	public:
 		DebugLog(const DebugLog&) = delete;
 		DebugLog(DebugLog&&) = delete;

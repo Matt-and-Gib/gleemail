@@ -162,6 +162,7 @@ private:
 	static void removeFromQueue(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
 
 	static void connectionEstablished(Networking& n, Queue<Message>& messagesOutQueue, QueueNode<Message>& messageIn, Message& messageOut);
+
 public:
 	Networking(unsigned long (* const)(), void (* const)(char*), void (* const)(), const long u, bool& quit);
 	Networking(const Networking&) = delete;
