@@ -111,5 +111,4 @@ char* WebsiteAccess::downloadFromServer(InternetAccess& net) {
 		dataBuffer = nullptr;
 		return nullptr;
 	}
-	
 }
