@@ -223,7 +223,7 @@ ___
 
 The first step to becoming a glEEveloper is understanding the project structure. Now, you may think that you already understand the structure because you saw that "src" folder, and you know what that's all about, but I'm here to tell you that there's more to the story. See, Arduino requires a .ino file with the same name as the project to live in the root folder. Now, again, you're like "I already know this," but hang on; if you open the .ino, you might eventually notice that it's entirely empty. Yeah, like, what? Well, there's also a main.cpp file in the root of the project, and _that's_ where the magic happens. Our main.cpp overwrites the implicit main.cpp created by Arduino so that we can control the main loop. Why did we do this? Red-hot performance gains.
 
-Aside from that, all other code files may be found inside `src`. The root folder `src` itself is for source files, `src/include` is for headers, and `src/include/LiteChaCha` is for the encryption library [written by DualJustice](https://github.com/DualJustice/LiteChaCha). We've separated as many files as possible into definition and implementation, but several important files are exclusive to `src/include`, such as data structures like our queue.
+Aside from that, all other code files may be found inside `src`. The root folder `src` itself is for source files and `src/include` is for headers. We've separated as many files as possible into definition and implementation, but several important files are exclusive to `src/include`, such as data structures like our queue.
 
 Most work will be done on implementation files in the base `src` folder. For an idea of what glEEmail does at runtime, please take a look at our flow diagram below, however for a basic overview, see the following:
 
@@ -245,6 +245,7 @@ Required Libraries
 - hd44780 by Bill Perry
 - WiFiNINA
 - SdFat by Bill Greiman
+- [LiteChaCha (written by DualJustice)](https://github.com/DualJustice/LiteChaCha)
 
 Note: Do not pass ASCII character 24 (cancel) to `InputMethod::pushCharacterToMessage`, it is reserved to prevent printing erroneous lines.
 
