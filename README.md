@@ -331,7 +331,7 @@ As soon as possible at launch, send **-A** via Serial to trigger the startup cod
 |`O`|Enable Offline Mode|??? (todo)|No network connections will be made (there's no shame in a solo glEEmail session)|
 |`R`|Remove glEEmail data from SD card|Storage|Lost data is unrecoverable by glEEmail- be certain that you want to do this|
 
-A usage example is provided below. Note that `-A` is entered as soon as glEEmail launches, then the desired arguments, `tvR`, are entered after "Enter startup codes:" arrives via Serial.
+A usage example is provided below. Note that `-A` is entered as soon as glEEmail launches, then the desired arguments, `Iv`, are entered after "Enter startup codes:" arrives via Serial.
 
 ``` plaintext
 Welcome to glEEmail!
