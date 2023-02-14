@@ -84,8 +84,7 @@ unsigned short MorseCodeInput::filterJsonPayloadSize(const char* payload) const 
 
 
 unsigned short MorseCodeInput::calculateMorsePhraseSymbolsSize(const ArduinoJson::JsonArrayConst& rawMorseCodeTreeData) const { //This function ASSUMES that the ingested JSON document's last phrase's length is the longest used phrase length.
-	ArduinoJson::JsonObjectConst lastElement = rawMorseCodeTreeData.getElement(rawMorseCodeTreeData.size() - 1);
-	const char* const lastPhrase = lastElement["phrase"];
+	const char* const lastPhrase = rawMorseCodeTreeData[rawMorseCodeTreeData.size() - 1]["phrase"];
 
 	unsigned short arraySize = 0;
 	for(unsigned short index = strlen(lastPhrase); index > 0; index -= 1) {
