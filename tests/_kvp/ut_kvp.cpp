@@ -57,10 +57,10 @@ int test_kvp_same_object() {
 
 int test_kvp_pointer_type() {
 	int k = 69;
-	TestingObject* v = new TestingObject('x');
-	KVPair<int, TestingObject*> testKVP(k, v);
+	TestingObject v('x');
+	KVPair<int, TestingObject*> testKVP(k, &v);
 
-	if(testKVP.getKey() == k && testKVP.getValue() == v && testKVP.getValue()->getData() == v->getData()) {
+	if(testKVP.getKey() == k && testKVP.getValue() == &v && *(testKVP.getValue()) == v) {
 		return 0;
 	} else {
 		return 1;
