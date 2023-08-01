@@ -9,6 +9,6 @@
 
 Know that we'll thoroughly review your pull request before merging it, and may have suggestions or questions before anything is approved.
 
-If you're wondering where to get started, please check any currently open issues, browse [our project board](https://github.com/orgs/Matt-and-Gib/projects/1), or get in touch with us here on GitHub!
+If you're wondering where to get started, please check any currently open issues, browse [our project board](https://github.com/orgs/Matt-and-Gib/projects/4), or get in touch with us here on GitHub!
 
 Thanks, _glEEpal!_
